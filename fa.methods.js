@@ -21,7 +21,7 @@
       add: function(G, a, b, i) {
         if (i == null) {
           G.edges.a.push(a);
-          return G.edges.b.push(b);
+          return G.edges.b.push(b) - 1;
         } else {
           fa.ins(G.edges.a, i, a);
           return fa.ins(G.edges.b, i, b);
@@ -63,11 +63,12 @@
       }
     },
     nodes: {
-      add: function(G, v) {
-        return G.nodes.v.push(v);
-      },
-      ins: function(G, i, v) {
-        return fa.ins(G.nodes.v, i, v);
+      add: function(G, v, i) {
+        if (i == null) {
+          return G.nodes.v.push(v) - 1;
+        } else {
+          return fa.ins(G.nodes.v, i, v);
+        }
       },
       del: function(G, i) {
         return fa.do_for_all(fa.del, G.nodes, i);

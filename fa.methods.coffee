@@ -19,25 +19,15 @@
 		}
 
 	edges : {
-		# Create a new node (b) and add edge(a, b) () [redundant?]
-		# new : (G, a) ->
-		# 	fa.edges.add(G, a, fa.nodes.add(G, null)-1)
-
 		# Add a new edge (a, b) or add an edge into position i
 		# Returns the position of added edge
 		add : (G, a, b, i) ->
 			if not i?
 				G.edges.a.push(a)
-				G.edges.b.push(b)
+				G.edges.b.push(b)-1
 			else
 				fa.ins(G.edges.a, i, a)
 				fa.ins(G.edges.b, i, b)
-
-		# Insert an edge into position 'i'
-		# Returns the position inserted if 'i'
-		# ins : (G, i, a, b) -> 
-		# 	fa.ins(G.edges.a, i, a)
-		# 	fa.ins(G.edges.b, i, b)
 
 		del : (G, i) ->
 			fa.do_for_all(fa.del, G.edges, i)
@@ -59,14 +49,13 @@
 
 	}
 	nodes : {
-		# Add a new node with a value 'v'
-		# Returns a number of nodes
-		add : (G, v) ->
-			G.nodes.v.push(v)
-
-		# Insert a node with a value 'v' into position 'i'console.log 
-		# Returns the position inserted if 'i'
-		ins : (G, i, v) -> fa.ins(G.nodes.v, i, v)
+		# Add a new node with a value 'v' or into position 'i'
+		# Returns the the position the node has been added to
+		add : (G, v, i) ->
+			if not i?
+				G.nodes.v.push(v)-1
+			else
+				fa.ins(G.nodes.v, i, v)
 
 		# Delete a node 'i'
 		del : (G, i) ->
