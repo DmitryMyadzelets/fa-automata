@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Test</title>
+	<style> 	
+    	#myCanvas {
+    		border: 1px solid #9C9898;
+            display: block auto;
+    	}
+    	#myCanvas2 {
+    		border: 1px solid #9C9898;
+    	}
+        body {
+            background-color: #336698;
+        }
+        .debug {
+            /*background-color: black;*/
+            color: white;
+            font-family: courier;
+            font-size: small;
+            display: block;
+        }
+    </style>
+
+    <script src="./lib/json2.js"></script>
+    <script src="./lib/jstorage.js"></script>
+    <script> /* $.jStorage is now available */ </script>
+    <script src="./automata_draw.js"></script>
+    <script src="./graph_editor.js"></script>
+    <script src="./fa.methods.js"></script>
+    <script src="./main.js"></script>
+    <script type="text/javascript">
+    	function myFunction(ev) {
+    		window.alert("message");
+    	}
+
+    </script>
+</head>
+<body>
+       <div id="debug" class = "debug" width="100px">X and Y</div>
+	   <canvas id="myCanvas" Width="800" height="600" tabindex="0"></canvas>
+       <!-- <canvas id="myCanvas2" Width="800" height="600"></canvas> -->
+</body>
+<html>
