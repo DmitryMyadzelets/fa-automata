@@ -1,14 +1,14 @@
 
 'use strict'
 
+
+
 @.fa = {
 	# Creates a new finite automata
 	new : () ->
 		{
 			start : 0		# Initial nodes
 			nodes : {		# Nodes
-				# x : []		# X-coordinates
-				# y : []		# Y-coordinates
 				v : []		# Values
 			}
 			edges : {		# Edges
@@ -46,16 +46,16 @@
 		has : (G, a, b) ->
 			(return true) for i, ix in G.edges.b when G.edges.a[ix] is a and i is b
 			false
-
 	}
+
 	nodes : {
-		# Add a new node with a value 'v' or into position 'i'
+		# Add a new node to the end or inserts into position 'i'
 		# Returns the the position the node has been added to
-		add : (G, v, i) ->
+		add : (G, i) ->
 			if not i?
-				G.nodes.v.push(v)-1
+				fa.do_for_all(((obj) -> obj.push()), G.nodes)
 			else
-				fa.ins(G.nodes.v, i, v)
+				fa.ins(G.nodes.v, i)
 
 		# Delete a node 'i'
 		del : (G, i) ->
@@ -112,7 +112,6 @@
 	# Execute the function 'fnc' over all arrays of the object
 	do_for_all : (fnc, obj, args) ->
 		keys = @.get_arrays(obj)
-		console.log keys
 		fnc(obj[key], args) for key in keys
 
 	###
@@ -280,3 +279,13 @@
 		null
 }
 
+
+# Example of extending automaton
+# Create new object
+g = fa.new()
+# Add new properties to nodes
+g.nodes.x = []
+g.nodes.y = []
+# Add a new node. Note that new properties have beed added as well 
+fa.nodes.add(g)
+console.log g.nodes
