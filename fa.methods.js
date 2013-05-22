@@ -4,10 +4,9 @@
   var a, b, g,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  this.fa = {
+  this.graph = {
     "new": function() {
       return {
-        start: 0,
         nodes: {
           v: []
         },
@@ -21,12 +20,12 @@
     edges: {
       add: function(G, a, b, i) {
         if (i == null) {
-          i = fa.for_arrays_of(G.edges, (function(arr) {
+          i = graph.for_arrays_of(G.edges, (function(arr) {
             return arr.push(null);
           })) - 1;
         } else {
-          fa.for_arrays_of(G.edges, (function(arr) {
-            return fa.ins(arr, i);
+          graph.for_arrays_of(G.edges, (function(arr) {
+            return graph.ins(arr, i);
           }));
         }
         G.edges.a[i] = a;
@@ -34,7 +33,7 @@
         return i;
       },
       del: function(G, i) {
-        return fa.for_arrays_of(G.edges, fa.del, i);
+        return graph.for_arrays_of(G.edges, graph.del, i);
       },
       get: function(G, i) {
         return G.edges.v[i];
@@ -71,18 +70,18 @@
     nodes: {
       add: function(G, i) {
         if (i == null) {
-          i = fa.for_arrays_of(G.nodes, (function(arr) {
+          i = graph.for_arrays_of(G.nodes, (function(arr) {
             return arr.push(null);
           })) - 1;
         } else {
-          fa.for_arrays_of(G.nodes, (function(arr) {
-            return fa.ins(arr, i);
+          graph.for_arrays_of(G.nodes, (function(arr) {
+            return graph.ins(arr, i);
           }));
         }
         return i;
       },
       del: function(G, i) {
-        return fa.for_arrays_of(G.nodes, fa.del, i);
+        return graph.for_arrays_of(G.nodes, graph.del, i);
       },
       get: function(G, i) {
         return G.nodes.v[i];
@@ -255,7 +254,7 @@
         _ref1 = G.nodes.v;
         for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
           v = _ref1[i];
-          J = fa.nodes.out(G, i).concat(fa.nodes["in"](G, i));
+          J = graph.nodes.out(G, i).concat(graph.nodes["in"](G, i));
           fx = 0;
           fy = 0;
           _ref2 = G.nodes.v;
@@ -319,6 +318,22 @@
     }
   };
 
+  this.fa = Object.create(graph);
+
+  this.fa.extend = function(G) {
+    G.start = 0;
+    G.nodes.x = [];
+    G.nodes.y = [];
+    return G;
+  };
+
+  fa["new"] = function() {
+    var G;
+
+    G = graph["new"]();
+    return fa.extend(G);
+  };
+
   g = fa["new"]();
 
   g.nodes.x = [];
@@ -326,6 +341,8 @@
   g.nodes.y = [];
 
   g.nodes.color = [];
+
+  g.states = g.nodes;
 
   console.log(a = fa.nodes.add(g));
 
@@ -340,5 +357,7 @@
   console.log(g.nodes);
 
   console.log(g.edges);
+
+  console.log(g.states);
 
 }).call(this);

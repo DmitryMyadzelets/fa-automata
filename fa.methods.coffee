@@ -3,11 +3,10 @@
 
 
 
-@.fa = {
 	# Creates a new finite automata
+@.graph = {
 	new : () ->
 		{
-			start : 0		# Initial nodes
 			nodes : {		# Nodes
 				v : []		# Values
 			}
@@ -23,15 +22,15 @@
 		# Returns the position of the added edge
 		add : (G, a, b, i) ->
 			if not i?
-				i = fa.for_arrays_of(G.edges, ((arr) -> arr.push(null)))-1
+				i = graph.for_arrays_of(G.edges, ((arr) -> arr.push(null)))-1
 			else
-				fa.for_arrays_of(G.edges, ((arr) -> fa.ins(arr, i)))
+				graph.for_arrays_of(G.edges, ((arr) -> graph.ins(arr, i)))
 			G.edges.a[i] = a
 			G.edges.b[i] = b
 			i
 
 		del : (G, i) ->
-			fa.for_arrays_of(G.edges, fa.del, i)
+			graph.for_arrays_of(G.edges, graph.del, i)
 
 		# Returns value for the edge (i)
 		get : (G, i) -> G.edges.v[i]
@@ -54,14 +53,14 @@
 		# Returns the position the node has been added to
 		add : (G, i) ->
 			if not i?
-				i = fa.for_arrays_of(G.nodes, ((arr) -> arr.push(null)))-1
+				i = graph.for_arrays_of(G.nodes, ((arr) -> arr.push(null)))-1
 			else
-				fa.for_arrays_of(G.nodes, ((arr) -> fa.ins(arr, i)))
+				graph.for_arrays_of(G.nodes, ((arr) -> graph.ins(arr, i)))
 			i
 
 		# Delete a node 'i'
 		del : (G, i) ->
-			fa.for_arrays_of(G.nodes, fa.del, i)
+			graph.for_arrays_of(G.nodes, graph.del, i)
 
 		# Returns value for the node (i)
 		get : (G, i) -> G.nodes.v[i]
@@ -205,7 +204,7 @@
 			# We iterate over all vertices
 			for v, i in G.nodes.v
 				# Get in/out vetices to 'i'
-				J = fa.nodes.out(G, i).concat fa.nodes.in(G, i)
+				J = graph.nodes.out(G, i).concat graph.nodes.in(G, i)
 				fx = 0
 				fy = 0
 				# Enumerate all adjacent vertices (skip self-loop)
@@ -282,6 +281,18 @@
 		null
 }
 
+@.fa = Object.create(graph)
+
+@.fa.extend = (G) ->
+		G.start = 0 	# Initial state
+		G.nodes.x = []
+		G.nodes.y = []
+		G
+
+fa.new = () ->
+		G = graph.new()
+		fa.extend(G)
+	
 
 # Example of extending automaton
 # Create new object
@@ -290,11 +301,13 @@ g = fa.new()
 g.nodes.x = []
 g.nodes.y = []
 g.nodes.color = []
+g.states = g.nodes
 # Add a new node. Note that new properties have beed added as well 
-# console.log a = fa.nodes.add(g)
-# console.log b = fa.nodes.add(g)
-# console.log fa.edges.add(g, a, b)
-# console.log fa.edges.add(g, a, a)
-# console.log fa.edges.add(g, b, b)
-# console.log g.nodes
-# console.log g.edges
+console.log a = fa.nodes.add(g)
+console.log b = fa.nodes.add(g)
+console.log fa.edges.add(g, a, b)
+console.log fa.edges.add(g, a, a)
+console.log fa.edges.add(g, b, b)
+console.log g.nodes
+console.log g.edges
+console.log g.states
