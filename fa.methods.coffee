@@ -20,17 +20,18 @@
 
 	edges : {
 		# Add a new edge (a, b) or add an edge into position i
-		# Returns the position of added edge
+		# Returns the position of the added edge
 		add : (G, a, b, i) ->
 			if not i?
-				G.edges.a.push(a)
-				G.edges.b.push(b)-1
+				i = fa.for_arrays_of(G.edges, ((arr) -> arr.push(null)))-1
 			else
-				fa.ins(G.edges.a, i, a)
-				fa.ins(G.edges.b, i, b)
+				fa.for_arrays_of(G.edges, ((arr) -> fa.ins(arr, i)))
+			G.edges.a[i] = a
+			G.edges.b[i] = b
+			i
 
 		del : (G, i) ->
-			fa.do_for_all(fa.del, G.edges, i)
+			fa.for_arrays_of(G.edges, fa.del, i)
 
 		# Returns value for the edge (i)
 		get : (G, i) -> G.edges.v[i]
@@ -50,16 +51,17 @@
 
 	nodes : {
 		# Add a new node to the end or inserts into position 'i'
-		# Returns the the position the node has been added to
+		# Returns the position the node has been added to
 		add : (G, i) ->
 			if not i?
-				fa.do_for_all(((obj) -> obj.push()), G.nodes)
+				i = fa.for_arrays_of(G.nodes, ((arr) -> arr.push(null)))-1
 			else
-				fa.ins(G.nodes.v, i)
+				fa.for_arrays_of(G.nodes, ((arr) -> fa.ins(arr, i)))
+			i
 
 		# Delete a node 'i'
 		del : (G, i) ->
-			fa.do_for_all(fa.del, G.nodes, i)
+			fa.for_arrays_of(G.nodes, fa.del, i)
 
 		# Returns value for the node (i)
 		get : (G, i) -> G.nodes.v[i]
@@ -110,9 +112,10 @@
 		keys
 
 	# Execute the function 'fnc' over all arrays of the object
-	do_for_all : (fnc, obj, args) ->
+	for_arrays_of : (obj, fnc, args) ->
 		keys = @.get_arrays(obj)
-		fnc(obj[key], args) for key in keys
+		ret = fnc(obj[key], args) for key in keys
+		ret
 
 	###
 	# Graph Methods
@@ -286,6 +289,12 @@ g = fa.new()
 # Add new properties to nodes
 g.nodes.x = []
 g.nodes.y = []
+g.nodes.color = []
 # Add a new node. Note that new properties have beed added as well 
-fa.nodes.add(g)
-console.log g.nodes
+# console.log a = fa.nodes.add(g)
+# console.log b = fa.nodes.add(g)
+# console.log fa.edges.add(g, a, b)
+# console.log fa.edges.add(g, a, a)
+# console.log fa.edges.add(g, b, b)
+# console.log g.nodes
+# console.log g.edges
