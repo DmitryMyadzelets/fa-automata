@@ -4,8 +4,8 @@
 
 
 	# Creates a new finite automata
-@.graph = {
-	new : () ->
+@.digraph = {
+	create : () ->
 		{
 			nodes : {		# Nodes
 				v : []		# Values
@@ -22,15 +22,15 @@
 		# Returns the position of the added edge
 		add : (G, a, b, i) ->
 			if not i?
-				i = graph.for_arrays_of(G.edges, ((arr) -> arr.push(null)))-1
+				i = digraph.for_arrays_of(G.edges, ((arr) -> arr.push(null)))-1
 			else
-				graph.for_arrays_of(G.edges, ((arr) -> graph.ins(arr, i)))
+				digraph.for_arrays_of(G.edges, ((arr) -> digraph.ins(arr, i)))
 			G.edges.a[i] = a
 			G.edges.b[i] = b
 			i
 
 		del : (G, i) ->
-			graph.for_arrays_of(G.edges, graph.del, i)
+			digraph.for_arrays_of(G.edges, digraph.del, i)
 
 		# Returns value for the edge (i)
 		get : (G, i) -> G.edges.v[i]
@@ -53,14 +53,14 @@
 		# Returns the position the node has been added to
 		add : (G, i) ->
 			if not i?
-				i = graph.for_arrays_of(G.nodes, ((arr) -> arr.push(null)))-1
+				i = digraph.for_arrays_of(G.nodes, ((arr) -> arr.push(null)))-1
 			else
-				graph.for_arrays_of(G.nodes, ((arr) -> graph.ins(arr, i)))
+				digraph.for_arrays_of(G.nodes, ((arr) -> digraph.ins(arr, i)))
 			i
 
 		# Delete a node 'i'
 		del : (G, i) ->
-			graph.for_arrays_of(G.nodes, graph.del, i)
+			digraph.for_arrays_of(G.nodes, digraph.del, i)
 
 		# Returns value for the node (i)
 		get : (G, i) -> G.nodes.v[i]
@@ -117,7 +117,7 @@
 		ret
 
 	###
-	# Graph Methods
+	# digraph Methods
 	# =======================================================================
 	###
 
@@ -204,7 +204,7 @@
 			# We iterate over all vertices
 			for v, i in G.nodes.v
 				# Get in/out vetices to 'i'
-				J = graph.nodes.out(G, i).concat graph.nodes.in(G, i)
+				J = digraph.nodes.out(G, i).concat digraph.nodes.in(G, i)
 				fx = 0
 				fy = 0
 				# Enumerate all adjacent vertices (skip self-loop)
@@ -281,33 +281,63 @@
 		null
 }
 
-@.fa = Object.create(graph)
+# 
+#  Class for Finite Automata
+# 
+@.fa = Object.create(digraph)
 
-@.fa.extend = (G) ->
-		G.start = 0 	# Initial state
-		G.nodes.x = []
-		G.nodes.y = []
-		G
+fa.extend = (G) ->
+	G.start = 0 	# Initial state
+	G.events = {	# Events
+		v : []
+	}	
+	G
 
-fa.new = () ->
-		G = graph.new()
-		fa.extend(G)
-	
+fa.create = () ->
+	G = digraph.create()
+	fa.extend(G)
+
+fa.events = {
+	add : (G, v, i) ->
+		return -1 if not v?
+		return ix if (ix = G.events.v.indexOf(v)) >= 0
+		if not i?
+			i = fa.for_arrays_of(G.events, ((arr) -> arr.push(null)))-1
+		else
+			fa.for_arrays_of(G.events, ((arr) -> fa.ins(arr, i)))
+		G.events.v[i] = v
+		i
+
+	del : (G, i) ->
+		fa.for_arrays_of(G.events, fa.del, i)
+}
+
+
+# 
+#  Class for Automata extended for graphical representation
+# 
+@.faxy = Object.create(fa)
+
+faxy.extend = (G) ->
+	G.nodes.x = []
+	G.nodes.y = []
+	G
+
+faxy.create = () ->
+	G = fa.create()
+	faxy.extend(G)
+
 
 # Example of extending automaton
 # Create new object
-g = fa.new()
+@.g = faxy.create()
 # Add new properties to nodes
-g.nodes.x = []
-g.nodes.y = []
-g.nodes.color = []
-g.states = g.nodes
 # Add a new node. Note that new properties have beed added as well 
-console.log a = fa.nodes.add(g)
-console.log b = fa.nodes.add(g)
-console.log fa.edges.add(g, a, b)
-console.log fa.edges.add(g, a, a)
-console.log fa.edges.add(g, b, b)
-console.log g.nodes
-console.log g.edges
-console.log g.states
+console.log a = faxy.nodes.add(g)
+console.log b = faxy.nodes.add(g)
+console.log faxy.edges.add(g, a, b)
+console.log faxy.edges.add(g, a, a)
+console.log faxy.edges.add(g, b, b)
+console.log "Nodes: ", g.nodes
+console.log "Edges: ", g.edges
+
