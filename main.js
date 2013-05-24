@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var G1, automata, canvas, ctx, e, edge_exists, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, i, init, load_graph, n, nn, nodeByXY, node_ix, ost, save_graph, st, tout, x, y, _i;
+  var automata, canvas, ctx, edge_exists, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, tout, x, y;
 
   x = y = 0;
 
@@ -407,8 +407,6 @@ Usefull links:
   };
 
   ev_keyup = function(ev) {
-    var G, X, a, b, e, i, ix, _i, _j, _len, _len1, _ref, _ref1, _ref2;
-
     switch (ev.keyCode) {
       case 46:
         editor.del_node(graph.nodes.x.length - 1);
@@ -422,24 +420,6 @@ Usefull links:
         draw_graph(ctx, graph);
         break;
       case 76:
-        G = fa["new"]();
-        X = [];
-        _ref = graph.nodes.x;
-        for (ix = _i = 0, _len = _ref.length; _i < _len; ix = ++_i) {
-          i = _ref[ix];
-          fa.nodes.add(G, null);
-          X.push({
-            x: i,
-            y: graph.nodes.y[ix]
-          });
-        }
-        _ref1 = graph.edges;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          e = _ref1[_j];
-          _ref2 = unpack(e), a = _ref2[0], b = _ref2[1];
-          fa.edges.add(G, a, b);
-        }
-        fa.FDA(G, graph.nodes.x, graph.nodes.y);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         draw_graph(ctx, graph);
         break;
@@ -451,27 +431,5 @@ Usefull links:
     console.log(".");
     return setTimeout(tout, 1000);
   })();
-
-  G1 = fa["new"]();
-
-  e = G1.edges;
-
-  n = G1.nodes;
-
-  nn = 20;
-
-  for (i = _i = 0; 0 <= nn ? _i <= nn : _i >= nn; i = 0 <= nn ? ++_i : --_i) {
-    fa.nodes.add(G1, i);
-    if (i > 0) {
-      fa.edges.add(G1, i - 1, i);
-    }
-  }
-
-  window.foo = function(a) {
-    if (a != null) {
-      console.log(a);
-    }
-    return console.log(a + '+');
-  };
 
 }).call(this);

@@ -357,11 +357,11 @@ ev_keyup = (ev) ->
 			draw_graph(ctx, graph)
 		when 76 # L
 			# Convert old graph to a new one
-			G = fa.new()
-			X = []
-			for i, ix in graph.nodes.x
-				fa.nodes.add(G, null)
-				X.push({x: i, y:graph.nodes.y[ix]})
+			# G = fa.create()
+			# X = []
+			# for i, ix in graph.nodes.x
+			# 	fa.nodes.add(G, null)
+			# 	X.push({x: i, y:graph.nodes.y[ix]})
 				
 			# X = []
 			# X.push(v.x) for v in arr
@@ -373,10 +373,10 @@ ev_keyup = (ev) ->
 			# fa.FDA(G, X, Y)
 			# draw_new(ctx, G, X, Y)
 
-			for e in graph.edges
-				[a, b] = unpack(e)
-				fa.edges.add(G, a, b)
-			fa.FDA(G, graph.nodes.x, graph.nodes.y)
+			# for e in graph.edges
+			# 	[a, b] = unpack(e)
+			# 	fa.edges.add(G, a, b)
+			# fa.FDA(G, graph.nodes.x, graph.nodes.y)
 			ctx.clearRect(0, 0, canvas.width, canvas.height)
 			draw_graph(ctx, graph)
 		else
@@ -405,18 +405,23 @@ ev_keyup = (ev) ->
 # add(1)
 
 
-G1 = fa.new()
-e = G1.edges
-n = G1.nodes
+# G1 = fa.new()
+# e = G1.edges
+# n = G1.nodes
 
-nn = 20
-for i in [0..nn]
-	fa.nodes.add(G1, i)
-	fa.edges.add(G1, i-1, i) if i>0
+# nn = 20
+# for i in [0..nn]
+# 	fa.nodes.add(G1, i)
+# 	fa.edges.add(G1, i-1, i) if i>0
 # fa.edges.add(G1, 0, 1)
 # fa.edges.add(G1, 1, 2)
 
 # fa.BFS(G1)
+
+	
+
+
+
 
 
 
