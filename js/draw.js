@@ -314,22 +314,19 @@ The functions here assume that there are global variables:
     return null;
   };
 
-  this.draw_new = function(ctx, G) {
-    var dy, index, text, x, y, _i, _len, _ref;
+  this.draw_new = function(ctx, X, Y) {
+    var i, ix, j, _i, _len;
 
     ctx.save();
     ctx.textAlign = "center";
     ctx.strokeStyle = cl_node_edge;
-    dy = 12 / 2;
-    _ref = graph.nodes.x;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      x = _ref[index];
-      y = graph.nodes.y[index];
-      ctx.fillStyle = cl_node;
-      draw_state(ctx, x, y);
-      text = index.toString();
-      ctx.fillStyle = cl_text;
-      ctx.fillText(text, x, y + dy);
+    for (ix = _i = 0, _len = X.length; _i < _len; ix = ++_i) {
+      i = X[ix];
+      j = Y[ix];
+      ctx.beginPath();
+      ctx.moveTo(G.nodes.x[i], y1);
+      ctx.lineTo(x5, y5);
+      ctx.stroke();
     }
     ctx.restore();
     return null;

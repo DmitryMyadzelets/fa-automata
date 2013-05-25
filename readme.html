@@ -1,0 +1,187 @@
+<html><meta charset="UTF-8"><style>html { 
+    font-size: 100%; 
+    overflow-y: scroll; 
+    -webkit-text-size-adjust: 100%; 
+    -ms-text-size-adjust: 100%; 
+}
+
+body{
+    font-family: helvetica, arial, freesans, clean, sans-serif;
+    color: #333;
+    background-color: #fff;
+    border-color: #999999;
+    border-width: 2px;
+    line-height: 1.5;
+    margin: 2em 3em;
+    text-align:left;
+    padding: 0 100px 0 100px;
+}
+
+pre{
+    background-color: #eee;
+    padding: 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    overflow: auto;
+}
+code{
+    background-color: #eee;
+    padding: 1px 3px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px; 
+}
+pre code {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+li p{
+    margin: 0.3em;
+}
+ul > li{
+    list-style-type: disc;
+}
+a:link, a:visited{
+    color: #33e;
+    text-decoration: none;
+}
+a:hover{
+    color: #00f;
+    text-shadow:1px 1px 2px #ccf;
+    text-decoration:underline;
+}
+h1{
+    color: #999;
+    font-weight: 400;
+    font-size: 36px;
+}
+h2{
+    border-bottom: 1px dotted #aaa;
+    margin-bottom: 1em;
+    color: #333;
+    font-size: 30px;
+}
+h3{
+    color: #666;
+    font-size: 24px;
+}
+h4 {
+    font-size: 21px;
+}
+h5 {
+    font-size: 18px;
+}
+.shadow{
+    -webkit-box-shadow:0 5px 15px #000;
+    -moz-box-shadow:0 5px 15px #000;
+    box-shadow:0 5px 15px #000;     
+}
+</style><body><h1>Automata Graph Editor</h1>
+<p>Methods to implement a graph editor are described.
+Based on a <a href="http://opendatastructures.org/ods-cpp/12_Graphs.html">graph structure description</a>
+and on <a href="https://github.com/d3/d3-plugins/tree/master/graph">d3-graph-plugin</a>.</p>
+<h2>Methods</h2>
+<h3>Basic methods for a graph (edges only, no explicit nodes)</h3>
+<pre><code>add(i, j)           # Add the edge (i, j)
+del(i, j)           # Delete the edge (i, j)
+out(i)              # Returns a list of j such that (i, j) in edges
+in(i)               # Returns a list of j such that (j, i) in edges
+set(i, j, value)    # Set value for the edge (i, j)
+get(i, j)           # Returns value for the edge (i, j)
+</code></pre>
+<h3>Extended methods for automata</h3>
+<pre><code>add()               # Create a new node
+add(i)              # Create a new node (j) and add edge(i, j)
+del(i)              # Delete the node (i) from nodes
+set(i, value)       # Set value for the node (i)
+get(i)              # Returns value for the node (i)
+</code></pre>
+<h3>Helper methods</h3>
+<pre><code>ins(i)          # Insert node i
+ins(i)          # Insert edge i
+</code></pre>
+<p>For the above we define a structure for a graph and methods to work with it:</p>
+<h2>Structures</h2>
+<h3>Structrue of a graph (to be kept on a storage)</h3>
+<pre><code>g : {
+    n : {           # Nodes
+        x : []      # X-coordinates
+        y : []      # Y-coordinates
+        v : []      # Values
+    }
+    e : {           # Edges
+        a : []      # index if i-node
+        b : []      # index if j-node
+        v : []      # Values
+    }
+    n0 : []         # Initial nodes
+}
+</code></pre>
+<h3>Helping structure for a graph</h3>
+<pre><code>g : {
+    n : {           # Nodes
+    }
+    e : {           # Edges
+        curved : [] # True if to be drawn curved
+    }
+}
+</code></pre>
+<h2>Draft of methods for Finite Automata</h2>
+<p>The prefix "fa" states for Finite Automata.</p>
+<pre><code>fa : {
+    nodes : {       # Nodes
+        add(G)      # Create a new node
+        add(G,i)    # Insert node into position (i)
+        del(G,i)    # Delete the node (i) from nodes
+        set(G,i,v)  # Set value for the node (i)
+        get(G,i)    # Returns value for the node (i)
+        out(G,i)    # Returns a list of j such that (i, j) in edges
+    }
+    edges : {       # Edges
+        add(i)      # Create a new node (j) and add edge(i, j)
+        add(i, j)   # Add the edge (i, j)
+        ins(i)      # Insert edge into position i
+        del(i, j)   # Delete the edge (i, j)
+        set(i, j, v)# Set value for the edge (i, j)
+        get(i, j)   # Returns value for the edge (i, j) &lt;-- sure we need it?
+        has(i, j)   # Returns true if exists edge (i, j)
+        out(i)      # Returns a list of edges such that (i, ?) in edges
+        in(i)       # Returns a list of edges such that (?, i) in edges
+    }
+}
+</code></pre>
+<h2>Breadth-first Search</h2>
+<pre><code>BFS : (G) -&gt;
+    stack = [G.start]
+    visited = [G.start]
+    while stack.length
+        a = stack.pop()
+        # Get edges going out of the node 'a'
+        E = @.edges.out(G, a)
+        for e in E
+            # Get nodes reachabe by the edge 'e'
+            b = G.edges.b[e]
+            if b not in visited
+                visited.push(b)
+                stack.push(b)
+            # Do something here
+            console.log a,"-&gt;", b
+</code></pre>
+<h2>Parallel composition</h2>
+<pre><code>a, b : typeof g
+stack1.push(a.n0)
+stack2.push(b.n0)
+wrt = [] # values with respect which we make the composition to
+#
+while stack1.length
+    n1 = stack1.pop()
+    n2 = stack2.pop()
+    outs1 = a.e.out(n1)
+    outs2 = a.e.out(n1)
+    for e in outs1
+        if e not in wrt
+            ...
+</code></pre>
+<h2>Graph drawing</h2>
+<p><a href="http://www2.research.att.com/~yifanhu/PUB/graph_draw_small.pdf">http://www2.research.att.com/~yifanhu/PUB/graph_draw_small.pdf</a></p></body></html>
