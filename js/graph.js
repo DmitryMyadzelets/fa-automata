@@ -2,7 +2,9 @@
 (function() {
   'use strict';  this.digraph = {
     create: function() {
-      return {
+      var graph;
+
+      graph = {
         nodes: {
           v: []
         },
@@ -12,9 +14,23 @@
           v: []
         }
       };
+      Object.defineProperty(graph.nodes, 'length', {
+        get: function() {
+          return graph.nodes.v.length;
+        }
+      });
+      Object.defineProperty(graph.edges, 'length', {
+        get: function() {
+          return graph.edges.v.length;
+        }
+      });
+      return graph;
     },
     edges: {
       add: function(G, a, b, i) {
+        if (a < 0 || b < 0 || a >= G.nodes.length || b >= G.nodes.length) {
+          return -1;
+        }
         if (i == null) {
           i = digraph.for_arrays_of(G.edges, (function(arr) {
             return arr.push(null);
@@ -61,6 +77,14 @@
           }
         }
         return false;
+      },
+      change_node: function(G, i, a, b) {
+        var ret;
+
+        ret = [G.edges.a[i], G.edges.b[i]];
+        G.edges.a[i] = a;
+        G.edges.b[i] = b;
+        return ret;
       }
     },
     nodes: {
@@ -77,6 +101,30 @@
         return i;
       },
       del: function(G, i) {
+        var a, b, change, ix, last_node;
+
+        ix = G.edges.length;
+        last_node = G.nodes.length - 1;
+        while (ix-- > 0) {
+          a = G.edges.a[ix];
+          b = G.edges.b[ix];
+          if ((a === i) || (b === i)) {
+            digraph.edges.del(G, ix);
+          } else if (i < last_node) {
+            change = false;
+            if (a === last_node) {
+              a = i;
+              change = true;
+            }
+            if (b === last_node) {
+              b = i;
+              change = true;
+            }
+            if (change) {
+              digraph.edges.change_node(G, ix, a, b);
+            }
+          }
+        }
         return digraph.for_arrays_of(G.nodes, digraph.del, i);
       },
       get: function(G, i) {

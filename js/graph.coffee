@@ -6,7 +6,7 @@
 	# Creates a new finite automata
 @.digraph = {
 	create : () ->
-		{
+		graph = {
 			nodes : {		# Nodes
 				v : []		# Values
 			}
@@ -16,11 +16,16 @@
 				v : []		# Values
 			}
 		}
+		# 'length' property for use in cycles
+		Object.defineProperty graph.nodes, 'length', get: -> graph.nodes.v.length
+		Object.defineProperty graph.edges, 'length', get: -> graph.edges.v.length
+		graph
 
 	edges : {
 		# Add a new edge (a, b) or add an edge into position i
 		# Returns the position of the added edge
 		add : (G, a, b, i) ->
+			return -1 if a<0 or b<0 or a>=G.nodes.length or b>=G.nodes.length
 			if not i?
 				i = digraph.for_arrays_of(G.edges, ((arr) -> arr.push(null)))-1
 			else
@@ -46,6 +51,15 @@
 		has : (G, a, b) ->
 			(return true) for i, ix in G.edges.b when G.edges.a[ix] is a and i is b
 			false
+
+		# Changes nodes to (a, b)
+		# Returns array of old nodes [a, b]
+		change_node : (G, i, a, b) ->
+			ret = [G.edges.a[i], G.edges.b[i]]
+			G.edges.a[i] = a
+			G.edges.b[i] = b
+			ret
+
 	}
 
 	nodes : {
@@ -60,6 +74,24 @@
 
 		# Delete a node 'i'
 		del : (G, i) ->
+			# First delete ingoing and outgoing edges
+			ix = G.edges.length
+			last_node = G.nodes.length-1
+			while ix-- >0
+				a = G.edges.a[ix] 
+				b = G.edges.b[ix]
+				if (a == i) or (b == i)
+					digraph.edges.del(G, ix)
+				else if i < last_node
+				# If the node 'i' is not the last 
+				# then the last node moves to the position of deleted one, and
+				# hence we have to update the correspondent edges
+					change = false
+					if a == last_node then a = i; change = true
+					if b == last_node then b = i; change = true
+					digraph.edges.change_node(G, ix, a, b) if change
+
+			# Then delete the node itself
 			digraph.for_arrays_of(G.nodes, digraph.del, i)
 
 		# Returns value for the node (i)
