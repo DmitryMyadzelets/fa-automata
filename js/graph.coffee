@@ -2,9 +2,8 @@
 'use strict'
 
 
-
-	# Creates a new finite automata
 @.digraph = {
+	# Creates a new graph
 	create : () ->
 		graph = {
 			nodes : {		# Nodes
@@ -148,3 +147,4 @@
 		ret = fnc(obj[key], args) for key in keys
 		ret
 }
+

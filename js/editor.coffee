@@ -242,3 +242,72 @@ move_graph = (dx, dy) ->
 		null
 
 }
+
+
+@.ged = {
+	stack : []
+	ix : 0
+	transaction : false
+
+	to_stack : (redo_func, redo_vals, undo_func, undo_vals) ->
+		# If index ix is not equal to the length of stack, it implies
+		# that user did "undo". Then new command cancels all the
+		# values in stack below the index.
+		if @.ix < @.stack.length
+			@.stack.length = @.ix
+		@.stack.push {
+			redo_func: redo_func
+			redo_vals: redo_vals
+			undo_func: undo_func
+			undo_vals: undo_vals
+		}
+		@.ix = @.stack.length
+		null
+
+	undo : () ->
+		ret = false
+		if @.ix > 0
+			while @.ix > 0
+				cmd = @.stack[--@.ix]
+				cmd.undo_func.apply(@, cmd.undo_vals)
+				break if not @.transaction
+			ret = true
+		ret
+
+	redo : () ->
+		ret = false
+		if @.ix < @.stack.length
+			while @.ix < @.stack.length
+				cmd = @.stack[@.ix++]
+				cmd.redo_func.apply(@, cmd.redo_vals)
+				break if not @.transaction
+			ret = true
+		ret
+
+	set_transaction : (state) -> @.transaction = state
+	start_transaction : () ->	@.to_stack(@.set_transaction, [true], @.set_transaction, [false])
+	stop_transaction : () -> @.to_stack(@.set_transaction, [false], @.set_transaction, [true])
+
+	edges : {
+		add : digraph.edges.add
+		del : digraph.edges.del
+		get : digraph.edges.get
+		set : digraph.edges.set
+		out : digraph.edges.out
+		has : digraph.edges.has
+	}
+	nodes : {
+		# add : (x, y) ->
+		add : (G, i) ->
+			ix = digraph.nodes.add(G, i)
+			ged.to_stack(digraph.nodes.add, arguments, digraph.nodes.del, [G, ix])
+			ix
+
+		del : digraph.nodes.del
+		get : digraph.nodes.get
+		set : digraph.nodes.set
+		out : digraph.nodes.out
+		in : digraph.nodes.in
+	}
+
+}

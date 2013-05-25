@@ -311,4 +311,86 @@
     }
   };
 
+  this.ged = {
+    stack: [],
+    ix: 0,
+    transaction: false,
+    to_stack: function(redo_func, redo_vals, undo_func, undo_vals) {
+      if (this.ix < this.stack.length) {
+        this.stack.length = this.ix;
+      }
+      this.stack.push({
+        redo_func: redo_func,
+        redo_vals: redo_vals,
+        undo_func: undo_func,
+        undo_vals: undo_vals
+      });
+      this.ix = this.stack.length;
+      return null;
+    },
+    undo: function() {
+      var cmd, ret;
+
+      ret = false;
+      if (this.ix > 0) {
+        while (this.ix > 0) {
+          cmd = this.stack[--this.ix];
+          cmd.undo_func.apply(this, cmd.undo_vals);
+          if (!this.transaction) {
+            break;
+          }
+        }
+        ret = true;
+      }
+      return ret;
+    },
+    redo: function() {
+      var cmd, ret;
+
+      ret = false;
+      if (this.ix < this.stack.length) {
+        while (this.ix < this.stack.length) {
+          cmd = this.stack[this.ix++];
+          cmd.redo_func.apply(this, cmd.redo_vals);
+          if (!this.transaction) {
+            break;
+          }
+        }
+        ret = true;
+      }
+      return ret;
+    },
+    set_transaction: function(state) {
+      return this.transaction = state;
+    },
+    start_transaction: function() {
+      return this.to_stack(this.set_transaction, [true], this.set_transaction, [false]);
+    },
+    stop_transaction: function() {
+      return this.to_stack(this.set_transaction, [false], this.set_transaction, [true]);
+    },
+    edges: {
+      add: digraph.edges.add,
+      del: digraph.edges.del,
+      get: digraph.edges.get,
+      set: digraph.edges.set,
+      out: digraph.edges.out,
+      has: digraph.edges.has
+    },
+    nodes: {
+      add: function(G, i) {
+        var ix;
+
+        ix = digraph.nodes.add(G, i);
+        ged.to_stack(digraph.nodes.add, arguments, digraph.nodes.del, [G, ix]);
+        return ix;
+      },
+      del: digraph.nodes.del,
+      get: digraph.nodes.get,
+      set: digraph.nodes.set,
+      out: digraph.nodes.out,
+      "in": digraph.nodes["in"]
+    }
+  };
+
 }).call(this);
