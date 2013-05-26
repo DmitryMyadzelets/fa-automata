@@ -54,7 +54,6 @@ fa.BFS = (G) ->
 
 
 
-
 # 
 #  Class for Automata extended for graphical representation
 # 
