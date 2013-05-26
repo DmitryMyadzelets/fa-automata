@@ -7,48 +7,28 @@
     it("Can create an instance of graph", function() {
       return expect(digraph.create()).toBeDefined;
     });
-    return describe("When works with nodes", function() {
+    describe("Undo|Redo when adds nodes", function() {
       var g;
 
       g = digraph.create();
+      ged.reset();
       it("Can add node 1", function() {
         return expect(ged.nodes.add(g)).toBe(0);
       });
-      it("Can add node 2", function() {
-        return expect(ged.nodes.add(g)).toBe(1);
-      });
-      it("Has 2 nodes", function() {
+      it("Adds 2nd node, has 2 nodes", function() {
+        expect(ged.nodes.add(g)).toBe(1);
         return expect(g.nodes.length).toBe(2);
       });
-      it("Executes Undo", function() {
-        return expect(ged.undo()).toBe(true);
-      });
-      it("Has 1 nodes", function() {
+      it("Executes Undo, has 1 node", function() {
+        expect(ged.undo()).toBe(true);
         return expect(g.nodes.length).toBe(1);
       });
-      it("Executes Redo", function() {
-        return expect(ged.redo()).toBe(true);
-      });
-      it("Has 2 nodes", function() {
-        return expect(g.nodes.length).toBe(2);
-      });
-      it("Executes Undo", function() {
-        return expect(ged.undo()).toBe(true);
-      });
-      it("Has 1 nodes", function() {
-        return expect(g.nodes.length).toBe(1);
-      });
-      it("Executes Redo", function() {
-        return expect(ged.redo()).toBe(true);
-      });
-      it("Has 2 nodes", function() {
+      it("Executes Redo, has 2 nodes", function() {
+        expect(ged.redo()).toBe(true);
         return expect(g.nodes.length).toBe(2);
       });
       it("Executes Redo - fails", function() {
         return expect(ged.redo()).toBe(false);
-      });
-      it("Has 2 nodes", function() {
-        return expect(g.nodes.length).toBe(2);
       });
       it("2 times Undo - no fail", function() {
         expect(ged.undo()).toBe(true);
@@ -56,6 +36,90 @@
       });
       return it("3d time Undo - fails", function() {
         return expect(ged.undo()).toBe(false);
+      });
+    });
+    describe("Undo|Redo when adds edges", function() {
+      var g;
+
+      g = digraph.create();
+      ged.reset();
+      it("Ads 2 nodes, has 2 nodes", function() {
+        expect(ged.nodes.add(g)).toBe(0);
+        expect(ged.nodes.add(g)).toBe(1);
+        return expect(g.nodes.length).toBe(2);
+      });
+      it("Can add edge from 1 to 2", function() {
+        return expect(ged.edges.add(g, 0, 1)).toBe(0);
+      });
+      it("Can add edge from 2 to 2", function() {
+        return expect(ged.edges.add(g, 1, 1)).toBe(1);
+      });
+      it("Delets edge 1 to 2", function() {
+        return expect(ged.edges.del(g, 0)).toBe(0);
+      });
+      it("Has 1 edge", function() {
+        return expect(g.edges.length).toBe(1);
+      });
+      it("Executes Undo, has 2 edges", function() {
+        expect(ged.undo()).toBe(true);
+        return expect(g.edges.length).toBe(2);
+      });
+      return it("And the first edge is from 1 to 2", function() {
+        return expect((g.edges.a[0] === 0) && (g.edges.b[0] === 1)).toBe(true);
+      });
+    });
+    describe("Does transacitons", function() {
+      var g;
+
+      g = digraph.create();
+      ged.reset();
+      it("Start transaction and ads 2 nodes", function() {
+        ged.start_transaction();
+        expect(ged.nodes.add(g)).toBe(0);
+        expect(ged.nodes.add(g)).toBe(1);
+        return expect(g.nodes.length).toBe(2);
+      });
+      return it("Stop transaction, then transaction and has 0 nodes", function() {
+        ged.stop_transaction();
+        ged.undo();
+        return expect(g.nodes.length).toBe(0);
+      });
+    });
+    return describe("Undo|Redo when deletes nodes", function() {
+      var g;
+
+      g = digraph.create();
+      ged.reset();
+      it("Adds 2 nodes, has 2 nodes", function() {
+        expect(ged.nodes.add(g)).toBe(0);
+        expect(ged.nodes.add(g)).toBe(1);
+        return expect(g.nodes.length).toBe(2);
+      });
+      it("Undo, has 1 node", function() {
+        expect(ged.undo()).toBe(true);
+        return expect(g.nodes.length).toBe(1);
+      });
+      it("Redo, has 2 nodes", function() {
+        expect(ged.redo()).toBe(true);
+        return expect(g.nodes.length).toBe(2);
+      });
+      it("Adds 1 edge, has 1 edge", function() {
+        expect(ged.edges.add(g, 0, 1)).toBe(0);
+        return expect(g.edges.length).toBe(1);
+      });
+      it("Deletes 1 node, has no edges", function() {
+        expect(ged.nodes.del(g, 0)).toBe(0);
+        return expect(g.edges.length).toBe(0);
+      });
+      it("Undo, has 2 nodes, 1 edge", function() {
+        expect(ged.undo()).toBe(true);
+        expect(g.nodes.length).toBe(2);
+        return expect(g.edges.length).toBe(1);
+      });
+      return it("Redo, has 1 node, no edges", function() {
+        expect(ged.redo()).toBe(true);
+        expect(g.nodes.length).toBe(1);
+        return expect(g.edges.length).toBe(0);
       });
     });
   });

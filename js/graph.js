@@ -45,6 +45,9 @@
         return i;
       },
       del: function(G, i) {
+        if (i < 0 || i >= G.edges.length) {
+          return -1;
+        }
         return digraph.for_arrays_of(G.edges, digraph.del, i);
       },
       get: function(G, i) {
@@ -100,7 +103,7 @@
         }
         return i;
       },
-      del: function(G, i) {
+      del: function(G, i, on_del_edge) {
         var a, b, change, ix, last_node;
 
         ix = G.edges.length;
@@ -109,7 +112,11 @@
           a = G.edges.a[ix];
           b = G.edges.b[ix];
           if ((a === i) || (b === i)) {
-            digraph.edges.del(G, ix);
+            if (typeof on_del_edge === "function") {
+              on_del_edge.apply(this, [G, ix]);
+            } else {
+              digraph.edges.del(G, ix);
+            }
           } else if (i < last_node) {
             change = false;
             if (a === last_node) {

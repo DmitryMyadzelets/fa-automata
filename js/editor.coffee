@@ -135,114 +135,113 @@ move_graph = (dx, dy) ->
 ###
 ===============================================================================
 ###
-@.editor = {
-	stack : []
-	ix : 0
-	transaction : false
+# @.editor = {
+# 	stack : []
+# 	ix : 0
+# 	transaction : false
 
-	execute : () ->
-		name = arguments[0]
-		args = Array.prototype.slice.call(arguments).splice(1)
-		if !!@[name]# != undefined
-			return @[name].apply(@, args)
-		console.log "Command not found: " + name + " (" + args + ")"
-		null
+# 	execute : () ->
+# 		name = arguments[0]
+# 		args = Array.prototype.slice.call(arguments).splice(1)
+# 		if !!@[name]# != undefined
+# 			return @[name].apply(@, args)
+# 		console.log "Command not found: " + name + " (" + args + ")"
+# 		null
 
-	undo : () ->
-		ret = false
-		if @.ix > 0
-			while @.ix > 0
-				cmd = @.stack[--@.ix]
-				cmd.undo_func.apply(@, cmd.undo_vals)
-				break if not @.transaction
-			ret = true
-		ret
+# 	undo : () ->
+# 		ret = false
+# 		if @.ix > 0
+# 			while @.ix > 0
+# 				cmd = @.stack[--@.ix]
+# 				cmd.undo_func.apply(@, cmd.undo_vals)
+# 				break if not @.transaction
+# 			ret = true
+# 		ret
 
-	redo : () ->
-		ret = false
-		if @.ix < @.stack.length
-			while @.ix < @.stack.length
-				cmd = @.stack[@.ix++]
-				cmd.redo_func.apply(@, cmd.redo_vals)
-				break if not @.transaction
-			ret = true
-		ret
+# 	redo : () ->
+# 		ret = false
+# 		if @.ix < @.stack.length
+# 			while @.ix < @.stack.length
+# 				cmd = @.stack[@.ix++]
+# 				cmd.redo_func.apply(@, cmd.redo_vals)
+# 				break if not @.transaction
+# 			ret = true
+# 		ret
 
-	to_stack : (redo_func, redo_vals, undo_func, undo_vals) ->
-		# If index ix is not equal to the length of stack, it implies
-		# that user did "undo". Then new command cancels all the
-		# values in stack below the index.
-		if @.ix < @.stack.length
-			@.stack.length = @.ix
-		@.stack.push {
-			redo_func: redo_func
-			redo_vals: redo_vals
-			undo_func: undo_func
-			undo_vals: undo_vals
-		}
-		@.ix = @.stack.length
-		null
+# 	to_stack : (redo_func, redo_vals, undo_func, undo_vals) ->
+# 		# If index ix is not equal to the length of stack, it implies
+# 		# that user did "undo". Then new command cancels all the
+# 		# values in stack below the index.
+# 		if @.ix < @.stack.length
+# 			@.stack.length = @.ix
+# 		@.stack.push {
+# 			redo_func: redo_func
+# 			redo_vals: redo_vals
+# 			undo_func: undo_func
+# 			undo_vals: undo_vals
+# 		}
+# 		@.ix = @.stack.length
+# 		null
 
-	set_transaction : (state) -> @.transaction = state
-	start_transaction : () ->	@.to_stack(@.set_transaction, [true], @.set_transaction, [false])
-	stop_transaction : () -> @.to_stack(@.set_transaction, [false], @.set_transaction, [true])
+# 	set_transaction : (state) -> @.transaction = state
+# 	start_transaction : () ->	@.to_stack(@.set_transaction, [true], @.set_transaction, [false])
+# 	stop_transaction : () -> @.to_stack(@.set_transaction, [false], @.set_transaction, [true])
 
-	add_node : (x, y) ->
-		ix = add_node(x, y)
-		@.to_stack(add_node, arguments, del_node, [ix])
-		ix
+# 	add_node : (x, y) -> # moved to ged
+# 		ix = add_node(x, y)
+# 		@.to_stack(add_node, arguments, del_node, [ix])
+# 		ix
 
-	del_node : (ix) ->
-		x = graph.nodes.x[ix]
-		y = graph.nodes.y[ix]
-		last = graph.nodes.length-1
-		del_node(ix)
-		@.start_transaction()
-		@.to_stack(del_node, [ix], ins_node, [x, y, ix])
-		# Delete ingoing and outgoing edges
-		i = graph.edges.length
-		while i-- >0
-			[v1, v2] = unpack(graph.edges[i])
-			if (v1 == ix) or (v2 == ix) 
-				@.del_edge(i)
-			else if ix < last
-			# If the deleted node was not the last 
-			# then the last node moves to the position of deleted one, and
-			# hence we have to update values of some edges.
-				v_old = graph.edges[i]
-				if v1 == last then v1 = ix
-				if v2 == last then v2 = ix
-				if (v1 == ix) or (v2 == ix)
-					upd_edge(i, pack(v1, v2))
-					@.to_stack(upd_edge, [i, graph.edges[i]], upd_edge, [i, v_old])
-		@.stop_transaction()
-		null
+# 	del_node : (ix) -> # moved to ged
+# 		x = graph.nodes.x[ix]
+# 		y = graph.nodes.y[ix]
+# 		last = graph.nodes.length-1
+# 		del_node(ix)
+# 		@.start_transaction()
+# 		@.to_stack(del_node, [ix], ins_node, [x, y, ix])
+# 		# Delete ingoing and outgoing edges
+# 		i = graph.edges.length
+# 		while i-- >0
+# 			[v1, v2] = unpack(graph.edges[i])
+# 			if (v1 == ix) or (v2 == ix) 
+# 				@.del_edge(i)
+# 			else if ix < last
+# 			# If the deleted node was not the last 
+# 			# then the last node moves to the position of deleted one, and
+# 			# hence we have to update values of some edges.
+# 				v_old = graph.edges[i]
+# 				if v1 == last then v1 = ix
+# 				if v2 == last then v2 = ix
+# 				if (v1 == ix) or (v2 == ix)
+# 					upd_edge(i, pack(v1, v2))
+# 					@.to_stack(upd_edge, [i, graph.edges[i]], upd_edge, [i, v_old])
+# 		@.stop_transaction()
+# 		null
 
-	move_node : (ix, x1, y1, x2, y2) ->
-		@.to_stack(move_node, [ix, x2, y2], move_node, [ix, x1, y1])
-		null
+# 	move_node : (ix, x1, y1, x2, y2) ->
+# 		@.to_stack(move_node, [ix, x2, y2], move_node, [ix, x1, y1])
+# 		null
 
-	add_edge : (node_ix1, node_ix2) ->
-		ix = add_edge(node_ix1, node_ix2)
-		@.to_stack(add_edge, [node_ix1, node_ix2], del_edge, [ix])
-		ix
+# 	add_edge : (node_ix1, node_ix2) -> # moved to ged
+# 		ix = add_edge(node_ix1, node_ix2)
+# 		@.to_stack(add_edge, [node_ix1, node_ix2], del_edge, [ix])
+# 		ix
 
-	del_edge : (ix) ->
-		nodes = del_edge(ix)
-		[v1, v2] = unpack(nodes)
-		@.to_stack(del_edge, [ix], ins_edge, [v1, v2, ix])
-		null
+# 	del_edge : (ix) -> # moved to ged
+# 		nodes = del_edge(ix)
+# 		[v1, v2] = unpack(nodes)
+# 		@.to_stack(del_edge, [ix], ins_edge, [v1, v2, ix])
+# 		null
 
-	move_graph : (x1, y1, x2, y2) ->
-		dx = x2-x1
-		dy = y2-y1
-		if dx || dy # log only if there are changes
-			move_graph(dx, dy)
-			@.to_stack(move_graph, [dx, dy], move_graph, [-dx, -dy])
-		null
+# 	move_graph : (x1, y1, x2, y2) ->
+# 		dx = x2-x1
+# 		dy = y2-y1
+# 		if dx || dy # log only if there are changes
+# 			move_graph(dx, dy)
+# 			@.to_stack(move_graph, [dx, dy], move_graph, [-dx, -dy])
+# 		null
 
-}
-
+# }
 
 @.ged = {
 	stack : []
@@ -253,44 +252,58 @@ move_graph = (dx, dy) ->
 		# If index ix is not equal to the length of stack, it implies
 		# that user did "undo". Then new command cancels all the
 		# values in stack below the index.
-		if @.ix < @.stack.length
-			@.stack.length = @.ix
-		@.stack.push {
+		if ged.ix < ged.stack.length
+			ged.stack.length = ged.ix
+		ged.stack.push {
 			redo_func: redo_func
 			redo_vals: redo_vals
 			undo_func: undo_func
 			undo_vals: undo_vals
 		}
-		@.ix = @.stack.length
+		ged.ix = ged.stack.length
 		null
 
 	undo : () ->
 		ret = false
-		if @.ix > 0
-			while @.ix > 0
-				cmd = @.stack[--@.ix]
-				cmd.undo_func.apply(@, cmd.undo_vals)
-				break if not @.transaction
+		if ged.ix > 0
+			while ged.ix > 0
+				cmd = ged.stack[--ged.ix]
+				cmd.undo_func.apply(ged, cmd.undo_vals)
+				break if not ged.transaction
 			ret = true
 		ret
 
 	redo : () ->
 		ret = false
-		if @.ix < @.stack.length
-			while @.ix < @.stack.length
-				cmd = @.stack[@.ix++]
-				cmd.redo_func.apply(@, cmd.redo_vals)
-				break if not @.transaction
+		if ged.ix < ged.stack.length
+			while ged.ix < ged.stack.length
+				cmd = ged.stack[ged.ix++]
+				cmd.redo_func.apply(ged, cmd.redo_vals)
+				break if not ged.transaction
 			ret = true
 		ret
 
-	set_transaction : (state) -> @.transaction = state
-	start_transaction : () ->	@.to_stack(@.set_transaction, [true], @.set_transaction, [false])
-	stop_transaction : () -> @.to_stack(@.set_transaction, [false], @.set_transaction, [true])
+	reset : () -> 
+		ged.stack.length = 0
+		ged.ix = 0; 
+
+	set_transaction : (state) -> ged.transaction = state
+	start_transaction : () -> ged.to_stack(ged.set_transaction, [true], ged.set_transaction, [false])
+	stop_transaction : () -> ged.to_stack(ged.set_transaction, [false], ged.set_transaction, [true])
 
 	edges : {
-		add : digraph.edges.add
-		del : digraph.edges.del
+		add : (G, a, b, i) ->
+			ret = digraph.edges.add(G, a, b, i)
+			if ret >= 0
+				ged.to_stack(digraph.edges.add, arguments, digraph.edges.del, [G, i])
+			ret
+		del : (G, i) ->
+			a = G.edges.a[i]
+			b = G.edges.b[i]
+			ret = digraph.edges.del(G, i)
+			if ret >= 0
+				ged.to_stack(digraph.edges.del, arguments, digraph.edges.add, [G, a, b, i])
+			ret
 		get : digraph.edges.get
 		set : digraph.edges.set
 		out : digraph.edges.out
@@ -303,7 +316,18 @@ move_graph = (dx, dy) ->
 			ged.to_stack(digraph.nodes.add, arguments, digraph.nodes.del, [G, ix])
 			ix
 
-		del : digraph.nodes.del
+		del : (G, i) ->
+			# Since when we delete a node in/out edges also deleted,
+			# then start transacton
+			ged.start_transaction()
+			# Pass callback of for an edge deleting,
+			# so we can record it too, instead of deleting 'blindly'
+			ret = digraph.nodes.del(G, i, (G, i) ->	ged.edges.del(G, i))
+			if ret >= 0
+				ged.to_stack(digraph.nodes.del, arguments, digraph.nodes.add, arguments)
+			ged.stop_transaction()
+			ret
+
 		get : digraph.nodes.get
 		set : digraph.nodes.set
 		out : digraph.nodes.out
@@ -311,3 +335,4 @@ move_graph = (dx, dy) ->
 	}
 
 }
+@.editor = @.ged

@@ -34,6 +34,7 @@
 			i
 
 		del : (G, i) ->
+			return -1 if i<0 or i>=G.edges.length
 			digraph.for_arrays_of(G.edges, digraph.del, i)
 
 		# Returns value for the edge (i)
@@ -72,15 +73,19 @@
 			i
 
 		# Delete a node 'i'
-		del : (G, i) ->
+		del : (G, i, on_del_edge) ->
 			# First delete ingoing and outgoing edges
 			ix = G.edges.length
 			last_node = G.nodes.length-1
+			# while false
 			while ix-- >0
 				a = G.edges.a[ix] 
 				b = G.edges.b[ix]
 				if (a == i) or (b == i)
-					digraph.edges.del(G, ix)
+					if typeof on_del_edge == "function"
+						on_del_edge.apply(@, [G, ix])
+					else 
+						digraph.edges.del(G, ix)
 				else if i < last_node
 				# If the node 'i' is not the last 
 				# then the last node moves to the position of deleted one, and

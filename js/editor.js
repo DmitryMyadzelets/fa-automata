@@ -172,171 +172,32 @@
   */
 
 
-  this.editor = {
-    stack: [],
-    ix: 0,
-    transaction: false,
-    execute: function() {
-      var args, name;
-
-      name = arguments[0];
-      args = Array.prototype.slice.call(arguments).splice(1);
-      if (!!this[name]) {
-        return this[name].apply(this, args);
-      }
-      console.log("Command not found: " + name + " (" + args + ")");
-      return null;
-    },
-    undo: function() {
-      var cmd, ret;
-
-      ret = false;
-      if (this.ix > 0) {
-        while (this.ix > 0) {
-          cmd = this.stack[--this.ix];
-          cmd.undo_func.apply(this, cmd.undo_vals);
-          if (!this.transaction) {
-            break;
-          }
-        }
-        ret = true;
-      }
-      return ret;
-    },
-    redo: function() {
-      var cmd, ret;
-
-      ret = false;
-      if (this.ix < this.stack.length) {
-        while (this.ix < this.stack.length) {
-          cmd = this.stack[this.ix++];
-          cmd.redo_func.apply(this, cmd.redo_vals);
-          if (!this.transaction) {
-            break;
-          }
-        }
-        ret = true;
-      }
-      return ret;
-    },
-    to_stack: function(redo_func, redo_vals, undo_func, undo_vals) {
-      if (this.ix < this.stack.length) {
-        this.stack.length = this.ix;
-      }
-      this.stack.push({
-        redo_func: redo_func,
-        redo_vals: redo_vals,
-        undo_func: undo_func,
-        undo_vals: undo_vals
-      });
-      this.ix = this.stack.length;
-      return null;
-    },
-    set_transaction: function(state) {
-      return this.transaction = state;
-    },
-    start_transaction: function() {
-      return this.to_stack(this.set_transaction, [true], this.set_transaction, [false]);
-    },
-    stop_transaction: function() {
-      return this.to_stack(this.set_transaction, [false], this.set_transaction, [true]);
-    },
-    add_node: function(x, y) {
-      var ix;
-
-      ix = add_node(x, y);
-      this.to_stack(add_node, arguments, del_node, [ix]);
-      return ix;
-    },
-    del_node: function(ix) {
-      var i, last, v1, v2, v_old, x, y, _ref;
-
-      x = graph.nodes.x[ix];
-      y = graph.nodes.y[ix];
-      last = graph.nodes.length - 1;
-      del_node(ix);
-      this.start_transaction();
-      this.to_stack(del_node, [ix], ins_node, [x, y, ix]);
-      i = graph.edges.length;
-      while (i-- > 0) {
-        _ref = unpack(graph.edges[i]), v1 = _ref[0], v2 = _ref[1];
-        if ((v1 === ix) || (v2 === ix)) {
-          this.del_edge(i);
-        } else if (ix < last) {
-          v_old = graph.edges[i];
-          if (v1 === last) {
-            v1 = ix;
-          }
-          if (v2 === last) {
-            v2 = ix;
-          }
-          if ((v1 === ix) || (v2 === ix)) {
-            upd_edge(i, pack(v1, v2));
-            this.to_stack(upd_edge, [i, graph.edges[i]], upd_edge, [i, v_old]);
-          }
-        }
-      }
-      this.stop_transaction();
-      return null;
-    },
-    move_node: function(ix, x1, y1, x2, y2) {
-      this.to_stack(move_node, [ix, x2, y2], move_node, [ix, x1, y1]);
-      return null;
-    },
-    add_edge: function(node_ix1, node_ix2) {
-      var ix;
-
-      ix = add_edge(node_ix1, node_ix2);
-      this.to_stack(add_edge, [node_ix1, node_ix2], del_edge, [ix]);
-      return ix;
-    },
-    del_edge: function(ix) {
-      var nodes, v1, v2, _ref;
-
-      nodes = del_edge(ix);
-      _ref = unpack(nodes), v1 = _ref[0], v2 = _ref[1];
-      this.to_stack(del_edge, [ix], ins_edge, [v1, v2, ix]);
-      return null;
-    },
-    move_graph: function(x1, y1, x2, y2) {
-      var dx, dy;
-
-      dx = x2 - x1;
-      dy = y2 - y1;
-      if (dx || dy) {
-        move_graph(dx, dy);
-        this.to_stack(move_graph, [dx, dy], move_graph, [-dx, -dy]);
-      }
-      return null;
-    }
-  };
-
   this.ged = {
     stack: [],
     ix: 0,
     transaction: false,
     to_stack: function(redo_func, redo_vals, undo_func, undo_vals) {
-      if (this.ix < this.stack.length) {
-        this.stack.length = this.ix;
+      if (ged.ix < ged.stack.length) {
+        ged.stack.length = ged.ix;
       }
-      this.stack.push({
+      ged.stack.push({
         redo_func: redo_func,
         redo_vals: redo_vals,
         undo_func: undo_func,
         undo_vals: undo_vals
       });
-      this.ix = this.stack.length;
+      ged.ix = ged.stack.length;
       return null;
     },
     undo: function() {
       var cmd, ret;
 
       ret = false;
-      if (this.ix > 0) {
-        while (this.ix > 0) {
-          cmd = this.stack[--this.ix];
-          cmd.undo_func.apply(this, cmd.undo_vals);
-          if (!this.transaction) {
+      if (ged.ix > 0) {
+        while (ged.ix > 0) {
+          cmd = ged.stack[--ged.ix];
+          cmd.undo_func.apply(ged, cmd.undo_vals);
+          if (!ged.transaction) {
             break;
           }
         }
@@ -348,11 +209,11 @@
       var cmd, ret;
 
       ret = false;
-      if (this.ix < this.stack.length) {
-        while (this.ix < this.stack.length) {
-          cmd = this.stack[this.ix++];
-          cmd.redo_func.apply(this, cmd.redo_vals);
-          if (!this.transaction) {
+      if (ged.ix < ged.stack.length) {
+        while (ged.ix < ged.stack.length) {
+          cmd = ged.stack[ged.ix++];
+          cmd.redo_func.apply(ged, cmd.redo_vals);
+          if (!ged.transaction) {
             break;
           }
         }
@@ -360,18 +221,40 @@
       }
       return ret;
     },
+    reset: function() {
+      ged.stack.length = 0;
+      return ged.ix = 0;
+    },
     set_transaction: function(state) {
-      return this.transaction = state;
+      return ged.transaction = state;
     },
     start_transaction: function() {
-      return this.to_stack(this.set_transaction, [true], this.set_transaction, [false]);
+      return ged.to_stack(ged.set_transaction, [true], ged.set_transaction, [false]);
     },
     stop_transaction: function() {
-      return this.to_stack(this.set_transaction, [false], this.set_transaction, [true]);
+      return ged.to_stack(ged.set_transaction, [false], ged.set_transaction, [true]);
     },
     edges: {
-      add: digraph.edges.add,
-      del: digraph.edges.del,
+      add: function(G, a, b, i) {
+        var ret;
+
+        ret = digraph.edges.add(G, a, b, i);
+        if (ret >= 0) {
+          ged.to_stack(digraph.edges.add, arguments, digraph.edges.del, [G, i]);
+        }
+        return ret;
+      },
+      del: function(G, i) {
+        var a, b, ret;
+
+        a = G.edges.a[i];
+        b = G.edges.b[i];
+        ret = digraph.edges.del(G, i);
+        if (ret >= 0) {
+          ged.to_stack(digraph.edges.del, arguments, digraph.edges.add, [G, a, b, i]);
+        }
+        return ret;
+      },
       get: digraph.edges.get,
       set: digraph.edges.set,
       out: digraph.edges.out,
@@ -385,12 +268,26 @@
         ged.to_stack(digraph.nodes.add, arguments, digraph.nodes.del, [G, ix]);
         return ix;
       },
-      del: digraph.nodes.del,
+      del: function(G, i) {
+        var ret;
+
+        ged.start_transaction();
+        ret = digraph.nodes.del(G, i, function(G, i) {
+          return ged.edges.del(G, i);
+        });
+        if (ret >= 0) {
+          ged.to_stack(digraph.nodes.del, arguments, digraph.nodes.add, arguments);
+        }
+        ged.stop_transaction();
+        return ret;
+      },
       get: digraph.nodes.get,
       set: digraph.nodes.set,
       out: digraph.nodes.out,
       "in": digraph.nodes["in"]
     }
   };
+
+  this.editor = this.ged;
 
 }).call(this);

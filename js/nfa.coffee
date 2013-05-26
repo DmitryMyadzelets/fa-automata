@@ -70,21 +70,8 @@ faxy.create = () ->
 	faxy.extend(G)
 
 
-# Example of extending automaton
-# Create new object
-@.g = faxy.create()
-# Add new properties to nodes
-# Add a new node. Note that new properties have beed added as well 
-console.log a = faxy.nodes.add(g)
-console.log b = faxy.nodes.add(g)
-console.log faxy.edges.add(g, a, b)
-console.log faxy.edges.add(g, a, a)
-console.log faxy.edges.add(g, b, b)
-console.log "Nodes: ", g.nodes
-console.log "Edges: ", g.edges
-
 ### TODO:
-- Make dependence consistency (nodes <- edges) for deletion 
++ Make dependence consistency (nodes <- edges) for deletion 
   and (events to edges) update.
 - Structure of the application:
 	/css
