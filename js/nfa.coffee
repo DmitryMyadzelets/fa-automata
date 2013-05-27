@@ -70,17 +70,50 @@ faxy.create = () ->
 
 
 ### TODO:
-+ Make dependence consistency (nodes <- edges) for deletion 
-  and (events to edges) update.
-- Structure of the application:
-	/css
-	/img
-	/js
-		/lib
-		graph.js	# Basic structures and functions
-		nfa.js 		# Non-determenistic atomaton structres and functions
-		dfa.js 		# Determenistic atomaton structres and functions
-		editor.js 	# Editor functionality
-		main.js		# Just an entry point
-	index.html
+- Would be better if each module knows how to Undo/Redo its actions?
+  Then we can have one Undo/Redo stack (or a few context-related), 
+  and keep: (Module, Undo-Redo couple). An Editor recieves all the 
+  user's commands, and sends them to a module. The editor knows if it 
+  wants to undo module's actions or not. Then the editor askes the module
+  to provide Undo-Redo action for a given command. The editor can:
+  1. Tell to the module in advance what place (stack pointer) 
+  to put Undo-Redo actions.
+  2. Recieve Undo-Redo actions from the module as callbacks.
+  The second option seems more relevant, since the editor knows 
+  the context (an object) the actions are taken in. Then the editor can
+  create an object along with the the stack of actions. Otherwise, 
+  (the first option) the editor has to change the module's stack pointer.
+
+  In the end it looks like:
+  	A)
+	From Editor side:
+		Action with no recording: module[i].action(args)
+		Action with recording: module[i].record(callback[i]).action(args)
+	From  Module side:
+		Action with no recording: module.action(args) { do...; ret }
+		Action with recording:
+		module.record(callback) ->
+			fnc = callback
+			return module
+		module.action(args) ->
+			do...
+			call fnc if fnc #if matters
+			fnc = null
+
+	B)
+	From Editor side:
+		Action with no recording: module[i].action(args)
+		Action with recording: module[i].action(args).record(callback[i])
+
+	Memento pattern!? 
+	Props:
+		It stores the entire state of the object.
+		Modules have no idea about Undo/Redo
+		Editor has only 2 commands, Undo and Redo and should know the context.
+	Cons:
+		Memory consuming. But this can be solveed storing only difference
+		of module's states.
+
+	Read there:
+		http://stackoverflow.com/questions/10552360/emberjs-history-undo
 ###
