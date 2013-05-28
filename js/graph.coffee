@@ -47,10 +47,10 @@
 		out : (G, from_node) ->
 			i for b, i in G.edges.b when G.edges.a[i] is from_node
 
-		# Returns true if edge (a, b) exists
+		# Returns its index if edge (a, b) exists
 		has : (G, a, b) ->
-			(return true) for i, ix in G.edges.b when G.edges.a[ix] is a and i is b
-			false
+			(return ix) for i, ix in G.edges.b when G.edges.a[ix] is a and i is b
+			-1
 
 		# Changes nodes to (a, b)
 		# Returns array of old nodes [a, b]

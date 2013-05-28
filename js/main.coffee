@@ -10,25 +10,9 @@ Usefull links:
 x = y = 0
 ctx = null
 canvas = null
-# selected = null
 
-###
-===============================================================================
-Creates an object with variables:
-	nodes: coordinates of nodes. Each node is two coordinates (x,y)
-		packed in one number.
-	edges: edges between two nodes, Each edge is two indexes of nodes
-		packed in one number. So, limits the length of the array 
-		of nodes to 2^16 = 65535.
-###
-@.graph = {
-	nodes : {
-		x : []
-		y : []
-	}
-	edges : []
-	curved : []
-}
+@graph = faxy.create()
+
 
 ###
 ===============================================================================
@@ -48,13 +32,15 @@ load_graph = (graph) ->
 	if !($ && $.jStorage && $.jStorage.storageAvailable() && JSON)
 		return false
 	parsed = JSON.parse($.jStorage.get("graph")) ? {}
-	# console.log parsed
-	#
-	graph.edges = parsed.edges ? []
-	graph.curved = parsed.curved ? []
-	graph.nodes.x = parsed.nodes ?.x ? []
-	graph.nodes.y = parsed.nodes ?.y ? []
-	graph.nodes.x.length > 0
+	# console.log "Loaded: ", parsed
+
+	# graph.edges.a = parsed.edges.a.slice(0);
+	# # graph.curved = parsed.curved ? []
+	# graph.nodes = clone(parsed.nodes)
+	# console.log graph.nodes
+	# graph.nodes.x = parsed.nodes ?.x ? []
+	# graph.nodes.y = parsed.nodes ?.y ? []
+	graph.nodes.length > 0
 
 ###
 ===============================================================================
@@ -85,16 +71,6 @@ nodeByXY = (graph, x, y) ->
 		if (edit.dx * edit.dx) + (edit.dy * edit.dy) < (r*r)
 			return index
 	-1
-
-###
-===============================================================================
-###
-edge_exists = (edges, from_node, to_node) ->
-	for edge in edges
-		[_from, _to] = unpack(edge)
-		if _from == from_node && _to == to_node
-			return true
-	false
 
 
 ###
@@ -143,10 +119,9 @@ automata = (eCode, ev) ->
 					[x, y] = get_mouse_xy(ev)
 					x = 0 if (x -= edit.dx) < 0
 					y = 0 if (y -= edit.dy) < 0
-					move_node(node_ix, x, y)
+					editor.nodes.move(graph, node_ix, x, y)
 				when 3 # up
-					# command("move_node", node_ix, from.x, from.y, x, y)
-					editor.move_node(node_ix, from.x, from.y, x, y)
+					editor.nodes.move2(graph, node_ix, from.x, from.y, x, y)
 					graph_is_changed = true
 					st = 0
 				else # cancel moving changes
@@ -187,13 +162,12 @@ automata = (eCode, ev) ->
 					node_ix = nodeByXY(graph, x, y)
 					if (node_ix < 0)
 						# Create a new node
-						editor.start_transaction()
-						node_ix = editor.add_node(x, y)
-						editor.add_edge(from.node_ix, node_ix)
-						editor.stop_transaction()
+						editor.commands.start_transaction()
+						node_ix = editor.nodes.add(graph, x, y)
+						editor.edges.add(graph, from.node_ix, node_ix)
+						editor.commands.stop_transaction()
 					else
-						if not edge_exists(graph.edges, from.node_ix, node_ix)
-							editor.add_edge(from.node_ix, node_ix)
+						editor.edges.add(graph, from.node_ix, node_ix)
 					graph_is_changed = true
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
 					draw_graph(ctx, graph)
@@ -214,7 +188,7 @@ automata = (eCode, ev) ->
 					ctx.restore()
 				when 3 # up
 					[x, y] = get_mouse_xy(ev)
-					editor.move_graph(from.x, from.y, x, y)
+					# editor.move_graph(from.x, from.y, x, y) TODO: fix! 
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
 					draw_graph(ctx, graph)
 					graph_is_changed = true
@@ -228,7 +202,7 @@ automata = (eCode, ev) ->
 			switch eCode
 				when 3 # up
 					[x, y] = get_mouse_xy(ev)
-					editor.add_node(x, y)
+					editor.nodes.add(graph, x, y)
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
 					draw_graph(ctx, graph)
 					graph_is_changed = true
@@ -284,15 +258,17 @@ init = () ->
 	canvas.addEventListener('mousemove', ev_mousemove, false)
 	canvas.addEventListener('keypress', ev_keypress, false)
 	canvas.addEventListener('keyup', ev_keyup, false)
-	# canvas.addEventListener('dragstart', ev_dragstart, false)
-	#
+	# Disable Dragging effect of canvas
+	canvas.addEventListener('dragstart', 
+		(e) -> e.preventDefault()
+	false)
 
 	#Load graph from local storage
 	if !load_graph(graph)
-		node1 = editor.add_node(-50 + canvas.width/2, canvas.height/2)
-		node2 = editor.add_node( 50 + canvas.width/2, canvas.height/2)
-		editor.add_edge(node1, node2)
-		editor.add_edge(node2, node2)
+		node1 = editor.nodes.add(graph, -50 + canvas.width/2, canvas.height/2)
+		node2 = editor.nodes.add(graph,  50 + canvas.width/2, canvas.height/2)
+		editor.edges.add(graph, node1, node2)
+		editor.edges.add(graph, node2, node2)
 	draw_graph(ctx, graph)
 
 	# selected = new graph_create()
@@ -344,39 +320,13 @@ ev_keypress = (ev) ->
 ev_keyup = (ev) ->
 	switch ev.keyCode
 		when 46 # Delete ### Move it to the main automaton!
-			# for node in selected.nodes
-			# 	editor.execute("del_node", node)
-			editor.del_node(graph.nodes.x.length-1)
+			editor.nodes.del(graph, graph.nodes.length-1)
 			ctx.clearRect(0, 0, canvas.width, canvas.height)
 			draw_graph(ctx, graph)
 			save_graph(graph)
 		when 81 # Q
 			# Testing edges deletion
-			editor.del_edge(graph.edges.length-1)
-			ctx.clearRect(0, 0, canvas.width, canvas.height)
-			draw_graph(ctx, graph)
-		when 76 # L
-			# Convert old graph to a new one
-			# G = fa.create()
-			# X = []
-			# for i, ix in graph.nodes.x
-			# 	fa.nodes.add(G, null)
-			# 	X.push({x: i, y:graph.nodes.y[ix]})
-				
-			# X = []
-			# X.push(v.x) for v in arr
-			# Y = []
-			# Y.push(v.y) for v in arr
-			# for i, ix in X
-			# 	fa.nodes.add(G, null) 
-			# 	fa.edges.add(G, X[i], Y[i])
-			# fa.FDA(G, X, Y)
-			# draw_new(ctx, G, X, Y)
-
-			# for e in graph.edges
-			# 	[a, b] = unpack(e)
-			# 	fa.edges.add(G, a, b)
-			# fa.FDA(G, graph.nodes.x, graph.nodes.y)
+			editor.edges.del(graph, graph.edges.length-1)
 			ctx.clearRect(0, 0, canvas.width, canvas.height)
 			draw_graph(ctx, graph)
 		else
@@ -389,39 +339,6 @@ ev_keyup = (ev) ->
 	console.log "."
 	setTimeout(tout, 1000)
 )()
-
-# @.add = (i, j) -> 
-# 	switch arguments.length
-# 		when 2 
-# 			console.log [i, j]
-# 		when 1 
-# 			console.log [i]
-# 		else
-# 			console.log "wrong arguments: ", arguments
-# 	@
-# ( () ->
-# 	add()
-# 	)()
-# add(1)
-
-
-# G1 = fa.new()
-# e = G1.edges
-# n = G1.nodes
-
-# nn = 20
-# for i in [0..nn]
-# 	fa.nodes.add(G1, i)
-# 	fa.edges.add(G1, i-1, i) if i>0
-# fa.edges.add(G1, 0, 1)
-# fa.edges.add(G1, 1, 2)
-
-# fa.BFS(G1)
-
-	
-
-
-
 
 
 

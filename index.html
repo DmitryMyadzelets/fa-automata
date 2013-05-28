@@ -6,7 +6,10 @@
 	<style> 	
     	#myCanvas {
     		border: 1px solid #9C9898;
-            display: block auto;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            /*display: block auto;*/
     	}
     	#myCanvas2 {
     		border: 1px solid #9C9898;
@@ -29,6 +32,7 @@
     <script src="./js/graph.js"></script>
     <script src="./js/nfa.js"></script>
     <script src="./js/draw.js"></script>
+    <script src="./js/undo.js"></script>
     <script src="./js/editor.js"></script>
     <script src="./js/main.js"></script>
     <script type="text/javascript">
@@ -40,6 +44,7 @@
 </head>
 <body>
        <div id="debug" class = "debug" width="100px">X and Y</div>
+       <!-- <canvas id="myCanvas" Width="800" height="600"></canvas> -->
 	   <canvas id="myCanvas" Width="800" height="600" tabindex="0"></canvas>
        <!-- <canvas id="myCanvas2" Width="800" height="600"></canvas> -->
 </body>

@@ -6,285 +6,72 @@
   The function deletes the elements of an array which have values ixDelete
   and change elements with values ixUpdate to ixDelete.
   */
-
-  /*
-  ===============================================================================
-  Returns the position in the array nodes which the node has been put to.
-  */
-
-  var add_edge, add_node, del_edge, del_node, has_edge, ins_edge, ins_node, move_graph, upd_edge;
-
-  add_node = function(x, y) {
-    graph.nodes.x.push(x);
-    return graph.nodes.y.push(y) - 1;
-  };
-
-  ins_node = function(x, y, ix) {
-    if (ix < graph.nodes.x.length) {
-      graph.nodes.x.push(graph.nodes.x[ix]);
-      graph.nodes.y.push(graph.nodes.y[ix]);
-    }
-    graph.nodes.x[ix] = x;
-    graph.nodes.y[ix] = y;
-    return ix;
-  };
-
-  /*
-  We delete an element [ix] of an array as follows:
-  1. Copy the last element to the position ix.
-  2. Remove the last element.
-  Returns the value at deleted position
-  */
-
-
-  del_node = function(ix) {
-    var len, ret;
-
-    ret = null;
-    if ((ix < (len = graph.nodes.x.length)) && (ix > -1)) {
-      if (ix === len - 1) {
-        ret = [graph.nodes.x.pop(), graph.nodes.y.pop()];
-      } else {
-        ret = [graph.nodes.x[ix], graph.nodes.y[ix]];
-        graph.nodes.x[ix] = graph.nodes.x.pop();
-        graph.nodes.y[ix] = graph.nodes.y.pop();
-      }
-    }
-    return ret;
-  };
-
-  this.move_node = function(ix, x, y) {
-    graph.nodes.x[ix] = x;
-    graph.nodes.y[ix] = y;
-    return null;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
-  add_edge = function(node_ix1, node_ix2) {
-    var eix, ret;
-
-    eix = has_edge(node_ix2, node_ix1);
-    ret = graph.edges.push(pack(node_ix1, node_ix2)) - 1;
-    if ((graph.curved[ret] = eix >= 0)) {
-      graph.curved[eix] = true;
-    }
-    return ret;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
-  ins_edge = function(node_ix1, node_ix2, ix) {
-    var eix;
-
-    eix = has_edge(node_ix2, node_ix1);
-    if (ix < graph.edges.length) {
-      graph.edges.push(graph.edges[ix]);
-      graph.curved.push(graph.curved[ix]);
-    }
-    graph.edges[ix] = pack(node_ix1, node_ix2);
-    if (eix < 0) {
-      graph.curved[ix] = false;
-    } else {
-      if (eix === ix) {
-        eix = graph.edges.length - 1;
-      }
-      graph.curved[ix] = graph.curved[eix] = true;
-    }
-    return ix;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
-  del_edge = function(ix) {
-    var a, b, eix, len, ret, _ref;
-
-    ret = null;
-    if ((ix < (len = graph.edges.length)) && (ix > -1)) {
-      _ref = unpack(graph.edges[ix]), a = _ref[0], b = _ref[1];
-      if (ix === len - 1) {
-        ret = graph.edges.pop();
-        graph.curved.pop();
-      } else {
-        ret = graph.edges[ix];
-        graph.edges[ix] = graph.edges.pop();
-        graph.curved[ix] = graph.curved.pop();
-      }
-      if ((eix = has_edge(b, a)) >= 0) {
-        graph.curved[eix] = false;
-      }
-    }
-    return ret;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
-  has_edge = function(from_node, to_node) {
-    var edge, index, packed, _i, _len, _ref;
-
-    packed = pack(from_node, to_node);
-    _ref = graph.edges;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      edge = _ref[index];
-      if (edge === packed) {
-        return index;
-      }
-    }
-    return -1;
-  };
-
-  upd_edge = function(ix, val) {
-    graph.edges[ix] = val;
-    return null;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
-  move_graph = function(dx, dy) {
-    var index, x, _i, _len, _ref;
-
-    _ref = graph.nodes.x;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      x = _ref[index];
-      graph.nodes.x[index] += dx;
-      graph.nodes.y[index] += dy;
-    }
-    return null;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
   this.ged = {
-    stack: [],
-    ix: 0,
-    transaction: false,
-    to_stack: function(redo_func, redo_vals, undo_func, undo_vals) {
-      if (ged.ix < ged.stack.length) {
-        ged.stack.length = ged.ix;
-      }
-      ged.stack.push({
-        redo_func: redo_func,
-        redo_vals: redo_vals,
-        undo_func: undo_func,
-        undo_vals: undo_vals
-      });
-      ged.ix = ged.stack.length;
-      return null;
-    },
-    undo: function() {
-      var cmd, ret;
-
-      ret = false;
-      if (ged.ix > 0) {
-        while (ged.ix > 0) {
-          cmd = ged.stack[--ged.ix];
-          cmd.undo_func.apply(ged, cmd.undo_vals);
-          if (!ged.transaction) {
-            break;
-          }
-        }
-        ret = true;
-      }
-      return ret;
-    },
-    redo: function() {
-      var cmd, ret;
-
-      ret = false;
-      if (ged.ix < ged.stack.length) {
-        while (ged.ix < ged.stack.length) {
-          cmd = ged.stack[ged.ix++];
-          cmd.redo_func.apply(ged, cmd.redo_vals);
-          if (!ged.transaction) {
-            break;
-          }
-        }
-        ret = true;
-      }
-      return ret;
-    },
-    reset: function() {
-      ged.stack.length = 0;
-      return ged.ix = 0;
-    },
-    set_transaction: function(state) {
-      return ged.transaction = state;
-    },
-    start_transaction: function() {
-      return ged.to_stack(ged.set_transaction, [true], ged.set_transaction, [false]);
-    },
-    stop_transaction: function() {
-      return ged.to_stack(ged.set_transaction, [false], ged.set_transaction, [true]);
-    },
+    commands: new Undo(),
+    reset: Undo.prototype.reset,
+    undo: Undo.prototype.undo,
+    redo: Undo.prototype.redo,
     edges: {
       add: function(G, a, b, i) {
-        var ret;
+        var ix;
 
-        ret = digraph.edges.add(G, a, b, i);
-        if (ret >= 0) {
-          ged.to_stack(digraph.edges.add, arguments, digraph.edges.del, [G, i]);
+        ix = faxy.edges.add(G, a, b, i);
+        if (ix >= 0) {
+          ged.commands.put(faxy.edges.add, arguments, faxy.edges.del, [G, ix]);
         }
-        return ret;
+        return ix;
       },
       del: function(G, i) {
         var a, b, ret;
 
         a = G.edges.a[i];
         b = G.edges.b[i];
-        ret = digraph.edges.del(G, i);
+        ret = faxy.edges.del(G, i);
         if (ret >= 0) {
-          ged.to_stack(digraph.edges.del, arguments, digraph.edges.add, [G, a, b, i]);
+          ged.commands.put(faxy.edges.del, arguments, faxy.edges.add, [G, a, b, i]);
         }
         return ret;
       },
-      get: digraph.edges.get,
-      set: digraph.edges.set,
-      out: digraph.edges.out,
-      has: digraph.edges.has
+      get: faxy.edges.get,
+      set: faxy.edges.set,
+      out: faxy.edges.out,
+      has: faxy.edges.has
     },
     nodes: {
-      add: function(G, i) {
+      add: function(G, x, y) {
         var ix;
 
-        ix = digraph.nodes.add(G, i);
-        ged.to_stack(digraph.nodes.add, arguments, digraph.nodes.del, [G, ix]);
+        ix = faxy.nodes.add(G, x, y);
+        ged.commands.put(faxy.nodes.add, arguments, faxy.nodes.del, [G, ix]);
         return ix;
       },
       del: function(G, i) {
-        var ret;
+        var args, ix, x, y;
 
-        ged.start_transaction();
-        ret = digraph.nodes.del(G, i, function(G, i) {
+        ged.commands.start_transaction();
+        x = G.nodes.x[i];
+        y = G.nodes.y[i];
+        ix = faxy.nodes.del(G, i, function(G, i) {
           return ged.edges.del(G, i);
         });
-        if (ret >= 0) {
-          ged.to_stack(digraph.nodes.del, arguments, digraph.nodes.add, arguments);
+        if (ix >= 0) {
+          args = [G, x, y, i];
+          ged.commands.put(faxy.nodes.del, arguments, faxy.nodes.add, args);
         }
-        ged.stop_transaction();
-        return ret;
+        ged.commands.stop_transaction();
+        return ix;
       },
-      get: digraph.nodes.get,
-      set: digraph.nodes.set,
-      out: digraph.nodes.out,
-      "in": digraph.nodes["in"]
+      move2: function(G, i, old_x, old_y, x, y) {
+        if (i >= 0 && i < G.nodes.length) {
+          ged.commands.put(faxy.nodes.move, [G, i, x, y], faxy.nodes.move, [G, i, old_x, old_y]);
+        }
+        return i;
+      },
+      get: faxy.nodes.get,
+      set: faxy.nodes.set,
+      out: faxy.nodes.out,
+      "in": faxy.nodes["in"],
+      move: faxy.nodes.move
     }
   };
 

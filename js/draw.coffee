@@ -99,7 +99,7 @@ The functions draws stright directed edge from coordinates (x1, y1) to (x2, y2).
 
 ###
 ===============================================================================
-The functions draws curved directed edge from (x1, y1) to (x2, y2).
+The functions draws edges.curved directed edge from (x1, y1) to (x2, y2).
 ###
 @.draw_cured_edge = (ctx, x1, y1, x2, y2, fake_edge = false) ->
 	dx = x2-x1
@@ -266,7 +266,7 @@ loop_k = {
 ###
 ===============================================================================
 ###
-@.draw_graph = (ctx, graph) ->
+@.draw_graph = (ctx, G) ->
 	# ctx.clearRect(0, 0, canvas.width, canvas.height)
 	#Draw nodes
 	ctx.save()
@@ -274,8 +274,8 @@ loop_k = {
 	ctx.textAlign = "center"
 	ctx.strokeStyle = cl_node_edge
 	dy = 12/2 # half of the font.size for text
-	for x, index in graph.nodes.x
-		y = graph.nodes.y[index]
+	for x, index in G.nodes.x
+		y = G.nodes.y[index]
 		ctx.fillStyle = cl_node
 		draw_state(ctx, x, y)
 		# Draw text
@@ -286,14 +286,16 @@ loop_k = {
 		ctx.fillText(text, x, y+dy)
 	#
 	#Draw edges
-	for edge, index in graph.edges
-		[v1, v2] = unpack(edge)
-		x1 = graph.nodes.x[v1]
-		y1 = graph.nodes.y[v1]
-		x2 = graph.nodes.x[v2]
-		y2 = graph.nodes.y[v2]
+	ix = G.edges.length
+	while --ix >= 0
+		v1 = G.edges.a[ix]
+		v2 = G.edges.b[ix]
+		x1 = G.nodes.x[v1]
+		y1 = G.nodes.y[v1]
+		x2 = G.nodes.x[v2]
+		y2 = G.nodes.y[v2]
 		if v1 != v2
-			if graph.curved[index]
+			if G.edges.curved[ix]
 				draw_cured_edge(ctx, x1, y1, x2, y2)
 			else							
 				draw_edge(ctx, x1, y1, x2, y2)
@@ -343,7 +345,7 @@ loop_k = {
 	# 	x2 = graph.nodes.x[v2]
 	# 	y2 = graph.nodes.y[v2]
 	# 	if v1 != v2
-	# 		if graph.curved[index]
+	# 		if graph.edges.curved[index]
 	# 			draw_cured_edge(ctx, x1, y1, x2, y2)
 	# 		else							
 	# 			draw_edge(ctx, x1, y1, x2, y2)

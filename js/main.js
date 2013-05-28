@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var automata, canvas, ctx, edge_exists, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, tout, x, y;
+  var automata, canvas, ctx, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, tout, x, y;
 
   x = y = 0;
 
@@ -18,25 +18,7 @@ Usefull links:
 
   canvas = null;
 
-  /*
-  ===============================================================================
-  Creates an object with variables:
-  	nodes: coordinates of nodes. Each node is two coordinates (x,y)
-  		packed in one number.
-  	edges: edges between two nodes, Each edge is two indexes of nodes
-  		packed in one number. So, limits the length of the array 
-  		of nodes to 2^16 = 65535.
-  */
-
-
-  this.graph = {
-    nodes: {
-      x: [],
-      y: []
-    },
-    edges: [],
-    curved: []
-  };
+  this.graph = faxy.create();
 
   /*
   ===============================================================================
@@ -62,17 +44,13 @@ Usefull links:
 
 
   load_graph = function(graph) {
-    var parsed, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+    var parsed, _ref;
 
     if (!($ && $.jStorage && $.jStorage.storageAvailable() && JSON)) {
       return false;
     }
     parsed = (_ref = JSON.parse($.jStorage.get("graph"))) != null ? _ref : {};
-    graph.edges = (_ref1 = parsed.edges) != null ? _ref1 : [];
-    graph.curved = (_ref2 = parsed.curved) != null ? _ref2 : [];
-    graph.nodes.x = (_ref3 = (_ref4 = parsed.nodes) != null ? _ref4.x : void 0) != null ? _ref3 : [];
-    graph.nodes.y = (_ref5 = (_ref6 = parsed.nodes) != null ? _ref6.y : void 0) != null ? _ref5 : [];
-    return graph.nodes.x.length > 0;
+    return graph.nodes.length > 0;
   };
 
   /*
@@ -118,24 +96,6 @@ Usefull links:
       }
     }
     return -1;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
-  edge_exists = function(edges, from_node, to_node) {
-    var edge, _from, _i, _len, _ref, _to;
-
-    for (_i = 0, _len = edges.length; _i < _len; _i++) {
-      edge = edges[_i];
-      _ref = unpack(edge), _from = _ref[0], _to = _ref[1];
-      if (_from === from_node && _to === to_node) {
-        return true;
-      }
-    }
-    return false;
   };
 
   /*
@@ -197,10 +157,10 @@ Usefull links:
             if ((y -= edit.dy) < 0) {
               y = 0;
             }
-            move_node(node_ix, x, y);
+            editor.nodes.move(graph, node_ix, x, y);
             break;
           case 3:
-            editor.move_node(node_ix, from.x, from.y, x, y);
+            editor.nodes.move2(graph, node_ix, from.x, from.y, x, y);
             graph_is_changed = true;
             st = 0;
             break;
@@ -248,14 +208,12 @@ Usefull links:
           case 3:
             node_ix = nodeByXY(graph, x, y);
             if (node_ix < 0) {
-              editor.start_transaction();
-              node_ix = editor.add_node(x, y);
-              editor.add_edge(from.node_ix, node_ix);
-              editor.stop_transaction();
+              editor.commands.start_transaction();
+              node_ix = editor.nodes.add(graph, x, y);
+              editor.edges.add(graph, from.node_ix, node_ix);
+              editor.commands.stop_transaction();
             } else {
-              if (!edge_exists(graph.edges, from.node_ix, node_ix)) {
-                editor.add_edge(from.node_ix, node_ix);
-              }
+              editor.edges.add(graph, from.node_ix, node_ix);
             }
             graph_is_changed = true;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -280,7 +238,6 @@ Usefull links:
             break;
           case 3:
             _ref5 = get_mouse_xy(ev), x = _ref5[0], y = _ref5[1];
-            editor.move_graph(from.x, from.y, x, y);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             draw_graph(ctx, graph);
             graph_is_changed = true;
@@ -296,7 +253,7 @@ Usefull links:
         switch (eCode) {
           case 3:
             _ref6 = get_mouse_xy(ev), x = _ref6[0], y = _ref6[1];
-            editor.add_node(x, y);
+            editor.nodes.add(graph, x, y);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             draw_graph(ctx, graph);
             graph_is_changed = true;
@@ -349,11 +306,14 @@ Usefull links:
     canvas.addEventListener('mousemove', ev_mousemove, false);
     canvas.addEventListener('keypress', ev_keypress, false);
     canvas.addEventListener('keyup', ev_keyup, false);
+    canvas.addEventListener('dragstart', function(e) {
+      return e.preventDefault();
+    }, false);
     if (!load_graph(graph)) {
-      node1 = editor.add_node(-50 + canvas.width / 2, canvas.height / 2);
-      node2 = editor.add_node(50 + canvas.width / 2, canvas.height / 2);
-      editor.add_edge(node1, node2);
-      editor.add_edge(node2, node2);
+      node1 = editor.nodes.add(graph, -50 + canvas.width / 2, canvas.height / 2);
+      node2 = editor.nodes.add(graph, 50 + canvas.width / 2, canvas.height / 2);
+      editor.edges.add(graph, node1, node2);
+      editor.edges.add(graph, node2, node2);
     }
     draw_graph(ctx, graph);
     return null;
@@ -409,17 +369,13 @@ Usefull links:
   ev_keyup = function(ev) {
     switch (ev.keyCode) {
       case 46:
-        editor.del_node(graph.nodes.x.length - 1);
+        editor.nodes.del(graph, graph.nodes.length - 1);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         draw_graph(ctx, graph);
         save_graph(graph);
         break;
       case 81:
-        editor.del_edge(graph.edges.length - 1);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw_graph(ctx, graph);
-        break;
-      case 76:
+        editor.edges.del(graph, graph.edges.length - 1);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         draw_graph(ctx, graph);
         break;

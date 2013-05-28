@@ -10,7 +10,7 @@ describe "Graph Editor", ->
 		expect(digraph.create()).toBeDefined
 
 	describe "Undo|Redo when adds nodes", ->
-		g = digraph.create()
+		g = faxy.create()
 		ged.reset()
 
 		it "Can add node 1", ->
@@ -39,7 +39,7 @@ describe "Graph Editor", ->
 			expect(ged.undo()).toBe(false)
 
 	describe "Undo|Redo when adds edges", ->
-		g = digraph.create()
+		g = faxy.create()
 		ged.reset()
 
 		it "Ads 2 nodes, has 2 nodes", ->
@@ -66,24 +66,8 @@ describe "Graph Editor", ->
 		it "And the first edge is from 1 to 2", ->
 			expect((g.edges.a[0] == 0) and (g.edges.b[0] == 1)).toBe(true)
 
-	describe "Does transacitons", ->
-		g = digraph.create()
-		ged.reset()
-
-		it "Start transaction and ads 2 nodes", ->
-			ged.start_transaction()
-			expect(ged.nodes.add(g)).toBe(0)
-			expect(ged.nodes.add(g)).toBe(1)
-			expect(g.nodes.length).toBe(2)
-		
-		it "Stop transaction, then transaction and has 0 nodes", ->
-			ged.stop_transaction()
-			ged.undo()
-			expect(g.nodes.length).toBe(0)
-
-
 	describe "Undo|Redo when deletes nodes", ->
-		g = digraph.create()
+		g = faxy.create()
 		ged.reset()
 
 		it "Adds 2 nodes, has 2 nodes", ->
@@ -116,3 +100,5 @@ describe "Graph Editor", ->
 			expect(ged.redo()).toBe(true)
 			expect(g.nodes.length).toBe(1)
 			expect(g.edges.length).toBe(0)
+
+			

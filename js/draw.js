@@ -111,7 +111,7 @@ The functions here assume that there are global variables:
 
   /*
   ===============================================================================
-  The functions draws curved directed edge from (x1, y1) to (x2, y2).
+  The functions draws edges.curved directed edge from (x1, y1) to (x2, y2).
   */
 
 
@@ -251,33 +251,33 @@ The functions here assume that there are global variables:
   */
 
 
-  this.draw_graph = function(ctx, graph) {
-    var dy, edge, index, text, v1, v2, x, x1, x2, y, y1, y2, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+  this.draw_graph = function(ctx, G) {
+    var dy, index, ix, text, v1, v2, x, x1, x2, y, y1, y2, _i, _len, _ref;
 
     ctx.save();
     ctx.textAlign = "center";
     ctx.strokeStyle = cl_node_edge;
     dy = 12 / 2;
-    _ref = graph.nodes.x;
+    _ref = G.nodes.x;
     for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
       x = _ref[index];
-      y = graph.nodes.y[index];
+      y = G.nodes.y[index];
       ctx.fillStyle = cl_node;
       draw_state(ctx, x, y);
       text = index.toString();
       ctx.fillStyle = cl_text;
       ctx.fillText(text, x, y + dy);
     }
-    _ref1 = graph.edges;
-    for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
-      edge = _ref1[index];
-      _ref2 = unpack(edge), v1 = _ref2[0], v2 = _ref2[1];
-      x1 = graph.nodes.x[v1];
-      y1 = graph.nodes.y[v1];
-      x2 = graph.nodes.x[v2];
-      y2 = graph.nodes.y[v2];
+    ix = G.edges.length;
+    while (--ix >= 0) {
+      v1 = G.edges.a[ix];
+      v2 = G.edges.b[ix];
+      x1 = G.nodes.x[v1];
+      y1 = G.nodes.y[v1];
+      x2 = G.nodes.x[v2];
+      y2 = G.nodes.y[v2];
       if (v1 !== v2) {
-        if (graph.curved[index]) {
+        if (G.edges.curved[ix]) {
           draw_cured_edge(ctx, x1, y1, x2, y2);
         } else {
           draw_edge(ctx, x1, y1, x2, y2);

@@ -76,10 +76,10 @@
         for (ix = _i = 0, _len = _ref.length; _i < _len; ix = ++_i) {
           i = _ref[ix];
           if (G.edges.a[ix] === a && i === b) {
-            return true;
+            return ix;
           }
         }
-        return false;
+        return -1;
       },
       change_node: function(G, i, a, b) {
         var ret;

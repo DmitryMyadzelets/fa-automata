@@ -10,7 +10,7 @@
     describe("Undo|Redo when adds nodes", function() {
       var g;
 
-      g = digraph.create();
+      g = faxy.create();
       ged.reset();
       it("Can add node 1", function() {
         return expect(ged.nodes.add(g)).toBe(0);
@@ -41,7 +41,7 @@
     describe("Undo|Redo when adds edges", function() {
       var g;
 
-      g = digraph.create();
+      g = faxy.create();
       ged.reset();
       it("Ads 2 nodes, has 2 nodes", function() {
         expect(ged.nodes.add(g)).toBe(0);
@@ -68,27 +68,10 @@
         return expect((g.edges.a[0] === 0) && (g.edges.b[0] === 1)).toBe(true);
       });
     });
-    describe("Does transacitons", function() {
-      var g;
-
-      g = digraph.create();
-      ged.reset();
-      it("Start transaction and ads 2 nodes", function() {
-        ged.start_transaction();
-        expect(ged.nodes.add(g)).toBe(0);
-        expect(ged.nodes.add(g)).toBe(1);
-        return expect(g.nodes.length).toBe(2);
-      });
-      return it("Stop transaction, then transaction and has 0 nodes", function() {
-        ged.stop_transaction();
-        ged.undo();
-        return expect(g.nodes.length).toBe(0);
-      });
-    });
     return describe("Undo|Redo when deletes nodes", function() {
       var g;
 
-      g = digraph.create();
+      g = faxy.create();
       ged.reset();
       it("Adds 2 nodes, has 2 nodes", function() {
         expect(ged.nodes.add(g)).toBe(0);
