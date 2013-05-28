@@ -9,6 +9,22 @@
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
     <title>Fa-automata</title>
+    <style>   
+      #editor {
+        border: 1px solid #9C9898;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+      }
+    </style>
+
+    <script src="./javascripts/graph.js"></script>
+    <script src="./javascripts/nfa.js"></script>
+    <script src="./javascripts/draw.js"></script>
+    <script src="./javascripts/undo.js"></script>
+    <script src="./javascripts/editor.js"></script>
+    <script src="./javascripts/main.js"></script>
+
   </head>
 
   <body>
@@ -31,11 +47,14 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>Welcome to GitHub Pages.</h3>
+        <h3>Welcome to Automata Editor</h3>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
 
-<pre><code>$ cd your_repo_root/repo_name
+<canvas id="editor" width="640px" height="400px" tabindex="0"></canvas>
+
+<p>Though this project is under development you can try what has been already done. Use mouse and Shift key to create and move states and transitions. Undo command is available.</p>
+
+<!-- <pre><code>$ cd your_repo_root/repo_name
 $ git fetch origin
 $ git checkout gh-pages
 </code></pre>
@@ -56,7 +75,7 @@ $ git checkout gh-pages
 
 <h3>Support or Contact</h3>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p> -->
       </section>
     </div>
 
