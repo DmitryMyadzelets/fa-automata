@@ -12,6 +12,16 @@ Usefull links:
   'use strict';
   var automata, canvas, ctx, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, tout, x, y;
 
+  if (typeof Object.create !== 'function') {
+    Object.create = function(o) {
+      F()(function() {
+        return {};
+      });
+      F.prototype = o;
+      return new F();
+    };
+  }
+
   x = y = 0;
 
   ctx = null;

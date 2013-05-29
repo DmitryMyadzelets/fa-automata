@@ -3,6 +3,18 @@
   'use strict';
   var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
+  if (typeof Object.create !== 'function') {
+    Object.create = function(o) {
+      var F;
+
+      F = function() {
+        return {};
+      };
+      F.prototype = o;
+      return new F();
+    };
+  }
+
   this.fa = Object.create(digraph);
 
   fa.extend = function(G) {

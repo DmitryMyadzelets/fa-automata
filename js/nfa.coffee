@@ -3,7 +3,15 @@
 
 # 
 #  Class for Finite Automata
-# 
+#
+# Make IE8 support Object.create() function
+if typeof Object.create != 'function'
+	Object.create = (o) ->
+		F = () -> {}
+		F.prototype = o
+		new F()
+
+
 @.fa = Object.create(digraph)
 
 fa.extend = (G) ->

@@ -7,10 +7,11 @@ Usefull links:
 ###
 'use strict'
 
+alert typeof Object.create == 'function'
+
 x = y = 0
 ctx = null
 canvas = null
-
 @graph = faxy.create()
 
 
