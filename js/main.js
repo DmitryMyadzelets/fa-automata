@@ -309,6 +309,9 @@ Usefull links:
     canvas.addEventListener('dragstart', function(e) {
       return e.preventDefault();
     }, false);
+    canvas.onselectstart = function() {
+      return false;
+    };
     if (!load_graph(graph)) {
       node1 = editor.nodes.add(graph, -50 + canvas.width / 2, canvas.height / 2);
       node2 = editor.nodes.add(graph, 50 + canvas.width / 2, canvas.height / 2);

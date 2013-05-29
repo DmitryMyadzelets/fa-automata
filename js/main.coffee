@@ -262,6 +262,7 @@ init = () ->
 	canvas.addEventListener('dragstart', 
 		(e) -> e.preventDefault()
 	false)
+	canvas.onselectstart = () -> false
 
 	#Load graph from local storage
 	if !load_graph(graph)
