@@ -49,9 +49,9 @@ order_based_access = () ->
 	add("Orange")
 	add("Apple")
 	add("Mango")
-	# Eqaul creation
-	people.push(1) # likes Orange
-	people.push(3) # likes Mango
+	# Equal creation
+	people.push(1) # 1st person likes Orange
+	people.push(3) # 2nd person likes Mango
 	# Logging helper
 	log = () ->
 		console.log fruits
@@ -62,8 +62,8 @@ order_based_access = () ->
 	del(1)
 	log()
 	#Access
-	fruits[1]
-	people[0]
+	fruits[1] # Returns the fruit
+	people[0] # Returns index of a fruit
 	#Depended (tree) access
 	v = fruits[people[0]]
 	console.log v
