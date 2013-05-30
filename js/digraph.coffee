@@ -41,14 +41,22 @@
 		keys = get_arrays(obj)
 		ret = fnc(obj[key], args) for key in keys
 		ret
-	
+
+	# Changes nodes to (a, b)
+	# Returns array of old nodes [a, b]
+	change_nodes = (G, i, a, b) ->
+		ret = [G.edges.a[i], G.edges.b[i]]
+		G.edges.a[i] = a
+		G.edges.b[i] = b
+		ret
+
 	# 
 	# Public metods
 	# 
 	_this = {
 		# Creates a new graph
 		create : () ->
-			graph = {
+			o = {
 				nodes : {		# Nodes
 					v : []		# Values
 				}
@@ -59,9 +67,9 @@
 				}
 			}
 			# 'length' property for use in cycles
-			Object.defineProperty graph.nodes, 'length', get: -> graph.nodes.v.length
-			Object.defineProperty graph.edges, 'length', get: -> graph.edges.v.length
-			graph
+			Object.defineProperty o.nodes, 'length', get: -> o.nodes.v.length
+			Object.defineProperty o.edges, 'length', get: -> o.edges.v.length
+			o
 
 		edges : {
 			# Add a new edge (a, b) or add an edge into position i
@@ -94,15 +102,6 @@
 			has : (G, a, b) ->
 				(return ix) for i, ix in G.edges.b when G.edges.a[ix] is a and i is b
 				-1
-
-			# Changes nodes to (a, b)
-			# Returns array of old nodes [a, b]
-			change_nodes : (G, i, a, b) ->
-				ret = [G.edges.a[i], G.edges.b[i]]
-				G.edges.a[i] = a
-				G.edges.b[i] = b
-				ret
-
 		}
 
 		nodes : {
@@ -135,7 +134,7 @@
 						change = false
 						if a == last_node then a = i; change = true
 						if b == last_node then b = i; change = true
-						_this.edges.change_nodes(G, ix, a, b) if change
+						change_nodes(G, ix, a, b) if change
 
 				# Then delete the node itself
 				for_arrays_of(G.nodes, del, i)
