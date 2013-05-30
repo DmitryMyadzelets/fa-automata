@@ -4,7 +4,9 @@
 
 @.digraph = (()->
 
-	# Helper private methods
+	# 
+	# Private methods
+	# 
 
 	# Insert a value 'v' into position 'i' of array
 	ins = (arr, i, val) ->
@@ -39,7 +41,10 @@
 		keys = get_arrays(obj)
 		ret = fnc(obj[key], args) for key in keys
 		ret
-
+	
+	# 
+	# Public metods
+	# 
 	_this = {
 		# Creates a new graph
 		create : () ->
