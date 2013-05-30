@@ -269,7 +269,7 @@ The functions here assume that there are global variables:
       ctx.fillText(text, x, y + dy);
     }
     ix = G.edges.length;
-    while (--ix >= 0) {
+    while (ix-- > 0) {
       v1 = G.edges.a[ix];
       v2 = G.edges.b[ix];
       x1 = G.nodes.x[v1];
@@ -329,6 +329,16 @@ The functions here assume that there are global variables:
       ctx.stroke();
     }
     ctx.restore();
+    return null;
+  };
+
+  this.draw_automaton = function(ctx, G) {
+    var x, y;
+
+    draw_graph(ctx, G);
+    x = G.nodes.x[G.start] - 4 * r;
+    y = G.nodes.y[G.start];
+    draw_edge(ctx, x, y, G.nodes.x[G.start], G.nodes.y[G.start]);
     return null;
   };
 

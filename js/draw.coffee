@@ -287,7 +287,7 @@ loop_k = {
 	#
 	#Draw edges
 	ix = G.edges.length
-	while --ix >= 0
+	while ix-- >0
 		v1 = G.edges.a[ix]
 		v2 = G.edges.b[ix]
 		x1 = G.nodes.x[v1]
@@ -339,18 +339,13 @@ loop_k = {
 		ctx.moveTo(G.nodes.x[i], y1)
 		ctx.lineTo(x5, y5)
 		ctx.stroke()
-	# 	[v1, v2] = unpack(edge)
-	# 	x1 = graph.nodes.x[v1]
-	# 	y1 = graph.nodes.y[v1]
-	# 	x2 = graph.nodes.x[v2]
-	# 	y2 = graph.nodes.y[v2]
-	# 	if v1 != v2
-	# 		if graph.edges.curved[index]
-	# 			draw_cured_edge(ctx, x1, y1, x2, y2)
-	# 		else							
-	# 			draw_edge(ctx, x1, y1, x2, y2)
-			
-	# 	else
-	# 		draw_loop(ctx, x1, y1)
 	ctx.restore()
+	null
+
+@.draw_automaton = (ctx, G) ->
+	draw_graph(ctx, G)
+	# Arrow to initial state
+	x = G.nodes.x[G.start] - 4*r
+	y = G.nodes.y[G.start]
+	draw_edge(ctx, x, y, G.nodes.x[G.start], G.nodes.y[G.start])
 	null
