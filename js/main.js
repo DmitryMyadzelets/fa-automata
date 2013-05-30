@@ -12,16 +12,6 @@ Usefull links:
   'use strict';
   var automata, canvas, ctx, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, tout, x, y;
 
-  if (typeof Object.create !== 'function') {
-    Object.create = function(o) {
-      F()(function() {
-        return {};
-      });
-      F.prototype = o;
-      return new F();
-    };
-  }
-
   x = y = 0;
 
   ctx = null;
@@ -137,7 +127,7 @@ Usefull links:
             if (!ev.shiftKey) {
               from.node_ix = node_ix;
               ctx.clearRect(0, 0, canvas.width, canvas.height);
-              draw_graph(ctx, graph);
+              draw_automaton(ctx, graph);
               st = 2;
             } else {
               from.x = graph.nodes.x[node_ix];
@@ -180,7 +170,7 @@ Usefull links:
             st = 0;
         }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw_graph(ctx, graph);
+        draw_automaton(ctx, graph);
         break;
       case 2:
         switch (eCode) {
@@ -208,7 +198,7 @@ Usefull links:
               y = graph.nodes.y[node_ix];
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_graph(ctx, graph);
+            draw_automaton(ctx, graph);
             if (node_ix === from.node_ix) {
               draw_loop(ctx, from.x, from.y);
             } else {
@@ -227,12 +217,12 @@ Usefull links:
             }
             graph_is_changed = true;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_graph(ctx, graph);
+            draw_automaton(ctx, graph);
             st = 0;
             break;
           default:
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_graph(ctx, graph);
+            draw_automaton(ctx, graph);
             st = 0;
         }
         break;
@@ -243,19 +233,19 @@ Usefull links:
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.translate(x - from.x, y - from.y);
-            draw_graph(ctx, graph);
+            draw_automaton(ctx, graph);
             ctx.restore();
             break;
           case 3:
             _ref5 = get_mouse_xy(ev), x = _ref5[0], y = _ref5[1];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_graph(ctx, graph);
+            draw_automaton(ctx, graph);
             graph_is_changed = true;
             st = 0;
             break;
           default:
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_graph(ctx, graph);
+            draw_automaton(ctx, graph);
             st = 0;
         }
         break;
@@ -265,7 +255,7 @@ Usefull links:
             _ref6 = get_mouse_xy(ev), x = _ref6[0], y = _ref6[1];
             editor.nodes.add(graph, x, y);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_graph(ctx, graph);
+            draw_automaton(ctx, graph);
             graph_is_changed = true;
             st = 0;
             break;
@@ -328,7 +318,7 @@ Usefull links:
       editor.edges.add(graph, node1, node2);
       editor.edges.add(graph, node2, node2);
     }
-    draw_graph(ctx, graph);
+    draw_automaton(ctx, graph);
     return null;
   };
 
@@ -366,13 +356,13 @@ Usefull links:
         case 25:
           editor.redo();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw_graph(ctx, graph);
+          draw_automaton(ctx, graph);
           save_graph(graph);
           break;
         case 26:
           editor.undo();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw_graph(ctx, graph);
+          draw_automaton(ctx, graph);
           save_graph(graph);
       }
     }
@@ -384,13 +374,13 @@ Usefull links:
       case 46:
         editor.nodes.del(graph, graph.nodes.length - 1);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw_graph(ctx, graph);
+        draw_automaton(ctx, graph);
         save_graph(graph);
         break;
       case 81:
         editor.edges.del(graph, graph.edges.length - 1);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw_graph(ctx, graph);
+        draw_automaton(ctx, graph);
         break;
     }
     return null;

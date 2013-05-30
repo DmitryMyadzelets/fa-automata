@@ -7,8 +7,6 @@ Usefull links:
 ###
 'use strict'
 
-alert typeof Object.create == 'function'
-
 x = y = 0
 ctx = null
 canvas = null
@@ -98,7 +96,7 @@ automata = (eCode, ev) ->
 						# selected.nodes.length = 0
 						# selected.nodes.push(node_ix)
 						ctx.clearRect(0, 0, canvas.width, canvas.height)
-						draw_graph(ctx, graph)
+						draw_automaton(ctx, graph)
 						# draw_selected(ctx, graph, selected)
 						st = 2
 					else 
@@ -130,7 +128,7 @@ automata = (eCode, ev) ->
 					graph.nodes.y[node_ix] = from.y
 					st = 0
 			ctx.clearRect(0, 0, canvas.width, canvas.height)
-			draw_graph(ctx, graph)
+			draw_automaton(ctx, graph)
 
 		when 2 # Going out of the "from" node
 			switch eCode
@@ -154,7 +152,7 @@ automata = (eCode, ev) ->
 						x = graph.nodes.x[node_ix]
 						y = graph.nodes.y[node_ix]
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw_graph(ctx, graph)
+					draw_automaton(ctx, graph)
 					if node_ix == from.node_ix
 						draw_loop(ctx, from.x, from.y)
 					else
@@ -171,11 +169,11 @@ automata = (eCode, ev) ->
 						editor.edges.add(graph, from.node_ix, node_ix)
 					graph_is_changed = true
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw_graph(ctx, graph)
+					draw_automaton(ctx, graph)
 					st = 0
 				else
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw_graph(ctx, graph)
+					draw_automaton(ctx, graph)
 					st = 0
 
 		when 4 # Moving graph
@@ -185,18 +183,18 @@ automata = (eCode, ev) ->
 					ctx.save()
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
 					ctx.translate(x-from.x, y-from.y)
-					draw_graph(ctx, graph)
+					draw_automaton(ctx, graph)
 					ctx.restore()
 				when 3 # up
 					[x, y] = get_mouse_xy(ev)
 					# editor.move_graph(from.x, from.y, x, y) TODO: fix! 
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw_graph(ctx, graph)
+					draw_automaton(ctx, graph)
 					graph_is_changed = true
 					st = 0
 				else # cancel movement (should be one value for entire graph)
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw_graph(ctx, graph)
+					draw_automaton(ctx, graph)
 					st = 0
 
 		when 5 # Creating a new node
@@ -205,7 +203,7 @@ automata = (eCode, ev) ->
 					[x, y] = get_mouse_xy(ev)
 					editor.nodes.add(graph, x, y)
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw_graph(ctx, graph)
+					draw_automaton(ctx, graph)
 					graph_is_changed = true
 					st = 0
 				when 2 # move
@@ -271,7 +269,7 @@ init = () ->
 		node2 = editor.nodes.add(graph,  50 + canvas.width/2, canvas.height/2)
 		editor.edges.add(graph, node1, node2)
 		editor.edges.add(graph, node2, node2)
-	draw_graph(ctx, graph)
+	draw_automaton(ctx, graph)
 
 	# selected = new graph_create()
 
@@ -309,12 +307,12 @@ ev_keypress = (ev) ->
 			when 25 # Y
 				editor.redo()
 				ctx.clearRect(0, 0, canvas.width, canvas.height)
-				draw_graph(ctx, graph)
+				draw_automaton(ctx, graph)
 				save_graph(graph)
 			when 26 # Z
 				editor.undo()
 				ctx.clearRect(0, 0, canvas.width, canvas.height)
-				draw_graph(ctx, graph)
+				draw_automaton(ctx, graph)
 				save_graph(graph)
 
 	null
@@ -324,13 +322,13 @@ ev_keyup = (ev) ->
 		when 46 # Delete ### Move it to the main automaton!
 			editor.nodes.del(graph, graph.nodes.length-1)
 			ctx.clearRect(0, 0, canvas.width, canvas.height)
-			draw_graph(ctx, graph)
+			draw_automaton(ctx, graph)
 			save_graph(graph)
 		when 81 # Q
 			# Testing edges deletion
 			editor.edges.del(graph, graph.edges.length-1)
 			ctx.clearRect(0, 0, canvas.width, canvas.height)
-			draw_graph(ctx, graph)
+			draw_automaton(ctx, graph)
 		else
 			# console.log "keyCode: " + ev.keyCode
 	null
@@ -341,7 +339,3 @@ ev_keyup = (ev) ->
 	console.log "."
 	setTimeout(tout, 1000)
 )()
-
-
-
-
