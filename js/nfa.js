@@ -22,6 +22,7 @@
     G.events = {
       v: []
     };
+    G.edges.event = [];
     return G;
   };
 

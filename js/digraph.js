@@ -19,6 +19,8 @@
       if (i >= 0) {
         last = arr.length - 1;
         if (i < last) {
+          arr[i] = null;
+          delete arr[i];
           arr[i] = arr.pop();
           ret = i;
         } else if (i === last) {
@@ -114,17 +116,28 @@
           return G.edges.v[i] = v;
         },
         out: function(G, from_node) {
-          var b, i, _i, _len, _ref, _results;
+          var i, ret;
 
-          _ref = G.edges.b;
-          _results = [];
-          for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-            b = _ref[i];
+          i = G.edges.length;
+          ret = [];
+          while (i-- > 0) {
             if (G.edges.a[i] === from_node) {
-              _results.push(i);
+              ret.push(i);
             }
           }
-          return _results;
+          return ret;
+        },
+        "in": function(G, to_node) {
+          var i, ret;
+
+          i = G.edges.length;
+          ret = [];
+          while (i-- > 0) {
+            if (G.edges.b[i] === to_node) {
+              ret.push(i);
+            }
+          }
+          return ret;
         },
         has: function(G, a, b) {
           var i, ix, _i, _len, _ref;

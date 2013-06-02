@@ -1,4 +1,3 @@
-
 'use strict'
 
 # 
@@ -18,7 +17,8 @@ fa.extend = (G) ->
 	G.start = 0 	# Initial state
 	G.events = {	# Events
 		v : []
-	}	
+	}
+	G.edges.event = []
 	G
 
 fa.create = () ->
@@ -58,61 +58,6 @@ fa.BFS = (G) ->
 			# G.edges.v[e]
 			console.log a,"->", b
 	null
-
-
-# 
-#  Class for Automata extended for graphical representation
-# 
-@.faxy = Object.create(fa)  
-
-faxy.create = () ->
-	G = fa.create()
-	faxy.extend(G)
-	G
-
-faxy.extend = (G) ->
-	G.nodes.x = []
-	G.nodes.y = []
-	G.edges.curved = []
-	G
-
-# Create separete objects of nodes and edges.
-# Otherwise you would override methods 'fa.nodes.add' and etc.
-faxy.nodes = Object.create(fa.nodes)
-faxy.edges = Object.create(fa.edges)
-
-faxy.nodes.add = (G, x, y) ->
-	ix = fa.nodes.add(G)
-	G.nodes.x[ix] = x
-	G.nodes.y[ix] = y
-	ix
-
-faxy.nodes.move = (G, i, x, y) ->
-	if i<G.nodes.length && i>-1
-		G.nodes.x[i] = x
-		G.nodes.y[i] = y
-	i
-
-
-faxy.edges.add = (G, a, b, args) ->
-	return -1 if fa.edges.has(G, a, b) > -1
-	eix = fa.edges.has(G, b, a)
-	ix = fa.edges.add(G, a, b, args)
-	if ix>=0 and eix>=0
-		G.edges.curved[eix] = true
-		G.edges.curved[ix] = true
-	ix
-
-faxy.edges.del = (G, i) ->
-	# console.log arguments
-	a = G.edges.a[i]
-	b = G.edges.b[i]
-	if (ix = fa.edges.del(G, i)) >= 0
-		if (eix = fa.edges.has(G, b, a)) >= 0
-			G.edges.curved[eix] = false
-	ix
-
-
 
 
 ### TODO:

@@ -202,7 +202,7 @@ Usefull links:
             if (node_ix === from.node_ix) {
               draw_loop(ctx, from.x, from.y);
             } else {
-              draw_edge(ctx, from.x, from.y, x, y, is_new_edge);
+              draw_fake_edge(ctx, from.x, from.y, x, y, is_new_edge);
             }
             break;
           case 3:

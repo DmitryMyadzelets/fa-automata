@@ -23,6 +23,8 @@
 		if i >= 0
 			last = arr.length-1
 			if i < last
+				arr[i] = null
+				delete arr[i]
 				arr[i] = arr.pop()
 				ret = i
 			else if i == last
@@ -96,7 +98,19 @@
 
 			# Returns an array of edges such that (from_node, ?) in edges
 			out : (G, from_node) ->
-				i for b, i in G.edges.b when G.edges.a[i] is from_node
+				i = G.edges.length
+				ret = []
+				while i-- >0 
+					ret.push(i) if G.edges.a[i] is from_node
+				ret
+
+			# Returns an array of edges such that (?, to_node) in edges
+			in : (G, to_node) ->
+				i = G.edges.length
+				ret = []
+				while i-- >0 
+					ret.push(i) if G.edges.b[i] is to_node
+				ret
 
 			# Returns its index if edge (a, b) exists
 			has : (G, a, b) ->

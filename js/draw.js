@@ -10,7 +10,7 @@ The functions here assume that there are global variables:
 
 (function() {
   'use strict';
-  var PI2, angle_from, angle_to, cl_black, cl_edge, cl_node, cl_node_edge, cl_node_sel, cl_text, draw_markedState, loop_k;
+  var PI2, angle_from, angle_to, cl_black, cl_edge, cl_node, cl_node_edge, cl_node_sel, cl_text, draw_markedState, empty_string, loop_k;
 
   this.r = 16;
 
@@ -27,6 +27,8 @@ The functions here assume that there are global variables:
   cl_node_edge = cl_black;
 
   cl_node_sel = "#da5d00";
+
+  empty_string = "\u03b5";
 
   /*
   ===============================================================================
@@ -66,107 +68,104 @@ The functions here assume that there are global variables:
   */
 
 
-  this.draw_edge = function(ctx, x1, y1, x2, y2, fake_edge) {
-    var dl, dx, dy, nx, ny, ox, oy, x3, x4, y3, y4;
-
-    if (fake_edge == null) {
-      fake_edge = false;
-    }
-    dx = x2 - x1;
-    dy = y2 - y1;
-    dl = Math.sqrt(dx * dx + dy * dy);
-    if (dl === 0) {
-      return;
-    }
-    nx = dx / dl;
-    ny = dy / dl;
-    ox = ny;
-    oy = -nx;
-    x1 = x1 + r * nx;
-    y1 = y1 + r * ny;
-    if (fake_edge === false) {
-      x2 = x2 - r * nx;
-      y2 = y2 - r * ny;
-    }
-    x3 = x2 - (10 * nx) + (4 * ox);
-    y3 = y2 - (10 * ny) + (4 * oy);
-    x4 = x3 - (8 * ox);
-    y4 = y3 - (8 * oy);
-    ctx.save();
-    ctx.fillStyle = cl_edge;
-    ctx.strokeStyle = cl_edge;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.lineTo(x3, y3);
-    ctx.lineTo(x4, y4);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.fill();
-    ctx.restore();
+  this.calc_arrow = function(to, norm, orth, v) {
+    v[0] = to[0];
+    v[1] = to[1];
+    v[2] = v[0] - (10 * norm[0]) + (4 * norm[1]);
+    v[3] = v[1] - (10 * norm[1]) - (4 * norm[0]);
+    v[4] = v[2] - (8 * norm[1]);
+    v[5] = v[3] + (8 * norm[0]);
     return null;
   };
 
-  /*
-  ===============================================================================
-  The functions draws edges.curved directed edge from (x1, y1) to (x2, y2).
-  */
+  this.calc_norm_ort = function(v1, v2, norm, orth) {
+    var dl, dx, dy;
 
-
-  this.draw_cured_edge = function(ctx, x1, y1, x2, y2, fake_edge) {
-    var cx, cy, dl, dx, dy, nx, ny, ox, oy, x3, x4, y3, y4;
-
-    if (fake_edge == null) {
-      fake_edge = false;
-    }
-    dx = x2 - x1;
-    dy = y2 - y1;
+    dx = v2[0] - v1[0];
+    dy = v2[1] - v1[1];
     dl = Math.sqrt(dx * dx + dy * dy);
     if (dl === 0) {
-      return;
+      return [];
     }
-    nx = dx / dl;
-    ny = dy / dl;
-    ox = ny;
-    oy = -nx;
-    cx = (x1 + x2) / 2 + ox * dl / 6;
-    cy = (y1 + y2) / 2 + oy * dl / 6;
-    dx = cx - x1;
-    dy = cy - y1;
-    dl = Math.sqrt(dx * dx + dy * dy);
-    nx = dx / dl;
-    ny = dy / dl;
-    x1 = x1 + r * nx;
-    y1 = y1 + r * ny;
-    if (fake_edge === false) {
-      dx = x2 - cx;
-      dy = y2 - cy;
-      nx = dx / dl;
-      ny = dy / dl;
-      ox = ny;
-      oy = -nx;
-      x2 = x2 - r * nx;
-      y2 = y2 - r * ny;
+    norm[0] = dx / dl;
+    norm[1] = dy / dl;
+    orth[0] = norm[1];
+    orth[1] = -norm[0];
+    return null;
+  };
+
+  this.calc_edge = function(v1, v2, norm) {
+    v1[0] += r * norm[0];
+    v1[1] += r * norm[1];
+    v2[0] -= r * norm[0];
+    v2[1] -= r * norm[1];
+    return null;
+  };
+
+  this.calc_curved = function(v1, v2, norm, orth, cv, arrow) {
+    var n, o;
+
+    calc_norm_ort(v1, v2, norm, orth);
+    cv[0] = (v1[0] + v2[0]) / 2 + norm[1] * 40;
+    cv[1] = (v1[1] + v2[1]) / 2 - norm[0] * 40;
+    n = [];
+    o = [];
+    calc_norm_ort(v1, cv, n, o);
+    calc_edge(v1, [], n);
+    calc_norm_ort(cv, v2, n, o);
+    calc_edge([], v2, n);
+    calc_arrow(v2, n, o, arrow);
+    return null;
+  };
+
+  this.draw_edge = function(ctx, v1, v2) {
+    ctx.beginPath();
+    ctx.moveTo(v1[0], v1[1]);
+    ctx.lineTo(v2[0], v2[1]);
+    ctx.stroke();
+    return null;
+  };
+
+  this.draw_curved = function(ctx, v1, v2, cv) {
+    ctx.beginPath();
+    ctx.moveTo(v1[0], v1[1]);
+    ctx.quadraticCurveTo(cv[0], cv[1], v2[0], v2[1]);
+    ctx.stroke();
+    return null;
+  };
+
+  this.draw_arrow = function(ctx, v) {
+    ctx.beginPath();
+    ctx.lineTo(v[0], v[1]);
+    ctx.lineTo(v[2], v[3]);
+    ctx.lineTo(v[4], v[5]);
+    ctx.stroke();
+    ctx.fill();
+    return null;
+  };
+
+  this.draw_fake_edge = function(ctx, x1, y1, x2, y2, new_edge) {
+    var norm, orth, v;
+
+    norm = [];
+    orth = [];
+    calc_norm_ort([x1, y1], [x2, y2], norm, orth);
+    x1 = x1 + r * norm[0];
+    y1 = y1 + r * norm[1];
+    if (!new_edge) {
+      x2 = x2 - r * norm[0];
+      y2 = y2 - r * norm[1];
     }
-    x3 = x2 - (10 * nx) + (4 * ox);
-    y3 = y2 - (10 * ny) + (4 * oy);
-    x4 = x3 - (8 * ox);
-    y4 = y3 - (8 * oy);
     ctx.save();
     ctx.fillStyle = cl_edge;
     ctx.strokeStyle = cl_edge;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
-    ctx.quadraticCurveTo(cx, cy, x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.lineTo(x3, y3);
-    ctx.lineTo(x4, y4);
     ctx.lineTo(x2, y2);
     ctx.stroke();
-    ctx.fill();
+    v = [];
+    calc_arrow([x2, y2], norm, orth, v);
+    draw_arrow(ctx, v);
     ctx.restore();
     return null;
   };
@@ -246,18 +245,13 @@ The functions here assume that there are global variables:
   */
 
 
-  /*
-  ===============================================================================
-  */
-
-
   this.draw_graph = function(ctx, G) {
-    var dy, index, ix, text, v1, v2, x, x1, x2, y, y1, y2, _i, _len, _ref;
+    var index, ix, text, v1, v2, x, x1, x2, y, y1, y2, _i, _len, _ref;
 
     ctx.save();
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.strokeStyle = cl_node_edge;
-    dy = 12 / 2;
     _ref = G.nodes.x;
     for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
       x = _ref[index];
@@ -266,7 +260,7 @@ The functions here assume that there are global variables:
       draw_state(ctx, x, y);
       text = index.toString();
       ctx.fillStyle = cl_text;
-      ctx.fillText(text, x, y + dy);
+      ctx.fillText(text, x, y);
     }
     ix = G.edges.length;
     while (ix-- > 0) {
@@ -278,9 +272,13 @@ The functions here assume that there are global variables:
       y2 = G.nodes.y[v2];
       if (v1 !== v2) {
         if (G.edges.curved[ix]) {
-          draw_cured_edge(ctx, x1, y1, x2, y2);
+          draw_curved(ctx, G.edges.v1[ix], G.edges.v2[ix], G.edges.cv[ix]);
+          draw_arrow(ctx, G.edges.arrow[ix]);
         } else {
-          draw_edge(ctx, x1, y1, x2, y2);
+          ctx.fillStyle = cl_edge;
+          ctx.strokeStyle = cl_edge;
+          draw_edge(ctx, G.edges.v1[ix], G.edges.v2[ix]);
+          draw_arrow(ctx, G.edges.arrow[ix]);
         }
       } else {
         draw_loop(ctx, x1, y1);
@@ -295,50 +293,43 @@ The functions here assume that there are global variables:
   */
 
 
-  this.draw_selected = function(ctx, graph, selected) {
-    var dy, node, text, x, y, _i, _len, _ref, _ref1;
-
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(0,0,255,0.2)";
-    dy = 12 / 2;
-    _ref = selected.nodes;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      node = _ref[_i];
-      _ref1 = unpack(graph.nodes[node]), x = _ref1[0], y = _ref1[1];
-      draw_state(ctx, x, y);
-      text = node.toString();
-      ctx.fillText(text, x, y + dy);
-    }
-    ctx.restore();
-    return null;
-  };
-
-  this.draw_new = function(ctx, X, Y) {
-    var i, ix, j, _i, _len;
-
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.strokeStyle = cl_node_edge;
-    for (ix = _i = 0, _len = X.length; _i < _len; ix = ++_i) {
-      i = X[ix];
-      j = Y[ix];
-      ctx.beginPath();
-      ctx.moveTo(G.nodes.x[i], y1);
-      ctx.lineTo(x5, y5);
-      ctx.stroke();
-    }
-    ctx.restore();
-    return null;
-  };
-
   this.draw_automaton = function(ctx, G) {
-    var x, y;
+    var ix, text, v1, v2, x, x1, x2, y, y1, y2;
 
     draw_graph(ctx, G);
     x = G.nodes.x[G.start] - 4 * r;
     y = G.nodes.y[G.start];
-    draw_edge(ctx, x, y, G.nodes.x[G.start], G.nodes.y[G.start]);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = cl_black;
+    ix = G.edges.length;
+    text = "";
+    while (ix-- > 0) {
+      v1 = G.edges.a[ix];
+      v2 = G.edges.b[ix];
+      x1 = G.nodes.x[v1];
+      y1 = G.nodes.y[v1];
+      x2 = G.nodes.x[v2];
+      y2 = G.nodes.y[v2];
+      if (v1 !== v2) {
+        if (G.edges.curved[ix]) {
+          x = G.edges.cv[ix][0];
+          y = G.edges.cv[ix][1];
+        } else {
+          x = x1 + (x2 - x1) / 2 + r * G.edges.orth[ix][0];
+          y = y1 + (y2 - y1) / 2 + r * G.edges.orth[ix][1];
+        }
+      } else {
+        x = x1 + 2 * r;
+        y = y1 - 3 * r;
+      }
+      if (G.edges.event[ix] != null) {
+        text = empty_string;
+      } else {
+        text = empty_string;
+      }
+      ctx.fillText(text, x, y);
+    }
     return null;
   };
 
