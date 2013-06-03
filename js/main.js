@@ -202,7 +202,7 @@ Usefull links:
             if (node_ix === from.node_ix) {
               draw_loop(ctx, from.x, from.y);
             } else {
-              draw_fake_edge(ctx, from.x, from.y, x, y, is_new_edge);
+              draw_fake_edge(ctx, faxy.get_fake_edge(from.x, from.y, x, y, is_new_edge));
             }
             break;
           case 3:
@@ -341,7 +341,6 @@ Usefull links:
 
   ev_mousemove = function(ev) {
     automata(2, ev);
-    document.getElementById("debug").innerHTML = "x, y = " + get_mouse_xy(ev);
     return null;
   };
 

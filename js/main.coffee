@@ -156,7 +156,9 @@ automata = (eCode, ev) ->
 					if node_ix == from.node_ix
 						draw_loop(ctx, from.x, from.y)
 					else
-						draw_fake_edge(ctx, from.x, from.y, x, y, is_new_edge)
+						draw_fake_edge(ctx
+							faxy.get_fake_edge(from.x, from.y, x, y, is_new_edge)
+							)
 				when 3 # up
 					node_ix = nodeByXY(graph, x, y)
 					if (node_ix < 0)
@@ -291,7 +293,7 @@ ev_mousedown = (ev) ->
 
 ev_mousemove = (ev) ->
 	automata(2, ev)
-	document.getElementById("debug").innerHTML = "x, y = " + get_mouse_xy(ev)
+	# document.getElementById("debug").innerHTML = "x, y = " + get_mouse_xy(ev)
 	null
 
 ev_mouseup = (ev) ->

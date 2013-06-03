@@ -1,14 +1,14 @@
 'use strict'
 
 # Some vector math is inspired by [http://media.tojicode.com/sfjs-vectors/]
-vector = {
+vec = {
 
 	create : () -> new Float32Array([0, 0])
 
 	length : (v) ->	Math.sqrt(v[0]*v[0] + v[1]*v[1])
 
 	normalize : (v, out) ->
-		len = length(v)
+		len = vec.length(v)
 		len = 1 / len
 		out[0] = v[0] * len
 		out[1] = v[1] * len
@@ -19,20 +19,34 @@ vector = {
 		out[1] = -v[0]
 		out
 
+	scale : (a, rate, out) ->
+		out[0] = a[0] * rate
+		out[1] = a[1] * rate
+		out
+
+	add : (a, b, out) ->
+		out[0] = a[0] + b[0]
+		out[1] = a[1] + b[1]
+		out
+
 	subtract : (a, b, out) ->
 		out[0] = a[0] - b[0]
 		out[1] = a[1] - b[1]
+		out
+
+	copy : (a, out) ->
+		out[0] = a[0]
+		out[1] = a[1]
 		out
 }
 
 # 
 #  Class for Automata extended for graphical representation
 #
-@.faxyz = (($)->
+@.faxy = (($)->
 	# 
 	# Private methods
 	# 
-
 	arrow = (to, a, n) ->
 		# 10 - length of the arrow
 		# 8 - width of the arrow
@@ -44,21 +58,53 @@ vector = {
 		a[5] = a[3] + (8 * n[0])
 		a
 
-	curved = (v1, v2, norm, orth, cv, arrow) ->
-		v = vector.create()
-		vector.subtract(v2, v1, v)
-		vector.normalize(v, norm)
-		#
+	stright = (v1, v2, norm) ->
+		v = vec.create()
+		vec.subtract(v2, v1, v)	# v = v2 - v1
+		vec.normalize(v, norm)	# norm = normalized v
+		vec.scale(norm, r, v)	# v = norm * r
+		vec.add(v1, v, v1)		# v1 = v1 + v
+		vec.subtract(v2, v, v2)	# v2 = v2 - v
+		null
+
+	curved = (v1, v2, norm, cv, _arrow) ->
+		v = vec.create()
+		# Calc normalized vector
+		vec.subtract(v2, v1, v)	# v = v2 - v1
+		vec.normalize(v, norm)	# norm = normalized v
+		# Control vector
 		cv[0] = (v1[0] + v2[0])/2 + norm[1]*40
 		cv[1] = (v1[1] + v2[1])/2 - norm[0]*40
-		n = vector() # Normal vector
-		o = vector() # Orthogonal vector
-		calc_norm_ort(v1, cv, n, o)
-		normal(v1, n)
-		calc_edge(v1, [], n)
-		calc_norm_ort(cv, v2, n, o)
-		calc_edge([], v2, n)
-		calc_arrow(v2, n, o, arrow)
+		# 'From' vector
+		vec.subtract(cv, v1, v)	# v = cv - v1
+		vec.normalize(v, v)		# v = normalized v
+		vec.scale(v, r, v)		# v = v * r
+		vec.add(v1, v, v1)		# v1 = v1 + v
+		# 'To' vector
+		vec.subtract(v2, cv, v)	# v = v2 - cv
+		vec.normalize(v, v)		# v = normalized v
+		vec.scale(v, r, v)		# v = v * r
+		vec.subtract(v2, v, v2)	# v2 = v2 - v
+		# Calc arrow
+		vec.normalize(v, v)
+		arrow(v2, _arrow, v)		
+		null
+
+	fake = (v1, v2, norm, is_new) ->
+		v = vec.create()
+		vec.subtract(v2, v1, v)	# v = v2 - v1
+		vec.normalize(v, norm)	# norm = normalized v
+		vec.scale(norm, r, v)	# v = norm * r
+		vec.add(v1, v, v1)		# v1 = v1 + v
+		if not is_new
+			vec.subtract(v2, v, v2)	# v2 = v2 - v
+		null
+
+	start = (v2, $) ->
+		vec.copy(v2, $.v2)
+		vec.subtract(v2, [4*r, 0], $.v1)
+		stright($.v1, $.v2, $.norm)
+		arrow($.v2, $.arrow, $.norm)
 		null
 
 
@@ -71,26 +117,41 @@ vector = {
 			ix = inout[i]
 			v1 = G.edges.a[ix]
 			v2 = G.edges.b[ix]
-			# Coordinates of the nodes
-			x1 = G.nodes.x[v1]
-			y1 = G.nodes.y[v1]
-			x2 = G.nodes.x[v2]
-			y2 = G.nodes.y[v2]
-			e = G.edges
+			e = G.edges.$[ix]
 			if v1 != v2 # not loop
-				e.v1[ix][0] = x1
-				e.v1[ix][1] = y1
-				e.v2[ix][0] = x2
-				e.v2[ix][1] = y2
-				if e.curved[ix]
-					window.calc_curved(e.v1[ix], e.v2[ix], e.norm[ix], e.orth[ix], e.cv[ix], e.arrow[ix])
+				vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1)
+				vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2)
+				if e.curved
+					curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
 				else
-					window.calc_norm_ort(e.v1[ix], e.v2[ix], e.norm[ix], e.orth[ix])
-					window.calc_edge(e.v1[ix], e.v2[ix], e.norm[ix])
-					window.calc_arrow(e.v2[ix], e.norm[ix], e.orth[ix], e.arrow[ix])
+					stright(e.v1, e.v2, e.norm)
+					arrow(e.v2, e.arrow, e.norm)
 			else # loop
 				null
+		if a is G.start
+			start([G.nodes.x[a], G.nodes.y[a]], G.edges.start)
 		null
+
+	create_edge_data = () ->
+		{
+			curved : false
+			v1 : vec.create()		# Vector 'from'
+			v2 : vec.create()		# Vector 'to'
+			cv : vec.create()		# Control vector for curve
+			norm : vec.create()		# Normalized vector of the edge
+			orth : vec.create()		# Orthogonal vector to the edge
+			arrow : [
+				vec.create()
+				vec.create()
+				vec.create()]		# Arrow coordinates 
+		}
+
+	# 
+	# Private members
+	#
+
+	# This object is used for editor while creating a new edge
+	fake_edge = create_edge_data()
 
 	# 
 	# Public metods
@@ -105,161 +166,56 @@ vector = {
 	extend : (G) ->
 		G.nodes.x = []
 		G.nodes.y = []
-		G.edges._ = []
-		G
+		G.edges.$ = []	# Edge graphical extention
+		G.edges.start = create_edge_data()
 
 	# Create separete objects of nodes and edges.
 	# Otherwise you would override methods 'fa.nodes.add' and etc.
 	nodes : Object.create($.nodes)
 	edges : Object.create($.edges)
+
+	get_fake_edge : (x1, y1, x2, y2, is_new) ->
+		vec.copy([x1, y1], fake_edge.v1)
+		vec.copy([x2, y2], fake_edge.v2)
+		fake(fake_edge.v1, fake_edge.v2, fake_edge.norm, is_new)
+		arrow(fake_edge.v2, fake_edge.arrow, fake_edge.norm)
+		fake_edge
+
 	}
 
 	_this.nodes.add = (G, x, y) ->
-		ix = $.nodes.add(G)
-		G.nodes.x[ix] = x
-		G.nodes.y[ix] = y
-		ix
+		i = $.nodes.add(G)
+		G.nodes.x[i] = x
+		G.nodes.y[i] = y
+		i
 
 	_this.nodes.move = (G, i, x, y) ->
 		if i<G.nodes.length && i>-1
 			G.nodes.x[i] = x
 			G.nodes.y[i] = y
-			# faxy.edges.update_xy(G, i)
+			update_node(G, i)
 		i
 
 	_this.edges.add = (G, a, b, args) ->
 		return -1 if $.edges.has(G, a, b) > -1
-		eix = $.edges.has(G, b, a)
-		ix = $.edges.add(G, a, b, args)
-		if ix>=0 
-			G.edges._[ix] = () -> {
-				curved : false
-				v1 : vector()		# Vector 'from'
-				v2 : vector()		# Vector 'to'
-				cv : vector()		# Control vector for curve
-				norm : vector()		# Normalized vector of the edge
-				orth : vector()		# Orthogonal vector to the edge
-				arrow : [
-					vector()
-					vector()
-					vector()]		# Arrow coordinates 
-			}
-			if eix>=0
-				G.edges._[eix].curved = true
-				G.edges._[ix].curved = true
-				# faxy.edges.update_xy(G, b, a)
-		# faxy.edges.update_xy(G, a, b)
-		ix
+		j = $.edges.has(G, b, a)
+		i = $.edges.add(G, a, b, args)
+		if i>=0
+			G.edges.$[i] = create_edge_data()
+			if j>=0
+				G.edges.$[j].curved = true
+				G.edges.$[i].curved = true
+		update_node(G, a)
+		i
 
 	_this.edges.del = (G, i) ->
 		a = G.edges.a[i]
 		b = G.edges.b[i]
 		if (ix = fa.edges.del(G, i)) >= 0
 			if (eix = fa.edges.has(G, b, a)) >= 0
-				G.edges._[eix].curved = false
+				G.edges.$[eix].curved = false
+				update_node(G, a)
 		ix
-
 
 	_this # return the object with public methods
 )(fa)
-
-@.faxy = Object.create(fa)  
-
-faxy.create = () ->
-	G = fa.create()
-	faxy.extend(G)
-	faxyz.extend(G)
-	G
-
-
-faxy.extend = (G) ->
-	G.nodes.x = []
-	G.nodes.y = []
-	#
-	vector = () -> new Float32Array([0, 0])
-	#
-	G.edges.curved = []
-	G.edges.v1 = []		# Vector 'from'
-	G.edges.v2 = []		# Vector 'to'
-	G.edges.cv = []		# Control vector for curve
-	G.edges.norm = []	# Normalized vector of the edge
-	G.edges.orth = []	# Orthogonal vector to the edge
-	G.edges.arrow = []	# Arrow coordinates 
-	#
-	G
-
-# Create separete objects of nodes and edges.
-# Otherwise you would override methods 'fa.nodes.add' and etc.
-faxy.nodes = Object.create(fa.nodes)
-faxy.edges = Object.create(fa.edges)
-
-faxy.nodes.add = (G, x, y) ->
-	ix = fa.nodes.add(G)
-	G.nodes.x[ix] = x
-	G.nodes.y[ix] = y
-	ix
-
-faxy.nodes.move = (G, i, x, y) ->
-	if i<G.nodes.length && i>-1
-		G.nodes.x[i] = x
-		G.nodes.y[i] = y
-		faxy.edges.update_xy(G, i)
-	i
-
-
-faxy.edges.add = (G, a, b, args) ->
-	return -1 if fa.edges.has(G, a, b) > -1
-	eix = fa.edges.has(G, b, a)
-	ix = fa.edges.add(G, a, b, args)
-	if ix>=0 
-		G.edges.v1[ix] = []
-		G.edges.v2[ix] = []
-		G.edges.cv[ix] = []
-		G.edges.norm[ix] = []
-		G.edges.orth[ix] = []
-		G.edges.arrow[ix] = []
-		if eix>=0
-			G.edges.curved[eix] = true
-			G.edges.curved[ix] = true
-			# faxy.edges.update_xy(G, b, a)
-	faxy.edges.update_xy(G, a, b)
-	ix
-
-faxy.edges.del = (G, i) ->
-	# console.log arguments
-	a = G.edges.a[i]
-	b = G.edges.b[i]
-	if (ix = fa.edges.del(G, i)) >= 0
-		if (eix = fa.edges.has(G, b, a)) >= 0
-			G.edges.curved[eix] = false
-	ix
-
-# Updates coordinates related to the edge(a, b) representation
-faxy.edges.update_xy = (G, a, b) ->
-	# Get edges outgoing of the node a
-	inout = faxy.edges.out(G, a).concat(faxy.edges.in(G, a))
-	i = inout.length
-	while i-- >0
-		ix = inout[i]
-		v1 = G.edges.a[ix]
-		v2 = G.edges.b[ix]
-		# Coordinates of the nodes
-		x1 = G.nodes.x[v1]
-		y1 = G.nodes.y[v1]
-		x2 = G.nodes.x[v2]
-		y2 = G.nodes.y[v2]
-		e = G.edges
-		if v1 != v2 # not loop
-			e.v1[ix][0] = x1
-			e.v1[ix][1] = y1
-			e.v2[ix][0] = x2
-			e.v2[ix][1] = y2
-			if e.curved[ix]
-				window.calc_curved(e.v1[ix], e.v2[ix], e.norm[ix], e.orth[ix], e.cv[ix], e.arrow[ix])
-			else
-				window.calc_norm_ort(e.v1[ix], e.v2[ix], e.norm[ix], e.orth[ix])
-				window.calc_edge(e.v1[ix], e.v2[ix], e.norm[ix])
-				window.calc_arrow(e.v2[ix], e.norm[ix], e.orth[ix], e.arrow[ix])
-		else # loop
-			null
-	null

@@ -49,8 +49,6 @@ The functions here assume that there are global variables:
 
 
   draw_markedState = function(ctx, x, y) {
-    ctx.save();
-    ctx.fillStyle = "rgba(0,0,255,0.2)";
     ctx.beginPath();
     ctx.arc(x, y, r, 0, PI2, true);
     ctx.fill();
@@ -58,65 +56,13 @@ The functions here assume that there are global variables:
     ctx.beginPath();
     ctx.arc(x, y, r + 4, 0, PI2, true);
     ctx.stroke();
-    ctx.restore();
     return null;
   };
 
   /*
   ===============================================================================
-  The functions draws stright directed edge from coordinates (x1, y1) to (x2, y2).
   */
 
-
-  this.calc_arrow = function(to, norm, orth, v) {
-    v[0] = to[0];
-    v[1] = to[1];
-    v[2] = v[0] - (10 * norm[0]) + (4 * norm[1]);
-    v[3] = v[1] - (10 * norm[1]) - (4 * norm[0]);
-    v[4] = v[2] - (8 * norm[1]);
-    v[5] = v[3] + (8 * norm[0]);
-    return null;
-  };
-
-  this.calc_norm_ort = function(v1, v2, norm, orth) {
-    var dl, dx, dy;
-
-    dx = v2[0] - v1[0];
-    dy = v2[1] - v1[1];
-    dl = Math.sqrt(dx * dx + dy * dy);
-    if (dl === 0) {
-      return [];
-    }
-    norm[0] = dx / dl;
-    norm[1] = dy / dl;
-    orth[0] = norm[1];
-    orth[1] = -norm[0];
-    return null;
-  };
-
-  this.calc_edge = function(v1, v2, norm) {
-    v1[0] += r * norm[0];
-    v1[1] += r * norm[1];
-    v2[0] -= r * norm[0];
-    v2[1] -= r * norm[1];
-    return null;
-  };
-
-  this.calc_curved = function(v1, v2, norm, orth, cv, arrow) {
-    var n, o;
-
-    calc_norm_ort(v1, v2, norm, orth);
-    cv[0] = (v1[0] + v2[0]) / 2 + norm[1] * 40;
-    cv[1] = (v1[1] + v2[1]) / 2 - norm[0] * 40;
-    n = [];
-    o = [];
-    calc_norm_ort(v1, cv, n, o);
-    calc_edge(v1, [], n);
-    calc_norm_ort(cv, v2, n, o);
-    calc_edge([], v2, n);
-    calc_arrow(v2, n, o, arrow);
-    return null;
-  };
 
   this.draw_edge = function(ctx, v1, v2) {
     ctx.beginPath();
@@ -144,28 +90,12 @@ The functions here assume that there are global variables:
     return null;
   };
 
-  this.draw_fake_edge = function(ctx, x1, y1, x2, y2, new_edge) {
-    var norm, orth, v;
-
-    norm = [];
-    orth = [];
-    calc_norm_ort([x1, y1], [x2, y2], norm, orth);
-    x1 = x1 + r * norm[0];
-    y1 = y1 + r * norm[1];
-    if (!new_edge) {
-      x2 = x2 - r * norm[0];
-      y2 = y2 - r * norm[1];
-    }
+  this.draw_fake_edge = function(ctx, o) {
     ctx.save();
     ctx.fillStyle = cl_edge;
     ctx.strokeStyle = cl_edge;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    v = [];
-    calc_arrow([x2, y2], norm, orth, v);
-    draw_arrow(ctx, v);
+    draw_edge(ctx, o.v1, o.v2);
+    draw_arrow(ctx, o.arrow);
     ctx.restore();
     return null;
   };
@@ -240,70 +170,18 @@ The functions here assume that there are global variables:
   */
 
 
-  /*
-  ===============================================================================
-  */
-
-
-  this.draw_graph = function(ctx, G) {
-    var index, ix, text, v1, v2, x, x1, x2, y, y1, y2, _i, _len, _ref;
+  this.draw_automaton = function(ctx, G) {
+    var $, ix, text, v1, v2, x, x1, x2, y, y1, y2;
 
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.strokeStyle = cl_node_edge;
-    _ref = G.nodes.x;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      x = _ref[index];
-      y = G.nodes.y[index];
-      ctx.fillStyle = cl_node;
-      draw_state(ctx, x, y);
-      text = index.toString();
-      ctx.fillStyle = cl_text;
-      ctx.fillText(text, x, y);
-    }
-    ix = G.edges.length;
-    while (ix-- > 0) {
-      v1 = G.edges.a[ix];
-      v2 = G.edges.b[ix];
-      x1 = G.nodes.x[v1];
-      y1 = G.nodes.y[v1];
-      x2 = G.nodes.x[v2];
-      y2 = G.nodes.y[v2];
-      if (v1 !== v2) {
-        if (G.edges.curved[ix]) {
-          draw_curved(ctx, G.edges.v1[ix], G.edges.v2[ix], G.edges.cv[ix]);
-          draw_arrow(ctx, G.edges.arrow[ix]);
-        } else {
-          ctx.fillStyle = cl_edge;
-          ctx.strokeStyle = cl_edge;
-          draw_edge(ctx, G.edges.v1[ix], G.edges.v2[ix]);
-          draw_arrow(ctx, G.edges.arrow[ix]);
-        }
-      } else {
-        draw_loop(ctx, x1, y1);
-      }
-    }
-    ctx.restore();
-    return null;
-  };
-
-  /*
-  ===============================================================================
-  */
-
-
-  this.draw_automaton = function(ctx, G) {
-    var ix, text, v1, v2, x, x1, x2, y, y1, y2;
-
-    draw_graph(ctx, G);
-    x = G.nodes.x[G.start] - 4 * r;
-    y = G.nodes.y[G.start];
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
     ctx.fillStyle = cl_black;
-    ix = G.edges.length;
+    ctx.fillStyle = cl_edge;
+    ctx.strokeStyle = cl_edge;
     text = "";
+    draw_fake_edge(ctx, G.edges.start);
+    ix = G.edges.length;
     while (ix-- > 0) {
       v1 = G.edges.a[ix];
       v2 = G.edges.b[ix];
@@ -311,17 +189,23 @@ The functions here assume that there are global variables:
       y1 = G.nodes.y[v1];
       x2 = G.nodes.x[v2];
       y2 = G.nodes.y[v2];
-      if (v1 !== v2) {
-        if (G.edges.curved[ix]) {
-          x = G.edges.cv[ix][0];
-          y = G.edges.cv[ix][1];
-        } else {
-          x = x1 + (x2 - x1) / 2 + r * G.edges.orth[ix][0];
-          y = y1 + (y2 - y1) / 2 + r * G.edges.orth[ix][1];
-        }
-      } else {
+      $ = G.edges.$[ix];
+      if (v1 === v2) {
+        draw_loop(ctx, x1, y1);
         x = x1 + 2 * r;
         y = y1 - 3 * r;
+      } else {
+        if ($.curved) {
+          draw_curved(ctx, $.v1, $.v2, $.cv);
+          draw_arrow(ctx, $.arrow);
+          x = $.cv[0] + (-5) * $.norm[1];
+          y = $.cv[1] - (-5) * $.norm[0];
+        } else {
+          draw_edge(ctx, $.v1, $.v2);
+          draw_arrow(ctx, $.arrow);
+          x = x1 + (x2 - x1) / 2 + 0.5 * r * $.norm[1];
+          y = y1 + (y2 - y1) / 2 - 0.5 * r * $.norm[0];
+        }
       }
       if (G.edges.event[ix] != null) {
         text = empty_string;
@@ -330,6 +214,17 @@ The functions here assume that there are global variables:
       }
       ctx.fillText(text, x, y);
     }
+    ix = G.nodes.length;
+    while (ix-- > 0) {
+      x = G.nodes.x[ix];
+      y = G.nodes.y[ix];
+      ctx.fillStyle = cl_node;
+      draw_state(ctx, x, y);
+      text = ix.toString();
+      ctx.fillStyle = cl_text;
+      ctx.fillText(text, x, y);
+    }
+    ctx.restore();
     return null;
   };
 

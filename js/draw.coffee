@@ -38,8 +38,7 @@ empty_string = "\u03b5"
 ===============================================================================
 ###
 draw_markedState = (ctx, x, y) ->
-	ctx.save()
-	ctx.fillStyle = "rgba(0,0,255,0.2)"
+	# ctx.fillStyle = "rgba(0,0,255,0.2)"
 	ctx.beginPath()
 	ctx.arc(x, y, r, 0, PI2, true)
 	ctx.fill()
@@ -47,62 +46,11 @@ draw_markedState = (ctx, x, y) ->
 	ctx.beginPath()
 	ctx.arc(x, y, r+4, 0, PI2, true)
 	ctx.stroke()
-	ctx.restore()
 	null
 
 ###
 ===============================================================================
-The functions draws stright directed edge from coordinates (x1, y1) to (x2, y2).
 ###
-@.calc_arrow = (to, norm, orth, v) ->
-	# Arrow coordinates 
-	# 10 - length of the arrow
-	# 8 - width of the arrow
-	v[0] = to[0]
-	v[1] = to[1]
-	v[2] = v[0] - (10 * norm[0]) + (4 * norm[1])
-	v[3] = v[1] - (10 * norm[1]) - (4 * norm[0])
-	v[4] = v[2] - (8 * norm[1])
-	v[5] = v[3] + (8 * norm[0])
-	null
-
-@.calc_norm_ort = (v1, v2, norm, orth) ->
-	dx = v2[0]-v1[0]
-	dy = v2[1]-v1[1]
-	# Length of vector 1->2
-	dl = Math.sqrt(dx*dx + dy*dy)
-	return [] if (dl == 0)
-	# Normalized vector 1->2
-	norm[0] = dx / dl
-	norm[1] = dy / dl
-	# Orthogonal vector
-	orth[0] =  norm[1]
-	orth[1] = -norm[0]
-	null
-
-
-@.calc_edge = (v1, v2, norm) ->
-	v1[0] += r*norm[0]
-	v1[1] += r*norm[1]
-	v2[0] -= r*norm[0]
-	v2[1] -= r*norm[1]
-	null
-
-@.calc_curved = (v1, v2, norm, orth, cv, arrow) ->
-	calc_norm_ort(v1, v2, norm, orth)
-	# dl = Math.sqrt(dx*dx + dy*dy)
-	# cv[0] = (v1[0] + v2[0])/2 + ox*dl/6 # you can pick any number looking nicer
-	# cv[1] = (v1[1] + v2[1])/2 + oy*dl/6
-	cv[0] = (v1[0] + v2[0])/2 + norm[1]*40
-	cv[1] = (v1[1] + v2[1])/2 - norm[0]*40
-	n = [] # Normal vector
-	o = [] # Orthogonal vector
-	calc_norm_ort(v1, cv, n, o)
-	calc_edge(v1, [], n)
-	calc_norm_ort(cv, v2, n, o)
-	calc_edge([], v2, n)
-	calc_arrow(v2, n, o, arrow)
-	null
 
 # Draws directed edge
 # e - = G.edges
@@ -133,31 +81,15 @@ The functions draws stright directed edge from coordinates (x1, y1) to (x2, y2).
 	ctx.fill()
 	null
 
-@.draw_fake_edge = (ctx, x1, y1, x2, y2, new_edge) ->
-	# Edge coordinates
-	norm = []
-	orth = []
-	calc_norm_ort([x1, y1], [x2, y2], norm, orth)
-	x1 = x1 + r*norm[0]
-	y1 = y1 + r*norm[1]
-	if not new_edge
-		x2 = x2 - r*norm[0]
-		y2 = y2 - r*norm[1]
-	#
+@.draw_fake_edge = (ctx, o) ->
 	ctx.save()
 	ctx.fillStyle = cl_edge
 	ctx.strokeStyle = cl_edge
-	# Edge
-	ctx.beginPath()
-	ctx.moveTo(x1, y1)
-	ctx.lineTo(x2, y2)
-	ctx.stroke()
-	# Arrow
-	v = []
-	calc_arrow([x2, y2], norm, orth, v)
-	draw_arrow(ctx, v)
+	draw_edge(ctx, o.v1, o.v2)
+	draw_arrow(ctx, o.arrow)
 	ctx.restore()
 	null
+
 
 ###
 ===============================================================================
@@ -237,102 +169,70 @@ loop_k = {
 ###
 ===============================================================================
 ###
-# draw_automaton = (XY, T) ->
-# 	#Draw states
-# 	for xy in XY
-# 		draw_state(xy[0], xy[1])
-# 	#Draw transitions
-# 	for t in T
-# 		v1 = XY[t[0]]
-# 		v2 = XY[t[2]]
-# 		draw_edge(v1[0], v1[1], v2[0], v2[1])
-# 	null
-
-
-###
-===============================================================================
-###
-@.draw_graph = (ctx, G) ->
-	# ctx.clearRect(0, 0, canvas.width, canvas.height)
-	#Draw nodes
+@.draw_automaton = (ctx, G) ->
 	ctx.save()
 	# ctx.font = "12pt Calibri"
 	ctx.textAlign = "center"
 	ctx.textBaseline = "middle"
-	ctx.strokeStyle = cl_node_edge
-	for x, index in G.nodes.x
-		y = G.nodes.y[index]
-		ctx.fillStyle = cl_node
-		draw_state(ctx, x, y)
-		# Draw text
-		text = index.toString()
-		# metrics = ctx.measureText(text)
-		# width = metrics.width
-		ctx.fillStyle = cl_text
-		ctx.fillText(text, x, y)
-	#
-	#Draw edges
-	ix = G.edges.length
-	while ix-- >0
-		v1 = G.edges.a[ix]
-		v2 = G.edges.b[ix]
-		x1 = G.nodes.x[v1]
-		y1 = G.nodes.y[v1]
-		x2 = G.nodes.x[v2]
-		y2 = G.nodes.y[v2]
-		if v1 != v2
-			if G.edges.curved[ix]
-				draw_curved(ctx, G.edges.v1[ix], G.edges.v2[ix], G.edges.cv[ix])
-				draw_arrow(ctx, G.edges.arrow[ix])
-			else
-				ctx.fillStyle = cl_edge
-				ctx.strokeStyle = cl_edge
-				draw_edge(ctx, G.edges.v1[ix], G.edges.v2[ix])
-				draw_arrow(ctx, G.edges.arrow[ix])
-			
-		else
-			draw_loop(ctx, x1, y1)
-	ctx.restore()
-	null
-
-###
-===============================================================================
-###
-@.draw_automaton = (ctx, G) ->
-	draw_graph(ctx, G)
-	# Arrow to initial state
-	x = G.nodes.x[G.start] - 4*r
-	y = G.nodes.y[G.start]
-	# draw_edge(ctx, [x, y], [G.nodes.x[G.start], G.nodes.y[G.start]]) FIXIT
-	
-	# Transition labels
-	ctx.textAlign = "center"
-	ctx.textBaseline = "middle"
 	ctx.fillStyle = cl_black
-	ix = G.edges.length
+	# 
+	# Draw edges
+	# 
+	ctx.fillStyle = cl_edge
+	ctx.strokeStyle = cl_edge
 	text = ""
+	# Arrow to initial state
+	draw_fake_edge(ctx, G.edges.start)
+	#
+	ix = G.edges.length
 	while ix-- >0
+		# Indexes of the nodes
 		v1 = G.edges.a[ix]
 		v2 = G.edges.b[ix]
+		# Coordinates of the nodes
 		x1 = G.nodes.x[v1]
 		y1 = G.nodes.y[v1]
 		x2 = G.nodes.x[v2]
 		y2 = G.nodes.y[v2]
-		if v1 != v2
-			if G.edges.curved[ix]
-				x = G.edges.cv[ix][0]
-				y = G.edges.cv[ix][1]
-			else
-				x = x1 + (x2-x1)/2 + r*G.edges.orth[ix][0]
-				y = y1 + (y2-y1)/2 + r*G.edges.orth[ix][1]
-		else
+		# Edge graphical info
+		$ = G.edges.$[ix]
+		if v1 == v2 # loop
+			draw_loop(ctx, x1, y1)
 			x = x1 + 2*r
 			y = y1 - 3*r
+		else
+			if $.curved
+				draw_curved(ctx, $.v1, $.v2, $.cv)
+				draw_arrow(ctx, $.arrow)
+				# Label coordinates
+				x = $.cv[0] + (-5)*$.norm[1]
+				y = $.cv[1] - (-5)*$.norm[0]
+			else
+				draw_edge(ctx, $.v1, $.v2)
+				draw_arrow(ctx, $.arrow)
+				x = x1 + (x2-x1)/2 + 0.5*r*$.norm[1]
+				y = y1 + (y2-y1)/2 - 0.5*r*$.norm[0]
 
 		if G.edges.event[ix]?
 			text = empty_string
 		else
 			text = empty_string
 		ctx.fillText(text, x, y)
+	# 
+	# Draw nodes
+	# 
+	ix = G.nodes.length
+	while ix-- >0
+		x = G.nodes.x[ix]
+		y = G.nodes.y[ix]
+		ctx.fillStyle = cl_node
+		draw_state(ctx, x, y)
+		# Draw text
+		text = ix.toString()
+		# metrics = ctx.measureText(text)
+		# width = metrics.width
+		ctx.fillStyle = cl_text
+		ctx.fillText(text, x, y)
 
+	ctx.restore()
 	null
