@@ -161,17 +161,18 @@
         v1 = G.edges.a[ix];
         v2 = G.edges.b[ix];
         e = G.edges.$[ix];
-        if (v1 !== v2) {
-          vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1);
-          vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2);
-          if (e.curved) {
-            calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
-          } else {
+        vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1);
+        vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2);
+        switch (e.type) {
+          case 0:
             calc.stright(e.v1, e.v2, e.norm);
             calc.arrow(e.v2, e.arrow, e.norm);
-          }
-        } else {
-          calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e);
+            break;
+          case 1:
+            calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
+            break;
+          case 2:
+            calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e);
         }
       }
       if (a === G.start) {
@@ -247,6 +248,7 @@
           if (j >= 0) {
             G.edges.$[j].type = 1;
             G.edges.$[i].type = 1;
+            console.log("curved", [i, j]);
           } else {
             G.edges.$[i].type = 0;
           }

@@ -173,16 +173,16 @@ vec = {
 			v1 = G.edges.a[ix]
 			v2 = G.edges.b[ix]
 			e = G.edges.$[ix]
-			if v1 != v2 # not loop
-				vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1)
-				vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2)
-				if e.curved
-					calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
-				else
+			vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1)
+			vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2)
+			switch e.type
+				when 0 # strigt
 					calc.stright(e.v1, e.v2, e.norm)
 					calc.arrow(e.v2, e.arrow, e.norm)
-			else # loop
-				calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e)
+				when 1 # curved
+					calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
+				when 2 # loop
+					calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e)
 
 		if a is G.start
 			calc.start([G.nodes.x[a], G.nodes.y[a]], G.edges.start)
