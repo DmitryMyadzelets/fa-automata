@@ -127,7 +127,7 @@ Usefull links:
             if (!ev.shiftKey) {
               from.node_ix = node_ix;
               ctx.clearRect(0, 0, canvas.width, canvas.height);
-              draw_automaton(ctx, graph);
+              draw.automaton(ctx, graph);
               st = 2;
             } else {
               from.x = graph.nodes.x[node_ix];
@@ -170,7 +170,7 @@ Usefull links:
             st = 0;
         }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw_automaton(ctx, graph);
+        draw.automaton(ctx, graph);
         break;
       case 2:
         switch (eCode) {
@@ -198,11 +198,12 @@ Usefull links:
               y = graph.nodes.y[node_ix];
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_automaton(ctx, graph);
+            draw.automaton(ctx, graph);
             if (node_ix === from.node_ix) {
-              draw_loop(ctx, from.x, from.y);
+              console.log("FIX IT: > Decide automatically which edge is");
+              draw.loop(ctx, from.x, from.y);
             } else {
-              draw_fake_edge(ctx, faxy.get_fake_edge(from.x, from.y, x, y, is_new_edge));
+              draw.fake_edge(ctx, faxy.get_fake_edge(from.x, from.y, x, y, is_new_edge));
             }
             break;
           case 3:
@@ -217,12 +218,12 @@ Usefull links:
             }
             graph_is_changed = true;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_automaton(ctx, graph);
+            draw.automaton(ctx, graph);
             st = 0;
             break;
           default:
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_automaton(ctx, graph);
+            draw.automaton(ctx, graph);
             st = 0;
         }
         break;
@@ -233,19 +234,19 @@ Usefull links:
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.translate(x - from.x, y - from.y);
-            draw_automaton(ctx, graph);
+            draw.automaton(ctx, graph);
             ctx.restore();
             break;
           case 3:
             _ref5 = get_mouse_xy(ev), x = _ref5[0], y = _ref5[1];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_automaton(ctx, graph);
+            draw.automaton(ctx, graph);
             graph_is_changed = true;
             st = 0;
             break;
           default:
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_automaton(ctx, graph);
+            draw.automaton(ctx, graph);
             st = 0;
         }
         break;
@@ -255,7 +256,7 @@ Usefull links:
             _ref6 = get_mouse_xy(ev), x = _ref6[0], y = _ref6[1];
             editor.nodes.add(graph, x, y);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw_automaton(ctx, graph);
+            draw.automaton(ctx, graph);
             graph_is_changed = true;
             st = 0;
             break;
@@ -318,7 +319,7 @@ Usefull links:
       editor.edges.add(graph, node1, node2);
       editor.edges.add(graph, node2, node2);
     }
-    draw_automaton(ctx, graph);
+    draw.automaton(ctx, graph);
     return null;
   };
 
@@ -355,13 +356,13 @@ Usefull links:
         case 25:
           editor.redo();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw_automaton(ctx, graph);
+          draw.automaton(ctx, graph);
           save_graph(graph);
           break;
         case 26:
           editor.undo();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw_automaton(ctx, graph);
+          draw.automaton(ctx, graph);
           save_graph(graph);
       }
     }
@@ -373,13 +374,13 @@ Usefull links:
       case 46:
         editor.nodes.del(graph, graph.nodes.length - 1);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw_automaton(ctx, graph);
+        draw.automaton(ctx, graph);
         save_graph(graph);
         break;
       case 81:
         editor.edges.del(graph, graph.edges.length - 1);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw_automaton(ctx, graph);
+        draw.automaton(ctx, graph);
         break;
     }
     return null;

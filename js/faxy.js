@@ -3,6 +3,8 @@
   'use strict';
   var vec;
 
+  this.r = 16;
+
   vec = {
     create: function() {
       return new Float32Array([0, 0]);
@@ -47,67 +49,107 @@
   };
 
   this.faxy = (function($) {
-    var arrow, create_edge_data, curved, fake, fake_edge, start, stright, update_node, _this;
+    var calc, create_edge_data, fake_edge, update_node, _this;
 
-    arrow = function(to, a, n) {
-      a[0] = to[0];
-      a[1] = to[1];
-      a[2] = a[0] - (10 * n[0]) + (4 * n[1]);
-      a[3] = a[1] - (10 * n[1]) - (4 * n[0]);
-      a[4] = a[2] - (8 * n[1]);
-      a[5] = a[3] + (8 * n[0]);
-      return a;
-    };
-    stright = function(v1, v2, norm) {
-      var v;
+    calc = {
+      v: vec.create(),
+      stright: function(v1, v2, norm) {
+        vec.subtract(v2, v1, this.v);
+        vec.normalize(this.v, norm);
+        vec.scale(norm, r, this.v);
+        vec.add(v1, this.v, v1);
+        vec.subtract(v2, this.v, v2);
+        return null;
+      },
+      arrow: function(to, a, n) {
+        a[0] = to[0];
+        a[1] = to[1];
+        a[2] = a[0] - (10 * n[0]) + (4 * n[1]);
+        a[3] = a[1] - (10 * n[1]) - (4 * n[0]);
+        a[4] = a[2] - (8 * n[1]);
+        a[5] = a[3] + (8 * n[0]);
+        return a;
+      },
+      curved: function(v1, v2, norm, cv, _arrow) {
+        vec.subtract(v2, v1, this.v);
+        vec.normalize(this.v, norm);
+        cv[0] = (v1[0] + v2[0]) / 2 + norm[1] * 40;
+        cv[1] = (v1[1] + v2[1]) / 2 - norm[0] * 40;
+        vec.subtract(cv, v1, this.v);
+        vec.normalize(this.v, this.v);
+        vec.scale(this.v, r, this.v);
+        vec.add(v1, this.v, v1);
+        vec.subtract(v2, cv, this.v);
+        vec.normalize(this.v, this.v);
+        vec.scale(this.v, r, this.v);
+        vec.subtract(v2, this.v, v2);
+        vec.normalize(this.v, this.v);
+        this.arrow(v2, _arrow, this.v);
+        return null;
+      },
+      /**
+      		 * Constants for calculating a loop
+      */
 
-      v = vec.create();
-      vec.subtract(v2, v1, v);
-      vec.normalize(v, norm);
-      vec.scale(norm, r, v);
-      vec.add(v1, v, v1);
-      vec.subtract(v2, v, v2);
-      return null;
-    };
-    curved = function(v1, v2, norm, cv, _arrow) {
-      var v;
+      K: (function() {
+        var k;
 
-      v = vec.create();
-      vec.subtract(v2, v1, v);
-      vec.normalize(v, norm);
-      cv[0] = (v1[0] + v2[0]) / 2 + norm[1] * 40;
-      cv[1] = (v1[1] + v2[1]) / 2 - norm[0] * 40;
-      vec.subtract(cv, v1, v);
-      vec.normalize(v, v);
-      vec.scale(v, r, v);
-      vec.add(v1, v, v1);
-      vec.subtract(v2, cv, v);
-      vec.normalize(v, v);
-      vec.scale(v, r, v);
-      vec.subtract(v2, v, v2);
-      vec.normalize(v, v);
-      arrow(v2, _arrow, v);
-      return null;
-    };
-    fake = function(v1, v2, norm, is_new) {
-      var v;
+        k = {
+          ANGLE_FROM: Math.PI / 3,
+          ANGLE_TO: Math.PI / 12
+        };
+        k.DX1 = r * Math.cos(k.ANGLE_FROM);
+        k.DY1 = r * Math.sin(k.ANGLE_FROM);
+        k.DX2 = r * 4 * Math.cos(k.ANGLE_FROM);
+        k.DY2 = r * 4 * Math.sin(k.ANGLE_FROM);
+        k.DX3 = r * 4 * Math.cos(k.ANGLE_TO);
+        k.DY3 = r * 4 * Math.sin(k.ANGLE_TO);
+        k.DX4 = r * Math.cos(k.ANGLE_TO);
+        k.DY4 = r * Math.sin(k.ANGLE_TO);
+        k.NX = Math.cos(k.ANGLE_FROM - Math.PI / 24);
+        k.NY = Math.sin(k.ANGLE_FROM - Math.PI / 24);
+        return function(name) {
+          return k[name];
+        };
+      })(),
+      /**
+      		 * Calculates coordinates for drawing a loop
+      		 * @param  {[Number, Number]) v A node coordinates
+      		 * @param  {Object) $ Object of faxy.create_edge_data()
+      		 * @return {null}
+      */
 
-      v = vec.create();
-      vec.subtract(v2, v1, v);
-      vec.normalize(v, norm);
-      vec.scale(norm, r, v);
-      vec.add(v1, v, v1);
-      if (!is_new) {
-        vec.subtract(v2, v, v2);
+      loop: function(v, $) {
+        $.norm[0] = -this.K('NX');
+        $.norm[1] = this.K('NY');
+        $.v1[0] = v[0] + this.K('DX1');
+        $.v1[1] = v[1] - this.K('DY1');
+        $.cv[0] = v[0] + this.K('DX2');
+        $.cv[1] = v[1] - this.K('DY2');
+        $.cv[2] = v[0] + this.K('DX3');
+        $.cv[3] = v[1] - this.K('DY3');
+        $.v2[0] = v[0] + this.K('DX4');
+        $.v2[1] = v[1] - this.K('DY4');
+        this.arrow($.v1, $.arrow, $.norm);
+        return null;
+      },
+      fake: function(v1, v2, norm, is_new) {
+        vec.subtract(v2, v1, this.v);
+        vec.normalize(this.v, norm);
+        vec.scale(norm, r, this.v);
+        vec.add(v1, this.v, v1);
+        if (!is_new) {
+          vec.subtract(v2, this.v, v2);
+        }
+        return null;
+      },
+      start: function(v2, $) {
+        vec.copy(v2, $.v2);
+        vec.subtract(v2, [4 * r, 0], $.v1);
+        this.stright($.v1, $.v2, $.norm);
+        this.arrow($.v2, $.arrow, $.norm);
+        return null;
       }
-      return null;
-    };
-    start = function(v2, $) {
-      vec.copy(v2, $.v2);
-      vec.subtract(v2, [4 * r, 0], $.v1);
-      stright($.v1, $.v2, $.norm);
-      arrow($.v2, $.arrow, $.norm);
-      return null;
     };
     update_node = function(G, a) {
       var e, i, inout, ix, v1, v2;
@@ -123,26 +165,26 @@
           vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1);
           vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2);
           if (e.curved) {
-            curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
+            calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
           } else {
-            stright(e.v1, e.v2, e.norm);
-            arrow(e.v2, e.arrow, e.norm);
+            calc.stright(e.v1, e.v2, e.norm);
+            calc.arrow(e.v2, e.arrow, e.norm);
           }
         } else {
-          null;
+          calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e);
         }
       }
       if (a === G.start) {
-        start([G.nodes.x[a], G.nodes.y[a]], G.edges.start);
+        calc.start([G.nodes.x[a], G.nodes.y[a]], G.edges.start);
       }
       return null;
     };
     create_edge_data = function() {
       return {
-        curved: false,
+        type: 0,
         v1: vec.create(),
         v2: vec.create(),
-        cv: vec.create(),
+        cv: [vec.create(), vec.create()],
         norm: vec.create(),
         orth: vec.create(),
         arrow: [vec.create(), vec.create(), vec.create()]
@@ -168,8 +210,8 @@
       get_fake_edge: function(x1, y1, x2, y2, is_new) {
         vec.copy([x1, y1], fake_edge.v1);
         vec.copy([x2, y2], fake_edge.v2);
-        fake(fake_edge.v1, fake_edge.v2, fake_edge.norm, is_new);
-        arrow(fake_edge.v2, fake_edge.arrow, fake_edge.norm);
+        calc.fake(fake_edge.v1, fake_edge.v2, fake_edge.norm, is_new);
+        calc.arrow(fake_edge.v2, fake_edge.arrow, fake_edge.norm);
         return fake_edge;
       }
     };
@@ -199,9 +241,15 @@
       i = $.edges.add(G, a, b, args);
       if (i >= 0) {
         G.edges.$[i] = create_edge_data();
-        if (j >= 0) {
-          G.edges.$[j].curved = true;
-          G.edges.$[i].curved = true;
+        if (a === b) {
+          G.edges.$[i].type = 2;
+        } else {
+          if (j >= 0) {
+            G.edges.$[j].type = 1;
+            G.edges.$[i].type = 1;
+          } else {
+            G.edges.$[i].type = 0;
+          }
         }
       }
       update_node(G, a);
@@ -214,7 +262,7 @@
       b = G.edges.b[i];
       if ((ix = fa.edges.del(G, i)) >= 0) {
         if ((eix = fa.edges.has(G, b, a)) >= 0) {
-          G.edges.$[eix].curved = false;
+          G.edges.$[eix].type = 0;
           update_node(G, a);
         }
       }
