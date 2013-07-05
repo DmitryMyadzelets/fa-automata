@@ -105,58 +105,11 @@ empty_string = "\u03b5"
 		 * @param  {Number} y Coordinate of the node
 		 * @return {null}
 		###
-		# loop : (ctx, x, y) ->
 		loop : (ctx, v1, v2, cv) ->
-			# # Normalized vector for the first point
-			# # Fix: it is not normalized. It should be like that the back of the arrow
-			# # be divided in half by the loop line. Then, it depends on the size of 
-			# # the arrow at least. Empirically:
-			# nx = -loop_k.nx
-			# ny = loop_k.ny
-			# # Some Bazier calc (http://www.moshplant.com/direct-or/bezier/math.html).
-			# #
-			# # Orthogonal vector
-			# ox =  ny
-			# oy = -nx
-			# # Coordinates of the baizier curve (60 degrees angle)
-			# x1 = x + loop_k.dx1
-			# y1 = y - loop_k.dy1
-			# #
-			# k = 4*r
-			# x2 = x + loop_k.dx2
-			# y2 = y - loop_k.dy2
-			# #
-			# x3 = x + loop_k.dx3 # 15 degrees
-			# y3 = y - loop_k.dy3
-			# #
-			# x4 = x + loop_k.dx4
-			# y4 = y - loop_k.dy4
-			# Arrow coordinates 
-			# 10 - length of the arrow
-			# 8 - width of the arrow
-			#
-			# x5 = x1 - (10 * nx) + (4 * ox)
-			# y5 = y1 - (10 * ny) + (4 * oy)
-			# x6 = x5 - (8 * ox)
-			# y6 = y5 - (8 * oy)
-			# #
-			ctx.save()
-			ctx.fillStyle = cl_edge
-			ctx.strokeStyle = cl_edge
-			# Loop
 			ctx.beginPath()
 			ctx.moveTo(v1[0], v1[1])
 			ctx.bezierCurveTo(cv[0], cv[1], cv[2], cv[3], v2[0], v2[1])
 			ctx.stroke()
-			# # Arrow
-			# ctx.beginPath()
-			# ctx.moveTo(x1, y1)
-			# ctx.lineTo(x5, y5)
-			# ctx.lineTo(x6, y6)
-			# ctx.lineTo(x1, y1)
-			# ctx.stroke()
-			# ctx.fill()
-			ctx.restore()
 			null
 
 		###*
@@ -178,8 +131,17 @@ empty_string = "\u03b5"
 			ctx.save()
 			ctx.fillStyle = cl_edge
 			ctx.strokeStyle = cl_edge
-			_this.edge(ctx, o.v1, o.v2)
-			_this.arrow(ctx, o.arrow)
+			switch o.type
+				when 0 # stright 
+					_this.edge(ctx, o.v1, o.v2)
+					_this.arrow(ctx, o.arrow)
+				when 1 # curved
+					_this.curved(ctx, o.v1, o.v2, o.cv)
+					_this.arrow(ctx, o.arrow)
+				when 2 # loop
+					_this.loop(ctx, o.v1, o.v2, o.cv)
+					_this.arrow(ctx, o.arrow)
+
 			ctx.restore()
 			null
 
@@ -216,6 +178,7 @@ empty_string = "\u03b5"
 				y2 = G.nodes.y[v2]
 				# Edge graphical info
 				$ = G.edges.$[ix]
+				# _this.edge_type(ctx, $)
 				switch $.type
 					when 0 # stright 
 						_this.edge(ctx, $.v1, $.v2)

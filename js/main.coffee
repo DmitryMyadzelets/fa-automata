@@ -95,8 +95,8 @@ automata = (eCode, ev) ->
 						from.node_ix = node_ix
 						# selected.nodes.length = 0
 						# selected.nodes.push(node_ix)
-						ctx.clearRect(0, 0, canvas.width, canvas.height)
-						draw.automaton(ctx, graph)
+						# ctx.clearRect(0, 0, canvas.width, canvas.height)
+						# draw.automaton(ctx, graph)
 						# draw_selected(ctx, graph, selected)
 						st = 2
 					else 
@@ -112,6 +112,7 @@ automata = (eCode, ev) ->
 						from.x = x
 						from.y = y
 						st = 5
+
 		when 1 # Moving selected node
 			switch eCode
 				when 2 # move
@@ -144,24 +145,26 @@ automata = (eCode, ev) ->
 
 		when 3 # Creating a new edge to ...
 			[x, y] = get_mouse_xy(ev)
+			node_ix = nodeByXY(graph, x, y)
 			switch eCode
 				when 2 # moving
-					node_ix = nodeByXY(graph, x, y)
 					is_new_edge = node_ix < 0
-					if (!is_new_edge)
-						x = graph.nodes.x[node_ix]
-						y = graph.nodes.y[node_ix]
+					# if (!is_new_edge)
+					# 	x = graph.nodes.x[node_ix]
+					# 	y = graph.nodes.y[node_ix]
 					ctx.clearRect(0, 0, canvas.width, canvas.height)
 					draw.automaton(ctx, graph)
-					if node_ix == from.node_ix
-						console.log "FIX IT: > Decide automatically which edge is"
-						draw.loop(ctx, from.x, from.y)
-					else
-						draw.fake_edge(ctx
-							faxy.get_fake_edge(from.x, from.y, x, y, is_new_edge)
-							)
+					# if node_ix == from.node_ix
+					# 	console.log "FIX IT: > Decide automatically which edge is"
+					# 	draw.loop(ctx, from.x, from.y)
+					# else
+					# draw.fake_edge(ctx, from.node_ix, node_ix<0)
+					edge = faxy.get_fake_edge(graph, from.node_ix, node_ix, x, y)
+					draw.fake_edge(ctx
+						edge
+						# faxy.get_fake_edge(from.x, from.y, x, y, is_new_edge)
+						)
 				when 3 # up
-					node_ix = nodeByXY(graph, x, y)
 					if (node_ix < 0)
 						# Create a new node
 						editor.commands.start_transaction()

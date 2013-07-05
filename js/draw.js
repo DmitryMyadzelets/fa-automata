@@ -122,14 +122,10 @@
       */
 
       loop: function(ctx, v1, v2, cv) {
-        ctx.save();
-        ctx.fillStyle = cl_edge;
-        ctx.strokeStyle = cl_edge;
         ctx.beginPath();
         ctx.moveTo(v1[0], v1[1]);
         ctx.bezierCurveTo(cv[0], cv[1], cv[2], cv[3], v2[0], v2[1]);
         ctx.stroke();
-        ctx.restore();
         return null;
       },
       /**
@@ -152,8 +148,19 @@
         ctx.save();
         ctx.fillStyle = cl_edge;
         ctx.strokeStyle = cl_edge;
-        _this.edge(ctx, o.v1, o.v2);
-        _this.arrow(ctx, o.arrow);
+        switch (o.type) {
+          case 0:
+            _this.edge(ctx, o.v1, o.v2);
+            _this.arrow(ctx, o.arrow);
+            break;
+          case 1:
+            _this.curved(ctx, o.v1, o.v2, o.cv);
+            _this.arrow(ctx, o.arrow);
+            break;
+          case 2:
+            _this.loop(ctx, o.v1, o.v2, o.cv);
+            _this.arrow(ctx, o.arrow);
+        }
         ctx.restore();
         return null;
       },

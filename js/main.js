@@ -116,7 +116,7 @@ Usefull links:
   };
 
   automata = function(eCode, ev) {
-    var dx, dy, is_new_edge, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+    var dx, dy, edge, is_new_edge, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
 
     switch (ost = st) {
       case 0:
@@ -126,8 +126,6 @@ Usefull links:
           if (node_ix >= 0) {
             if (!ev.shiftKey) {
               from.node_ix = node_ix;
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              draw.automaton(ctx, graph);
               st = 2;
             } else {
               from.x = graph.nodes.x[node_ix];
@@ -189,25 +187,16 @@ Usefull links:
         break;
       case 3:
         _ref3 = get_mouse_xy(ev), x = _ref3[0], y = _ref3[1];
+        node_ix = nodeByXY(graph, x, y);
         switch (eCode) {
           case 2:
-            node_ix = nodeByXY(graph, x, y);
             is_new_edge = node_ix < 0;
-            if (!is_new_edge) {
-              x = graph.nodes.x[node_ix];
-              y = graph.nodes.y[node_ix];
-            }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             draw.automaton(ctx, graph);
-            if (node_ix === from.node_ix) {
-              console.log("FIX IT: > Decide automatically which edge is");
-              draw.loop(ctx, from.x, from.y);
-            } else {
-              draw.fake_edge(ctx, faxy.get_fake_edge(from.x, from.y, x, y, is_new_edge));
-            }
+            edge = faxy.get_fake_edge(graph, from.node_ix, node_ix, x, y);
+            draw.fake_edge(ctx, edge);
             break;
           case 3:
-            node_ix = nodeByXY(graph, x, y);
             if (node_ix < 0) {
               editor.commands.start_transaction();
               node_ix = editor.nodes.add(graph, x, y);

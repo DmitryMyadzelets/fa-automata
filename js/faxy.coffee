@@ -162,6 +162,16 @@ vec = {
 			null
 	}
 
+	update_edge = (G, e, v2) ->
+		switch e.type
+			when 0 # strigt
+				calc.stright(e.v1, e.v2, e.norm)
+				calc.arrow(e.v2, e.arrow, e.norm)
+			when 1 # curved
+				calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
+			when 2 # loop
+				calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e)
+		e
 
 	# Updates coordinates related to the node 'a'
 	update_node = (G, a) ->
@@ -175,14 +185,7 @@ vec = {
 			e = G.edges.$[ix]
 			vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1)
 			vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2)
-			switch e.type
-				when 0 # strigt
-					calc.stright(e.v1, e.v2, e.norm)
-					calc.arrow(e.v2, e.arrow, e.norm)
-				when 1 # curved
-					calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
-				when 2 # loop
-					calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e)
+			update_edge(G, e, v2)
 
 		if a is G.start
 			calc.start([G.nodes.x[a], G.nodes.y[a]], G.edges.start)
@@ -203,6 +206,24 @@ vec = {
 				vec.create()
 				vec.create()]		# Arrow coordinates 
 		}
+
+	###*
+	 * Calculates geometric type of the edge
+	 * @param  {Graph} G
+	 * @param  {int} a Index of "from" node
+	 * @param  {int} b Index of "to" node
+	 * @param  {boolean} b2a True if exists an edge from b to a
+	 * @return {int}   (0-straight, 1-curved, 2-loop)
+	###
+	get_edge_type = (a, b, b2a) ->
+		ret = 0
+		if a == b 
+			ret = 2
+		else
+			if b2a
+				ret = 1
+		ret
+
 
 	# 
 	# Private members
@@ -232,12 +253,22 @@ vec = {
 	nodes : Object.create($.nodes)
 	edges : Object.create($.edges)
 
-	get_fake_edge : (x1, y1, x2, y2, is_new) ->
-		vec.copy([x1, y1], fake_edge.v1)
-		vec.copy([x2, y2], fake_edge.v2)
-		calc.fake(fake_edge.v1, fake_edge.v2, fake_edge.norm, is_new)
-		calc.arrow(fake_edge.v2, fake_edge.arrow, fake_edge.norm)
+	get_fake_edge : (G, a, b, x, y) ->
+		fake_edge.type = get_edge_type(a, b, false)
+		vec.copy([G.nodes.x[a], G.nodes.y[a]], fake_edge.v1)
+		if b < 0
+			vec.copy([x, y], fake_edge.v2)
+		else
+			vec.copy([G.nodes.x[b], G.nodes.y[b]], fake_edge.v2)
+		update_edge(G, fake_edge, b)
 		fake_edge
+
+	# get_fake_edge : (x1, y1, x2, y2, is_new) ->
+	# 	vec.copy([x1, y1], fake_edge.v1)
+	# 	vec.copy([x2, y2], fake_edge.v2)
+	# 	calc.fake(fake_edge.v1, fake_edge.v2, fake_edge.norm, is_new)
+	# 	calc.arrow(fake_edge.v2, fake_edge.arrow, fake_edge.norm)
+	# 	fake_edge
 
 	}
 
@@ -260,14 +291,10 @@ vec = {
 		i = $.edges.add(G, a, b, args)
 		if i>=0
 			G.edges.$[i] = create_edge_data()
-			if a == b 
-				G.edges.$[i].type = 2 # loop type
-			else
-				if j>=0
-					G.edges.$[j].type = 1 # curved type
-					G.edges.$[i].type = 1
-				else
-					G.edges.$[i].type = 0 # stright type
+			# Specifying the edge type
+			type = get_edge_type(a, b, j>=0)
+			G.edges.$[i].type = type
+			G.edges.$[j].type = type if j>=0
 		update_node(G, a)
 		i
 

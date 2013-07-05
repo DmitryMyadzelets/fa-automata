@@ -63,8 +63,8 @@
 					v : []		# Values
 				}
 				edges : {		# Edges
-					a : []		# index of from-node
-					b : []		# index of to-node
+					a : []		# index of 'from' in nodes.v[]
+					b : []		# index of 'to' in nodes.v[]
 					v : []		# Values
 				}
 			}
