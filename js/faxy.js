@@ -49,16 +49,30 @@
   };
 
   this.faxy = (function($) {
-    var calc, create_edge_data, fake_edge, get_edge_type, update_edge, update_node, _this;
+    var calc, create_edge_data, fake_edge, get_edge_type, update_node, _this;
 
     calc = {
       v: vec.create(),
-      stright: function(v1, v2, norm) {
+      /**
+      		 * Calculates edge parameters
+      		 * @param  {[vec]} v1       ['from' vector]
+      		 * @param  {[vec]} v2       ['to' vector]
+      		 * @param  {[vec]} norm     [normal vector]
+      		 * @param  {boolean} subtract [True if need to substractthe second node radius]
+      		 * @return {null}          []
+      */
+
+      stright: function(v1, v2, norm, subtract) {
+        if (subtract == null) {
+          subtract = true;
+        }
         vec.subtract(v2, v1, this.v);
         vec.normalize(this.v, norm);
         vec.scale(norm, r, this.v);
         vec.add(v1, this.v, v1);
-        vec.subtract(v2, this.v, v2);
+        if (subtract) {
+          vec.subtract(v2, this.v, v2);
+        }
         return null;
       },
       arrow: function(to, a, n) {
@@ -133,16 +147,6 @@
         this.arrow($.v1, $.arrow, $.norm);
         return null;
       },
-      fake: function(v1, v2, norm, is_new) {
-        vec.subtract(v2, v1, this.v);
-        vec.normalize(this.v, norm);
-        vec.scale(norm, r, this.v);
-        vec.add(v1, this.v, v1);
-        if (!is_new) {
-          vec.subtract(v2, this.v, v2);
-        }
-        return null;
-      },
       start: function(v2, $) {
         vec.copy(v2, $.v2);
         vec.subtract(v2, [4 * r, 0], $.v1);
@@ -150,20 +154,6 @@
         this.arrow($.v2, $.arrow, $.norm);
         return null;
       }
-    };
-    update_edge = function(G, e, v2) {
-      switch (e.type) {
-        case 0:
-          calc.stright(e.v1, e.v2, e.norm);
-          calc.arrow(e.v2, e.arrow, e.norm);
-          break;
-        case 1:
-          calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
-          break;
-        case 2:
-          calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e);
-      }
-      return e;
     };
     update_node = function(G, a) {
       var e, i, inout, ix, v1, v2;
@@ -177,7 +167,17 @@
         e = G.edges.$[ix];
         vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1);
         vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2);
-        update_edge(G, e, v2);
+        switch (e.type) {
+          case 0:
+            calc.stright(e.v1, e.v2, e.norm);
+            calc.arrow(e.v2, e.arrow, e.norm);
+            break;
+          case 1:
+            calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
+            break;
+          case 2:
+            calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e);
+        }
       }
       if (a === G.start) {
         calc.start([G.nodes.x[a], G.nodes.y[a]], G.edges.start);
@@ -235,15 +235,25 @@
       nodes: Object.create($.nodes),
       edges: Object.create($.edges),
       get_fake_edge: function(G, a, b, x, y) {
-        fake_edge.type = get_edge_type(a, b, false);
-        vec.copy([G.nodes.x[a], G.nodes.y[a]], fake_edge.v1);
+        var e;
+
+        e = fake_edge;
+        e.type = get_edge_type(a, b, false);
+        vec.copy([G.nodes.x[a], G.nodes.y[a]], e.v1);
         if (b < 0) {
-          vec.copy([x, y], fake_edge.v2);
+          vec.copy([x, y], e.v2);
+          calc.stright(e.v1, e.v2, e.norm, false);
+          calc.arrow(e.v2, e.arrow, e.norm);
         } else {
-          vec.copy([G.nodes.x[b], G.nodes.y[b]], fake_edge.v2);
+          if (e.type === 2) {
+            calc.loop([G.nodes.x[a], G.nodes.y[a]], e);
+          } else {
+            vec.copy([G.nodes.x[b], G.nodes.y[b]], e.v2);
+            calc.stright(e.v1, e.v2, e.norm, true);
+            calc.arrow(e.v2, e.arrow, e.norm);
+          }
         }
-        update_edge(G, fake_edge, b);
-        return fake_edge;
+        return e;
       }
     };
     _this.nodes.add = function(G, x, y) {

@@ -52,12 +52,21 @@ vec = {
 	calc = {
 		v : vec.create() # vector as a buffer for calculations
 
-		stright : (v1, v2, norm) ->
+		###*
+		 * Calculates edge parameters
+		 * @param  {[vec]} v1       ['from' vector]
+		 * @param  {[vec]} v2       ['to' vector]
+		 * @param  {[vec]} norm     [normal vector]
+		 * @param  {boolean} subtract [True if need to substractthe second node radius]
+		 * @return {null}          []
+		###
+		stright : (v1, v2, norm, subtract=true) ->
 			vec.subtract(v2, v1, @v)	# v = v2 - v1
 			vec.normalize(@v, norm)		# norm = normalized v
 			vec.scale(norm, r, @v)		# v = norm * r
 			vec.add(v1, @v, v1)			# v1 = v1 + v
-			vec.subtract(v2, @v, v2)	# v2 = v2 - v
+			if subtract
+				vec.subtract(v2, @v, v2)	# v2 = v2 - v
 			null
 
 		arrow : (to, a, n) ->
@@ -145,15 +154,6 @@ vec = {
 			@arrow($.v1, $.arrow, $.norm)
 			null
 
-		fake : (v1, v2, norm, is_new) ->
-			vec.subtract(v2, v1, @v)	# v = v2 - v1
-			vec.normalize(@v, norm)		# norm = normalized v
-			vec.scale(norm, r, @v)		# v = norm * r
-			vec.add(v1, @v, v1)			# v1 = v1 + v
-			if not is_new
-				vec.subtract(v2, @v, v2)# v2 = v2 - v
-			null
-
 		start : (v2, $) ->
 			vec.copy(v2, $.v2)
 			vec.subtract(v2, [4*r, 0], $.v1)
@@ -162,16 +162,6 @@ vec = {
 			null
 	}
 
-	update_edge = (G, e, v2) ->
-		switch e.type
-			when 0 # strigt
-				calc.stright(e.v1, e.v2, e.norm)
-				calc.arrow(e.v2, e.arrow, e.norm)
-			when 1 # curved
-				calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
-			when 2 # loop
-				calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e)
-		e
 
 	# Updates coordinates related to the node 'a'
 	update_node = (G, a) ->
@@ -185,7 +175,14 @@ vec = {
 			e = G.edges.$[ix]
 			vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1)
 			vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2)
-			update_edge(G, e, v2)
+			switch e.type
+				when 0 # strigt
+					calc.stright(e.v1, e.v2, e.norm)
+					calc.arrow(e.v2, e.arrow, e.norm)
+				when 1 # curved
+					calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
+				when 2 # loop
+					calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e)
 
 		if a is G.start
 			calc.start([G.nodes.x[a], G.nodes.y[a]], G.edges.start)
@@ -242,11 +239,13 @@ vec = {
 		_this.extend(G)
 		G
 
+
 	extend : (G) ->
 		G.nodes.x = []
 		G.nodes.y = []
-		G.edges.$ = []	# Edge graphical extention
+		G.edges.$ = []	# Edge graphical exstention
 		G.edges.start = create_edge_data()
+
 
 	# Create separete objects of nodes and edges.
 	# Otherwise you would override methods 'fa.nodes.add' and etc.
@@ -254,21 +253,21 @@ vec = {
 	edges : Object.create($.edges)
 
 	get_fake_edge : (G, a, b, x, y) ->
-		fake_edge.type = get_edge_type(a, b, false)
-		vec.copy([G.nodes.x[a], G.nodes.y[a]], fake_edge.v1)
-		if b < 0
-			vec.copy([x, y], fake_edge.v2)
+		e = fake_edge
+		e.type = get_edge_type(a, b, false)
+		vec.copy([G.nodes.x[a], G.nodes.y[a]], e.v1)
+		if b < 0 # edge to the mouse point
+			vec.copy([x, y], e.v2)
+			calc.stright(e.v1, e.v2, e.norm, false)
+			calc.arrow(e.v2, e.arrow, e.norm)
 		else
-			vec.copy([G.nodes.x[b], G.nodes.y[b]], fake_edge.v2)
-		update_edge(G, fake_edge, b)
-		fake_edge
-
-	# get_fake_edge : (x1, y1, x2, y2, is_new) ->
-	# 	vec.copy([x1, y1], fake_edge.v1)
-	# 	vec.copy([x2, y2], fake_edge.v2)
-	# 	calc.fake(fake_edge.v1, fake_edge.v2, fake_edge.norm, is_new)
-	# 	calc.arrow(fake_edge.v2, fake_edge.arrow, fake_edge.norm)
-	# 	fake_edge
+			if e.type == 2 # loop
+				calc.loop([G.nodes.x[a], G.nodes.y[a]], e)
+			else
+				vec.copy([G.nodes.x[b], G.nodes.y[b]], e.v2)
+				calc.stright(e.v1, e.v2, e.norm, true)
+				calc.arrow(e.v2, e.arrow, e.norm)
+		e
 
 	}
 

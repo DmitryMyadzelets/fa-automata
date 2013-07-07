@@ -116,7 +116,7 @@ Usefull links:
   };
 
   automata = function(eCode, ev) {
-    var dx, dy, edge, is_new_edge, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+    var dx, dy, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
 
     switch (ost = st) {
       case 0:
@@ -190,11 +190,9 @@ Usefull links:
         node_ix = nodeByXY(graph, x, y);
         switch (eCode) {
           case 2:
-            is_new_edge = node_ix < 0;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             draw.automaton(ctx, graph);
-            edge = faxy.get_fake_edge(graph, from.node_ix, node_ix, x, y);
-            draw.fake_edge(ctx, edge);
+            draw.fake_edge(ctx, faxy.get_fake_edge(graph, from.node_ix, node_ix, x, y));
             break;
           case 3:
             if (node_ix < 0) {

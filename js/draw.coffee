@@ -98,6 +98,7 @@ empty_string = "\u03b5"
 			ctx.fill()
 			null
 
+
 		###*
 		 * Draws a loop edge
 		 * @param  {canvas} ctx
@@ -112,6 +113,7 @@ empty_string = "\u03b5"
 			ctx.stroke()
 			null
 
+
 		###*
 		 * The above functions are structure-independent.
 		 * The below functions are dependent on the automaton structure
@@ -122,15 +124,9 @@ empty_string = "\u03b5"
 		 * Draws an edge
 		 * @param  {canvas} ctx
 		 * @param  {Object} o Parameters of the edge
-		 * 						o.v1 vector 'from'
-		 * 						o.v2 vector 'to'
-		 * 						o.arrow
 		 * @return {null}
 		###
-		fake_edge : (ctx, o) ->
-			ctx.save()
-			ctx.fillStyle = cl_edge
-			ctx.strokeStyle = cl_edge
+		any_edge : (ctx, o) ->
 			switch o.type
 				when 0 # stright 
 					_this.edge(ctx, o.v1, o.v2)
@@ -142,8 +138,23 @@ empty_string = "\u03b5"
 					_this.loop(ctx, o.v1, o.v2, o.cv)
 					_this.arrow(ctx, o.arrow)
 
+			null
+
+
+		###*
+		 * Draws a fake edge
+		 * @param  {canvas} ctx
+		 * @param  {Object} o Parameters of the edge
+		 * @return {null}
+		###
+		fake_edge : (ctx, o) ->
+			ctx.save()
+			ctx.fillStyle = cl_edge
+			ctx.strokeStyle = cl_edge
+			_this.any_edge(ctx, o)
 			ctx.restore()
 			null
+
 
 		###*
 		 * Draws automaton graph on canvas
@@ -178,22 +189,16 @@ empty_string = "\u03b5"
 				y2 = G.nodes.y[v2]
 				# Edge graphical info
 				$ = G.edges.$[ix]
-				# _this.edge_type(ctx, $)
+				_this.any_edge(ctx, $)
+				# Calculate the event label coordinates
 				switch $.type
 					when 0 # stright 
-						_this.edge(ctx, $.v1, $.v2)
-						_this.arrow(ctx, $.arrow)
 						x = x1 + (x2-x1)/2 + 0.5*r*$.norm[1]
 						y = y1 + (y2-y1)/2 - 0.5*r*$.norm[0]
 					when 1 # curved
-						_this.curved(ctx, $.v1, $.v2, $.cv)
-						_this.arrow(ctx, $.arrow)
-						# Label coordinates
 						x = $.cv[0] + (-5)*$.norm[1]
 						y = $.cv[1] - (-5)*$.norm[0]
-					when 2 # loop
-						_this.loop(ctx, $.v1, $.v2, $.cv)
-						_this.arrow(ctx, $.arrow)
+					else # 2, loop
 						x = x1 + 2*r
 						y = y1 - 3*r
 

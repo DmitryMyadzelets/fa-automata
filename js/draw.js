@@ -138,16 +138,10 @@
       		 * Draws an edge
       		 * @param  {canvas} ctx
       		 * @param  {Object} o Parameters of the edge
-      		 * 						o.v1 vector 'from'
-      		 * 						o.v2 vector 'to'
-      		 * 						o.arrow
       		 * @return {null}
       */
 
-      fake_edge: function(ctx, o) {
-        ctx.save();
-        ctx.fillStyle = cl_edge;
-        ctx.strokeStyle = cl_edge;
+      any_edge: function(ctx, o) {
         switch (o.type) {
           case 0:
             _this.edge(ctx, o.v1, o.v2);
@@ -161,6 +155,20 @@
             _this.loop(ctx, o.v1, o.v2, o.cv);
             _this.arrow(ctx, o.arrow);
         }
+        return null;
+      },
+      /**
+      		 * Draws a fake edge
+      		 * @param  {canvas} ctx
+      		 * @param  {Object} o Parameters of the edge
+      		 * @return {null}
+      */
+
+      fake_edge: function(ctx, o) {
+        ctx.save();
+        ctx.fillStyle = cl_edge;
+        ctx.strokeStyle = cl_edge;
+        _this.any_edge(ctx, o);
         ctx.restore();
         return null;
       },
@@ -191,22 +199,17 @@
           x2 = G.nodes.x[v2];
           y2 = G.nodes.y[v2];
           $ = G.edges.$[ix];
+          _this.any_edge(ctx, $);
           switch ($.type) {
             case 0:
-              _this.edge(ctx, $.v1, $.v2);
-              _this.arrow(ctx, $.arrow);
               x = x1 + (x2 - x1) / 2 + 0.5 * r * $.norm[1];
               y = y1 + (y2 - y1) / 2 - 0.5 * r * $.norm[0];
               break;
             case 1:
-              _this.curved(ctx, $.v1, $.v2, $.cv);
-              _this.arrow(ctx, $.arrow);
               x = $.cv[0] + (-5) * $.norm[1];
               y = $.cv[1] - (-5) * $.norm[0];
               break;
-            case 2:
-              _this.loop(ctx, $.v1, $.v2, $.cv);
-              _this.arrow(ctx, $.arrow);
+            default:
               x = x1 + 2 * r;
               y = y1 - 3 * r;
           }
