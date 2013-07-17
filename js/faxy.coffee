@@ -246,7 +246,6 @@ vec = {
 		G.nodes.y = []
 		G.edges.$ = []	# Edge graphical exstention
 		G.edges.start = create_edge_data()
-		console.log G.nodes
 		null
 
 
@@ -301,13 +300,13 @@ vec = {
 	_this.edges.del = (G, i) ->
 		a = G.edges.a[i]
 		b = G.edges.b[i]
-		if (ix = fa.edges.del(G, i)) >= 0
-			if (eix = fa.edges.has(G, b, a)) >= 0
+		if (ix = automata.edges.del(G, i)) >= 0
+			if (eix = automata.edges.has(G, b, a)) >= 0
 				G.edges.$[eix].type = 0
 				update_node(G, a)
 		ix
 
 	_this # returns the object with public methods
-)(fa)
+)(automata)
 
 

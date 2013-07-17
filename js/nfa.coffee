@@ -4,70 +4,67 @@
 #  Class for Finite Automata
 #
 # Make IE8 support Object.create() function
-if typeof Object.create != 'function'
-	Object.create = (o) ->
-		F = () -> {}
-		F.prototype = o
-		new F()
+# if typeof Object.create != 'function'
+# 	Object.create = (o) ->
+# 		F = () -> {}
+# 		F.prototype = o
+# 		new F()
 
 
-@.fa = Object.create(digraph)
+# @.fa = Object.create(digraph)
 
 
-fa.extend = (G) ->
-	G.start = 0 	# Initial state
-	G.events = {	# Events 
-		v : []		# Alphabet set. The values must be unique
-	}
-	G.edges.event = []
-	G
+# fa.extend = (G) ->
+# 	# G.start = 0 	# Initial state
+# 	# G.edges.event = []
+# 	G
 
 
-fa.create = () ->
-	G = digraph.create()
-	fa.extend(G)
+# fa.create = () ->
+# 	G = digraph.create()
+# 	fa.extend(G)
 
 
-fa.events = {
-	###*
-	 * Adds an event into alphabet (to the end or to the index 'i')
-	 * @param {fa class} G Automaton
-	 * @param {string} v Event label
-	 * @param {int} i Index of the array
-	###
-	add : (G, v, i) ->
-		return -1 if not v?
-		return ix if (ix = G.events.v.indexOf(v)) >= 0
-		if not i?
-			i = fa.for_arrays_of(G.events, ((arr) -> arr.push(null)))-1
-		else
-			fa.for_arrays_of(G.events, ((arr) -> fa.ins(arr, i)))
-		G.events.v[i] = v
-		i
+# fa.events = {
+# 	###*
+# 	 * Adds an event into alphabet (to the end or to the index 'i')
+# 	 * @param {fa class} G Automaton
+# 	 * @param {string} v Event label
+# 	 * @param {int} i Index of the array
+# 	###
+# 	add : (G, v, i) ->
+# 		return -1 if not v?
+# 		return ix if (ix = G.events.v.indexOf(v)) >= 0
+# 		if not i?
+# 			i = fa.for_arrays_of(G.events, ((arr) -> arr.push(null)))-1
+# 		else
+# 			fa.for_arrays_of(G.events, ((arr) -> fa.ins(arr, i)))
+# 		G.events.v[i] = v
+# 		i
 
-	del : (G, i) ->
-		fa.for_arrays_of(G.events, fa.del, i)
-}
+# 	del : (G, i) ->
+# 		fa.for_arrays_of(G.events, fa.del, i)
+# }
 
 
 # Breadth-first Search
-fa.BFS = (G) ->
-	stack = [G.start]
-	visited = [G.start]
-	while stack.length
-		a = stack.pop()
-		# Get edges going out of the node 'a'
-		E = @.edges.out(G, a)
-		for e in E
-			# Get nodes reachabe by the edge 'e'
-			b = G.edges.b[e]
-			if b not in visited
-				visited.push(b)
-				stack.push(b)
-			# Do something here
-			# G.edges.v[e]
-			console.log a,"->", b
-	null
+# fa.BFS = (G) ->
+# 	stack = [G.start]
+# 	visited = [G.start]
+# 	while stack.length
+# 		a = stack.pop()
+# 		# Get edges going out of the node 'a'
+# 		E = @.edges.out(G, a)
+# 		for e in E
+# 			# Get nodes reachabe by the edge 'e'
+# 			b = G.edges.b[e]
+# 			if b not in visited
+# 				visited.push(b)
+# 				stack.push(b)
+# 			# Do something here
+# 			# G.edges.v[e]
+# 			console.log a,"->", b
+# 	null
 
 
 ### TODO:

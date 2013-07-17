@@ -231,7 +231,6 @@
         G.nodes.y = [];
         G.edges.$ = [];
         G.edges.start = create_edge_data();
-        console.log(G.nodes);
         return null;
       },
       nodes: Object.create($.nodes),
@@ -296,8 +295,8 @@
 
       a = G.edges.a[i];
       b = G.edges.b[i];
-      if ((ix = fa.edges.del(G, i)) >= 0) {
-        if ((eix = fa.edges.has(G, b, a)) >= 0) {
+      if ((ix = automata.edges.del(G, i)) >= 0) {
+        if ((eix = automata.edges.has(G, b, a)) >= 0) {
           G.edges.$[eix].type = 0;
           update_node(G, a);
         }
@@ -305,6 +304,6 @@
       return ix;
     };
     return _this;
-  })(fa);
+  })(automata);
 
 }).call(this);

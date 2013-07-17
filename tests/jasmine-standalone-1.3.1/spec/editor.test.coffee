@@ -7,7 +7,7 @@ describe "Graph Editor", ->
 # 		expect(ged.execute).toBeDefined
 
 	it "Can create an instance of graph", ->
-		expect(digraph.create()).toBeDefined
+		expect(automata.create()).toBeDefined
 
 	describe "Undo|Redo when adds nodes", ->
 		g = faxy.create()
@@ -42,7 +42,7 @@ describe "Graph Editor", ->
 		g = faxy.create()
 		ged.reset()
 
-		it "Ads 2 nodes, has 2 nodes", ->
+		it "Adds 2 nodes, has 2 nodes", ->
 			expect(ged.nodes.add(g)).toBe(0)
 			expect(ged.nodes.add(g)).toBe(1)
 			expect(g.nodes.length).toBe(2)
@@ -54,14 +54,17 @@ describe "Graph Editor", ->
 			expect(ged.edges.add(g, 1, 1)).toBe(1)
 
 		it "Delets edge 1 to 2", ->
+			console.log g.edges.a, g.edges.b
 			expect(ged.edges.del(g, 0)).toBe(0)
 
 		it "Has 1 edge", ->
+			console.log g.edges.a, g.edges.b
 			expect(g.edges.length).toBe(1)
 
 		it "Executes Undo, has 2 edges", ->
 			expect(ged.undo()).toBe(true)
 			expect(g.edges.length).toBe(2)
+			console.log g.edges.a, g.edges.b
 
 		it "And the first edge is from 1 to 2", ->
 			expect((g.edges.a[0] == 0) and (g.edges.b[0] == 1)).toBe(true)
@@ -92,6 +95,8 @@ describe "Graph Editor", ->
 			expect(g.edges.length).toBe(0)
 
 		it "Undo, has 2 nodes, 1 edge", ->
+			console.log g.nodes
+			console.log g.edges
 			expect(ged.undo()).toBe(true)
 			expect(g.nodes.length).toBe(2)
 			expect(g.edges.length).toBe(1)
