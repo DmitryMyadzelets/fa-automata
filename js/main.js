@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var automata, canvas, ctx, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, tout, x, y;
+  var automata, canvas, ctx, edit, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
 
   x = y = 0;
 
@@ -19,6 +19,8 @@ Usefull links:
   canvas = null;
 
   this.graph = faxy.create();
+
+  text_editor = null;
 
   /*
   ===============================================================================
@@ -307,6 +309,22 @@ Usefull links:
       editor.edges.add(graph, node2, node2);
     }
     draw.automaton(ctx, graph);
+    text_editor = document.getElementById("label_editor2");
+    text_editor.onfocus = function() {
+      text_editor.value = "some text";
+      console.log("onfocus");
+      return null;
+    };
+    text_editor.onblur = function() {
+      text_editor.value = "";
+      text_editor.style.display = "none";
+      console.log("offocus");
+      return null;
+    };
+    text_editor.oninput = function() {
+      console.log(text_editor.value);
+      return null;
+    };
     return null;
   };
 

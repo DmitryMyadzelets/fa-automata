@@ -52,23 +52,6 @@ vec = {
 	calc = {
 		v : vec.create() # vector as a buffer for calculations
 
-		###*
-		 * Calculates edge parameters
-		 * @param  {[vec]} v1       ['from' vector]
-		 * @param  {[vec]} v2       ['to' vector]
-		 * @param  {[vec]} norm     [normal vector]
-		 * @param  {boolean} subtract [True if need to substractthe second node radius]
-		 * @return {null}          []
-		###
-		stright : (v1, v2, norm, subtract=true) ->
-			vec.subtract(v2, v1, @v)	# v = v2 - v1
-			vec.normalize(@v, norm)		# norm = normalized v
-			vec.scale(norm, r, @v)		# v = norm * r
-			vec.add(v1, @v, v1)			# v1 = v1 + v
-			if subtract
-				vec.subtract(v2, @v, v2)	# v2 = v2 - v
-			null
-
 		arrow : (to, a, n) ->
 			# 10 - length of the arrow
 			# 8 - width of the arrow
@@ -79,6 +62,24 @@ vec = {
 			a[4] = a[2] - (8 * n[1])
 			a[5] = a[3] + (8 * n[0])
 			a
+
+		###*
+		 * Calculates edge parameters
+		 * @param  {[vec]} v1       ['from' vector]
+		 * @param  {[vec]} v2       ['to' vector]
+		 * @param  {[vec]} norm     [normal vector]
+		 * @param  {boolean} subtract [True if need to substractthe second node radius]
+		 * @return {null}          []
+		###
+		stright : (v1, v2, norm, $, subtract=true) ->
+			vec.subtract(v2, v1, @v)	# v = v2 - v1
+			vec.normalize(@v, norm)		# norm = normalized v
+			vec.scale(norm, r, @v)		# v = norm * r
+			vec.add(v1, @v, v1)			# v1 = v1 + v
+			if subtract
+				vec.subtract(v2, @v, v2)	# v2 = v2 - v
+			@arrow(v2, $.arrow, norm)
+			null
 
 		curved : (v1, v2, norm, cv, _arrow) ->
 			# Calc normalized vector
@@ -157,7 +158,7 @@ vec = {
 		start : (v2, $) ->
 			vec.copy(v2, $.v2)
 			vec.subtract(v2, [4*r, 0], $.v1)
-			@stright($.v1, $.v2, $.norm)
+			@stright($.v1, $.v2, $.norm, $)
 			@arrow($.v2, $.arrow, $.norm)
 			null
 	}
@@ -175,10 +176,10 @@ vec = {
 			e = G.edges.$[ix]
 			vec.copy([G.nodes.x[v1], G.nodes.y[v1]], e.v1)
 			vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2)
+			# Update edge coordinates
 			switch e.type
 				when 0 # strigt
-					calc.stright(e.v1, e.v2, e.norm)
-					calc.arrow(e.v2, e.arrow, e.norm)
+					calc.stright(e.v1, e.v2, e.norm, e)
 				when 1 # curved
 					calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
 				when 2 # loop
@@ -245,6 +246,8 @@ vec = {
 		G.nodes.y = []
 		G.edges.$ = []	# Edge graphical exstention
 		G.edges.start = create_edge_data()
+		console.log G.nodes
+		null
 
 
 	# Create separete objects of nodes and edges.
@@ -258,15 +261,13 @@ vec = {
 		vec.copy([G.nodes.x[a], G.nodes.y[a]], e.v1)
 		if b < 0 # edge to the mouse point
 			vec.copy([x, y], e.v2)
-			calc.stright(e.v1, e.v2, e.norm, false)
-			calc.arrow(e.v2, e.arrow, e.norm)
+			calc.stright(e.v1, e.v2, e.norm, e, false)
 		else
 			if e.type == 2 # loop
 				calc.loop([G.nodes.x[a], G.nodes.y[a]], e)
 			else
 				vec.copy([G.nodes.x[b], G.nodes.y[b]], e.v2)
-				calc.stright(e.v1, e.v2, e.norm, true)
-				calc.arrow(e.v2, e.arrow, e.norm)
+				calc.stright(e.v1, e.v2, e.norm, e, true)
 		e
 
 	}

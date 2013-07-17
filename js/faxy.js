@@ -53,6 +53,15 @@
 
     calc = {
       v: vec.create(),
+      arrow: function(to, a, n) {
+        a[0] = to[0];
+        a[1] = to[1];
+        a[2] = a[0] - (10 * n[0]) + (4 * n[1]);
+        a[3] = a[1] - (10 * n[1]) - (4 * n[0]);
+        a[4] = a[2] - (8 * n[1]);
+        a[5] = a[3] + (8 * n[0]);
+        return a;
+      },
       /**
       		 * Calculates edge parameters
       		 * @param  {[vec]} v1       ['from' vector]
@@ -62,7 +71,7 @@
       		 * @return {null}          []
       */
 
-      stright: function(v1, v2, norm, subtract) {
+      stright: function(v1, v2, norm, $, subtract) {
         if (subtract == null) {
           subtract = true;
         }
@@ -73,16 +82,8 @@
         if (subtract) {
           vec.subtract(v2, this.v, v2);
         }
+        this.arrow(v2, $.arrow, norm);
         return null;
-      },
-      arrow: function(to, a, n) {
-        a[0] = to[0];
-        a[1] = to[1];
-        a[2] = a[0] - (10 * n[0]) + (4 * n[1]);
-        a[3] = a[1] - (10 * n[1]) - (4 * n[0]);
-        a[4] = a[2] - (8 * n[1]);
-        a[5] = a[3] + (8 * n[0]);
-        return a;
       },
       curved: function(v1, v2, norm, cv, _arrow) {
         vec.subtract(v2, v1, this.v);
@@ -150,7 +151,7 @@
       start: function(v2, $) {
         vec.copy(v2, $.v2);
         vec.subtract(v2, [4 * r, 0], $.v1);
-        this.stright($.v1, $.v2, $.norm);
+        this.stright($.v1, $.v2, $.norm, $);
         this.arrow($.v2, $.arrow, $.norm);
         return null;
       }
@@ -169,8 +170,7 @@
         vec.copy([G.nodes.x[v2], G.nodes.y[v2]], e.v2);
         switch (e.type) {
           case 0:
-            calc.stright(e.v1, e.v2, e.norm);
-            calc.arrow(e.v2, e.arrow, e.norm);
+            calc.stright(e.v1, e.v2, e.norm, e);
             break;
           case 1:
             calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
@@ -230,7 +230,9 @@
         G.nodes.x = [];
         G.nodes.y = [];
         G.edges.$ = [];
-        return G.edges.start = create_edge_data();
+        G.edges.start = create_edge_data();
+        console.log(G.nodes);
+        return null;
       },
       nodes: Object.create($.nodes),
       edges: Object.create($.edges),
@@ -242,15 +244,13 @@
         vec.copy([G.nodes.x[a], G.nodes.y[a]], e.v1);
         if (b < 0) {
           vec.copy([x, y], e.v2);
-          calc.stright(e.v1, e.v2, e.norm, false);
-          calc.arrow(e.v2, e.arrow, e.norm);
+          calc.stright(e.v1, e.v2, e.norm, e, false);
         } else {
           if (e.type === 2) {
             calc.loop([G.nodes.x[a], G.nodes.y[a]], e);
           } else {
             vec.copy([G.nodes.x[b], G.nodes.y[b]], e.v2);
-            calc.stright(e.v1, e.v2, e.norm, true);
-            calc.arrow(e.v2, e.arrow, e.norm);
+            calc.stright(e.v1, e.v2, e.norm, e, true);
           }
         }
         return e;

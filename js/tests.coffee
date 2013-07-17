@@ -69,3 +69,73 @@ order_based_access = () ->
 	console.log v
 	#
 	null
+
+
+
+
+
+
+# This approach of Array extention is taken from:
+# http://stackoverflow.com/questions/13081379/javascript-extending-array-class
+foo = () ->
+foo.prototype = Object.create(Array.prototype)
+foo.prototype.constructor = foo
+foo.prototype.foo = () -> ":)"
+
+# Returns object's keys wich have the Array type
+foo.prototype.get_arrays = (o) ->
+	keys = []
+	keys.push(key) for key of o when o[key] instanceof Array
+	keys
+
+# Execute the function 'fnc' over all the object's properties of Array type
+foo.prototype.for_arrays_of = (obj, fnc, args) ->
+	keys = @get_arrays(obj)
+	ret = fnc(obj[key], args) for key in keys
+	ret
+
+
+foo.prototype.add = (v, i) ->
+	if i? 
+		if i>-1 and i<@length
+			@push(@[i])
+			@[i] = v
+			@for_arrays_of(@, (o) -> o.push(o[i]); o[i]=null)
+	else
+		@push(v)
+		@for_arrays_of(@, (o) -> o.push(null))
+	@length
+
+
+# Deletes an element 'i' of the array and returns the deleted element
+foo.prototype.del = (i) ->
+	if i< @length-1
+		ret = @splice(i, 1, @pop())
+		@for_arrays_of(@, (o) -> o.splice(i, 1, o.pop()))
+	else
+		ret = @splice(i, 1)
+		@for_arrays_of(@, (o) -> o.splice(i, 1))
+
+	# Notify the dependent arrays
+	@for_arrays_of(@dependent, (o) -> o.on_delParent(i))
+
+	ret
+
+
+@nodes = new foo
+@edges = new foo
+edges.a = []
+edges.b = []
+
+
+edges.add("one")
+edges.a[0] = 5
+edges.b[0] = 7
+
+console.log edges
+console.log edges.a, edges.b
+
+edges.add("two", 0)
+
+console.log edges
+console.log edges.a, edges.b

@@ -34,6 +34,13 @@
   };
 
   fa.events = {
+    /**
+    	 * Adds an event into alphabet (to the end or to the index 'i')
+    	 * @param {fa class} G Automaton
+    	 * @param {string} v Event label
+    	 * @param {int} i Index of the array
+    */
+
     add: function(G, v, i) {
       var ix;
 
@@ -79,72 +86,6 @@
       }
     }
     return null;
-  };
-
-  this.faxy = Object.create(fa);
-
-  faxy.create = function() {
-    var G;
-
-    G = fa.create();
-    faxy.extend(G);
-    return G;
-  };
-
-  faxy.extend = function(G) {
-    G.nodes.x = [];
-    G.nodes.y = [];
-    G.edges.curved = [];
-    return G;
-  };
-
-  faxy.nodes = Object.create(fa.nodes);
-
-  faxy.edges = Object.create(fa.edges);
-
-  faxy.nodes.add = function(G, x, y) {
-    var ix;
-
-    ix = fa.nodes.add(G);
-    G.nodes.x[ix] = x;
-    G.nodes.y[ix] = y;
-    return ix;
-  };
-
-  faxy.nodes.move = function(G, i, x, y) {
-    if (i < G.nodes.length && i > -1) {
-      G.nodes.x[i] = x;
-      G.nodes.y[i] = y;
-    }
-    return i;
-  };
-
-  faxy.edges.add = function(G, a, b, args) {
-    var eix, ix;
-
-    if (fa.edges.has(G, a, b) > -1) {
-      return -1;
-    }
-    eix = fa.edges.has(G, b, a);
-    ix = fa.edges.add(G, a, b, args);
-    if (ix >= 0 && eix >= 0) {
-      G.edges.curved[eix] = true;
-      G.edges.curved[ix] = true;
-    }
-    return ix;
-  };
-
-  faxy.edges.del = function(G, i) {
-    var a, b, eix, ix;
-
-    a = G.edges.a[i];
-    b = G.edges.b[i];
-    if ((ix = fa.edges.del(G, i)) >= 0) {
-      if ((eix = fa.edges.has(G, b, a)) >= 0) {
-        G.edges.curved[eix] = false;
-      }
-    }
-    return ix;
   };
 
   /* TODO:

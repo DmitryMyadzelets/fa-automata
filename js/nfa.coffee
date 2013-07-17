@@ -13,19 +13,28 @@ if typeof Object.create != 'function'
 
 @.fa = Object.create(digraph)
 
+
 fa.extend = (G) ->
 	G.start = 0 	# Initial state
-	G.events = {	# Events
-		v : []
+	G.events = {	# Events 
+		v : []		# Alphabet set. The values must be unique
 	}
 	G.edges.event = []
 	G
+
 
 fa.create = () ->
 	G = digraph.create()
 	fa.extend(G)
 
+
 fa.events = {
+	###*
+	 * Adds an event into alphabet (to the end or to the index 'i')
+	 * @param {fa class} G Automaton
+	 * @param {string} v Event label
+	 * @param {int} i Index of the array
+	###
 	add : (G, v, i) ->
 		return -1 if not v?
 		return ix if (ix = G.events.v.indexOf(v)) >= 0
@@ -39,6 +48,7 @@ fa.events = {
 	del : (G, i) ->
 		fa.for_arrays_of(G.events, fa.del, i)
 }
+
 
 # Breadth-first Search
 fa.BFS = (G) ->

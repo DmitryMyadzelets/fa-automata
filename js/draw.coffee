@@ -178,6 +178,7 @@ empty_string = "\u03b5"
 			_this.fake_edge(ctx, G.edges.start)
 			#
 			ix = G.edges.length
+			# console.log G.edges.a
 			while ix-- >0
 				# Indexes of the nodes
 				v1 = G.edges.a[ix]

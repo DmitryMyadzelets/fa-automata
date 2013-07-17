@@ -11,6 +11,7 @@ x = y = 0
 ctx = null
 canvas = null
 @graph = faxy.create()
+text_editor = null
 
 
 ###
@@ -230,7 +231,6 @@ automata = (eCode, ev) ->
 ###
 init = () ->
 
-
 	canvas = document.getElementById("myCanvas")
 	# canvas = document.createElement('canvas')
 	# document.body.appendChild(canvas)
@@ -265,6 +265,21 @@ init = () ->
 	draw.automaton(ctx, graph)
 
 	# selected = new graph_create()
+
+	text_editor = document.getElementById("label_editor2")
+	text_editor.onfocus = () ->
+		text_editor.value = "some text"
+		console.log "onfocus"
+		null
+	text_editor.onblur = () ->
+		text_editor.value = ""
+		text_editor.style.display = "none"
+		console.log "offocus"
+		null
+
+	text_editor.oninput = () ->
+		console.log text_editor.value
+		null	
 
 	null
 
@@ -332,3 +347,4 @@ ev_keyup = (ev) ->
 	console.log "."
 	setTimeout(tout, 1000)
 )()
+

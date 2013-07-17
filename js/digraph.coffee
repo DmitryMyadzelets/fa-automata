@@ -1,6 +1,67 @@
 
 'use strict'
 
+# This approach of Array extention is taken from:
+# http://stackoverflow.com/questions/13081379/javascript-extending-array-class
+extArray = () -> null
+extArray.prototype = Object.create(Array.prototype)
+extArray.prototype.constructor = extArray
+
+
+# Returns object's keys wich have the Array type
+extArray.prototype.get_arrays = (o) ->
+	keys = []
+	keys.push(key) for key of o when o[key] instanceof Array
+	keys
+
+
+# Execute the function 'fnc' over all the object's properties of Array type
+extArray.prototype.for_arrays_of = (obj, fnc, args) ->
+	keys = @get_arrays(obj)
+	ret = fnc(obj[key], args) for key in keys
+	ret
+
+# Adds value to the array into position 'i', returns the position
+extArray.prototype.add = (v, i) ->
+	ret = -1
+	if i? 
+		if i>=0 and i<@length
+			@push(@[i])
+			@[i] = v
+			@for_arrays_of(@, (o) -> o.push(o[i]); o[i]=null)
+			ret = i
+	else
+		@push(v)
+		@for_arrays_of(@, (o) -> o.push(null))
+		ret = @length-1
+	ret
+
+
+# Deletes an element 'i' of the array and returns the deleted element
+extArray.prototype.del = (i) ->
+	if i< @length-1
+		ret = @splice(i, 1, @pop())
+		@for_arrays_of(@, (o) -> o.splice(i, 1, o.pop()))
+	else
+		ret = @splice(i, 1)
+		@for_arrays_of(@, (o) -> o.splice(i, 1))
+
+	# Notify the dependent arrays
+	# @for_arrays_of(@dependent, (o) -> o.on_delParent(i))
+
+	ret
+
+
+Nodes = () -> null
+Nodes.prototype = Object.create(extArray.prototype)
+Nodes.prototype.constructor = Nodes
+
+
+Edges = () -> null
+Edges.prototype = Object.create(extArray.prototype)
+Edges.prototype.constructor = Edges
+
+
 
 @.digraph = (()->
 
@@ -9,40 +70,35 @@
 	# 
 
 	# Insert a value 'v' into position 'i' of array
-	ins = (arr, i, val) ->
-		if i < arr.length
-			arr.push(arr[i])
-			arr[i] = val
-		else
-			arr.push(val)
-		i
+	# ins = (arr, i, val) ->
+	# 	if i < arr.length
+	# 		arr.push(arr[i])
+	# 		arr[i] = val
+	# 	else
+	# 		arr.push(val)
+	# 	i
 
 	# Delete an element 'i' of the array
-	del = (arr, i) ->
-		ret = -1
-		if i >= 0
-			last = arr.length-1
-			if i < last
-				arr[i] = null
-				delete arr[i]
-				arr[i] = arr.pop()
-				ret = i
-			else if i == last
-				arr.pop()
-				ret = i
-		ret
+	# del = (arr, i) ->
+	# 	ret = -1
+	# 	if i >= 0
+	# 		last = arr.length-1
+	# 		if i < last
+	# 			arr[i] = null
+	# 			delete arr[i]
+	# 			arr[i] = arr.pop()
+	# 			ret = i
+	# 		else if i == last
+	# 			arr.pop()
+	# 			ret = i
+	# 	ret
 
 	# Returns keys of the object wich have array type
-	get_arrays = (obj) ->
-		keys = []
-		keys.push(key) for key of obj when obj[key] instanceof Array
-		keys
+	# get_arrays = (obj) ->
+	# 	keys = []
+	# 	keys.push(key) for key of obj when obj[key] instanceof Array
+	# 	keys
 
-	# Execute the function 'fnc' over all arrays of the object
-	for_arrays_of = (obj, fnc, args) ->
-		keys = get_arrays(obj)
-		ret = fnc(obj[key], args) for key in keys
-		ret
 
 	# Changes nodes to (a, b)
 	# Returns array of old nodes [a, b]
@@ -59,42 +115,40 @@
 		# Creates a new graph
 		create : () ->
 			o = {
-				nodes : {		# Nodes
-					v : []		# Values
-				}
-				edges : {		# Edges
-					a : []		# index of 'from' in nodes.v[]
-					b : []		# index of 'to' in nodes.v[]
-					v : []		# Values
-				}
+				nodes : new Nodes
+				# nodes.v : []
+				# nodes : {		# Nodes
+				# 	v : []		# Values
+				# }
+				edges : new Edges
+				# edges : {		# Edges
+				# 	a : []		# index of 'from' in nodes.v[]
+				# 	b : []		# index of 'to' in nodes.v[]
+				# 	v : []		# Values
 			}
-			# 'length' property for use in cycles
-			Object.defineProperty o.nodes, 'length', get: -> o.nodes.v.length
-			Object.defineProperty o.edges, 'length', get: -> o.edges.v.length
+			o.edges.a = []
+			o.edges.b = []
 			o
+
+		# Execute the function 'fnc' over all arrays of the object
+		# for_arrays_of : (obj, fnc, args) ->
+		# 	keys = get_arrays(obj)
+		# 	ret = fnc(obj[key], args) for key in keys
+		# 	ret
+
 
 		edges : {
 			# Add a new edge (a, b) or add an edge into position i
 			# Returns the position of the added edge
 			add : (G, a, b, i) ->
-				return -1 if a<0 or b<0 or a>=G.nodes.length or b>=G.nodes.length
-				if not i?
-					i = for_arrays_of(G.edges, ((arr) -> arr.push(null)))-1
-				else
-					for_arrays_of(G.edges, ((arr) -> ins(arr, i)))
-				G.edges.a[i] = a
-				G.edges.b[i] = b
+				i = G.edges.add(null, i)
+				if i>=0
+					G.edges.a[i] = a
+					G.edges.b[i] = b
 				i
 
-			del : (G, i) ->
-				return -1 if i<0 or i>=G.edges.length
-				for_arrays_of(G.edges, del, i)
-
-			# Returns value for the edge (i)
-			get : (G, i) -> G.edges.v[i]
-
-			# Set value for the edge (i)
-			set : (G, i, v) -> G.edges.v[i] = v
+			del : (G, i) ->  G.edges.del(i)
+				# _this.for_arrays_of(G.edges, del, i)
 
 			# Returns an array of edges such that (from_node, ?) in edges
 			out : (G, from_node) ->
@@ -121,12 +175,7 @@
 		nodes : {
 			# Add a new node to the end or inserts into position 'i'
 			# Returns the position the node has been added to
-			add : (G, i) ->
-				if not i?
-					i = for_arrays_of(G.nodes, ((arr) -> arr.push(null)))-1
-				else
-					for_arrays_of(G.nodes, ((arr) -> ins(arr, i)))
-				i
+			add : (G, i) -> G.nodes.add(i)
 
 			# Delete a node 'i'
 			del : (G, i, on_del_edge) ->
@@ -140,7 +189,8 @@
 						if typeof on_del_edge == "function"
 							on_del_edge.apply(@, [G, ix])
 						else 
-							_this.edges.del(G, ix)
+							# _this.edges.del(G, ix)
+							G.edges.del(i)
 					else if i < last_node
 					# If the node 'i' is not the last 
 					# then the last node moves to the position of deleted one, and
@@ -151,13 +201,9 @@
 						change_nodes(G, ix, a, b) if change
 
 				# Then delete the node itself
-				for_arrays_of(G.nodes, del, i)
+				# _this.for_arrays_of(G.nodes, del, i)
+				G.nodes.del(i)
 
-			# Returns value for the node (i)
-			get : (G, i) -> G.nodes.v[i]
-
-			# Set value for the node (i)
-			set : (G, i, v) -> G.nodes.v[i] = v
 
 			# Returns an array of nodes 'b' such that (from_node, b) in edges
 			out : (G, from_node) ->
