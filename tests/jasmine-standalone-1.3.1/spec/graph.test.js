@@ -55,7 +55,7 @@
         return expect(g.edges.length).toBe(1);
       });
     });
-    return describe("Has to remove ingoing and outhoing edges when a node removed", function() {
+    describe("Has to remove ingoing and outhoing edges when a node removed", function() {
       var g;
 
       g = automata.create();
@@ -91,6 +91,108 @@
       });
       return it("Has no edges", function() {
         return expect(g.edges.length).toBe(0);
+      });
+    });
+    describe("When adds|delets events", function() {
+      var g;
+
+      g = automata.create();
+      it("Has no events before", function() {
+        return expect(g.events.length).toBe(0);
+      });
+      it("Adds an event 'Start'. Has 1 event", function() {
+        automata.events.add(g, "Start");
+        return expect(g.events.length).toBe(1);
+      });
+      it("And the event is 'Start'", function() {
+        return expect(g.events[0]).toBe('Start');
+      });
+      it("Adds 2nd event 'Stop'", function() {
+        automata.events.add(g, "Stop", 0);
+        return expect(g.events[0]).toBe('Stop');
+      });
+      it("And the 2nd event is 'Start'", function() {
+        return expect(g.events[1]).toBe('Start');
+      });
+      it("Delets the 1st event", function() {
+        return expect(automata.events.del(g, 0)).toBe(0);
+      });
+      it("Has 1 event", function() {
+        return expect(g.events.length).toBe(1);
+      });
+      it("And the event is 'Start'", function() {
+        return expect(g.events[0]).toBe('Start');
+      });
+      return it("Doesn't add an event with the same name", function() {
+        return expect(automata.events.add(g, "Start", 5)).toBe(0);
+      });
+    });
+    describe("When adds|delets events for edges", function() {
+      var a, b, e, ev, g;
+
+      g = automata.create();
+      a = automata.nodes.add(g);
+      b = automata.nodes.add(g);
+      e = automata.edges.add(g, a, b);
+      ev = automata.events.add(g, "Start");
+      it("Adds first event", function() {
+        return expect(automata.edges.events.add(g, e, ev)).toBe(ev);
+      });
+      it("Doesn't add the same event", function() {
+        return expect(automata.edges.events.add(g, e, ev)).toBe(ev);
+      });
+      it("Doesn't add non existing event", function() {
+        return expect(automata.edges.events.add(g, e, ev + 1)).toBe(-1);
+      });
+      it("Doesn't add the event to non existing edge", function() {
+        return expect(automata.edges.events.add(g, e + 1, ev)).toBe(-1);
+      });
+      it("Doesn't delete the event from non existing edge", function() {
+        return expect(automata.edges.events.del(g, e, ev + 1)).toBe(-1);
+      });
+      it("Doesn't delete non existing event", function() {
+        return expect(automata.edges.events.del(g, e + 1, ev)).toBe(-1);
+      });
+      it("Deletes the event", function() {
+        expect(automata.edges.events.del(g, e, ev)).toBe(ev);
+        return expect(g.edges.events[e].length).toBe(0);
+      });
+      return it("Adds 2 events", function() {
+        var ev2;
+
+        ev2 = automata.events.add(g, "Stop");
+        automata.edges.events.add(g, e, ev);
+        automata.edges.events.add(g, e, ev2);
+        return expect(g.edges.events[e].length).toBe(2);
+      });
+    });
+    describe("When delets a node", function() {
+      var a, b, e, ev, g;
+
+      g = automata.create();
+      a = automata.nodes.add(g);
+      b = automata.nodes.add(g);
+      e = automata.edges.add(g, a, b);
+      ev = automata.events.add(g, "Start");
+      return it("Deletes the edge and edge's events", function() {
+        automata.nodes.del(g, a);
+        expect(g.edges.length).toBe(0);
+        return expect(g.edges.events.length).toBe(0);
+      });
+    });
+    return describe("When delets an event from the alphabet", function() {
+      var a, b, e, ev, g;
+
+      g = automata.create();
+      a = automata.nodes.add(g);
+      b = automata.nodes.add(g);
+      e = automata.edges.add(g, a, b);
+      ev = automata.events.add(g, "Start");
+      automata.edges.events.add(g, e, ev);
+      return it("Deletes the event from edges", function() {
+        expect(g.edges.events[e].length).toBe(1);
+        automata.events.del(g, ev);
+        return expect(g.edges.events[e].length).toBe(0);
       });
     });
   });

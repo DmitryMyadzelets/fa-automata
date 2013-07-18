@@ -203,8 +203,10 @@ empty_string = "\u03b5"
 						x = x1 + 2*r
 						y = y1 - 3*r
 
-				if G.edges.event[ix]?
-					text = empty_string
+				if G.edges.events[ix]?
+					vals = []
+					vals.push(G.events[event]) for event in G.edges.events[ix]
+					text = vals.join(", ")
 				else
 					text = empty_string
 				ctx.fillText(text, x, y)
@@ -235,18 +237,3 @@ empty_string = "\u03b5"
 ###
 ===============================================================================
 ###
-
-angle_from = Math.PI/3
-angle_to = Math.PI/12
-loop_k = {
-	dx1: r * Math.cos(angle_from)
-	dy1: r * Math.sin(angle_from)
-	dx2: r * 4 * Math.cos(angle_from)
-	dy2: r * 4 * Math.sin(angle_from)
-	dx3: r * 4 * Math.cos(angle_to)
-	dy3: r * 4 * Math.sin(angle_to)
-	dx4: r * Math.cos(angle_to)
-	dy4: r * Math.sin(angle_to)
-	nx: Math.cos(angle_from - Math.PI/24)
-	ny: Math.sin(angle_from - Math.PI/24)
-	}

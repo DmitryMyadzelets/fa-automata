@@ -83,3 +83,98 @@ describe "Directed graph", ->
 		it "Has no edges", ->
 			expect(g.edges.length).toBe(0)
 
+
+	describe "When adds|delets events", ->
+		g = automata.create()
+		it "Has no events before", ->
+			expect(g.events.length).toBe(0)
+
+		it "Adds an event 'Start'. Has 1 event", ->
+			automata.events.add(g, "Start")
+			expect(g.events.length).toBe(1)
+
+		it "And the event is 'Start'", ->
+			expect(g.events[0]).toBe('Start')
+
+		it "Adds 2nd event 'Stop'", ->
+			automata.events.add(g, "Stop", 0)
+			expect(g.events[0]).toBe('Stop')
+
+		it "And the 2nd event is 'Start'", ->
+			expect(g.events[1]).toBe('Start')
+
+		it "Delets the 1st event", ->
+			expect(automata.events.del(g, 0)).toBe(0)
+
+		it "Has 1 event", ->
+			expect(g.events.length).toBe(1)
+
+		it "And the event is 'Start'", ->
+			expect(g.events[0]).toBe('Start')
+
+		it "Doesn't add an event with the same name", ->
+			expect(automata.events.add(g, "Start", 5)).toBe(0)
+
+
+	describe "When adds|delets events for edges", ->
+		g = automata.create()
+		a = automata.nodes.add(g)
+		b = automata.nodes.add(g)
+		e = automata.edges.add(g, a, b)
+		ev = automata.events.add(g, "Start")
+
+		it "Adds first event", ->
+			expect(automata.edges.events.add(g, e, ev)).toBe(ev)
+
+		it "Doesn't add the same event", ->
+			expect(automata.edges.events.add(g, e, ev)).toBe(ev)
+
+		it "Doesn't add non existing event", ->
+			expect(automata.edges.events.add(g, e, ev+1)).toBe(-1) 
+
+		it "Doesn't add the event to non existing edge", ->
+			expect(automata.edges.events.add(g, e+1, ev)).toBe(-1)
+
+		it "Doesn't delete the event from non existing edge", ->
+			expect(automata.edges.events.del(g, e, ev+1)).toBe(-1) 
+
+		it "Doesn't delete non existing event", ->
+			expect(automata.edges.events.del(g, e+1, ev)).toBe(-1) 
+
+		it "Deletes the event", ->
+			expect(automata.edges.events.del(g, e, ev)).toBe(ev)
+			expect(g.edges.events[e].length).toBe(0)
+
+		it "Adds 2 events", ->
+			ev2 = automata.events.add(g, "Stop")
+			automata.edges.events.add(g, e, ev)
+			automata.edges.events.add(g, e, ev2)
+			expect(g.edges.events[e].length).toBe(2)
+
+	describe "When delets a node", ->
+		g = automata.create()
+		a = automata.nodes.add(g)
+		b = automata.nodes.add(g)
+		e = automata.edges.add(g, a, b)
+		ev = automata.events.add(g, "Start")
+
+		it "Deletes the edge and edge's events", ->
+			automata.nodes.del(g, a)
+			expect(g.edges.length).toBe(0)
+			expect(g.edges.events.length).toBe(0)
+
+
+	describe "When delets an event from the alphabet", ->
+		g = automata.create()
+		a = automata.nodes.add(g)
+		b = automata.nodes.add(g)
+		e = automata.edges.add(g, a, b)
+		ev = automata.events.add(g, "Start")
+		automata.edges.events.add(g, e, ev)
+
+
+		it "Deletes the event from edges", ->
+			expect(g.edges.events[e].length).toBe(1)
+			automata.events.del(g, ev)
+			expect(g.edges.events[e].length).toBe(0)
+

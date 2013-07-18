@@ -55,17 +55,14 @@
         return expect(ged.edges.add(g, 1, 1)).toBe(1);
       });
       it("Delets edge 1 to 2", function() {
-        console.log(g.edges.a, g.edges.b);
         return expect(ged.edges.del(g, 0)).toBe(0);
       });
       it("Has 1 edge", function() {
-        console.log(g.edges.a, g.edges.b);
         return expect(g.edges.length).toBe(1);
       });
       it("Executes Undo, has 2 edges", function() {
         expect(ged.undo()).toBe(true);
-        expect(g.edges.length).toBe(2);
-        return console.log(g.edges.a, g.edges.b);
+        return expect(g.edges.length).toBe(2);
       });
       return it("And the first edge is from 1 to 2", function() {
         return expect((g.edges.a[0] === 0) && (g.edges.b[0] === 1)).toBe(true);
@@ -98,8 +95,6 @@
         return expect(g.edges.length).toBe(0);
       });
       it("Undo, has 2 nodes, 1 edge", function() {
-        console.log(g.nodes);
-        console.log(g.edges);
         expect(ged.undo()).toBe(true);
         expect(g.nodes.length).toBe(2);
         return expect(g.edges.length).toBe(1);
