@@ -180,36 +180,19 @@ empty_string = "\u03b5"
 			ix = G.edges.length
 			# console.log G.edges.a
 			while ix-- >0
-				# Indexes of the nodes
-				v1 = G.edges.a[ix]
-				v2 = G.edges.b[ix]
-				# Coordinates of the nodes
-				x1 = G.nodes.x[v1]
-				y1 = G.nodes.y[v1]
-				x2 = G.nodes.x[v2]
-				y2 = G.nodes.y[v2]
 				# Edge graphical info
 				$ = G.edges.$[ix]
 				_this.any_edge(ctx, $)
-				# Calculate the event label coordinates
-				switch $.type
-					when 0 # stright 
-						x = x1 + (x2-x1)/2 + 0.5*r*$.norm[1]
-						y = y1 + (y2-y1)/2 - 0.5*r*$.norm[0]
-					when 1 # curved
-						x = $.cv[0] + (-5)*$.norm[1]
-						y = $.cv[1] - (-5)*$.norm[0]
-					else # 2, loop
-						x = x1 + 2*r
-						y = y1 - 3*r
 
+				# Making label as a sequence of the events
 				if G.edges.events[ix]?
 					vals = []
 					vals.push(G.events[event]) for event in G.edges.events[ix]
 					text = vals.join(", ")
 				else
 					text = empty_string
-				ctx.fillText(text, x, y)
+				
+				ctx.fillText(text, $.label[0][0], $.label[0][1])
 			# 
 			# Draw nodes
 			# 

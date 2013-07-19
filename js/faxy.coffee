@@ -42,6 +42,33 @@ vec = {
 		out
 }
 
+###*
+ * Class of array for graphical representation.
+ * 
+###
+# @xyArray = () -> 
+# 	@all.counter++
+# 	@.test.push(@all.counter)
+# 	@foo = ->
+# 	console.log @
+# 	null
+# xyArray.prototype = Object.create(Array.prototype)
+# xyArray.prototype.constructor = xyArray
+# # Note, that if you create a non-object property, 
+# # like xyArray.prototype.counter then it would be separate for each instance.
+# # However, xyArray.prototype.all - point to the same object for each instance.
+# xyArray.prototype.test = []
+# xyArray.prototype.all = {
+# 	counter : 0
+# 	object : []
+# 	index : []
+# }
+
+# @a = new xyArray
+# @b = new xyArray
+
+
+
 # 
 #  Class for Automata extended for graphical representation
 #
@@ -79,9 +106,12 @@ vec = {
 			if subtract
 				vec.subtract(v2, @v, v2)	# v2 = v2 - v
 			@arrow(v2, $.arrow, norm)
+			# Position of the label
+			$.label[0][0] = v1[0] + (v2[0]-v1[0])/2 + 0.5*r*$.norm[1]
+			$.label[0][1] = v1[1] + (v2[1]-v1[1])/2 - 0.5*r*$.norm[0]
 			null
 
-		curved : (v1, v2, norm, cv, _arrow) ->
+		curved : (v1, v2, norm, cv, $) ->
 			# Calc normalized vector
 			vec.subtract(v2, v1, @v)	# v = v2 - v1
 			vec.normalize(@v, norm)		# norm = normalized v
@@ -100,7 +130,12 @@ vec = {
 			vec.subtract(v2, @v, v2)	# v2 = v2 - v
 			# Calc arrow
 			vec.normalize(@v, @v)
-			@arrow(v2, _arrow, @v)
+			@arrow(v2, $.arrow, @v)
+			# Position of the label
+			# x = $.cv[0] + (-5)*$.norm[1]
+			# y = $.cv[1] - (-5)*$.norm[0]
+			$.label[0][0] = cv[0] + (-5)*$.norm[1]
+			$.label[0][1] = cv[1] - (-5)*$.norm[0]
 			null
 
 		###*
@@ -153,6 +188,11 @@ vec = {
 			$.v2[1] = v[1] - @K('DY4')
 			#
 			@arrow($.v1, $.arrow, $.norm)
+			# Position of the label
+			# x = x1 + 2*r
+			# y = y1 - 3*r
+			$.label[0][0] = v[0] + 2*r
+			$.label[0][1] = v[1] - 3*r
 			null
 
 		start : (v2, $) ->
@@ -181,7 +221,7 @@ vec = {
 				when 0 # strigt
 					calc.stright(e.v1, e.v2, e.norm, e)
 				when 1 # curved
-					calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow)
+					calc.curved(e.v1, e.v2, e.norm, e.cv, e)
 				when 2 # loop
 					calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e)
 
@@ -203,6 +243,9 @@ vec = {
 				vec.create()
 				vec.create()
 				vec.create()]		# Arrow coordinates 
+			label : [				# label coordinates
+				vec.create()
+				vec.create()]
 		}
 
 	###*

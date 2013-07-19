@@ -48,6 +48,12 @@
     }
   };
 
+  /**
+   * Class of array for graphical representation.
+   *
+  */
+
+
   this.faxy = (function($) {
     var calc, create_edge_data, fake_edge, get_edge_type, update_node, _this;
 
@@ -83,9 +89,11 @@
           vec.subtract(v2, this.v, v2);
         }
         this.arrow(v2, $.arrow, norm);
+        $.label[0][0] = v1[0] + (v2[0] - v1[0]) / 2 + 0.5 * r * $.norm[1];
+        $.label[0][1] = v1[1] + (v2[1] - v1[1]) / 2 - 0.5 * r * $.norm[0];
         return null;
       },
-      curved: function(v1, v2, norm, cv, _arrow) {
+      curved: function(v1, v2, norm, cv, $) {
         vec.subtract(v2, v1, this.v);
         vec.normalize(this.v, norm);
         cv[0] = (v1[0] + v2[0]) / 2 + norm[1] * 40;
@@ -99,7 +107,9 @@
         vec.scale(this.v, r, this.v);
         vec.subtract(v2, this.v, v2);
         vec.normalize(this.v, this.v);
-        this.arrow(v2, _arrow, this.v);
+        this.arrow(v2, $.arrow, this.v);
+        $.label[0][0] = cv[0] + (-5) * $.norm[1];
+        $.label[0][1] = cv[1] - (-5) * $.norm[0];
         return null;
       },
       /**
@@ -146,6 +156,8 @@
         $.v2[0] = v[0] + this.K('DX4');
         $.v2[1] = v[1] - this.K('DY4');
         this.arrow($.v1, $.arrow, $.norm);
+        $.label[0][0] = v[0] + 2 * r;
+        $.label[0][1] = v[1] - 3 * r;
         return null;
       },
       start: function(v2, $) {
@@ -173,7 +185,7 @@
             calc.stright(e.v1, e.v2, e.norm, e);
             break;
           case 1:
-            calc.curved(e.v1, e.v2, e.norm, e.cv, e.arrow);
+            calc.curved(e.v1, e.v2, e.norm, e.cv, e);
             break;
           case 2:
             calc.loop([G.nodes.x[v2], G.nodes.y[v2]], e);
@@ -192,7 +204,8 @@
         cv: [vec.create(), vec.create()],
         norm: vec.create(),
         orth: vec.create(),
-        arrow: [vec.create(), vec.create(), vec.create()]
+        arrow: [vec.create(), vec.create(), vec.create()],
+        label: [vec.create(), vec.create()]
       };
     };
     /**

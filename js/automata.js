@@ -85,6 +85,9 @@
   Nodes.prototype.constructor = Nodes;
 
   Edges = function() {
+    this.a = [];
+    this.b = [];
+    this.events = [];
     return null;
   };
 
@@ -113,18 +116,12 @@
     };
     return _this = {
       create: function() {
-        var o;
-
-        o = {
+        return {
           start: 0,
           nodes: new Nodes,
           edges: new Edges,
           events: new Events
         };
-        o.edges.a = [];
-        o.edges.b = [];
-        o.edges.events = [];
-        return o;
       },
       edges: {
         add: function(G, a, b, i) {

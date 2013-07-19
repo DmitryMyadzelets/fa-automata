@@ -13,13 +13,8 @@
             background: #44accf;
         }
         #label_editor {
-            position: relative;
-            width: 100px;
-            height: 20px;
-            background: white;
-        }
-        #label_editor2 {
-            position: relative;
+            position: absolute;
+            left : 50px;
             width: 50px;
             /*background: transparent;*/
         }
@@ -70,8 +65,7 @@
     <!-- <canvas id="myCanvas" Width="800" height="600"></canvas> -->
     <div id="container">
         <canvas id="myCanvas" width="500px" height="500px" tabindex="0"></canvas>
-        <div id="label_editor" contenteditable="true"></div>
-        <input id="label_editor2" type="text">
+        <input id="label_editor" type="text">
     </div>
 </body>
 <html>

@@ -12,6 +12,7 @@ ctx = null
 canvas = null
 @graph = faxy.create()
 text_editor = null
+label = -1 # index of edge label
 
 
 ###
@@ -72,6 +73,34 @@ nodeByXY = (graph, x, y) ->
 			return index
 	-1
 
+###*
+ * Checks if an edge's label is under the coordinates
+ * @param  {[type]} graph [description]
+ * @param  {int} x     
+ * @param  {int} y     
+ * @return {int}       index of edge, -1 if no edge found
+###
+labelByXY  = (graph, x, y) ->
+	for e, index in graph.edges
+		$ = graph.edges.$[index]
+		# Width and hight should be based on the text of the label,
+		# but lets do it simple for now.
+		w = 20
+		h = 10
+		x1 = $.label[0][0] - w
+		y1 = $.label[0][1] - h
+		x2 = $.label[0][0] + w
+		y2 = $.label[0][1] + h
+		if x > x1 and x < x2 and y > y1 and y < y2
+			# ctx.beginPath();
+			# ctx.rect(x1, y1, x2-x1, y2-y1);
+			# ctx.fillStyle = 'white';
+			# ctx.fill();
+			# ctx.strokeStyle = 'black';
+			# ctx.stroke();
+			return index
+	-1
+
 
 ###
 ===============================================================================
@@ -85,7 +114,7 @@ from = {
 	y: 0
 }
 
-automata = (eCode, ev) ->
+automaton = (eCode, ev) ->
 	switch ost = st
 		when 0 # Waiting for mouse down
 			if 1 == eCode # down
@@ -104,6 +133,9 @@ automata = (eCode, ev) ->
 						from.x = graph.nodes.x[node_ix]
 						from.y = graph.nodes.y[node_ix]
 						st = 1
+
+				else if labelByXY(graph, x, y) >= 0
+					null
 				else
 					if ev.shiftKey
 						from.x = x
@@ -113,6 +145,25 @@ automata = (eCode, ev) ->
 						from.x = x
 						from.y = y
 						st = 5
+
+			if 4 == eCode # double click
+				# Display text editor for the label
+				[x, y] = get_mouse_xy(ev)
+				label = labelByXY(graph, x, y)
+				if label >= 0
+					if graph.edges.events[label]?
+						vals = []
+						vals.push(graph.events[event]) for event in graph.edges.events[label]
+						text = vals.join(", ")
+					else
+						text = ""
+					text_editor.value = text
+					text_editor.style.width = "40px"
+					text_editor.style.left = graph.edges.$[label].label[0][0]-20 + "px"
+					text_editor.style.top = graph.edges.$[label].label[0][1]-10 + "px"
+					text_editor.style.display = null
+					text_editor.focus()
+					st = 6
 
 		when 1 # Moving selected node
 			switch eCode
@@ -215,6 +266,28 @@ automata = (eCode, ev) ->
 				else
 					st = 0
 
+
+		when 6 # Editing a label
+			switch eCode
+				when 5 # key pressed
+					if 13 == ev.keyCode
+						text_editor.style.display = "none"
+						if label > -1
+							event = automata.events.add(graph, text_editor.value)
+							automata.edges.events.add(graph, label, event)
+							ctx.clearRect(0, 0, canvas.width, canvas.height)
+							draw.automaton(ctx, graph)
+						canvas.focus()
+						# st = 0
+				when 6 # lost focus
+					text_editor.style.display = "none"
+					st = 0
+				when 7 # key down
+					if 27 == ev.keyCode 
+						text_editor.style.display = "none"
+						canvas.focus()
+						# st = 0
+
 	# If automation changes its state
 	if (ost != st)
 		console.log eCode + ": " + ost + "->" + st
@@ -222,6 +295,8 @@ automata = (eCode, ev) ->
 			if graph_is_changed
 				save_graph(graph)
 				graph_is_changed = false
+		if 6 == ost
+			label = -1
 	null
 
 
@@ -245,15 +320,14 @@ init = () ->
 	ctx.font = "12pt Tahoma"
 	ctx.textAlign = "left"
 	#
+	canvas.addEventListener('mousemove', ev_mousemove, false)
 	canvas.addEventListener('mousedown', ev_mousedown, false)
 	canvas.addEventListener('mouseup', ev_mouseup, false)
-	canvas.addEventListener('mousemove', ev_mousemove, false)
 	canvas.addEventListener('keypress', ev_keypress, false)
 	canvas.addEventListener('keyup', ev_keyup, false)
+	canvas.addEventListener('dblclick', ev_dblclick, false)
 	# Disable Dragging effect of canvas
-	canvas.addEventListener('dragstart', 
-		(e) -> e.preventDefault()
-	false)
+	canvas.addEventListener('dragstart', (e) -> e.preventDefault(); false)
 	canvas.onselectstart = () -> false
 
 	#Load graph from local storage
@@ -266,20 +340,13 @@ init = () ->
 
 	# selected = new graph_create()
 
-	text_editor = document.getElementById("label_editor2")
-	text_editor.onfocus = () ->
-		text_editor.value = "some text"
-		console.log "onfocus"
+	text_editor = document.getElementById("label_editor")
+	text_editor.style.display = "none"
+	text_editor.addEventListener('keypress', ((ev) ->  automaton(5, ev)), false)
+	text_editor.onblur = (ev) -> 
+		automaton(6, ev)
 		null
-	text_editor.onblur = () ->
-		text_editor.value = ""
-		text_editor.style.display = "none"
-		console.log "offocus"
-		null
-
-	text_editor.oninput = () ->
-		console.log text_editor.value
-		null	
+	text_editor.addEventListener('keydown', ((ev) ->  automaton(7, ev)), false)
 
 	null
 
@@ -294,16 +361,20 @@ window.onload = () ->
 	null
 
 ev_mousedown = (ev) ->
-	automata(1, ev)
+	automaton(1, ev)
 	null
 
 ev_mousemove = (ev) ->
-	automata(2, ev)
+	automaton(2, ev)
 	# document.getElementById("debug").innerHTML = "x, y = " + get_mouse_xy(ev)
 	null
 
 ev_mouseup = (ev) ->
-	automata(3, ev)
+	automaton(3, ev)
+	null
+
+ev_dblclick = (ev) ->
+	automaton(4, ev)
 	null
 
 ev_keypress = (ev) ->

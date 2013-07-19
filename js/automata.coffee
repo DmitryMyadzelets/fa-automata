@@ -58,7 +58,11 @@ Nodes.prototype = Object.create(extArray.prototype)
 Nodes.prototype.constructor = Nodes
 
 
-Edges = () -> null
+Edges = () -> 
+	@a = []
+	@b = []
+	@events = []
+	null
 Edges.prototype = Object.create(extArray.prototype)
 Edges.prototype.constructor = Edges
 
@@ -84,16 +88,12 @@ Events.prototype.constructor = Events
 	_this = {
 		# Creates a new graph
 		create : () ->
-			o = {
+			{
 				start : 0 		# Initial state
 				nodes : new Nodes
 				edges : new Edges
 				events : new Events
 			}
-			o.edges.a = []
-			o.edges.b = []
-			o.edges.events = []
-			o
 
 
 		edges : {

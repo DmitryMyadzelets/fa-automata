@@ -180,7 +180,7 @@
       */
 
       automaton: function(ctx, G) {
-        var $, event, ix, text, v1, v2, vals, x, x1, x2, y, y1, y2, _i, _len, _ref;
+        var $, event, ix, text, vals, x, y, _i, _len, _ref;
 
         ctx.save();
         ctx.textAlign = "center";
@@ -192,27 +192,8 @@
         _this.fake_edge(ctx, G.edges.start);
         ix = G.edges.length;
         while (ix-- > 0) {
-          v1 = G.edges.a[ix];
-          v2 = G.edges.b[ix];
-          x1 = G.nodes.x[v1];
-          y1 = G.nodes.y[v1];
-          x2 = G.nodes.x[v2];
-          y2 = G.nodes.y[v2];
           $ = G.edges.$[ix];
           _this.any_edge(ctx, $);
-          switch ($.type) {
-            case 0:
-              x = x1 + (x2 - x1) / 2 + 0.5 * r * $.norm[1];
-              y = y1 + (y2 - y1) / 2 - 0.5 * r * $.norm[0];
-              break;
-            case 1:
-              x = $.cv[0] + (-5) * $.norm[1];
-              y = $.cv[1] - (-5) * $.norm[0];
-              break;
-            default:
-              x = x1 + 2 * r;
-              y = y1 - 3 * r;
-          }
           if (G.edges.events[ix] != null) {
             vals = [];
             _ref = G.edges.events[ix];
@@ -224,7 +205,7 @@
           } else {
             text = empty_string;
           }
-          ctx.fillText(text, x, y);
+          ctx.fillText(text, $.label[0][0], $.label[0][1]);
         }
         ix = G.nodes.length;
         while (ix-- > 0) {
