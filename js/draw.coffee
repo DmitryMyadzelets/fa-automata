@@ -5,17 +5,17 @@
 PI2 = Math.PI * 2
 
 # The first colors:
-# cl_node = "rgba(0,0,255,0.2)"
+# cl_node = 'rgba(0,0,255,0.2)'
 
 # Colors taken from Haiku OS:
-cl_black = "rgba(0,0,0, 0.8)"
-cl_node = "#fec867" #(254, 200, 103)
+cl_black = 'rgba(0,0,0, 0.8)'
+cl_node = '#fec867' #(254, 200, 103)
 cl_text = cl_black
 cl_edge = cl_black
 cl_node_edge = cl_black
-cl_node_sel = "#da5d00" #(218, 93, 0) # color for selected nodes
+cl_node_sel = '#da5d00' #(218, 93, 0) # color for selected nodes
 # Empty string symbol - Epsilon:
-empty_string = "\u03b5"
+empty_string = '\u03b5'
 
 ###
 ===============================================================================
@@ -164,16 +164,16 @@ empty_string = "\u03b5"
 		###
 		automaton : (ctx, G) ->
 			ctx.save()
-			# ctx.font = "12pt Calibri"
-			ctx.textAlign = "center"
-			ctx.textBaseline = "middle"
+			# ctx.font = '12pt Calibri'
+			ctx.textAlign = 'center'
+			ctx.textBaseline = 'middle'
 			ctx.fillStyle = cl_black
 			# 
 			# Draw edges
 			# 
 			ctx.fillStyle = cl_edge
 			ctx.strokeStyle = cl_edge
-			text = ""
+			text = ''
 			# Arrow to initial state
 			_this.fake_edge(ctx, G.edges.start)
 			#
@@ -188,7 +188,7 @@ empty_string = "\u03b5"
 				if G.edges.events[ix]?
 					vals = []
 					vals.push(G.events[event]) for event in G.edges.events[ix]
-					text = vals.join(", ")
+					text = vals.join(', ')
 				else
 					text = empty_string
 				

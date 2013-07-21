@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var automaton, canvas, ctx, edit, ev_dblclick, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, label, labelByXY, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
+  var automaton, canvas, csv2array, ctx, edit, ev_dblclick, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, label, labelByXY, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
 
   x = y = 0;
 
@@ -35,6 +35,51 @@ Usefull links:
 
   this.unpack = function(xy) {
     return [(xy >> 16) & 0xFFFF, xy & 0xFFFF];
+  };
+
+  /*
+  ===============================================================================
+  */
+
+
+  /**
+   * Converts a commma separated string to array of strings.
+   * Cuts whitespaces in the beginnig and the end of each string.
+   * @param  {string} s Any string
+   * @return {Array[string]}   Array of strings
+  */
+
+
+  csv2array = function(s) {
+    var c, end, i, len, ret, st, start;
+
+    len = s.length;
+    ret = [];
+    st = 0;
+    i = 0;
+    while (i < len) {
+      c = s.charCodeAt(i);
+      switch (st) {
+        case 0:
+          if (c !== 32 && c !== 44) {
+            start = i;
+            end = i;
+            st = 1;
+          }
+          break;
+        case 1:
+          if (c === 44) {
+            ret.push(s.substr(start, end - start + 1));
+            st = 0;
+          } else if (c !== 32) {
+            end = i;
+          }
+      }
+      if (++i === len && 1 === st) {
+        ret.push(s.substr(start, end - start + 1));
+      }
+    }
+    return ret;
   };
 
   /*
@@ -149,7 +194,7 @@ Usefull links:
   };
 
   automaton = function(eCode, ev) {
-    var dx, dy, event, text, vals, _i, _len, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    var arr, dx, dy, event, text, v, vals, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
 
     switch (ost = st) {
       case 0:
@@ -326,8 +371,13 @@ Usefull links:
             if (13 === ev.keyCode) {
               text_editor.style.display = "none";
               if (label > -1) {
-                event = automata.events.add(graph, text_editor.value);
-                automata.edges.events.add(graph, label, event);
+                arr = csv2array(text_editor.value);
+                graph.edges.events.length = 0;
+                for (_j = 0, _len1 = arr.length; _j < _len1; _j++) {
+                  v = arr[_j];
+                  event = automata.events.add(graph, v);
+                  automata.edges.events.add(graph, label, event);
+                }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 draw.automaton(ctx, graph);
               }
@@ -365,16 +415,16 @@ Usefull links:
   */
 
 
-  init = function() {
+  init = function(elementName) {
     var node1, node2;
 
-    canvas = document.getElementById("myCanvas");
+    canvas = document.getElementById(elementName);
     canvas.focus();
     ctx = canvas.getContext("2d");
     ctx.fillStyle = "gray";
     ctx.lineWidth = 1.2;
     ctx.strokeStyle = "rgba(0,0,255,0.5)";
-    ctx.font = "12pt Tahoma";
+    ctx.font = "0.8em Verdana 'Courier New'";
     ctx.textAlign = "left";
     canvas.addEventListener('mousemove', ev_mousemove, false);
     canvas.addEventListener('mousedown', ev_mousedown, false);
@@ -416,11 +466,6 @@ Usefull links:
 
     rc = canvas.getBoundingClientRect();
     return [ev.clientX - rc.left, ev.clientY - rc.top];
-  };
-
-  window.onload = function() {
-    init();
-    return null;
   };
 
   ev_mousedown = function(ev) {
@@ -476,6 +521,11 @@ Usefull links:
         draw.automaton(ctx, graph);
         break;
     }
+    return null;
+  };
+
+  window.onload = function() {
+    init("myCanvas");
     return null;
   };
 

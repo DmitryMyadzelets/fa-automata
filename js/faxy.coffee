@@ -251,8 +251,8 @@ vec = {
 	###*
 	 * Calculates geometric type of the edge
 	 * @param  {Graph} G
-	 * @param  {int} a Index of "from" node
-	 * @param  {int} b Index of "to" node
+	 * @param  {int} a Index of 'from' node
+	 * @param  {int} b Index of 'to' node
 	 * @param  {boolean} b2a True if exists an edge from b to a
 	 * @return {int}   (0-straight, 1-curved, 2-loop)
 	###

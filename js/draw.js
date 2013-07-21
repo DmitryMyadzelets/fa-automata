@@ -7,9 +7,9 @@
 
   PI2 = Math.PI * 2;
 
-  cl_black = "rgba(0,0,0, 0.8)";
+  cl_black = 'rgba(0,0,0, 0.8)';
 
-  cl_node = "#fec867";
+  cl_node = '#fec867';
 
   cl_text = cl_black;
 
@@ -17,9 +17,9 @@
 
   cl_node_edge = cl_black;
 
-  cl_node_sel = "#da5d00";
+  cl_node_sel = '#da5d00';
 
-  empty_string = "\u03b5";
+  empty_string = '\u03b5';
 
   /*
   ===============================================================================
@@ -183,12 +183,12 @@
         var $, event, ix, text, vals, x, y, _i, _len, _ref;
 
         ctx.save();
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.fillStyle = cl_black;
         ctx.fillStyle = cl_edge;
         ctx.strokeStyle = cl_edge;
-        text = "";
+        text = '';
         _this.fake_edge(ctx, G.edges.start);
         ix = G.edges.length;
         while (ix-- > 0) {
@@ -201,7 +201,7 @@
               event = _ref[_i];
               vals.push(G.events[event]);
             }
-            text = vals.join(", ");
+            text = vals.join(', ');
           } else {
             text = empty_string;
           }

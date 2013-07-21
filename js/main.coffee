@@ -23,6 +23,40 @@ label = -1 # index of edge label
 
 ###
 ===============================================================================
+###
+
+###*
+ * Converts a commma separated string to array of strings.
+ * Cuts whitespaces in the beginnig and the end of each string.
+ * @param  {string} s Any string
+ * @return {Array[string]}   Array of strings
+###
+csv2array = (s) ->
+	len = s.length
+	ret = []
+	st = 0
+	i = 0
+	while i < len
+		c = s.charCodeAt(i)
+		switch st
+			when 0 # wait for not space and not comma
+				if c != 32 and c !=  44
+					start = i
+					end = i
+					st = 1
+			when 1 #wait for space, comma or EOL
+				if c == 44
+					ret.push(s.substr(start, end-start+1))
+					st = 0
+				else if c != 32
+					end = i
+
+		if ++i == len and 1 == st
+			ret.push(s.substr(start, end-start+1))
+	ret
+
+###
+===============================================================================
 Loads nodes and edges from the local storage of the browser.
 Nodes must be stored as a value of key "nodes".
 Edges must be stored as a value of key "edges".
@@ -273,8 +307,12 @@ automaton = (eCode, ev) ->
 					if 13 == ev.keyCode
 						text_editor.style.display = "none"
 						if label > -1
-							event = automata.events.add(graph, text_editor.value)
-							automata.edges.events.add(graph, label, event)
+							arr = csv2array(text_editor.value)
+							# Clear old events
+							graph.edges.events.length = 0
+							for v in arr
+								event = automata.events.add(graph, v)
+								automata.edges.events.add(graph, label, event)
 							ctx.clearRect(0, 0, canvas.width, canvas.height)
 							draw.automaton(ctx, graph)
 						canvas.focus()
@@ -304,9 +342,9 @@ automaton = (eCode, ev) ->
 ###
 ===============================================================================
 ###
-init = () ->
+init = (elementName) ->
 
-	canvas = document.getElementById("myCanvas")
+	canvas = document.getElementById(elementName)
 	# canvas = document.createElement('canvas')
 	# document.body.appendChild(canvas)
 	# canvas.width = window.innerWidth;
@@ -317,7 +355,7 @@ init = () ->
 	ctx.fillStyle = "gray"
 	ctx.lineWidth = 1.2
 	ctx.strokeStyle = "rgba(0,0,255,0.5)"
-	ctx.font = "12pt Tahoma"
+	ctx.font = "0.8em Verdana 'Courier New'"
 	ctx.textAlign = "left"
 	#
 	canvas.addEventListener('mousemove', ev_mousemove, false)
@@ -356,17 +394,12 @@ get_mouse_xy = (ev) ->
 	[ev.clientX - rc.left, ev.clientY - rc.top]
 
 
-window.onload = () ->
-	init()
-	null
-
 ev_mousedown = (ev) ->
 	automaton(1, ev)
 	null
 
 ev_mousemove = (ev) ->
 	automaton(2, ev)
-	# document.getElementById("debug").innerHTML = "x, y = " + get_mouse_xy(ev)
 	null
 
 ev_mouseup = (ev) ->
@@ -413,9 +446,12 @@ ev_keyup = (ev) ->
 	null
 
 
+window.onload = () ->
+	init("myCanvas")
+	null
+
 
 (tout = ()  ->
 	console.log "."
 	setTimeout(tout, 1000)
 )()
-
