@@ -89,8 +89,8 @@
           vec.subtract(v2, this.v, v2);
         }
         this.arrow(v2, $.arrow, norm);
-        $.label[0][0] = v1[0] + (v2[0] - v1[0]) / 2 + 0.5 * r * $.norm[1];
-        $.label[0][1] = v1[1] + (v2[1] - v1[1]) / 2 - 0.5 * r * $.norm[0];
+        $.label[0][0] = v1[0] + (v2[0] - v1[0]) / 2 + 0.6 * r * $.norm[1];
+        $.label[0][1] = v1[1] + (v2[1] - v1[1]) / 2 - 0.6 * r * $.norm[0];
         return null;
       },
       curved: function(v1, v2, norm, cv, $) {

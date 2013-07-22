@@ -205,7 +205,12 @@
           } else {
             text = empty_string;
           }
+          ctx.save();
+          ctx.strokeStyle = 'gray';
+          ctx.lineWidth = 4;
+          ctx.strokeText(text, $.label[0][0], $.label[0][1]);
           ctx.fillText(text, $.label[0][0], $.label[0][1]);
+          ctx.restore();
         }
         ix = G.nodes.length;
         while (ix-- > 0) {

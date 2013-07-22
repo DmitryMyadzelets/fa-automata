@@ -192,7 +192,12 @@ empty_string = '\u03b5'
 				else
 					text = empty_string
 				
+				ctx.save()
+				ctx.strokeStyle = 'gray'
+				ctx.lineWidth = 4
+				ctx.strokeText(text, $.label[0][0], $.label[0][1])
 				ctx.fillText(text, $.label[0][0], $.label[0][1])
+				ctx.restore()
 			# 
 			# Draw nodes
 			# 
