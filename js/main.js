@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var automaton, canvas, csv2array, ctx, edgeByXY, edge_ix, edit, ev_dblclick, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
+  var automaton, canvas, csv2array, ctx, edgeByXY, edge_ix, edit, ev_dblclick, ev_keydown, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
 
   x = y = 0;
 
@@ -419,8 +419,7 @@ Usefull links:
     canvas.addEventListener('mousemove', ev_mousemove, false);
     canvas.addEventListener('mousedown', ev_mousedown, false);
     canvas.addEventListener('mouseup', ev_mouseup, false);
-    canvas.addEventListener('keypress', ev_keypress, false);
-    canvas.addEventListener('keyup', ev_keyup, false);
+    canvas.addEventListener('keydown', ev_keydown, false);
     canvas.addEventListener('dblclick', ev_dblclick, false);
     canvas.addEventListener('dragstart', function(e) {
       e.preventDefault();
@@ -472,38 +471,34 @@ Usefull links:
     return null;
   };
 
-  ev_keypress = function(ev) {
+  ev_keydown = function(ev) {
     if (ev.ctrlKey) {
       switch (ev.keyCode) {
-        case 25:
+        case 89:
           editor.redo();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           draw.automaton(ctx, graph);
           save_graph(graph);
           break;
-        case 26:
+        case 90:
           editor.undo();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           draw.automaton(ctx, graph);
           save_graph(graph);
       }
-    }
-    return null;
-  };
-
-  ev_keyup = function(ev) {
-    switch (ev.keyCode) {
-      case 46:
-        editor.nodes.del(graph, graph.nodes.length - 1);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw.automaton(ctx, graph);
-        save_graph(graph);
-        break;
-      case 81:
-        editor.edges.del(graph, graph.edges.length - 1);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw.automaton(ctx, graph);
-        break;
+    } else {
+      switch (ev.keyCode) {
+        case 46:
+          editor.nodes.del(graph, graph.nodes.length - 1);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          draw.automaton(ctx, graph);
+          save_graph(graph);
+          break;
+        case 81:
+          editor.edges.del(graph, graph.edges.length - 1);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          draw.automaton(ctx, graph);
+      }
     }
     return null;
   };

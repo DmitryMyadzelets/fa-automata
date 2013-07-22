@@ -40,7 +40,9 @@
 				_text.style.display = "none"
 				shown = false
 				_onCancel?(ev)
-		delayedResize()
+			else
+				delayedResize()
+		null
 
 	offocus = () -> 
 		_text.style.display = "none"
@@ -52,30 +54,32 @@
 	{
 		attach : (id, onEnter, onCancel) ->
 			_text = document.getElementById(id)
-			hook(_text, 'change',	resize)
-			hook(_text, 'cut', 		delayedResize)
-			hook(_text, 'paste', 	delayedResize)
-			hook(_text, 'drop', 	delayedResize)
+			# hook(_text, 'change',	resize)
+			# hook(_text, 'cut', 		delayedResize)
+			# hook(_text, 'paste', 	delayedResize)
+			# hook(_text, 'drop', 	delayedResize)
 			hook(_text, 'keydown', 	keydown)
 			hook(_text, 'blur',		offocus)
+			hook(_text, 'input',	delayedResize)
 
 			_onEnter = onEnter
 			_onCancel = onCancel
 
 			_text.style.display = "none"
+			_text.style.font = "0.8em Verdana 'Courier New'"
 			null
 
 		show : (x, y, text) ->
-			_text
 			_text.value = text
-			_text.style.width = "40px"
+			_text.style.width = "4em"
 			_text.style.left = x + "px"
 			_text.style.top = y + "px"
 			_text.style.display = null
 			_text.focus()
-			_text.select()
+			# _text.select()
 			resize()
 			shown = true
+			null
 
 		text : () -> _text.value
 

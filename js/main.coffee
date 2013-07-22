@@ -355,8 +355,9 @@ init = (elementName) ->
 	canvas.addEventListener('mousemove', ev_mousemove, false)
 	canvas.addEventListener('mousedown', ev_mousedown, false)
 	canvas.addEventListener('mouseup', ev_mouseup, false)
-	canvas.addEventListener('keypress', ev_keypress, false)
-	canvas.addEventListener('keyup', ev_keyup, false)
+	# canvas.addEventListener('keypress', ev_keypress, false)
+	# canvas.addEventListener('keyup', ev_keyup, false)
+	canvas.addEventListener('keydown', ev_keydown, false)
 	canvas.addEventListener('dblclick', ev_dblclick, false)
 	# Disable Dragging effect of canvas
 	canvas.addEventListener('dragstart', (e) -> e.preventDefault(); false)
@@ -401,39 +402,33 @@ ev_dblclick = (ev) ->
 	automaton(4, ev)
 	null
 
-ev_keypress = (ev) ->
-	# Does not work on Firefox. I hate that browser already!
+ev_keydown = (ev) ->
 	if ev.ctrlKey
 		# console.log ev.which
 		# console.log ev.charCode
 		switch ev.keyCode
-			when 25 # Y
+			when 89 # Y
 				editor.redo()
 				ctx.clearRect(0, 0, canvas.width, canvas.height)
 				draw.automaton(ctx, graph)
 				save_graph(graph)
-			when 26 # Z
+			when 90 # Z
 				editor.undo()
 				ctx.clearRect(0, 0, canvas.width, canvas.height)
 				draw.automaton(ctx, graph)
 				save_graph(graph)
-
-	null
-
-ev_keyup = (ev) ->
-	switch ev.keyCode
-		when 46 # Delete ### Move it to the main automaton!
-			editor.nodes.del(graph, graph.nodes.length-1)
-			ctx.clearRect(0, 0, canvas.width, canvas.height)
-			draw.automaton(ctx, graph)
-			save_graph(graph)
-		when 81 # Q
-			# Testing edges deletion
-			editor.edges.del(graph, graph.edges.length-1)
-			ctx.clearRect(0, 0, canvas.width, canvas.height)
-			draw.automaton(ctx, graph)
-		else
-			# console.log "keyCode: " + ev.keyCode
+	else
+		switch ev.keyCode
+			when 46 # Delete ### Move it to the main automaton!
+				editor.nodes.del(graph, graph.nodes.length-1)
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+				draw.automaton(ctx, graph)
+				save_graph(graph)
+			when 81 # Q
+				# Testing edges deletion
+				editor.edges.del(graph, graph.edges.length-1)
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+				draw.automaton(ctx, graph)
 	null
 
 
