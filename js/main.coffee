@@ -12,7 +12,6 @@ ctx = null
 canvas = null
 @graph = faxy.create()
 text_editor = null
-label = -1 # index of edge label
 
 
 ###
@@ -114,10 +113,10 @@ nodeByXY = (graph, x, y) ->
  * @param  {int} y     
  * @return {int}       index of edge, -1 if no edge found
 ###
-labelByXY  = (graph, x, y) ->
+edgeByXY  = (graph, x, y) ->
 	for e, index in graph.edges
 		$ = graph.edges.$[index]
-		# Width and hight should be based on the text of the label,
+		# Width and hight should be based on the text of the edge,
 		# but lets do it simple for now.
 		w = 20
 		h = 10
@@ -147,6 +146,8 @@ from = {
 	x: 0
 	y: 0
 }
+edge_ix = -1 # index of edge label
+
 
 automaton = (eCode, ev) ->
 	switch ost = st
@@ -168,7 +169,7 @@ automaton = (eCode, ev) ->
 						from.y = graph.nodes.y[node_ix]
 						st = 1
 
-				else if labelByXY(graph, x, y) >= 0
+				else if edgeByXY(graph, x, y) >= 0
 					null
 				else
 					if ev.shiftKey
@@ -183,20 +184,18 @@ automaton = (eCode, ev) ->
 			if 4 == eCode # double click
 				# Display text editor for the label
 				[x, y] = get_mouse_xy(ev)
-				label = labelByXY(graph, x, y)
-				if label >= 0
-					if graph.edges.events[label]?
+				edge_ix = edgeByXY(graph, x, y)
+				if edge_ix >= 0
+					if graph.edges.events[edge_ix]?
 						vals = []
-						vals.push(graph.events[event]) for event in graph.edges.events[label]
+						vals.push(graph.events[event]) for event in graph.edges.events[edge_ix]
 						text = vals.join(", ")
 					else
 						text = ""
-					text_editor.value = text
-					text_editor.style.width = "40px"
-					text_editor.style.left = graph.edges.$[label].label[0][0]-20 + "px"
-					text_editor.style.top = graph.edges.$[label].label[0][1]-10 + "px"
-					text_editor.style.display = null
-					text_editor.focus()
+					text_editor.show(
+						graph.edges.$[edge_ix].label[0][0]-20
+						graph.edges.$[edge_ix].label[0][1]-10
+						text)
 					st = 6
 
 		when 1 # Moving selected node
@@ -303,28 +302,23 @@ automaton = (eCode, ev) ->
 
 		when 6 # Editing a label
 			switch eCode
-				when 5 # key pressed
-					if 13 == ev.keyCode
-						text_editor.style.display = "none"
-						if label > -1
-							arr = csv2array(text_editor.value)
-							# Clear old events
-							graph.edges.events.length = 0
-							for v in arr
-								event = automata.events.add(graph, v)
-								automata.edges.events.add(graph, label, event)
-							ctx.clearRect(0, 0, canvas.width, canvas.height)
-							draw.automaton(ctx, graph)
-						canvas.focus()
-						# st = 0
-				when 6 # lost focus
-					text_editor.style.display = "none"
+				when 5 # Enter key pressed
+					if edge_ix > -1
+						arr = csv2array(text_editor.text())
+						# Clear old events
+						if graph.edges.events[edge_ix]?
+							graph.edges.events[edge_ix].length = 0
+						for v in arr
+							event = automata.events.add(graph, v)
+							automata.edges.events.add(graph, edge_ix, event)
+						ctx.clearRect(0, 0, canvas.width, canvas.height)
+						draw.automaton(ctx, graph)
+						console.log edge_ix
+					canvas.focus()
 					st = 0
-				when 7 # key down
-					if 27 == ev.keyCode 
-						text_editor.style.display = "none"
-						canvas.focus()
-						# st = 0
+				when 6 # lost focus (cansel)
+					canvas.focus()
+					st = 0
 
 	# If automation changes its state
 	if (ost != st)
@@ -334,7 +328,7 @@ automaton = (eCode, ev) ->
 				save_graph(graph)
 				graph_is_changed = false
 		if 6 == ost
-			label = -1
+			edge_ix = -1
 	null
 
 
@@ -376,15 +370,12 @@ init = (elementName) ->
 		editor.edges.add(graph, node2, node2)
 	draw.automaton(ctx, graph)
 
-	# selected = new graph_create()
 
-	text_editor = document.getElementById("label_editor")
-	text_editor.style.display = "none"
-	text_editor.addEventListener('keypress', ((ev) ->  automaton(5, ev)), false)
-	text_editor.onblur = (ev) -> 
-		automaton(6, ev)
-		null
-	text_editor.addEventListener('keydown', ((ev) ->  automaton(7, ev)), false)
+	text_editor = new textarea
+	text_editor.attach('label_editor'
+		((ev)->automaton(5, ev)) # on Enter event
+		((ev)->automaton(6, ev)) # on Cancel event
+		)
 
 	null
 

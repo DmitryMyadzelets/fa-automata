@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var automaton, canvas, csv2array, ctx, edit, ev_dblclick, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, label, labelByXY, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
+  var automaton, canvas, csv2array, ctx, edgeByXY, edge_ix, edit, ev_dblclick, ev_keypress, ev_keyup, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
 
   x = y = 0;
 
@@ -21,8 +21,6 @@ Usefull links:
   this.graph = faxy.create();
 
   text_editor = null;
-
-  label = -1;
 
   /*
   ===============================================================================
@@ -156,7 +154,7 @@ Usefull links:
   */
 
 
-  labelByXY = function(graph, x, y) {
+  edgeByXY = function(graph, x, y) {
     var $, e, h, index, w, x1, x2, y1, y2, _i, _len, _ref;
 
     _ref = graph.edges;
@@ -193,6 +191,8 @@ Usefull links:
     y: 0
   };
 
+  edge_ix = -1;
+
   automaton = function(eCode, ev) {
     var arr, dx, dy, event, text, v, vals, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
 
@@ -210,7 +210,7 @@ Usefull links:
               from.y = graph.nodes.y[node_ix];
               st = 1;
             }
-          } else if (labelByXY(graph, x, y) >= 0) {
+          } else if (edgeByXY(graph, x, y) >= 0) {
             null;
           } else {
             if (ev.shiftKey) {
@@ -226,11 +226,11 @@ Usefull links:
         }
         if (4 === eCode) {
           _ref1 = get_mouse_xy(ev), x = _ref1[0], y = _ref1[1];
-          label = labelByXY(graph, x, y);
-          if (label >= 0) {
-            if (graph.edges.events[label] != null) {
+          edge_ix = edgeByXY(graph, x, y);
+          if (edge_ix >= 0) {
+            if (graph.edges.events[edge_ix] != null) {
               vals = [];
-              _ref2 = graph.edges.events[label];
+              _ref2 = graph.edges.events[edge_ix];
               for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
                 event = _ref2[_i];
                 vals.push(graph.events[event]);
@@ -239,12 +239,7 @@ Usefull links:
             } else {
               text = "";
             }
-            text_editor.value = text;
-            text_editor.style.width = "40px";
-            text_editor.style.left = graph.edges.$[label].label[0][0] - 20 + "px";
-            text_editor.style.top = graph.edges.$[label].label[0][1] - 10 + "px";
-            text_editor.style.display = null;
-            text_editor.focus();
+            text_editor.show(graph.edges.$[edge_ix].label[0][0] - 20, graph.edges.$[edge_ix].label[0][1] - 10, text);
             st = 6;
           }
         }
@@ -368,31 +363,26 @@ Usefull links:
       case 6:
         switch (eCode) {
           case 5:
-            if (13 === ev.keyCode) {
-              text_editor.style.display = "none";
-              if (label > -1) {
-                arr = csv2array(text_editor.value);
-                graph.edges.events.length = 0;
-                for (_j = 0, _len1 = arr.length; _j < _len1; _j++) {
-                  v = arr[_j];
-                  event = automata.events.add(graph, v);
-                  automata.edges.events.add(graph, label, event);
-                }
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                draw.automaton(ctx, graph);
+            if (edge_ix > -1) {
+              arr = csv2array(text_editor.text());
+              if (graph.edges.events[edge_ix] != null) {
+                graph.edges.events[edge_ix].length = 0;
               }
-              canvas.focus();
+              for (_j = 0, _len1 = arr.length; _j < _len1; _j++) {
+                v = arr[_j];
+                event = automata.events.add(graph, v);
+                automata.edges.events.add(graph, edge_ix, event);
+              }
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              draw.automaton(ctx, graph);
+              console.log(edge_ix);
             }
-            break;
-          case 6:
-            text_editor.style.display = "none";
+            canvas.focus();
             st = 0;
             break;
-          case 7:
-            if (27 === ev.keyCode) {
-              text_editor.style.display = "none";
-              canvas.focus();
-            }
+          case 6:
+            canvas.focus();
+            st = 0;
         }
     }
     if (ost !== st) {
@@ -404,7 +394,7 @@ Usefull links:
         }
       }
       if (6 === ost) {
-        label = -1;
+        edge_ix = -1;
       }
     }
     return null;
@@ -446,18 +436,12 @@ Usefull links:
       editor.edges.add(graph, node2, node2);
     }
     draw.automaton(ctx, graph);
-    text_editor = document.getElementById("label_editor");
-    text_editor.style.display = "none";
-    text_editor.addEventListener('keypress', (function(ev) {
+    text_editor = new textarea;
+    text_editor.attach('label_editor', (function(ev) {
       return automaton(5, ev);
-    }), false);
-    text_editor.onblur = function(ev) {
-      automaton(6, ev);
-      return null;
-    };
-    text_editor.addEventListener('keydown', (function(ev) {
-      return automaton(7, ev);
-    }), false);
+    }), (function(ev) {
+      return automaton(6, ev);
+    }));
     return null;
   };
 
