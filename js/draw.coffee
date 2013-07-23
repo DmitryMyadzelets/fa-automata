@@ -185,7 +185,7 @@ empty_string = '\u03b5'
 				_this.any_edge(ctx, $)
 
 				# Making label as a sequence of the events
-				if G.edges.events[ix]?
+				if G.edges.events[ix]? and G.edges.events[ix].length != 0
 					vals = []
 					vals.push(G.events[event]) for event in G.edges.events[ix]
 					text = vals.join(', ')

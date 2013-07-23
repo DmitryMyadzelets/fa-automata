@@ -360,7 +360,6 @@ init = (elementName) ->
 
 	#Load graph from local storage
 	g = load_graph(graph)
-	console.log g
 	if g == null
 		console.log "default"
 		node1 = editor.nodes.add(graph, -50 + canvas.width/2, canvas.height/2)

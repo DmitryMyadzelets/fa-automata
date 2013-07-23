@@ -194,7 +194,7 @@
         while (ix-- > 0) {
           $ = G.edges.$[ix];
           _this.any_edge(ctx, $);
-          if (G.edges.events[ix] != null) {
+          if ((G.edges.events[ix] != null) && G.edges.events[ix].length !== 0) {
             vals = [];
             _ref = G.edges.events[ix];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
