@@ -62,7 +62,7 @@
         return ix;
       },
       move2: function(G, i, old_x, old_y, x, y) {
-        if (i >= 0 && i < G.nodes.length) {
+        if (i >= 0 && i < G.nodes.v.length) {
           ged.commands.put(faxy.nodes.move, [G, i, x, y], faxy.nodes.move, [G, i, old_x, old_y]);
         }
         return i;

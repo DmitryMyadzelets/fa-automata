@@ -64,7 +64,7 @@ and change elements with values ixUpdate to ixDelete.
 			ix
 
 		move2 : (G, i, old_x, old_y, x, y) ->
-			if i>=0 and i< G.nodes.length
+			if i>=0 and i< G.nodes.v.length
 				ged.commands.put(faxy.nodes.move, [G, i, x, y], faxy.nodes.move, [G, i, old_x, old_y])
 			i
 

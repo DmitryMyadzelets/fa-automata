@@ -16,11 +16,11 @@
       });
       it("Adds 1st node", function() {
         automata.nodes.add(g);
-        return expect(g.nodes.length).toBe(1);
+        return expect(automata.nodes.all(g)).toBe(1);
       });
       return it("Adds 2nd node", function() {
         automata.nodes.add(g);
-        return expect(g.nodes.length).toBe(2);
+        return expect(automata.nodes.all(g)).toBe(2);
       });
     });
     describe("When a node deleted", function() {
@@ -31,13 +31,13 @@
       automata.nodes.add(g);
       it("Deletes with right index", function() {
         automata.nodes.del(g, 0);
-        return expect(g.nodes.length).toBe(1);
+        return expect(automata.nodes.all(g)).toBe(1);
       });
       return it("Does not deletes with wrong index", function() {
         automata.nodes.del(g, -1);
-        expect(g.nodes.length).toBe(1);
-        automata.nodes.del(g, g.nodes.length);
-        return expect(g.nodes.length).toBe(1);
+        expect(automata.nodes.all(g)).toBe(1);
+        automata.nodes.del(g, g.nodes.v.length);
+        return expect(automata.nodes.all(g)).toBe(1);
       });
     });
     describe("When adds edges", function() {
@@ -48,11 +48,11 @@
       automata.nodes.add(g);
       it("Adds with right node indexes", function() {
         automata.edges.add(g, 0, 1);
-        return expect(g.edges.length).toBe(1);
+        return expect(automata.edges.all(g)).toBe(1);
       });
       return it("Does not adds with wrong node indexes", function() {
         automata.edges.add(g, -1, 1);
-        return expect(g.edges.length).toBe(1);
+        return expect(automata.edges.all(g)).toBe(1);
       });
     });
     describe("Has to remove ingoing and outhoing edges when a node removed", function() {
@@ -62,35 +62,35 @@
       it("Creates 2 nodes", function() {
         automata.nodes.add(g);
         automata.nodes.add(g);
-        return expect(g.nodes.length).toBe(2);
+        return expect(automata.nodes.all(g)).toBe(2);
       });
       it("Adds 1 edge from node 0 to 1", function() {
         automata.edges.add(g, 0, 1);
-        return expect(g.edges.length).toBe(1);
+        return expect(automata.edges.all(g)).toBe(1);
       });
       it("Adds 1 edge-loop from node 1 to 1, and has 2 edges", function() {
         automata.edges.add(g, 1, 1);
-        return expect(g.edges.length).toBe(2);
+        return expect(automata.edges.all(g)).toBe(2);
       });
       it("Deletes node 0", function() {
         automata.nodes.del(g, 0);
-        return expect(g.nodes.length).toBe(1);
+        return expect(automata.nodes.all(g)).toBe(1);
       });
       it("Has 1 edge", function() {
-        return expect(g.edges.length).toBe(1);
+        return expect(automata.edges.all(g)).toBe(1);
       });
       it("Edge is a loop", function() {
         var ix;
 
-        ix = g.edges.length;
+        ix = automata.edges.all(g);
         return expect(g.edges.a[ix] === g.edges.b[ix]).toBe(true);
       });
       it("Deletes node. No nodes for now", function() {
         automata.nodes.del(g, 0);
-        return expect(g.nodes.length).toBe(0);
+        return expect(automata.nodes.all(g)).toBe(0);
       });
       return it("Has no edges", function() {
-        return expect(g.edges.length).toBe(0);
+        return expect(automata.edges.all(g)).toBe(0);
       });
     });
     describe("When adds|delets events", function() {
@@ -176,7 +176,7 @@
       ev = automata.events.add(g, "Start");
       return it("Deletes the edge and edge's events", function() {
         automata.nodes.del(g, a);
-        expect(g.edges.length).toBe(0);
+        expect(automata.edges.all(g)).toBe(0);
         return expect(g.edges.events.length).toBe(0);
       });
     });

@@ -190,7 +190,7 @@
         ctx.strokeStyle = cl_edge;
         text = '';
         _this.fake_edge(ctx, G.edges.start);
-        ix = G.edges.length;
+        ix = G.edges.v.length;
         while (ix-- > 0) {
           $ = G.edges.$[ix];
           _this.any_edge(ctx, $);
@@ -212,7 +212,7 @@
           ctx.fillText(text, $.label[0][0], $.label[0][1]);
           ctx.restore();
         }
-        ix = G.nodes.length;
+        ix = G.nodes.v.length;
         while (ix-- > 0) {
           x = G.nodes.x[ix];
           y = G.nodes.y[ix];

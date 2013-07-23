@@ -65,24 +65,18 @@ there are no keys; otherwise returns true.
 load_graph = (graph) ->
 	if !($ && $.jStorage && $.jStorage.storageAvailable() && JSON)
 		return false
-	parsed = JSON.parse($.jStorage.get("graph")) ? {}
-	# console.log "Loaded: ", parsed
-
-	# graph.edges.a = parsed.edges.a.slice(0);
-	# # graph.curved = parsed.curved ? []
-	# graph.nodes = clone(parsed.nodes)
-	# console.log graph.nodes
-	# graph.nodes.x = parsed.nodes ?.x ? []
-	# graph.nodes.y = parsed.nodes ?.y ? []
-	graph.nodes.length > 0
+	parsed = JSON.parse($.jStorage.get("graph")) ? null
+	parsed
 
 ###
 ===============================================================================
 ###
 save_graph = (graph) ->
+	# $.jStorage.flush() # Clean the storage
 	if !($ && $.jStorage && $.jStorage.storageAvailable())
 		return false
 	$.jStorage.set("graph", JSON.stringify(graph))
+	null
 
 ###
 ===============================================================================
@@ -114,8 +108,7 @@ nodeByXY = (graph, x, y) ->
  * @return {int}       index of edge, -1 if no edge found
 ###
 edgeByXY  = (graph, x, y) ->
-	for e, index in graph.edges
-		$ = graph.edges.$[index]
+	for $, index in graph.edges.$
 		# Width and hight should be based on the text of the edge,
 		# but lets do it simple for now.
 		w = 20
@@ -313,7 +306,9 @@ automaton = (eCode, ev) ->
 							automata.edges.events.add(graph, edge_ix, event)
 						ctx.clearRect(0, 0, canvas.width, canvas.height)
 						draw.automaton(ctx, graph)
-						console.log edge_ix
+						
+						graph_is_changed = true
+
 					canvas.focus()
 					st = 0
 				when 6 # lost focus (cansel)
@@ -364,11 +359,17 @@ init = (elementName) ->
 	canvas.onselectstart = () -> false
 
 	#Load graph from local storage
-	if !load_graph(graph)
+	g = load_graph(graph)
+	console.log g
+	if g == null
+		console.log "default"
 		node1 = editor.nodes.add(graph, -50 + canvas.width/2, canvas.height/2)
 		node2 = editor.nodes.add(graph,  50 + canvas.width/2, canvas.height/2)
 		editor.edges.add(graph, node1, node2)
 		editor.edges.add(graph, node2, node2)
+	else
+		window.graph = g
+
 	draw.automaton(ctx, graph)
 
 
@@ -429,6 +430,12 @@ ev_keydown = (ev) ->
 				editor.edges.del(graph, graph.edges.length-1)
 				ctx.clearRect(0, 0, canvas.width, canvas.height)
 				draw.automaton(ctx, graph)
+			when 74 # J
+				console.log  JSON.stringify(graph)
+
+			else
+				# console.log ev.keyCode
+				null
 	null
 
 
@@ -441,3 +448,9 @@ window.onload = () ->
 	console.log "."
 	setTimeout(tout, 1000)
 )()
+
+
+@foo = () ->
+	console.log s = JSON.stringify(graph)
+	console.log JSON.parse(s)
+	null

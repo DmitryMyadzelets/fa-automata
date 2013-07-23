@@ -177,8 +177,8 @@ empty_string = '\u03b5'
 			# Arrow to initial state
 			_this.fake_edge(ctx, G.edges.start)
 			#
-			ix = G.edges.length
-			# console.log G.edges.a
+			ix = G.edges.v.length
+
 			while ix-- >0
 				# Edge graphical info
 				$ = G.edges.$[ix]
@@ -201,7 +201,7 @@ empty_string = '\u03b5'
 			# 
 			# Draw nodes
 			# 
-			ix = G.nodes.length
+			ix = G.nodes.v.length
 			while ix-- >0
 				x = G.nodes.x[ix]
 				y = G.nodes.y[ix]

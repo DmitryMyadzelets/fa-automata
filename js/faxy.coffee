@@ -5,7 +5,7 @@
 # Some vector math is inspired by [http://media.tojicode.com/sfjs-vectors/]
 vec = {
 
-	create : () -> new Float32Array([0, 0])
+	create : () -> new Array([0, 0])
 
 	length : (v) ->	Math.sqrt(v[0]*v[0] + v[1]*v[1])
 
@@ -192,7 +192,7 @@ vec = {
 			# x = x1 + 2*r
 			# y = y1 - 3*r
 			$.label[0][0] = v[0] + 2*r
-			$.label[0][1] = v[1] - 3*r
+			$.label[0][1] = v[1] - 2.6*r
 			null
 
 		start : (v2, $) ->
@@ -321,7 +321,7 @@ vec = {
 		i
 
 	_this.nodes.move = (G, i, x, y) ->
-		if i<G.nodes.length && i>-1
+		if i<G.nodes.x.length && i>-1
 			G.nodes.x[i] = x
 			G.nodes.y[i] = y
 			update_node(G, i)

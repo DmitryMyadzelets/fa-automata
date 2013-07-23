@@ -7,7 +7,7 @@
 
   vec = {
     create: function() {
-      return new Float32Array([0, 0]);
+      return new Array([0, 0]);
     },
     length: function(v) {
       return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
@@ -157,7 +157,7 @@
         $.v2[1] = v[1] - this.K('DY4');
         this.arrow($.v1, $.arrow, $.norm);
         $.label[0][0] = v[0] + 2 * r;
-        $.label[0][1] = v[1] - 3 * r;
+        $.label[0][1] = v[1] - 2.6 * r;
         return null;
       },
       start: function(v2, $) {
@@ -277,7 +277,7 @@
       return i;
     };
     _this.nodes.move = function(G, i, x, y) {
-      if (i < G.nodes.length && i > -1) {
+      if (i < G.nodes.x.length && i > -1) {
         G.nodes.x[i] = x;
         G.nodes.y[i] = y;
         update_node(G, i);

@@ -96,8 +96,8 @@ Usefull links:
     if (!($ && $.jStorage && $.jStorage.storageAvailable() && JSON)) {
       return false;
     }
-    parsed = (_ref = JSON.parse($.jStorage.get("graph"))) != null ? _ref : {};
-    return graph.nodes.length > 0;
+    parsed = (_ref = JSON.parse($.jStorage.get("graph"))) != null ? _ref : null;
+    return parsed;
   };
 
   /*
@@ -109,7 +109,8 @@ Usefull links:
     if (!($ && $.jStorage && $.jStorage.storageAvailable())) {
       return false;
     }
-    return $.jStorage.set("graph", JSON.stringify(graph));
+    $.jStorage.set("graph", JSON.stringify(graph));
+    return null;
   };
 
   /*
@@ -155,12 +156,11 @@ Usefull links:
 
 
   edgeByXY = function(graph, x, y) {
-    var $, e, h, index, w, x1, x2, y1, y2, _i, _len, _ref;
+    var $, h, index, w, x1, x2, y1, y2, _i, _len, _ref;
 
-    _ref = graph.edges;
+    _ref = graph.edges.$;
     for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      e = _ref[index];
-      $ = graph.edges.$[index];
+      $ = _ref[index];
       w = 20;
       h = 10;
       x1 = $.label[0][0] - w;
@@ -375,7 +375,7 @@ Usefull links:
               }
               ctx.clearRect(0, 0, canvas.width, canvas.height);
               draw.automaton(ctx, graph);
-              console.log(edge_ix);
+              graph_is_changed = true;
             }
             canvas.focus();
             st = 0;
@@ -406,7 +406,7 @@ Usefull links:
 
 
   init = function(elementName) {
-    var node1, node2;
+    var g, node1, node2;
 
     canvas = document.getElementById(elementName);
     canvas.focus();
@@ -428,11 +428,16 @@ Usefull links:
     canvas.onselectstart = function() {
       return false;
     };
-    if (!load_graph(graph)) {
+    g = load_graph(graph);
+    console.log(g);
+    if (g === null) {
+      console.log("default");
       node1 = editor.nodes.add(graph, -50 + canvas.width / 2, canvas.height / 2);
       node2 = editor.nodes.add(graph, 50 + canvas.width / 2, canvas.height / 2);
       editor.edges.add(graph, node1, node2);
       editor.edges.add(graph, node2, node2);
+    } else {
+      window.graph = g;
     }
     draw.automaton(ctx, graph);
     text_editor = new textarea;
@@ -498,6 +503,12 @@ Usefull links:
           editor.edges.del(graph, graph.edges.length - 1);
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           draw.automaton(ctx, graph);
+          break;
+        case 74:
+          console.log(JSON.stringify(graph));
+          break;
+        default:
+          null;
       }
     }
     return null;
@@ -512,5 +523,13 @@ Usefull links:
     console.log(".");
     return setTimeout(tout, 1000);
   })();
+
+  this.foo = function() {
+    var s;
+
+    console.log(s = JSON.stringify(graph));
+    console.log(JSON.parse(s));
+    return null;
+  };
 
 }).call(this);
