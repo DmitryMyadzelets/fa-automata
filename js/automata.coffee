@@ -19,7 +19,7 @@
 
 	# Deletes an element 'i' of the array and returns the deleted element
 	del = (arr, i) ->
-		return -1 if i<0 or i>=arr.length
+		return -1 if i<0 or i>=arr.length or isNaN(i) or not (arr instanceof Array)
 		if i< arr.length-1
 			arr.splice(i, 1, arr.pop())
 		else
@@ -30,7 +30,7 @@
 	# Returns object's keys wich have the Array type
 	get_arrays = (o) ->
 		keys = []
-		keys.push(key) for key of o when o[key] instanceof Array
+		keys.push(key) for key of o when o.hasOwnProperty(key) and o[key] instanceof Array
 		keys
 
 
@@ -135,6 +135,7 @@
 					G.edges.events[edge].splice(event, 1)
 					ix
 			}
+
 		}
 
 		nodes : {

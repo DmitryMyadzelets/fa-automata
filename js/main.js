@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var automaton, canvas, csv2array, ctx, edgeByXY, edge_ix, edit, ev_dblclick, ev_keydown, ev_mousedown, ev_mousemove, ev_mouseup, from, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, save_graph, st, text_editor, tout, x, y;
+  var automaton, canvas, csv2array, ctx, edgeByXY, edge_ix, edit, ev_dblclick, ev_keydown, ev_mousedown, ev_mousemove, ev_mouseup, from, getStyleProperty, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, resizeCanvas, save_graph, st, text_editor, tout, updateCanvas, x, y;
 
   x = y = 0;
 
@@ -174,6 +174,25 @@ Usefull links:
     return -1;
   };
 
+  resizeCanvas = function(w, h) {
+    if (w !== canvas.width || h !== canvas.height) {
+      canvas.width = w;
+      canvas.height = h;
+      ctx.lineWidth = 1.2;
+      draw.automaton(ctx, graph);
+    }
+    return null;
+  };
+
+  updateCanvas = function() {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+    draw.automaton(ctx, graph);
+    return null;
+  };
+
   /*
   ===============================================================================
   */
@@ -266,8 +285,7 @@ Usefull links:
             graph.nodes.y[node_ix] = from.y;
             st = 0;
         }
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw.automaton(ctx, graph);
+        updateCanvas();
         break;
       case 2:
         switch (eCode) {
@@ -289,8 +307,7 @@ Usefull links:
         node_ix = nodeByXY(graph, x, y);
         switch (eCode) {
           case 2:
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw.automaton(ctx, graph);
+            updateCanvas();
             draw.fake_edge(ctx, faxy.get_fake_edge(graph, from.node_ix, node_ix, x, y));
             break;
           case 3:
@@ -303,13 +320,11 @@ Usefull links:
               editor.edges.add(graph, from.node_ix, node_ix);
             }
             graph_is_changed = true;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw.automaton(ctx, graph);
+            updateCanvas();
             st = 0;
             break;
           default:
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw.automaton(ctx, graph);
+            updateCanvas();
             st = 0;
         }
         break;
@@ -318,21 +333,18 @@ Usefull links:
           case 2:
             _ref6 = get_mouse_xy(ev), x = _ref6[0], y = _ref6[1];
             ctx.save();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.translate(x - from.x, y - from.y);
-            draw.automaton(ctx, graph);
+            updateCanvas();
             ctx.restore();
             break;
           case 3:
             _ref7 = get_mouse_xy(ev), x = _ref7[0], y = _ref7[1];
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw.automaton(ctx, graph);
+            updateCanvas();
             graph_is_changed = true;
             st = 0;
             break;
           default:
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw.automaton(ctx, graph);
+            updateCanvas();
             st = 0;
         }
         break;
@@ -341,8 +353,7 @@ Usefull links:
           case 3:
             _ref8 = get_mouse_xy(ev), x = _ref8[0], y = _ref8[1];
             editor.nodes.add(graph, x, y);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            draw.automaton(ctx, graph);
+            updateCanvas();
             graph_is_changed = true;
             st = 0;
             break;
@@ -373,8 +384,7 @@ Usefull links:
                 event = automata.events.add(graph, v);
                 automata.edges.events.add(graph, edge_ix, event);
               }
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              draw.automaton(ctx, graph);
+              updateCanvas();
               graph_is_changed = true;
             }
             canvas.focus();
@@ -400,22 +410,56 @@ Usefull links:
     return null;
   };
 
+  getStyleProperty = function(element, prop) {
+    if (window.getComputedStyle) {
+      return window.getComputedStyle(element)[prop];
+    } else if (element.currentStyle) {
+      return element.currentStyle[prop];
+    }
+    return null;
+  };
+
   /*
   ===============================================================================
   */
 
 
   init = function(elementName) {
-    var g, node1, node2;
+    var div, edge_style, g, node1, node2, node_style, v;
 
+    div = document.getElementById('container');
     canvas = document.getElementById(elementName);
     canvas.focus();
     ctx = canvas.getContext("2d");
-    ctx.fillStyle = "gray";
     ctx.lineWidth = 1.2;
-    ctx.strokeStyle = "rgba(0,0,255,0.5)";
-    ctx.font = "0.8em Verdana 'Courier New'";
-    ctx.textAlign = "left";
+    if ((v = getStyleProperty(canvas, 'backgroundColor'))) {
+      draw.backgroundColor = v;
+    }
+    if ((v = getStyleProperty(canvas, 'font'))) {
+      draw.font = v;
+    }
+    if ((v = getStyleProperty(canvas, 'color'))) {
+      draw.fontColor = v;
+    }
+    if ((node_style = document.getElementById('automaton-node'))) {
+      if ((v = getStyleProperty(node_style, 'backgroundColor'))) {
+        draw.nodeBackgroundColor = v;
+      }
+      if ((v = getStyleProperty(node_style, 'color'))) {
+        draw.nodeColor = v;
+      }
+      if ((v = getStyleProperty(node_style, 'color'))) {
+        draw.nodeFontColor = v;
+      }
+    }
+    if ((edge_style = document.getElementById('automaton-edge'))) {
+      if ((v = getStyleProperty(edge_style, 'backgroundColor'))) {
+        draw.edgeColor = v;
+      }
+      if ((v = getStyleProperty(edge_style, 'color'))) {
+        draw.edgeFontColor = v;
+      }
+    }
     canvas.addEventListener('mousemove', ev_mousemove, false);
     canvas.addEventListener('mousedown', ev_mousedown, false);
     canvas.addEventListener('mouseup', ev_mouseup, false);
@@ -427,6 +471,11 @@ Usefull links:
     });
     canvas.onselectstart = function() {
       return false;
+    };
+    resizeCanvas(div.offsetWidth, div.offsetHeight);
+    window.onresize = function(ev) {
+      resizeCanvas(div.offsetWidth, div.offsetHeight);
+      return null;
     };
     g = load_graph(graph);
     if (g === null) {
@@ -480,28 +529,24 @@ Usefull links:
       switch (ev.keyCode) {
         case 89:
           editor.redo();
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw.automaton(ctx, graph);
+          updateCanvas();
           save_graph(graph);
           break;
         case 90:
           editor.undo();
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw.automaton(ctx, graph);
+          updateCanvas();
           save_graph(graph);
       }
     } else {
       switch (ev.keyCode) {
         case 46:
-          editor.nodes.del(graph, graph.nodes.length - 1);
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw.automaton(ctx, graph);
+          editor.nodes.del(graph, graph.nodes.v.length - 1);
+          updateCanvas();
           save_graph(graph);
           break;
         case 81:
-          editor.edges.del(graph, graph.edges.length - 1);
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          draw.automaton(ctx, graph);
+          editor.edges.del(graph, graph.edges.v.length - 1);
+          updateCanvas();
           break;
         case 74:
           console.log(JSON.stringify(graph));
@@ -524,10 +569,7 @@ Usefull links:
   })();
 
   this.foo = function() {
-    var s;
-
-    console.log(s = JSON.stringify(graph));
-    console.log(JSON.parse(s));
+    canvas.width = 1000;
     return null;
   };
 

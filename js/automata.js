@@ -20,7 +20,7 @@
       return ret;
     };
     del = function(arr, i) {
-      if (i < 0 || i >= arr.length) {
+      if (i < 0 || i >= arr.length || isNaN(i) || !(arr instanceof Array)) {
         return -1;
       }
       if (i < arr.length - 1) {
@@ -35,7 +35,7 @@
 
       keys = [];
       for (key in o) {
-        if (o[key] instanceof Array) {
+        if (o.hasOwnProperty(key) && o[key] instanceof Array) {
           keys.push(key);
         }
       }

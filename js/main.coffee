@@ -128,6 +128,23 @@ edgeByXY  = (graph, x, y) ->
 	-1
 
 
+resizeCanvas = (w, h) ->
+	if w != canvas.width or h != canvas.height
+		canvas.width = w
+		canvas.height = h
+		# Canvas resets its values when resized, so we should set them again
+		ctx.lineWidth = 1.2
+		draw.automaton(ctx, graph)
+	null
+
+updateCanvas = () ->
+	ctx.save()
+	ctx.setTransform(1, 0, 0, 1, 0, 0);
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+	ctx.restore()
+	draw.automaton(ctx, graph)
+	null
+
 ###
 ===============================================================================
 ###
@@ -153,8 +170,7 @@ automaton = (eCode, ev) ->
 						from.node_ix = node_ix
 						# selected.nodes.length = 0
 						# selected.nodes.push(node_ix)
-						# ctx.clearRect(0, 0, canvas.width, canvas.height)
-						# draw.automaton(ctx, graph)
+						# updateCanvas()
 						# draw_selected(ctx, graph, selected)
 						st = 2
 					else 
@@ -206,8 +222,7 @@ automaton = (eCode, ev) ->
 					graph.nodes.x[node_ix] = from.x
 					graph.nodes.y[node_ix] = from.y
 					st = 0
-			ctx.clearRect(0, 0, canvas.width, canvas.height)
-			draw.automaton(ctx, graph)
+			updateCanvas()
 
 		when 2 # Going out of the "from" node
 			switch eCode
@@ -226,8 +241,7 @@ automaton = (eCode, ev) ->
 			node_ix = nodeByXY(graph, x, y)
 			switch eCode
 				when 2 # moving
-					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw.automaton(ctx, graph)
+					updateCanvas()
 					draw.fake_edge(ctx, faxy.get_fake_edge(graph, from.node_ix, node_ix, x, y))
 				when 3 # up
 					if (node_ix < 0)
@@ -239,12 +253,10 @@ automaton = (eCode, ev) ->
 					else
 						editor.edges.add(graph, from.node_ix, node_ix)
 					graph_is_changed = true
-					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw.automaton(ctx, graph)
+					updateCanvas()
 					st = 0
 				else
-					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw.automaton(ctx, graph)
+					updateCanvas()
 					st = 0
 
 		when 4 # Moving graph
@@ -252,20 +264,17 @@ automaton = (eCode, ev) ->
 				when 2 # move
 					[x, y] = get_mouse_xy(ev)
 					ctx.save()
-					ctx.clearRect(0, 0, canvas.width, canvas.height)
 					ctx.translate(x-from.x, y-from.y)
-					draw.automaton(ctx, graph)
+					updateCanvas()
 					ctx.restore()
 				when 3 # up
 					[x, y] = get_mouse_xy(ev)
 					# editor.move_graph(from.x, from.y, x, y) TODO: fix! 
-					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw.automaton(ctx, graph)
+					updateCanvas()
 					graph_is_changed = true
 					st = 0
 				else # cancel movement (should be one value for entire graph)
-					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw.automaton(ctx, graph)
+					updateCanvas()
 					st = 0
 
 		when 5 # Creating a new node
@@ -273,8 +282,7 @@ automaton = (eCode, ev) ->
 				when 3 # up
 					[x, y] = get_mouse_xy(ev)
 					editor.nodes.add(graph, x, y)
-					ctx.clearRect(0, 0, canvas.width, canvas.height)
-					draw.automaton(ctx, graph)
+					updateCanvas()
 					graph_is_changed = true
 					st = 0
 				when 2 # move
@@ -304,9 +312,7 @@ automaton = (eCode, ev) ->
 						for v in arr
 							event = automata.events.add(graph, v)
 							automata.edges.events.add(graph, edge_ix, event)
-						ctx.clearRect(0, 0, canvas.width, canvas.height)
-						draw.automaton(ctx, graph)
-						
+						updateCanvas()
 						graph_is_changed = true
 
 					canvas.focus()
@@ -327,25 +333,43 @@ automaton = (eCode, ev) ->
 	null
 
 
+getStyleProperty = (element, prop) ->
+	if window.getComputedStyle
+		return window.getComputedStyle(element)[prop]
+	else if element.currentStyle
+		return element.currentStyle[prop]
+	null
+
 
 ###
 ===============================================================================
 ###
 init = (elementName) ->
 
+
+	div = document.getElementById('container')
 	canvas = document.getElementById(elementName)
-	# canvas = document.createElement('canvas')
-	# document.body.appendChild(canvas)
-	# canvas.width = window.innerWidth;
-	# canvas.height = window.innerHeight;
 	canvas.focus()
 	#
 	ctx = canvas.getContext("2d")
-	ctx.fillStyle = "gray"
 	ctx.lineWidth = 1.2
-	ctx.strokeStyle = "rgba(0,0,255,0.5)"
-	ctx.font = "0.8em Verdana 'Courier New'"
-	ctx.textAlign = "left"
+
+	# 
+	# Set style properties for drawing
+	# 
+	draw.backgroundColor = v if (v = getStyleProperty(canvas, 'backgroundColor'))
+	draw.font = v if (v = getStyleProperty(canvas, 'font'))
+	draw.fontColor = v if (v = getStyleProperty(canvas, 'color'))
+	# 
+	if (node_style = document.getElementById('automaton-node'))
+		draw.nodeBackgroundColor = v if (v = getStyleProperty(node_style, 'backgroundColor'))
+		draw.nodeColor = v if (v = getStyleProperty(node_style, 'color'))
+		draw.nodeFontColor = v if (v = getStyleProperty(node_style, 'color'))
+	# 
+	if (edge_style = document.getElementById('automaton-edge'))
+		draw.edgeColor = v if (v = getStyleProperty(edge_style, 'backgroundColor'))
+		draw.edgeFontColor = v if (v = getStyleProperty(edge_style, 'color'))
+
 	#
 	canvas.addEventListener('mousemove', ev_mousemove, false)
 	canvas.addEventListener('mousedown', ev_mousedown, false)
@@ -357,6 +381,12 @@ init = (elementName) ->
 	# Disable Dragging effect of canvas
 	canvas.addEventListener('dragstart', (e) -> e.preventDefault(); false)
 	canvas.onselectstart = () -> false
+
+	resizeCanvas(div.offsetWidth, div.offsetHeight)
+	window.onresize = (ev) ->
+		# console.log div.offsetHeight
+		resizeCanvas(div.offsetWidth, div.offsetHeight)
+		null
 
 	#Load graph from local storage
 	g = load_graph(graph)
@@ -409,26 +439,22 @@ ev_keydown = (ev) ->
 		switch ev.keyCode
 			when 89 # Y
 				editor.redo()
-				ctx.clearRect(0, 0, canvas.width, canvas.height)
-				draw.automaton(ctx, graph)
+				updateCanvas()
 				save_graph(graph)
 			when 90 # Z
 				editor.undo()
-				ctx.clearRect(0, 0, canvas.width, canvas.height)
-				draw.automaton(ctx, graph)
+				updateCanvas()
 				save_graph(graph)
 	else
 		switch ev.keyCode
 			when 46 # Delete ### Move it to the main automaton!
-				editor.nodes.del(graph, graph.nodes.length-1)
-				ctx.clearRect(0, 0, canvas.width, canvas.height)
-				draw.automaton(ctx, graph)
+				editor.nodes.del(graph, graph.nodes.v.length-1)
+				updateCanvas()
 				save_graph(graph)
 			when 81 # Q
 				# Testing edges deletion
-				editor.edges.del(graph, graph.edges.length-1)
-				ctx.clearRect(0, 0, canvas.width, canvas.height)
-				draw.automaton(ctx, graph)
+				editor.edges.del(graph, graph.edges.v.length-1)
+				updateCanvas()
 			when 74 # J
 				console.log  JSON.stringify(graph)
 
@@ -450,6 +476,5 @@ window.onload = () ->
 
 
 @foo = () ->
-	console.log s = JSON.stringify(graph)
-	console.log JSON.parse(s)
+	canvas.width = 1000
 	null

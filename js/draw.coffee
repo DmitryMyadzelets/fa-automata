@@ -1,19 +1,9 @@
 
 'use strict'
 
+
 @.r = 16 # Radius of circle for a node
 PI2 = Math.PI * 2
-
-# The first colors:
-# cl_node = 'rgba(0,0,255,0.2)'
-
-# Colors taken from Haiku OS:
-cl_black = 'rgba(0,0,0, 0.8)'
-cl_node = '#fec867' #(254, 200, 103)
-cl_text = cl_black
-cl_edge = cl_black
-cl_node_edge = cl_black
-cl_node_sel = '#da5d00' #(218, 93, 0) # color for selected nodes
 # Empty string symbol - Epsilon:
 empty_string = '\u03b5'
 
@@ -25,7 +15,18 @@ empty_string = '\u03b5'
  * @return {Object}
 ###
 @.draw = ( () ->
+
 	_this = {
+		backgroundColor : "white"
+		font : "normal 0.8em Verdana, sans-serif"
+		fontColor : "black"
+
+		nodeBackgroundColor : "white"
+		nodeColor : "black"
+		nodeFontColor : "black"
+
+		edgeColor : "black"
+		edgeFontColor : "black"
 		###*
 		 * Draws a state of the automaton
 		 * @param  {canvas} ctx
@@ -149,8 +150,8 @@ empty_string = '\u03b5'
 		###
 		fake_edge : (ctx, o) ->
 			ctx.save()
-			ctx.fillStyle = cl_edge
-			ctx.strokeStyle = cl_edge
+			ctx.fillStyle = _this.edgeFontColor
+			ctx.strokeStyle = _this.edgeFontColor
 			_this.any_edge(ctx, o)
 			ctx.restore()
 			null
@@ -164,55 +165,58 @@ empty_string = '\u03b5'
 		###
 		automaton : (ctx, G) ->
 			ctx.save()
-			# ctx.font = '12pt Calibri'
+			ctx.font = _this.font
 			ctx.textAlign = 'center'
 			ctx.textBaseline = 'middle'
-			ctx.fillStyle = cl_black
 			# 
 			# Draw edges
 			# 
-			ctx.fillStyle = cl_edge
-			ctx.strokeStyle = cl_edge
+			ctx.fillStyle = _this.edgeFontColor
+			ctx.strokeStyle = _this.edgeFontColor
 			text = ''
 			# Arrow to initial state
 			_this.fake_edge(ctx, G.edges.start)
-			#
-			ix = G.edges.v.length
-
-			while ix-- >0
+			# 
+			# Draw edges
+			# 
+			automata.edges.all(G, (edges, ix) ->
 				# Edge graphical info
-				$ = G.edges.$[ix]
+				$ = edges.$[ix]
 				_this.any_edge(ctx, $)
 
 				# Making label as a sequence of the events
-				if G.edges.events[ix]? and G.edges.events[ix].length != 0
+				if edges.events[ix]? and edges.events[ix].length != 0
 					vals = []
-					vals.push(G.events[event]) for event in G.edges.events[ix]
+					vals.push(G.events[event]) for event in edges.events[ix]
 					text = vals.join(', ')
 				else
 					text = empty_string
 				
 				ctx.save()
-				ctx.strokeStyle = 'gray'
+				ctx.strokeStyle = _this.backgroundColor
+				ctx.fillStyle = _this.edgeFontColor
 				ctx.lineWidth = 4
 				ctx.strokeText(text, $.label[0][0], $.label[0][1])
 				ctx.fillText(text, $.label[0][0], $.label[0][1])
+				# console.log  ctx.measureText(text).width, text
 				ctx.restore()
+				null
+				)
 			# 
 			# Draw nodes
 			# 
-			ix = G.nodes.v.length
-			while ix-- >0
-				x = G.nodes.x[ix]
-				y = G.nodes.y[ix]
-				ctx.fillStyle = cl_node
+			ctx.strokeStyle = _this.nodeColor
+			automata.nodes.all(G, (nodes, ix) ->
+				x = nodes.x[ix]
+				y = nodes.y[ix]
+				ctx.fillStyle = _this.nodeBackgroundColor
 				_this.state(ctx, x, y)
 				# Draw text
 				text = ix.toString()
-				# metrics = ctx.measureText(text)
-				# width = metrics.width
-				ctx.fillStyle = cl_text
+				ctx.fillStyle = _this.nodeFontColor
 				ctx.fillText(text, x, y)
+				null
+				)
 
 			ctx.restore()
 			null
