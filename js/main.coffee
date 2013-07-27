@@ -341,6 +341,18 @@ getStyleProperty = (element, prop) ->
 	null
 
 
+undo = () ->
+	editor.undo()
+	updateCanvas()
+	save_graph(graph)
+	null
+
+redo = () ->
+	editor.redo()
+	updateCanvas()
+	save_graph(graph)
+	null
+
 ###
 ===============================================================================
 ###
@@ -387,6 +399,10 @@ init = (elementName) ->
 		# console.log div.offsetHeight
 		resizeCanvas(div.offsetWidth, div.offsetHeight)
 		null
+
+
+	el.onclick = undo if (el = document.getElementById('btn_undo')) 
+	el.onclick = redo if (el = document.getElementById('btn_redo'))
 
 	#Load graph from local storage
 	g = load_graph(graph)
@@ -438,13 +454,9 @@ ev_keydown = (ev) ->
 		# console.log ev.charCode
 		switch ev.keyCode
 			when 89 # Y
-				editor.redo()
-				updateCanvas()
-				save_graph(graph)
+				redo()
 			when 90 # Z
-				editor.undo()
-				updateCanvas()
-				save_graph(graph)
+				undo()
 	else
 		switch ev.keyCode
 			when 46 # Delete ### Move it to the main automaton!

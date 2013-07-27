@@ -1,63 +1,8 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="main.css">
 	<title>Test</title>
-
-	<style> 	
-        #container {
-            position: absolute;
-            /*width: 80%;*/
-            /*height: 100%;*/
-            bottom: 0;
-            left: 0px;
-            top: 0px;
-            right: 0px;
-            overflow: hidden;
-            background: #44accf;
-        }
-        #label_editor {
-            position: absolute;
-            border: 0 none white;
-            overflow: hidden;
-            padding: 1px 0px 0px 0px;
-            outline: none;
-            background-color: white;
-            resize: none;
-            /*background: transparent;*/
-        }
-    	#myCanvas {
-    		border: 1px solid #9C9898;
-            /*background: #44accf;*/
-            background: gray;
-            color: red;
-            font: normal 0.8em Verdana, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            /*position: absolute;*/
-            /*width: 100%;*/
-            /*height: 100%;*/
-            left: 0;
-            top: 0;
-            /*display: block auto;*/
-    	}
-        #automaton-node {
-            visibility: hidden;
-            background: #fec867;
-            color: black;
-        }
-        #automaton-edge {
-            visibility: hidden;
-            background: black;
-            color: black;
-        }
-
-        body {
-            /*background-color: #336698;*/
-            /*background-color: black;*/
-        }
-    </style>
 
     <script src="./lib/json2.js"></script>
     <script src="./lib/jstorage.js"></script>
@@ -71,12 +16,16 @@
     <script src="./js/main.js"></script>
 </head>
 <body>
-    <!-- <canvas id="myCanvas" Width="800" height="600"></canvas> -->
     <div id="container">
         <canvas id="myCanvas" tabindex="0"></canvas>
         <textarea rows = "1" style="height:1em" id="label_editor" ></textarea>
     </div>
     <div id="automaton-node"></div>
+    <div id="top_panel">
+        <span class="caption">Automata Editor</span>        
+        <a href="#" class="menu-link" id="btn_undo">Undo</a>
+        <a href="#" class="menu-link" id="btn_redo">Redo</a>
+    <div>
 
 <!-- https://developers.google.com/drive/savetodrive#javascript_api     -->
 <!-- 
@@ -87,7 +36,6 @@
        data-sitename="My Company Name">
     </div
  -->    
-
 
 </body>
 <html>

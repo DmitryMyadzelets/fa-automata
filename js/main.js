@@ -10,7 +10,7 @@ Usefull links:
 
 (function() {
   'use strict';
-  var automaton, canvas, csv2array, ctx, edgeByXY, edge_ix, edit, ev_dblclick, ev_keydown, ev_mousedown, ev_mousemove, ev_mouseup, from, getStyleProperty, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, resizeCanvas, save_graph, st, text_editor, tout, updateCanvas, x, y;
+  var automaton, canvas, csv2array, ctx, edgeByXY, edge_ix, edit, ev_dblclick, ev_keydown, ev_mousedown, ev_mousemove, ev_mouseup, from, getStyleProperty, get_mouse_xy, graph_is_changed, init, load_graph, nodeByXY, node_ix, ost, redo, resizeCanvas, save_graph, st, text_editor, tout, undo, updateCanvas, x, y;
 
   x = y = 0;
 
@@ -419,13 +419,27 @@ Usefull links:
     return null;
   };
 
+  undo = function() {
+    editor.undo();
+    updateCanvas();
+    save_graph(graph);
+    return null;
+  };
+
+  redo = function() {
+    editor.redo();
+    updateCanvas();
+    save_graph(graph);
+    return null;
+  };
+
   /*
   ===============================================================================
   */
 
 
   init = function(elementName) {
-    var div, edge_style, g, node1, node2, node_style, v;
+    var div, edge_style, el, g, node1, node2, node_style, v;
 
     div = document.getElementById('container');
     canvas = document.getElementById(elementName);
@@ -477,6 +491,12 @@ Usefull links:
       resizeCanvas(div.offsetWidth, div.offsetHeight);
       return null;
     };
+    if ((el = document.getElementById('btn_undo'))) {
+      el.onclick = undo;
+    }
+    if ((el = document.getElementById('btn_redo'))) {
+      el.onclick = redo;
+    }
     g = load_graph(graph);
     if (g === null) {
       console.log("default");
@@ -528,14 +548,10 @@ Usefull links:
     if (ev.ctrlKey) {
       switch (ev.keyCode) {
         case 89:
-          editor.redo();
-          updateCanvas();
-          save_graph(graph);
+          redo();
           break;
         case 90:
-          editor.undo();
-          updateCanvas();
-          save_graph(graph);
+          undo();
       }
     } else {
       switch (ev.keyCode) {

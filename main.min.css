@@ -1,0 +1,5 @@
+@charset 'UTF-8';#top_panel{display:block;position:absolute;top:0;left:0;right:0;background:#333;box-shadow:0 .2em .3em #888;padding:.5em;padding-left:2em}
+#top_panel .caption{color:#dd4814;display:block;float:left;font:bold .9em Verdana,sans-serif;padding-right:2em;border-right:1px solid #909090}#top_panel a{display:block;float:left;padding:0 1.375em;line-height:50px;text-decoration:none;font:.8em Verdana,sans-serif;color:#c0c0c0;border-right:1px solid #909090}
+#top_panel a:hover{color:white}#container{position:absolute;bottom:0;left:0;top:0;right:0;overflow:hidden}#label_editor{position:absolute;border:0 none white;overflow:hidden;padding:1px 0 0 0;outline:0;background-color:white;resize:none}
+#myCanvas{border:1px solid #9c9898;background:#efefef;color:red;font:normal .8em Verdana,sans-serif;user-select:none;-webkit-user-select:none;-moz-user-select:none;left:0;top:0}
+#automaton-node{visibility:hidden;background:#fec867;color:black}#automaton-edge{visibility:hidden;background:black;color:black}
