@@ -1,17 +1,13 @@
 @charset 'UTF-8';
-/*@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300,800,700,600);*/
-/*@font-face {
-	font-family: 'Ubuntu'; 
-	src: url('./fonts/ubuntu/Ubuntu-R.ttf') format('truetype'); 
+
+@font-face {
+    font-family: 'Ubuntu';
+    src: url('./fonts/ubuntu/Ubuntu-R.ttf');
 }
-*/
-/*@font-face {
-	font-family: 'Cabin'; 
-	src: url('./fonts/cabin/Cabin-Regular.otf'); 
-}
-*/
+
 body {
     /*background-color: #336698;*/
+    font: Ubuntu, Verdana, sans-serif;
 }
 
 #top_panel {
@@ -24,28 +20,28 @@ body {
     /*height: 40px;*/
     background: #333333;
     /*background: #242424;*/
-    box-shadow: 0 .2em .3em #888;
+    box-shadow: 0 0.2em 0.3em #888;
     /*color: white;*/
-    padding: .5em;
+    padding: 0.5em;
     padding-left: 2em;
 }
 #top_panel .caption {
     color: #dd4814; /*Ubuntu orange*/
-	display: block;
-	float: left;
-    font: bold .9em Verdana, sans-serif;
+    display: block;
+    float: left;
+    font: bold 0.9em Ubuntu, Verdana, sans-serif;
     padding-right: 2em;
-	border-right: 1px solid #909090;
+    border-right: 1px solid #909090;
 }
 #top_panel a {
-	display: block;
-	float: left;
-	padding: 0 1.375em;
-	line-height: 50px;
-	text-decoration: none;
-	font: .8em Verdana, sans-serif;
-	color: #c0c0c0;
-	border-right: 1px solid #909090;
+    display: block;
+    float: left;
+    padding: 0 1.375em;
+    line-height: 50px;
+    text-decoration: none;
+    font: 0.8em Ubuntu, Verdana, sans-serif;
+    color: #c0c0c0;
+    border-right: 1px solid #909090;
 }
 #top_panel a:hover {
     color: white;
@@ -71,11 +67,11 @@ body {
     /*background: transparent;*/
 }
 #myCanvas {
-	border: 1px solid #9C9898;
+    border: 1px solid #9C9898;
     /*background: #44accf;*/
     background: #efefef;
     color: red;
-    font: normal 0.8em Verdana, sans-serif;
+    font: normal 0.8em Ubuntu, Verdana, sans-serif;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -89,6 +85,7 @@ body {
 #automaton-node {
     visibility: hidden;
     background: #fec867;
+    /*background: #dd4814; Ubuntu orange*/
     color: black;
 }
 #automaton-edge {

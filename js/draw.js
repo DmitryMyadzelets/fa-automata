@@ -162,8 +162,8 @@
 
       fake_edge: function(ctx, o) {
         ctx.save();
-        ctx.fillStyle = _this.edgeFontColor;
-        ctx.strokeStyle = _this.edgeFontColor;
+        ctx.fillStyle = _this.edgeColor;
+        ctx.strokeStyle = _this.edgeColor;
         _this.any_edge(ctx, o);
         ctx.restore();
         return null;
@@ -182,14 +182,14 @@
         ctx.font = _this.font;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = _this.edgeFontColor;
-        ctx.strokeStyle = _this.edgeFontColor;
         text = '';
         _this.fake_edge(ctx, G.edges.start);
         automata.edges.all(G, function(edges, ix) {
           var $, event, vals, _i, _len, _ref;
 
           $ = edges.$[ix];
+          ctx.strokeStyle = _this.edgeColor;
+          ctx.fillStyle = _this.edgeColor;
           _this.any_edge(ctx, $);
           if ((edges.events[ix] != null) && edges.events[ix].length !== 0) {
             vals = [];

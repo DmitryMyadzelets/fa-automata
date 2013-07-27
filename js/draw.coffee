@@ -150,8 +150,8 @@ empty_string = '\u03b5'
 		###
 		fake_edge : (ctx, o) ->
 			ctx.save()
-			ctx.fillStyle = _this.edgeFontColor
-			ctx.strokeStyle = _this.edgeFontColor
+			ctx.fillStyle = _this.edgeColor
+			ctx.strokeStyle = _this.edgeColor
 			_this.any_edge(ctx, o)
 			ctx.restore()
 			null
@@ -168,20 +168,19 @@ empty_string = '\u03b5'
 			ctx.font = _this.font
 			ctx.textAlign = 'center'
 			ctx.textBaseline = 'middle'
+			text = ''
+			# 
 			# 
 			# Draw edges
 			# 
-			ctx.fillStyle = _this.edgeFontColor
-			ctx.strokeStyle = _this.edgeFontColor
-			text = ''
 			# Arrow to initial state
 			_this.fake_edge(ctx, G.edges.start)
-			# 
-			# Draw edges
 			# 
 			automata.edges.all(G, (edges, ix) ->
 				# Edge graphical info
 				$ = edges.$[ix]
+				ctx.strokeStyle = _this.edgeColor
+				ctx.fillStyle = _this.edgeColor
 				_this.any_edge(ctx, $)
 
 				# Making label as a sequence of the events

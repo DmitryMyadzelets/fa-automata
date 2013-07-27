@@ -25,7 +25,7 @@ text_editor = null
 ###
 
 ###*
- * Converts a commma separated string to array of strings.
+ * Converts a commma separated string to the array of strings.
  * Cuts whitespaces in the beginnig and the end of each string.
  * @param  {string} s Any string
  * @return {Array[string]}   Array of strings
@@ -486,7 +486,3 @@ window.onload = () ->
 	setTimeout(tout, 1000)
 )()
 
-
-@foo = () ->
-	canvas.width = 1000
-	null
