@@ -424,6 +424,12 @@ init = (elementName) ->
 		((ev)->automaton(6, ev)) # on Cancel event
 		)
 
+
+	# Testing BFS
+	# automata.BFS(graph, (a, label, b) ->
+	# 	console.log a, label, b
+	# )
+
 	null
 
 

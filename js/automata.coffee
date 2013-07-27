@@ -53,6 +53,10 @@
 	# Public metods
 	# 
 	_this = {
+
+		# Empty string symbol - Epsilon:
+		empty_string : '\u03b5'
+
 		# Creates a new graph
 		create : () ->
 			{
@@ -134,6 +138,16 @@
 					return -1 if ix == -1
 					G.edges.events[edge].splice(event, 1)
 					ix
+
+				# Returns event's labels of the edge i
+				labels : (G, i) ->
+					ret = []
+					if G? and i?
+						if G.edges.events[i]? and G.edges.events[i].length != 0
+							ret.push(G.events[event]) for event in G.edges.events[i]
+						else
+							ret.push(automata.empty_string)
+					ret
 			}
 
 		}
@@ -206,3 +220,31 @@
 	}
 )()
 
+
+###*
+ * Breadth-first Search
+ * @param {Automaton} G   
+ * @param {function} fnc Callback function. Called with (node_from, label, node_to)
+ * where:
+ * node_from: index of the outgoing node
+ * label: event label
+ * node_to: index of the ingoing node
+###
+automata.BFS = (G, fnc) ->
+	return null if not G?
+	stack = [G.start]
+	visited = [G.start]
+	while stack.length
+		a = stack.pop()
+		# Get edges going out of the node 'a'
+		E = @edges.out(G, a)
+		for e in E
+			# Get nodes reachabe by the edge 'e'
+			b = G.edges.b[e]
+			if b not in visited
+				visited.push(b)
+				stack.push(b)
+			# Get all event labels for the edge
+			labels = @edges.events.labels(G, e)
+			fnc(a, l, b) for l in labels if typeof fnc == 'function'
+	null

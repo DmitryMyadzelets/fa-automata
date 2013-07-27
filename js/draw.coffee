@@ -4,8 +4,6 @@
 
 @.r = 16 # Radius of circle for a node
 PI2 = Math.PI * 2
-# Empty string symbol - Epsilon:
-empty_string = '\u03b5'
 
 ###
 ===============================================================================
@@ -183,13 +181,12 @@ empty_string = '\u03b5'
 				ctx.fillStyle = _this.edgeColor
 				_this.any_edge(ctx, $)
 
-				# Making label as a sequence of the events
-				if edges.events[ix]? and edges.events[ix].length != 0
-					vals = []
-					vals.push(G.events[event]) for event in edges.events[ix]
+				# Make one label as a sequence of the events
+				vals = automata.edges.events.labels(G, ix)
+				if vals.length > 0
 					text = vals.join(', ')
 				else
-					text = empty_string
+					text = automata.empty_string
 				
 				ctx.save()
 				ctx.strokeStyle = _this.backgroundColor
