@@ -4,7 +4,7 @@
   var f, g;
 
   this.automata2 = (function() {
-    var add, change_nodes, del, for_arrays_of, get_arrays, _this;
+    var add, del, _this;
 
     add = function(arr, i) {
       var ret;
@@ -33,40 +33,11 @@
       }
       return i;
     };
-    get_arrays = function(o) {
-      var key, keys;
-
-      keys = [];
-      for (key in o) {
-        if (o.hasOwnProperty(key) && o[key] instanceof Array) {
-          keys.push(key);
-        }
-      }
-      return keys;
-    };
-    for_arrays_of = function(obj, fnc, args) {
-      var key, keys, ret, _i, _len;
-
-      keys = get_arrays(obj);
-      for (_i = 0, _len = keys.length; _i < _len; _i++) {
-        key = keys[_i];
-        ret = fnc(obj[key], args);
-      }
-      return ret;
-    };
-    change_nodes = function(G, i, a, b) {
-      var ret;
-
-      ret = [G.edges.a[i], G.edges.b[i]];
-      G.edges.a[i] = a;
-      G.edges.b[i] = b;
-      return ret;
-    };
     return _this = {
       create: function() {
         return {
           start: 0,
-          trans: new Uint32Array(),
+          trans: new Uint32Array(3),
           nN: 0,
           nE: 0,
           nT: 0
@@ -74,22 +45,6 @@
       },
       trans: {
         add: function(G, q, e, p, i) {
-          var ix, t;
-
-          if (q < 0 || p < 0 || q >= G.nN || p >= G.nN) {
-            return -1;
-          }
-          ix = G.trans.length;
-          t = new Uint32Array(ix + 3);
-          t.set(G.trans);
-          delete G.trans;
-          G.trans = t;
-          t[ix++] = q;
-          t[ix++] = e;
-          t[ix++] = p;
-          return G.nT = (ix / 3) | 0;
-        },
-        add2: function(G, q, e, p, i) {
           var ix, len, t;
 
           if (q < 0 || p < 0 || q >= G.nN || p >= G.nN) {
@@ -98,7 +53,7 @@
           len = G.trans.length | 0;
           ix = G.nT * 3 | 0;
           if (ix + 3 > len) {
-            t = new Uint32Array(len + 3 * 10 | 0);
+            t = new Uint32Array(len + 30 | 0);
             t.set(G.trans);
             delete G.trans;
             G.trans = t;
@@ -235,9 +190,6 @@
         }
       },
       nodes: {
-        add: function(G, i) {
-          return for_arrays_of(G.nodes, add, i);
-        },
         del: function(G, i, on_del_edge) {
           var a, b, change, ix, last_node;
 
@@ -330,11 +282,11 @@
 
   g.nN = 10;
 
-  automata2.trans.add2(g, 0, 1, 2);
+  automata2.trans.add(g, 0, 1, 2);
 
-  automata2.trans.add2(g, 3, 4, 5);
+  automata2.trans.add(g, 3, 4, 5);
 
-  automata2.trans.add2(g, 6, 7, 8);
+  automata2.trans.add(g, 6, 7, 8);
 
   console.log(g.trans);
 
