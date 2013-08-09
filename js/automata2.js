@@ -90,21 +90,6 @@
           return G.nT = (ix / 3) | 0;
         },
         add2: function(G, q, e, p, i) {
-          var ix, t;
-
-          if (q < 0 || p < 0 || q >= G.nN || p >= G.nN) {
-            return -1;
-          }
-          ix = G.trans.length;
-          t = new Uint32Array(ix + 3);
-          t.set(G.trans);
-          t.set([q, e, p], ix);
-          delete G.trans;
-          G.trans = t;
-          ix += 3;
-          return G.nT = (ix / 3) | 0;
-        },
-        add3: function(G, q, e, p, i) {
           var ix, len, t;
 
           if (q < 0 || p < 0 || q >= G.nN || p >= G.nN) {
@@ -113,7 +98,7 @@
           len = G.trans.length;
           ix = G.nT * 3;
           if (ix + 3 > len) {
-            t = new Uint32Array(len + 6);
+            t = new Uint32Array(len + 12);
             t.set(G.trans);
             delete G.trans;
             G.trans = t;
