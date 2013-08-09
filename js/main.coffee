@@ -492,3 +492,7 @@ window.onload = () ->
 	setTimeout(tout, 1000)
 )()
 
+
+# setBit32 = (i) ->
+# 	console.log [i, i >> 5, i & 0x1F, 1 << (i & 0x1F)]
+# 	null
