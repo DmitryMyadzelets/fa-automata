@@ -95,19 +95,17 @@
           if (q < 0 || p < 0 || q >= G.nN || p >= G.nN) {
             return -1;
           }
-          len = G.trans.length;
-          ix = G.nT * 3;
+          len = G.trans.length | 0;
+          ix = G.nT * 3 | 0;
           if (ix + 3 > len) {
-            t = new Uint32Array(len + 12);
+            t = new Uint32Array(len + 3 * 10 | 0);
             t.set(G.trans);
             delete G.trans;
             G.trans = t;
-          } else {
-            t = G.trans;
           }
-          t[ix++] = q;
-          t[ix++] = e;
-          t[ix++] = p;
+          G.trans[ix++] = q | 0;
+          G.trans[ix++] = e | 0;
+          G.trans[ix++] = p | 0;
           return G.nT = (ix / 3) | 0;
         },
         del: function(G, i) {
@@ -332,11 +330,11 @@
 
   g.nN = 10;
 
-  automata2.trans.add3(g, 0, 1, 2);
+  automata2.trans.add2(g, 0, 1, 2);
 
-  automata2.trans.add3(g, 3, 4, 5);
+  automata2.trans.add2(g, 3, 4, 5);
 
-  automata2.trans.add3(g, 6, 7, 8);
+  automata2.trans.add2(g, 6, 7, 8);
 
   console.log(g.trans);
 
