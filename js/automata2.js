@@ -104,6 +104,27 @@
           ix += 3;
           return G.nT = (ix / 3) | 0;
         },
+        add3: function(G, q, e, p, i) {
+          var ix, len, t;
+
+          if (q < 0 || p < 0 || q >= G.nN || p >= G.nN) {
+            return -1;
+          }
+          len = G.trans.length;
+          ix = G.nT * 3;
+          if (ix + 3 > len) {
+            t = new Uint32Array(len + 6);
+            t.set(G.trans);
+            delete G.trans;
+            G.trans = t;
+          } else {
+            t = G.trans;
+          }
+          t[ix++] = q;
+          t[ix++] = e;
+          t[ix++] = p;
+          return G.nT = (ix / 3) | 0;
+        },
         del: function(G, i) {
           var j, t;
 
@@ -326,11 +347,11 @@
 
   g.nN = 10;
 
-  automata2.trans.add2(g, 0, 1, 2);
+  automata2.trans.add3(g, 0, 1, 2);
 
-  automata2.trans.add2(g, 3, 4, 5);
+  automata2.trans.add3(g, 3, 4, 5);
 
-  automata2.trans.add2(g, 6, 7, 8);
+  automata2.trans.add3(g, 6, 7, 8);
 
   console.log(g.trans);
 

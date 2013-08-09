@@ -89,6 +89,24 @@
 				ix+=3
 				G.nT = (ix/3)|0
 
+			add3 : (G, q, e, p, i) ->
+				return -1 if q<0 or p<0 or q>=G.nN or p>=G.nN
+				# Current length of the array
+				len = G.trans.length
+				# Current length occupied
+				ix = G.nT * 3
+				if ix+3 > len
+					t = new Uint32Array(len+6)
+					t.set(G.trans)
+					delete G.trans
+					G.trans = t
+				else
+					t = G.trans
+				t[ix++] = q
+				t[ix++] = e
+				t[ix++] = p
+				G.nT = (ix/3)|0
+
 			del : (G, i) ->
 				return -1 if i<0 or i>=G.nT
 				G.nT -=1
@@ -247,9 +265,9 @@
 
 g = automata2.create()
 g.nN = 10
-automata2.trans.add2(g, 0, 1, 2)
-automata2.trans.add2(g, 3, 4, 5)
-automata2.trans.add2(g, 6, 7, 8)
+automata2.trans.add3(g, 0, 1, 2)
+automata2.trans.add3(g, 3, 4, 5)
+automata2.trans.add3(g, 6, 7, 8)
 
 console.log g.trans
 
