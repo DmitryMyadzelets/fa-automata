@@ -4,7 +4,7 @@
   var f, g;
 
   this.automata2 = (function() {
-    var add, del, _this;
+    var DELTA_TRANS, add, del, _this;
 
     add = function(arr, i) {
       var ret;
@@ -33,40 +33,57 @@
       }
       return i;
     };
+    DELTA_TRANS = 10;
     return _this = {
       create: function() {
         return {
-          start: 0,
-          trans: new Uint32Array(3),
-          nN: 0,
-          nE: 0,
-          nT: 0
+          start: 0 | 0,
+          trans: new Uint32Array(3 * DELTA_TRANS),
+          nN: 0 | 0,
+          nE: 0 | 0,
+          nT: 0 | 0
         };
       },
       trans: {
         add: function(G, q, e, p, i) {
-          var ix, len, t;
+          var j, k, len, t;
 
-          if (q < 0 || p < 0 || q >= G.nN || p >= G.nN) {
+          if (q < 0 || p < 0 || e < 0 || q >= G.nN || p >= G.nN || e >= g.nE) {
             return -1;
           }
           len = G.trans.length | 0;
-          ix = G.nT * 3 | 0;
-          if (ix + 3 > len) {
-            t = new Uint32Array(len + 30 | 0);
+          j = G.nT * 3 | 0;
+          if (j + 3 > len) {
+            t = new Uint32Array(len + 3 * DELTA_TRANS);
             t.set(G.trans);
             delete G.trans;
             G.trans = t;
           }
-          G.trans[ix++] = q | 0;
-          G.trans[ix++] = e | 0;
-          G.trans[ix++] = p | 0;
-          return G.nT = (ix / 3) | 0;
+          if ((i == null) || i === G.nT) {
+            G.trans[j++] = q | 0;
+            G.trans[j++] = e | 0;
+            G.trans[j++] = p | 0;
+            return G.nT++;
+          } else {
+            if (i < 0 || i > G.nT) {
+              return -1;
+            }
+            k = i * 3 | 0;
+            G.trans[j++] = G.trans[k++];
+            G.trans[j++] = G.trans[k++];
+            G.trans[j++] = G.trans[k++];
+            k -= 3;
+            G.trans[k++] = q | 0;
+            G.trans[k++] = e | 0;
+            G.trans[k++] = p | 0;
+            G.nT++;
+            return i | 0;
+          }
         },
         del: function(G, i) {
-          var j, t;
+          var j, len, t;
 
-          if (i < 0 || i >= G.nT) {
+          if ((i == null) || i < 0 || i >= G.nT) {
             return -1;
           }
           G.nT -= 1;
@@ -77,9 +94,13 @@
             G.trans[i++] = G.trans[j++];
             G.trans[i] = G.trans[j];
           }
-          t = new Uint32Array(G.trans.subarray(0, G.nT * 3));
-          delete G.trans;
-          G.trans = t;
+          len = G.trans.length;
+          if ((len - G.nT * 3) > 3 * DELTA_TRANS) {
+            len -= 3 * DELTA_TRANS;
+            t = new Uint32Array(G.trans.subarray(0, len));
+            delete G.trans;
+            G.trans = t;
+          }
           return G.nT;
         },
         get: function(G, i) {
@@ -87,192 +108,6 @@
             return [];
           }
           return G.trans.subarray(i *= 3, i + 3);
-        }
-      },
-      edges: {
-        add: function(G, a, b, i) {
-          if (a < 0 || b < 0 || a >= G.nodes.length || b >= G.nodes.length) {
-            return -1;
-          }
-          i = for_arrays_of(G.edges, add, i);
-          if (i >= 0) {
-            G.edges.a[i] = a;
-            G.edges.b[i] = b;
-          }
-          return i;
-        },
-        del: function(G, i) {
-          return for_arrays_of(G.edges, del, i);
-        },
-        out: function(G, from_node) {
-          var ret;
-
-          ret = [];
-          _this.edges.all(G, function(edge, i) {
-            if (edge.a[i] === from_node) {
-              return ret.push(i);
-            }
-          });
-          return ret;
-        },
-        "in": function(G, to_node) {
-          var ret;
-
-          ret = [];
-          _this.edges.all(G, function(edge, i) {
-            if (edge.b[i] === to_node) {
-              return ret.push(i);
-            }
-          });
-          return ret;
-        },
-        has: function(G, a, b) {
-          var i, ix, _i, _len, _ref;
-
-          _ref = G.edges.b;
-          for (ix = _i = 0, _len = _ref.length; _i < _len; ix = ++_i) {
-            i = _ref[ix];
-            if (G.edges.a[ix] === a && i === b) {
-              return ix;
-            }
-          }
-          return -1;
-        },
-        all: function(G, fnc) {
-          return _this.all(G.edges, 'v', fnc);
-        },
-        events: {
-          add: function(G, edge, event) {
-            if (edge < 0 || edge >= _this.edges.all(G)) {
-              return -1;
-            }
-            if (event < 0 || event >= G.events.length) {
-              return -1;
-            }
-            if (!(G.edges.events[edge] instanceof Array)) {
-              G.edges.events[edge] = new Array;
-            }
-            if (G.edges.events[edge].indexOf(event) === -1) {
-              G.edges.events[edge].push(event);
-            }
-            return event;
-          },
-          del: function(G, edge, event) {
-            var ix;
-
-            if (edge < 0 || edge >= _this.edges.all(G)) {
-              return -1;
-            }
-            ix = G.edges.events[edge].indexOf(event);
-            if (ix === -1) {
-              return -1;
-            }
-            G.edges.events[edge].splice(event, 1);
-            return ix;
-          },
-          labels: function(G, i) {
-            var event, ret, _i, _len, _ref;
-
-            ret = [];
-            if ((G != null) && (i != null)) {
-              if ((G.edges.events[i] != null) && G.edges.events[i].length !== 0) {
-                _ref = G.edges.events[i];
-                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                  event = _ref[_i];
-                  ret.push(G.events[event]);
-                }
-              } else {
-                ret.push(automata.empty_string);
-              }
-            }
-            return ret;
-          }
-        }
-      },
-      nodes: {
-        del: function(G, i, on_del_edge) {
-          var a, b, change, ix, last_node;
-
-          last_node = G.nodes.v.length - 1;
-          ix = _this.edges.all(G);
-          while (ix-- > 0) {
-            a = G.edges.a[ix];
-            b = G.edges.b[ix];
-            if ((a === i) || (b === i)) {
-              if (typeof on_del_edge === "function") {
-                on_del_edge.apply(this, [G, ix]);
-              } else {
-                _this.edges.del(G, ix);
-              }
-            } else if (i < last_node) {
-              change = false;
-              if (a === last_node) {
-                a = i;
-                change = true;
-              }
-              if (b === last_node) {
-                b = i;
-                change = true;
-              }
-              if (change) {
-                change_nodes(G, ix, a, b);
-              }
-            }
-          }
-          return for_arrays_of(G.nodes, del, i);
-        },
-        out: function(G, from_node) {
-          var b, i, _i, _len, _ref, _results;
-
-          _ref = G.edges.b;
-          _results = [];
-          for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-            b = _ref[i];
-            if (G.edges.a[i] === from_node) {
-              _results.push(b);
-            }
-          }
-          return _results;
-        },
-        "in": function(G, to_node) {
-          var a, i, _i, _len, _ref, _results;
-
-          _ref = G.edges.a;
-          _results = [];
-          for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-            a = _ref[i];
-            if (G.edges.b[i] === to_node) {
-              _results.push(a);
-            }
-          }
-          return _results;
-        },
-        all: function(G, fnc) {
-          return _this.all(G.nodes, 'v', fnc);
-        }
-      },
-      events: {
-        add: function(G, v, i) {
-          var ix;
-
-          if ((ix = G.events.indexOf(v)) !== -1) {
-            return ix;
-          }
-          i = add(G.events, i);
-          G.events[i] = v;
-          return i;
-        },
-        del: function(G, i) {
-          var events, _i, _len, _ref;
-
-          _ref = G.edges.events;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            events = _ref[_i];
-            if (events.indexOf(i) !== -1) {
-              events.splice(i, 1);
-            }
-          }
-          return del(G.events, i);
         }
       }
     };
@@ -282,11 +117,13 @@
 
   g.nN = 10;
 
+  g.nE = 10;
+
   automata2.trans.add(g, 0, 1, 2);
 
   automata2.trans.add(g, 3, 4, 5);
 
-  automata2.trans.add(g, 6, 7, 8);
+  automata2.trans.add(g, 6, 7, 8, 1);
 
   console.log(g.trans);
 
@@ -294,10 +131,6 @@
 
   console.log(g.trans);
 
-  console.log(f = automata2.trans.get(g, 0));
-
-  f.set([22, 15, 16]);
-
-  console.log(g.trans);
+  console.log(f = automata2.trans.get(g, 1));
 
 }).call(this);
