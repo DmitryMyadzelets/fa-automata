@@ -43,7 +43,7 @@
             return G.nT++;
           } else {
             if (i < 0 || i > G.nT) {
-              return -1;
+              return -1 | 0;
             }
             k = i * 3 | 0;
             G.trans[j++] = G.trans[k++];
@@ -82,41 +82,51 @@
         },
         get: function(G, i) {
           if (i < 0 || i >= G.nT) {
-            return -1;
+            return -1 | 0;
           }
           return G.trans.subarray(i *= 3, i + 3);
         },
         out: function(G, q) {
-          var i, j, n, ret;
+          var i, n, ret;
 
           ret = [];
-          n = G.nT | 0;
+          n = G.nT * 3 | 0;
           i = 0 | 0;
-          j = 0 | 0;
           while (i < n) {
-            if (G.trans[j] === q) {
-              ret.push(j);
+            if (G.trans[i] === q) {
+              ret.push(i);
             }
-            i++;
-            j += 3;
+            i += 3;
           }
           return new Uint32Array(ret);
         },
         "in": function(G, p) {
-          var i, j, n, ret;
+          var i, n, ret;
 
           ret = [];
-          n = G.nT | 0;
-          i = 0 | 0;
-          j = 2 | 0;
+          n = G.nT * 3 | 0;
+          i = 2 | 0;
           while (i < n) {
-            if (G.trans[j] === p) {
-              ret.push(j - 2);
+            if (G.trans[i] === p) {
+              ret.push(i - 2);
             }
-            i++;
-            j += 3;
+            i += 3;
           }
           return new Uint32Array(ret);
+        },
+        exists: function(G, p, e, q) {
+          var i, n, t;
+
+          n = G.nT * 3 | 0;
+          i = 0 | 0;
+          t = G.trans;
+          while (i < n) {
+            if (t[i] === p && t[i + 1] === e && t[i + 2] === q) {
+              return i;
+            }
+            i += 3;
+          }
+          return -1 | 0;
         }
       },
       edges: {}

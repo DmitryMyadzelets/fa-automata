@@ -56,6 +56,10 @@ describe "Directed graph, version 2", ->
 			expect(t[1]).toBe(3)
 			expect(t.length).toBe(2)
 
+		it ".trans.exists(1, 7, 1) return index 3, .trans.exists(1, 7, 0) retruns -1",  ->
+			expect(automata2.trans.exists(g, 1, 7, 1)).toBe(3)
+			expect(automata2.trans.exists(g, 1, 7, 0)).toBe(-1)
+
 		it ".BFS works (check the console)", ->
 			console.log "BFS:"
 			automata2.BFS(g, (q, e, p) ->

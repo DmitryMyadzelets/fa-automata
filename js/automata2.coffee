@@ -71,7 +71,7 @@
 					G.trans[j++] = p|0
 					return G.nT++
 				else
-					return -1 if i<0 or i>G.nT
+					return -1|0 if i<0 or i>G.nT
 					# Put the triple to the required position, 
 					# and triple from the position move to the end
 					k = i*3|0
@@ -112,34 +112,43 @@
 			# Returns a transitions triple (as array) from the position i, 
 			# or -1 if the position is wrong.
 			get : (G, i) ->
-				return -1 if i<0 or i>=G.nT
+				return -1|0 if i<0 or i>=G.nT
 				G.trans.subarray(i*=3, i+3)
+
 
 			# Returns array of indexes of 'q' for triples (q, e, p) in transitions
 			# if 'q' matches
 			out : (G, q) ->
 				ret = []
-				n = G.nT|0
+				n = G.nT*3|0
 				i = 0|0
-				j = 0|0
 				while i<n
-					ret.push(j) if G.trans[j] == q
-					i++
-					j+=3
+					ret.push(i) if G.trans[i] == q
+					i+=3
 				new Uint32Array(ret)
+
 
 			# Returns array of indexes of 'q' for triples (q, e, p) in transitions
 			# if 'p' matches
 			in : (G, p) ->
 				ret = []
-				n = G.nT|0
-				i = 0|0
-				j = 2|0 # index of 'p' in (q, e, p)
+				n = G.nT*3|0
+				i = 2|0 # index of 'p' in (q, e, p)
 				while i<n
-					ret.push(j-2) if G.trans[j] == p
-					i++
-					j+=3
+					ret.push(i-2) if G.trans[i] == p
+					i+=3
 				new Uint32Array(ret)
+
+
+			# Returns index if transition (p, e, q) exists, otherwise -1
+			exists : (G, p, e, q) ->
+				n = G.nT*3|0
+				i = 0|0
+				t = G.trans
+				while i<n
+					return i if t[i]==p and t[i+1]==e and t[i+2]==q
+					i+=3
+				-1|0
 
 
 		} # trans
