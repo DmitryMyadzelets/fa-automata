@@ -4,28 +4,6 @@
 
 @.automata2 = (()->
 
-	# Adds null to the array into position 'i', returns the position
-	add = (arr, i) ->
-		ret = -1
-		if not i? or i==arr.length
-			arr.push(null)
-			ret = arr.length-1
-		else
-			if i>=0 and i<arr.length
-				arr.push(arr[i])
-				arr[i] = null
-				ret = i
-		ret
-
-	# Deletes an element 'i' of the array and returns the deleted element
-	del = (arr, i) ->
-		return -1 if i<0 or i>=arr.length or isNaN(i) or not (arr instanceof Array)
-		if i< arr.length-1
-			arr.splice(i, 1, arr.pop())
-		else
-			arr.splice(i, 1)
-		i
-
 	DELTA_TRANS = 10 # Size of the increment for future transitions
 
 	# 
@@ -41,12 +19,20 @@
 				trans : new Uint32Array(3*DELTA_TRANS) # Transition's triples
 				nN : 0|0 # Number of Nodes/States
 				nE : 0|0 # Number of Events
-				nT : 0|0 # Number of transitions
+				nT : 0|0 # Number of Transitions
 			}
+
 
 		trans : {
 
-			# Add a transition into position i if defined, or to the end
+
+			# Adds a transition into position i if defined, or to the end
+			# G - automaton structure
+			# q - integer, state 'from'
+			# e - integer, event
+			# q - integer, state 'to'
+			# i - integer, index of the transition [optional]
+			# Returns index of the added transition, or -1 if the index is wrong.
 			add : (G, q, e, p, i) ->
 				# Fix: we do not need to control bounds of states and events,
 				# since set of transitions has no clue about them
@@ -88,7 +74,9 @@
 					G.nT++
 					return i|0
 
-			
+
+			# Deletes a transition from the position i
+			# Returns amount of transitions or -1 if the position is wrong
 			del : (G, i) ->
 				return -1 if not i? or i<0 or i>=G.nT
 				G.nT -=1
@@ -110,8 +98,10 @@
 				G.nT
 
 
+			# Returns a transitions triple (as array) from the position i, 
+			# or -1 if the position is wrong.
 			get : (G, i) ->
-				return [] if i<0 or i>=G.nT
+				return -1 if i<0 or i>=G.nT
 				G.trans.subarray(i*=3, i+3)
 
 		}

@@ -4,35 +4,8 @@
   var f, g;
 
   this.automata2 = (function() {
-    var DELTA_TRANS, add, del, _this;
+    var DELTA_TRANS, _this;
 
-    add = function(arr, i) {
-      var ret;
-
-      ret = -1;
-      if ((i == null) || i === arr.length) {
-        arr.push(null);
-        ret = arr.length - 1;
-      } else {
-        if (i >= 0 && i < arr.length) {
-          arr.push(arr[i]);
-          arr[i] = null;
-          ret = i;
-        }
-      }
-      return ret;
-    };
-    del = function(arr, i) {
-      if (i < 0 || i >= arr.length || isNaN(i) || !(arr instanceof Array)) {
-        return -1;
-      }
-      if (i < arr.length - 1) {
-        arr.splice(i, 1, arr.pop());
-      } else {
-        arr.splice(i, 1);
-      }
-      return i;
-    };
     DELTA_TRANS = 10;
     return _this = {
       create: function() {
@@ -102,7 +75,7 @@
         },
         get: function(G, i) {
           if (i < 0 || i >= G.nT) {
-            return [];
+            return -1;
           }
           return G.trans.subarray(i *= 3, i + 3);
         }
