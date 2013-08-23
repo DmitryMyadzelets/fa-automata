@@ -1,3 +1,67 @@
+describe "Directed graph, version 2", ->
+	describe "Basic operations", ->
+		it "Creates object", ->
+			expect(typeof automata2.create()).toBe("object")
+
+	describe "Transitions", ->
+		g = automata2.create()
+
+		it "Adds transition (0, 5, 1)", ->
+			expect(automata2.trans.add(g, 0, 5, 1)).toBe(0)
+
+		it "Inserts transition (1, 7, 1) to position 0", ->
+			expect(automata2.trans.add(g, 1, 7, 1, 0)).toBe(0)
+
+		it "Returns transition of position 1, and it is (0, 5, 1)", ->
+			t = automata2.trans.get(g, 1)
+			expect(t[0]).toBe(0)
+			expect(t[1]).toBe(5)
+			expect(t[2]).toBe(1)
+
+		it "Does not add transitions with wrong indexes", ->
+			expect(automata2.trans.add(g, 1, 7, 1, 3)).toBe(-1)
+			expect(automata2.trans.add(g, 1, 7, 1, -1)).toBe(-1)
+			expect(g.nT).toBe(2)
+
+		it "Deletes transition from position 0",  ->
+			expect(automata2.trans.del(g, 0)).toBe(1)
+
+		it "Has one transitions left and it is (0, 5, 1)", ->
+			expect(g.nT).toBe(1)
+			t = automata2.trans.get(g, 0)
+			expect(t[0]).toBe(0)
+			expect(t[1]).toBe(5)
+			expect(t[2]).toBe(1)
+
+
+	describe "Operations with automaton", ->
+		g = automata2.create()
+
+		automata2.trans.add(g, 0, 5, 1)
+		automata2.trans.add(g, 1, 7, 1)
+		automata2.trans.add(g, 1, 8, 0)
+
+		it "Has 3 transitions (0, 5, 1), (1, 7, 1), (1, 8, 0)",  ->
+			expect(g.nT).toBe(3)
+
+		it ".trans.out(1) return indexes 3 and 6",  ->
+			t = automata2.trans.out(g, 1)
+			expect(t[0]).toBe(3)
+			expect(t[1]).toBe(6)
+			expect(t.length).toBe(2)
+
+		it ".trans.in(1) return indexes 0 and 3",  ->
+			t = automata2.trans.in(g, 1)
+			expect(t[0]).toBe(0)
+			expect(t[1]).toBe(3)
+			expect(t.length).toBe(2)
+
+		it ".BFS works (check the console)", ->
+			console.log "BFS:"
+			automata2.BFS(g, (q, e, p) ->
+				console.log q, e, p
+				)
+
 
 
 describe "Directed graph", ->
