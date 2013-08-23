@@ -283,6 +283,7 @@ automata2.sync = (G1, G2) ->
 						b = q1
 						_t2 = false
 
+				# Check if next composed state wasn't maped
 				k = inMap(a, b)
 				if k < 0
 					p = q+1
@@ -291,6 +292,7 @@ automata2.sync = (G1, G2) ->
 				else
 					p = k
 
+				# Add feasible transitions to the new automaton
 				@trans.add(G, q, e1, p) if _t1
 				@trans.add(G, q, e2, p) if _t2 and e1 != e2
 
