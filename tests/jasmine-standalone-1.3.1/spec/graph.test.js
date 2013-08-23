@@ -43,12 +43,15 @@
       });
     });
     return describe("Operations with automaton", function() {
-      var g;
+      var g, g2;
 
       g = automata2.create();
       automata2.trans.add(g, 0, 5, 1);
       automata2.trans.add(g, 1, 7, 1);
       automata2.trans.add(g, 1, 8, 0);
+      g2 = automata2.create();
+      automata2.trans.add(g2, 0, 3, 1);
+      automata2.trans.add(g2, 1, 5, 1);
       it("Has 3 transitions (0, 5, 1), (1, 7, 1), (1, 8, 0)", function() {
         return expect(g.nT).toBe(3);
       });
@@ -72,9 +75,18 @@
         expect(automata2.trans.exists(g, 1, 7, 1)).toBe(3);
         return expect(automata2.trans.exists(g, 1, 7, 0)).toBe(-1);
       });
-      return it(".BFS works (check the console)", function() {
-        console.log("BFS:");
+      it(".BFS works (check the console)", function() {
+        console.log("BFS (Breadth-First Search:");
         return automata2.BFS(g, function(q, e, p) {
+          return console.log(q, e, p);
+        });
+      });
+      return it(".sync works (check the console)", function() {
+        var h;
+
+        console.log("sync (parallel composition):");
+        h = automata2.sync(g, g2);
+        return automata2.BFS(h, function(q, e, p) {
           return console.log(q, e, p);
         });
       });

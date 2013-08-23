@@ -159,7 +159,7 @@
     var I, e, i, p, q, stack, visited, _i, _len;
 
     if (G == null) {
-      return null;
+      return;
     }
     stack = [G.start];
     visited = [G.start];
@@ -183,18 +183,85 @@
   };
 
   /**
-   * Parallel composition ('sync' name is taken from RW control theory)
-   * @param  {automaton} G
-   * @param  {automaton} H
-   * @return {null}
+   * Parallel composition ('sync' name is taken from RW (Ramage & Wonham) theory)
+   * @param  {automaton} G1
+   * @param  {automaton} G2
+   * @return {automaton} G
   */
 
 
-  automata2.sync = function(G, H) {
-    if ((G == null) || !H) {
-      return null;
+  automata2.sync = function(G1, G2) {
+    var G, I, J, a, b, common, e1, e2, i, inMap, j, k, map, p, p1, p2, q, q1, q2, stack, _i, _j, _len, _len1, _t1, _t2;
+
+    G = this.create();
+    if ((G1 == null) || (G2 == null)) {
+      return G;
     }
-    return null;
+    map = [[G1.start, G2.start, G.start = 0]];
+    stack = [0];
+    common = [5];
+    inMap = function(q1, q2) {
+      var index, m, _i, _len;
+
+      for (index = _i = 0, _len = map.length; _i < _len; index = ++_i) {
+        m = map[index];
+        if (m[0] === q1 && m[1] === q2) {
+          return index;
+        }
+      }
+      return -1;
+    };
+    while (stack.length) {
+      q = stack.pop();
+      I = this.trans.out(G1, map[q][0]);
+      J = this.trans.out(G2, map[q][1]);
+      for (_i = 0, _len = I.length; _i < _len; _i++) {
+        i = I[_i];
+        q1 = G1.trans[i];
+        e1 = G1.trans[i + 1];
+        p1 = G1.trans[i + 2];
+        for (_j = 0, _len1 = J.length; _j < _len1; _j++) {
+          j = J[_j];
+          q2 = G2.trans[j];
+          e2 = G2.trans[j + 1];
+          p2 = G2.trans[j + 2];
+          a = p1;
+          b = p2;
+          _t1 = true;
+          _t2 = true;
+          if (__indexOf.call(common, e1) >= 0) {
+            if (__indexOf.call(common, e2) >= 0) {
+              if (e1 !== e2) {
+                continue;
+              }
+            } else {
+              a = q1;
+              _t1 = false;
+            }
+          } else {
+            if (__indexOf.call(common, e2) >= 0) {
+              b = q1;
+              _t2 = false;
+            }
+          }
+          k = inMap(a, b);
+          if (k < 0) {
+            p = q + 1;
+            stack.push(p);
+            map.push([a, b, p]);
+          } else {
+            p = k;
+          }
+          if (_t1) {
+            this.trans.add(G, q, e1, p);
+          }
+          if (_t2 && e1 !== e2) {
+            this.trans.add(G, q, e2, p);
+          }
+        }
+      }
+    }
+    return G;
   };
 
 }).call(this);

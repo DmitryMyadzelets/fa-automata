@@ -146,7 +146,7 @@
 				i = 0|0
 				t = G.trans
 				while i<n
-					return i if t[i]==p and t[i+1]==e and t[i+2]==q
+					return i if t[i] == p and t[i+1] == e and t[i+2] == q
 					i+=3
 				-1|0
 
@@ -211,7 +211,7 @@
  * @return {null}
 ###
 automata2.BFS = (G, fnc) ->
-	return null if not G?
+	return if not G?
 	stack = [G.start]
 	visited = [G.start]
 	while stack.length
@@ -228,11 +228,71 @@ automata2.BFS = (G, fnc) ->
 	null
 
 ###*
- * Parallel composition ('sync' name is taken from RW control theory)
- * @param  {automaton} G
- * @param  {automaton} H
- * @return {null}
+ * Parallel composition ('sync' name is taken from RW (Ramage & Wonham) theory)
+ * @param  {automaton} G1
+ * @param  {automaton} G2
+ * @return {automaton} G
 ###
-automata2.sync = (G, H) ->
-	return null if not G? or not H
-	null
+automata2.sync = (G1, G2) ->
+	G = @create()
+	return G if not G1? or not G2?
+	# Map contains supporting triples (q1, q2, q), 
+	# where q1 \in G1, q2 \in G2, q \in G.
+	map = [[G1.start, G2.start, G.start = 0]]
+	stack = [0]
+	common = [5]
+
+	# Search if states are in the map
+	inMap = (q1, q2) ->
+		for m, index in map
+			return index if m[0]==q1 and m[1]==q2
+		-1
+
+	while stack.length
+		q = stack.pop()
+
+		I = @trans.out(G1, map[q][0])
+		J = @trans.out(G2, map[q][1])
+
+		for i in I
+			q1 = G1.trans[i]
+			e1 = G1.trans[i+1]
+			p1 = G1.trans[i+2]
+
+			for j in J
+				q2 = G2.trans[j]
+				e2 = G2.trans[j+1]
+				p2 = G2.trans[j+2]
+
+				# console.log [q1, e1, p1], [q2, e2, p2]
+				
+				# Synchronous transition function
+				a = p1
+				b = p2
+				_t1 = true
+				_t2 = true
+				if e1 in common 
+					if e2 in common
+						if e1 != e2
+							continue
+					else
+						a = q1
+						_t1 = false
+				else
+					if e2 in common
+						b = q1
+						_t2 = false
+
+				k = inMap(a, b)
+				if k < 0
+					p = q+1
+					stack.push(p)
+					map.push([a, b, p])
+				else
+					p = k
+
+				@trans.add(G, q, e1, p) if _t1
+				@trans.add(G, q, e2, p) if _t2 and e1 != e2
+
+	G
+
