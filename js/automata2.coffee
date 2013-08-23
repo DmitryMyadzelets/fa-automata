@@ -48,7 +48,10 @@
 
 			# Add a transition into position i if defined, or to the end
 			add : (G, q, e, p, i) ->
-				return -1 if q<0 or p<0 or e<0 or q>=G.nN or p>=G.nN or e>=g.nE
+				# Fix: we do not need to control bounds of states and events,
+				# since set of transitions has no clue about them
+				# return -1 if q<0 or p<0 or e<0 or q>=G.nN or p>=G.nN or e>=g.nE
+				# 
 				# Number of items available
 				len = G.trans.length|0
 				# Number of items occupied by transitions

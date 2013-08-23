@@ -48,9 +48,6 @@
         add: function(G, q, e, p, i) {
           var j, k, len, t;
 
-          if (q < 0 || p < 0 || e < 0 || q >= G.nN || p >= G.nN || e >= g.nE) {
-            return -1;
-          }
           len = G.trans.length | 0;
           j = G.nT * 3 | 0;
           if (j + 3 > len) {
