@@ -6,6 +6,17 @@
 
 	DELTA_TRANS = 10 # Size of the increment for future transitions
 
+	# Set the value to 1 in a  binary array
+	# Returns null
+	setBit = (arr, i) ->
+		arr[i>>5] |= 1 << (i & 0x1F)
+		null
+
+	# Returns value 1/0 of the bit i
+	getBit = (arr, i) ->
+		arr[i>>5] & 1 << (i & 0x1F) && 1
+
+
 	# 
 	# Public metods
 	# 
@@ -104,22 +115,115 @@
 				return -1 if i<0 or i>=G.nT
 				G.trans.subarray(i*=3, i+3)
 
-		}
+			# Returns array of indexes of 'q' for triples (q, e, p) in transitions
+			# if 'q' matches
+			out : (G, q) ->
+				ret = []
+				n = G.nT|0
+				i = 0|0
+				j = 0|0
+				while i<n
+					ret.push(j) if G.trans[j] == q
+					i++
+					j+=3
+				new Uint32Array(ret)
 
-	}
+			# Returns array of indexes of 'q' for triples (q, e, p) in transitions
+			# if 'p' matches
+			in : (G, p) ->
+				ret = []
+				n = G.nT|0
+				i = 0|0
+				j = 2|0 # index of 'p' in (q, e, p)
+				while i<n
+					ret.push(j-2) if G.trans[j] == p
+					i++
+					j+=3
+				new Uint32Array(ret)
+
+
+		} # trans
+
+
+		edges : {
+
+
+
+			} # edges
+
+		###*
+		 * Breadth-first Search
+		 * @param {Automaton} G   
+		 * @param {function} fnc Callback function. Called with (node_from, label, node_to)
+		 * where:
+		 * node_from: index of the outgoing node
+		 * label: event label
+		 * node_to: index of the ingoing node
+		###
+		# BFS : (G, fnc) ->
+		# 	return null if not G?
+		# 	stack = [G.start]
+		# 	N = G.nN | 0
+		# 	# Size of a binary array presented as Uint32Array
+		# 	M = (N >> 5) + ((N & 0x1F) && 1)
+		# 	visited = new Uint32Array(M)
+		# 	setBit(visited, G.start)
+
+		# 	return null
+
+		# 	while stack.length
+		# 		a = stack.pop()
+		# 		# Get edges going out of the node 'a'
+		# 		E = @edges.out(G, a)
+		# 		for e in E
+		# 			# Get nodes reachabe by the edge 'e'
+		# 			b = G.edges.b[e]
+		# 			if b not in visited
+		# 				visited.push(b)
+		# 				stack.push(b)
+		# 			# Get all event labels for the edge
+		# 			labels = @edges.events.labels(G, e)
+		# 			fnc(a, l, b) for l in labels if typeof fnc == 'function'
+		# 	null
+
+	} # _this
+
 )()
 
-g = automata2.create()
-g.nN = 10
-g.nE = 10
-automata2.trans.add(g, 0, 1, 2)
-automata2.trans.add(g, 3, 4, 5)
-automata2.trans.add(g, 6, 7, 8, 1)
 
-console.log g.trans
+###*
+ * Breadth-first Search
+ * @param {Automaton} G   
+ * @param {function} fnc Callback function. Called with (node_from, event, node_to)
+ * where:
+ * node_from: index of the outgoing node
+ * event: index of event
+ * node_to: index of the ingoing node
+ * @return {null}
+###
+automata2.BFS = (G, fnc) ->
+	return null if not G?
+	stack = [G.start]
+	visited = [G.start]
+	while stack.length
+		q = stack.pop()
+		# Get indexes of transitions going out of the node 'q'
+		I = @trans.out(G, q)
+		for i in I
+			e = G.trans[i+1]
+			p = G.trans[i+2]
+			if p not in visited
+				visited.push(p)
+				stack.push(p)
+			fnc(q, e, p) if typeof fnc == 'function'
+	null
 
-automata2.trans.del(g, 1)
-console.log g.trans
-
-# console.log g.trans
-console.log f = automata2.trans.get(g, 1)
+###*
+ * Parallel composition ('sync' name is taken from RW control theory)
+ * @param  {automaton} G
+ * @param  {automaton} H
+ * @return {null}
+###
+automata2.sync = (G, H) ->
+	return null if not G? or not H
+	null
