@@ -12,6 +12,7 @@
 		arr[i>>5] |= 1 << (i & 0x1F)
 		null
 
+
 	# Returns value 1/0 of the bit i
 	getBit = (arr, i) ->
 		arr[i>>5] & 1 << (i & 0x1F) && 1
@@ -150,8 +151,23 @@
 					i+=3
 				-1|0
 
-
 		} # trans
+
+		sorted : (G) ->
+			ret = []
+			# Get maximal state number
+			max = 0
+			n = G.nT*3|0
+			i = 0|0
+			while i<n
+				max = G.trans[i] if G.trans[i] > max
+				i+=3
+
+			i = 0|0
+			while i<=max
+				ret.push(@trans.out(G, i))
+				i++
+			ret
 
 
 		edges : {
@@ -227,6 +243,9 @@ automata2.BFS = (G, fnc) ->
 			fnc(q, e, p) if typeof fnc == 'function'
 	null
 
+
+
+
 ###*
  * Parallel composition ('sync' name is taken from RW (Ramage & Wonham) theory)
  * @param  {automaton} G1
@@ -239,13 +258,28 @@ automata2.sync = (G1, G2, common) ->
 	return G if not G1? or not G2?
 	# Map contains supporting triples (q1, q2, q), 
 	# where q1 \in G1, q2 \in G2, q \in G.
-	map = [[G1.start, G2.start, G.start = 0]]
+	# map = [[G1.start, G2.start, G.start = 0]]
+	map = [G1.start, G2.start, G.start = 0]
 	stack = [0]
+
+	# Sorting improves the performance x2 times
+	sorted_T1 = @sorted(G1)
+	sorted_T2 = @sorted(G2)
+	# Preallocation impoves performance x20 times
+	t = new Uint32Array(G1.nT * G2.nT * 3|0)
+	delete G.trans
+	G.trans = t
+
 
 	# Search if states are in the map
 	inMap = (q1, q2) ->
-		for m, index in map
-			return index if m[0]==q1 and m[1]==q2
+		i = 0
+		n = map.length
+		while i+2 <n 
+			return i if map[i]==q1 and map[i+1]==q2
+			i+=3
+		# for m, index in map
+		# 	return index if m[0]==q1 and m[1]==q2
 		-1
 
 	add_transition = (a, e, b) ->
@@ -254,7 +288,10 @@ automata2.sync = (G1, G2, common) ->
 		if k < 0
 			p = q+1
 			stack.push(p)
-			map.push([a, b, p])
+			# map.push([a, b, p])
+			map.push(a)
+			map.push(b)
+			map.push(p)
 		else
 			p = k
 		# Add transition to the new automaton
@@ -265,8 +302,13 @@ automata2.sync = (G1, G2, common) ->
 	while stack.length
 		q = stack.pop()
 
-		I = @trans.out(G1, map[q][0])
-		J = @trans.out(G2, map[q][1])
+		# I = @trans.out(G1, map[q][0])
+		# J = @trans.out(G2, map[q][1])
+		I = @trans.out(G1, map[q*3])
+		J = @trans.out(G2, map[q*3+1])
+		# Sorting doubles performance
+		# I = sorted_T1[map[q*3]]
+		# J = sorted_T2[map[q*3+1]]
 
 		for i in I
 			q1 = G1.trans[i]
@@ -280,7 +322,7 @@ automata2.sync = (G1, G2, common) ->
 
 				# Synchronous transition function
 				# We have 5 states in BDD for transitions of G1 and G2:
-				# 1 - none of transitions occure
+				# 1 - none of the transition occures
 				# 2 - G1 does transition, G2 doesn't
 				# 3 - G2 does transition, G1 doesn't
 				# 4 - G1 ang G2 do one transitions together
@@ -313,7 +355,8 @@ make_G = (G) ->
 			p++
 		q++
 
-# make_G(G)
+make_G(G)
+
 # automata2.trans.add(G, 0, 1, 1)
 
 # console.log "G", G.trans, G.nT

@@ -130,6 +130,26 @@
           return -1 | 0;
         }
       },
+      sorted: function(G) {
+        var i, max, n, ret;
+
+        ret = [];
+        max = 0;
+        n = G.nT * 3 | 0;
+        i = 0 | 0;
+        while (i < n) {
+          if (G.trans[i] > max) {
+            max = G.trans[i];
+          }
+          i += 3;
+        }
+        i = 0 | 0;
+        while (i <= max) {
+          ret.push(this.trans.out(G, i));
+          i++;
+        }
+        return ret;
+      },
       edges: {}
       /**
       		 * Breadth-first Search
@@ -193,22 +213,29 @@
 
 
   automata2.sync = function(G1, G2, common) {
-    var G, I, J, add_transition, e1, e2, i, inMap, j, map, p1, p2, q, q1, q2, stack, _i, _j, _len, _len1;
+    var G, I, J, add_transition, e1, e2, i, inMap, j, map, p1, p2, q, q1, q2, sorted_T1, sorted_T2, stack, t, _i, _j, _len, _len1;
 
     G = this.create();
     if ((G1 == null) || (G2 == null)) {
       return G;
     }
-    map = [[G1.start, G2.start, G.start = 0]];
+    map = [G1.start, G2.start, G.start = 0];
     stack = [0];
+    sorted_T1 = this.sorted(G1);
+    sorted_T2 = this.sorted(G2);
+    t = new Uint32Array(G1.nT * G2.nT * 3 | 0);
+    delete G.trans;
+    G.trans = t;
     inMap = function(q1, q2) {
-      var index, m, _i, _len;
+      var i, n;
 
-      for (index = _i = 0, _len = map.length; _i < _len; index = ++_i) {
-        m = map[index];
-        if (m[0] === q1 && m[1] === q2) {
-          return index;
+      i = 0;
+      n = map.length;
+      while (i + 2 < n) {
+        if (map[i] === q1 && map[i + 1] === q2) {
+          return i;
         }
+        i += 3;
       }
       return -1;
     };
@@ -219,7 +246,9 @@
       if (k < 0) {
         p = q + 1;
         stack.push(p);
-        map.push([a, b, p]);
+        map.push(a);
+        map.push(b);
+        map.push(p);
       } else {
         p = k;
       }
@@ -227,8 +256,8 @@
     };
     while (stack.length) {
       q = stack.pop();
-      I = this.trans.out(G1, map[q][0]);
-      J = this.trans.out(G2, map[q][1]);
+      I = this.trans.out(G1, map[q * 3]);
+      J = this.trans.out(G2, map[q * 3 + 1]);
       for (_i = 0, _len = I.length; _i < _len; _i++) {
         i = I[_i];
         q1 = G1.trans[i];
@@ -280,5 +309,7 @@
     }
     return _results;
   };
+
+  make_G(G);
 
 }).call(this);
