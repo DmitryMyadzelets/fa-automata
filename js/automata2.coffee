@@ -231,22 +231,36 @@ automata2.BFS = (G, fnc) ->
  * Parallel composition ('sync' name is taken from RW (Ramage & Wonham) theory)
  * @param  {automaton} G1
  * @param  {automaton} G2
+ * @param  {array} common [Common events]
  * @return {automaton} G
 ###
-automata2.sync = (G1, G2) ->
+automata2.sync = (G1, G2, common) ->
 	G = @create()
 	return G if not G1? or not G2?
 	# Map contains supporting triples (q1, q2, q), 
 	# where q1 \in G1, q2 \in G2, q \in G.
 	map = [[G1.start, G2.start, G.start = 0]]
 	stack = [0]
-	common = [5]
 
 	# Search if states are in the map
 	inMap = (q1, q2) ->
 		for m, index in map
 			return index if m[0]==q1 and m[1]==q2
 		-1
+
+	add_transition = (a, e, b) ->
+		# Check if next composed state wasn't maped
+		k = inMap(a, b)
+		if k < 0
+			p = q+1
+			stack.push(p)
+			map.push([a, b, p])
+		else
+			p = k
+		# Add transition to the new automaton
+		automata2.trans.add(G, q, e, p)
+		return
+
 
 	while stack.length
 		q = stack.pop()
@@ -264,37 +278,55 @@ automata2.sync = (G1, G2) ->
 				e2 = G2.trans[j+1]
 				p2 = G2.trans[j+2]
 
-				# console.log [q1, e1, p1], [q2, e2, p2]
-				
 				# Synchronous transition function
-				a = p1
-				b = p2
-				_t1 = true
-				_t2 = true
-				if e1 in common 
-					if e2 in common
-						if e1 != e2
-							continue
+				# We have 5 states in BDD for transitions of G1 and G2:
+				# 1 - none of transitions occure
+				# 2 - G1 does transition, G2 doesn't
+				# 3 - G2 does transition, G1 doesn't
+				# 4 - G1 ang G2 do one transitions together
+				# 5 - G1 ang G2 do separate transitions
+
+				if e1 not in common
+					if e2 not in common
+						add_transition(p1, e1, q2)
+						add_transition(q1, e2, p2)
 					else
-						a = q1
-						_t1 = false
+						add_transition(p1, e1, q2)
 				else
-					if e2 in common
-						b = q1
-						_t2 = false
-
-				# Check if next composed state wasn't maped
-				k = inMap(a, b)
-				if k < 0
-					p = q+1
-					stack.push(p)
-					map.push([a, b, p])
-				else
-					p = k
-
-				# Add feasible transitions to the new automaton
-				@trans.add(G, q, e1, p) if _t1
-				@trans.add(G, q, e2, p) if _t2 and e1 != e2
+					if e2 not in common
+						add_transition(q1, e2, p2)
+					else
+						if e1 == e2
+							add_transition(p1, e1, p2)
 
 	G
 
+G = automata2.create()
+
+NUM_STATES = 2
+make_G = (G) ->
+	q = 0
+	while q <NUM_STATES
+		p = 0
+		while p <NUM_STATES
+			automata2.trans.add(G, q, p, p)
+			p++
+		q++
+
+# make_G(G)
+# automata2.trans.add(G, 0, 1, 1)
+
+# console.log "G", G.trans, G.nT
+
+# automata2.BFS(G, (q, e, p) ->
+# 	console.log [q, e, p]
+# 	)
+
+# console.log "sync:"
+# H = automata2.sync(G, G, [])
+# console.log "H", H.trans, H.nT
+
+# console.log "BFS:"
+# automata2.BFS(H, (q, e, p) ->
+# 	console.log q, e, p
+# 	)

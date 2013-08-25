@@ -85,7 +85,7 @@
         var h;
 
         console.log("sync (parallel composition):");
-        h = automata2.sync(g, g2);
+        h = automata2.sync(g, g2, [5]);
         return automata2.BFS(h, function(q, e, p) {
           return console.log(q, e, p);
         });

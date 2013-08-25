@@ -72,7 +72,7 @@ describe "Directed graph, version 2", ->
 
 		it ".sync works (check the console)", ->
 			console.log "sync (parallel composition):"
-			h = automata2.sync(g, g2)
+			h = automata2.sync(g, g2, [5])
 			automata2.BFS(h, (q, e, p) ->
 				console.log q, e, p
 				)
