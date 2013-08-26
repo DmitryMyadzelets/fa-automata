@@ -320,19 +320,17 @@ automata2.sync = (G1, G2, common) ->
 	G.trans = t
 
 
-	# Search if states are in the map
-	inMap = (q1, q2) ->
-		i = 2
-		n = map.length
-		while i<n 
-			return map[i] if map[i-2]==q1 and map[i-1]==q2
-			i+=3
-		-1
-	
-
 	add_transition = (a, e, b) ->
+		# Search if states are in the map
+		i = 2
+		k = -1
+		n = map.length
+		while i<n
+			if map[i-2]==a and map[i-1]==b
+				k = map[i]
+				break
+			i+=3
 		# Check if next composed state wasn't maped
-		k = inMap(a, b)
 		if k < 0
 			p = q+1
 			stack.push(p)
@@ -350,13 +348,8 @@ automata2.sync = (G1, G2, common) ->
 	while stack.length
 		q = stack.pop()
 
-		# I = @trans.out(G1, map[q][0])
-		# J = @trans.out(G2, map[q][1])
 		I = @trans.out(G1, map[q*3])
 		J = @trans.out(G2, map[q*3+1])
-		# Sorting doubles performance
-		# I = sorted_T1[map[q*3]]
-		# J = sorted_T2[map[q*3+1]]
 
 		for i in I
 			q1 = G1.trans[i]

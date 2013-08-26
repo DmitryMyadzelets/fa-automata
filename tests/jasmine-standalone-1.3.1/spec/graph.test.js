@@ -51,7 +51,7 @@
       automata2.trans.add(g, 1, 8, 0);
       g2 = automata2.create();
       automata2.trans.add(g2, 0, 3, 1);
-      automata2.trans.add(g2, 1, 5, 1);
+      automata2.trans.add(g2, 1, 5, 1, 1);
       it("Has 3 transitions (0, 5, 1), (1, 7, 1), (1, 8, 0)", function() {
         return expect(g.nT).toBe(3);
       });

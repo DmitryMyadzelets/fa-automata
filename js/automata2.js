@@ -252,7 +252,7 @@
 
 
   automata2.sync = function(G1, G2, common) {
-    var G, I, J, add_transition, e1, e2, i, inMap, j, map, p1, p2, q, q1, q2, stack, t, _i, _j, _len, _len1;
+    var G, I, J, add_transition, e1, e2, i, j, map, p1, p2, q, q1, q2, stack, t, _i, _j, _len, _len1;
 
     G = this.create();
     if ((G1 == null) || (G2 == null)) {
@@ -269,23 +269,19 @@
     t = new Uint32Array(G1.nT * G2.nT * 3 | 0);
     delete G.trans;
     G.trans = t;
-    inMap = function(q1, q2) {
-      var i, n;
+    add_transition = function(a, e, b) {
+      var i, k, n, p;
 
       i = 2;
+      k = -1;
       n = map.length;
       while (i < n) {
-        if (map[i - 2] === q1 && map[i - 1] === q2) {
-          return map[i];
+        if (map[i - 2] === a && map[i - 1] === b) {
+          k = map[i];
+          break;
         }
         i += 3;
       }
-      return -1;
-    };
-    add_transition = function(a, e, b) {
-      var k, p;
-
-      k = inMap(a, b);
       if (k < 0) {
         p = q + 1;
         stack.push(p);
