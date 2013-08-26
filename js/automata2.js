@@ -17,7 +17,7 @@
     };
     /**
     	 * [Optimized bubble sort (http://en.wikipedia.org/wiki/Bubble_sort). 
-    	 * Sorts index array instead of the array itself.]
+    	 * Sorts the index array instead of the array itself.]
     	 * @param  {[Array]} a   [Array with data]
     	 * @param  {[Array]} ix  [Index array to be sorted]
     	 * @param  {[int]} len [Length of the index array]

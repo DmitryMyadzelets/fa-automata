@@ -20,7 +20,7 @@
 
 	###*
 	 * [Optimized bubble sort (http://en.wikipedia.org/wiki/Bubble_sort). 
-	 * Sorts index array instead of the array itself.]
+	 * Sorts the index array instead of the array itself.]
 	 * @param  {[Array]} a   [Array with data]
 	 * @param  {[Array]} ix  [Index array to be sorted]
 	 * @param  {[int]} len [Length of the index array]
@@ -203,21 +203,20 @@
 					G.tix[i] = i*3
 				sort(G.trans, G.tix, G.nT)
 
-				# Upgrade sorted nodes
+				# Upgrade array of states 'nix'
 				delete G.nix
 				max = 0
-				if G.nT > 0
-					# The last record contains a maximal state number
-					max = G.trans[G.tix[G.nT-1]]
+				# The last record contains the maximal state number
+				max = G.trans[G.tix[G.nT-1]] if G.nT > 0
 				G.nix = new Uint32Array(max + 1)
-				# Fill array of states
+				# ... and fill it.
 				n = -1
 				i = 0
 				len = G.nT
-				while i < len
+				while i < len 			# Enumerate sorted transitions
 					m = G.trans[G.tix[i]]
-					if m ^ n
-						G.nix[m] = i
+					if m ^ n 			# When number of state 'q' changes,
+						G.nix[m] = i 	# rember its position.
 						n = m
 					i++
 
