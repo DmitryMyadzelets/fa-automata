@@ -196,34 +196,35 @@
 				-1|0
 
 
-			sort : (G) ->
-				# Reset array of sorted transitions
-				i = G.nT
-				while i-- >0
-					G.tix[i] = i*3
-				sort(G.trans, G.tix, G.nT)
-
-				# Upgrade array of states 'nix'
-				delete G.nix
-				max = 0
-				# The last record contains the maximal state number
-				max = G.trans[G.tix[G.nT-1]] if G.nT > 0
-				G.nix = new Uint32Array(max + 1)
-				# ... and fill it.
-				n = -1
-				i = 0
-				len = G.nT
-				while i < len 			# Enumerate sorted transitions
-					m = G.trans[G.tix[i]]
-					if m ^ n 			# When number of state 'q' changes,
-						G.nix[m] = i 	# rember its position.
-						n = m
-					i++
-
-				G.sorted = true
-				return
-
 		} # trans
+
+		sort : (G) ->
+			# Reset array of sorted transitions
+			i = G.nT
+			while i-- >0
+				G.tix[i] = i*3
+			sort(G.trans, G.tix, G.nT)
+
+			# Upgrade array of states 'nix'
+			delete G.nix
+			max = 0
+			# The last record contains the maximal state number
+			max = G.trans[G.tix[G.nT-1]] if G.nT > 0
+			G.nix = new Uint32Array(max + 1)
+			# ... and fill it.
+			n = -1
+			i = 0
+			len = G.nT
+			while i < len 			# Enumerate sorted transitions
+				m = G.trans[G.tix[i]]
+				if m ^ n 			# When number of state 'q' changes,
+					G.nix[m] = i 	# rember its position.
+					n = m
+				i++
+
+			G.sorted = true
+			return
+
 
 		edges : {
 
@@ -255,7 +256,7 @@
 automata2.BFS = (G, fnc) ->
 	return if not G?
 
-	automata2.trans.sort(G) if not G.sorted
+	automata2.sort(G) if not G.sorted
 
 	call_fnc = typeof fnc == 'function'
 	stack 	= [G.start]
@@ -310,8 +311,8 @@ automata2.sync = (G1, G2, common) ->
 	stack = [0]
 
 	# Sorting improves the performance x2 times
-	automata2.trans.sort(G1) if not G1.sorted
-	automata2.trans.sort(G2) if not G2.sorted
+	automata2.sort(G1) if not G1.sorted
+	automata2.sort(G2) if not G2.sorted
 
 	# Preallocation impoves performance x10 times
 	t = new Uint32Array(G1.nT * G2.nT * 3|0)

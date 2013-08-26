@@ -168,34 +168,34 @@
             i += 3;
           }
           return -1 | 0;
-        },
-        sort: function(G) {
-          var i, len, m, max, n;
-
-          i = G.nT;
-          while (i-- > 0) {
-            G.tix[i] = i * 3;
-          }
-          sort(G.trans, G.tix, G.nT);
-          delete G.nix;
-          max = 0;
-          if (G.nT > 0) {
-            max = G.trans[G.tix[G.nT - 1]];
-          }
-          G.nix = new Uint32Array(max + 1);
-          n = -1;
-          i = 0;
-          len = G.nT;
-          while (i < len) {
-            m = G.trans[G.tix[i]];
-            if (m ^ n) {
-              G.nix[m] = i;
-              n = m;
-            }
-            i++;
-          }
-          G.sorted = true;
         }
+      },
+      sort: function(G) {
+        var i, len, m, max, n;
+
+        i = G.nT;
+        while (i-- > 0) {
+          G.tix[i] = i * 3;
+        }
+        sort(G.trans, G.tix, G.nT);
+        delete G.nix;
+        max = 0;
+        if (G.nT > 0) {
+          max = G.trans[G.tix[G.nT - 1]];
+        }
+        G.nix = new Uint32Array(max + 1);
+        n = -1;
+        i = 0;
+        len = G.nT;
+        while (i < len) {
+          m = G.trans[G.tix[i]];
+          if (m ^ n) {
+            G.nix[m] = i;
+            n = m;
+          }
+          i++;
+        }
+        G.sorted = true;
       },
       edges: {}
     };
@@ -220,7 +220,7 @@
       return;
     }
     if (!G.sorted) {
-      automata2.trans.sort(G);
+      automata2.sort(G);
     }
     call_fnc = typeof fnc === 'function';
     stack = [G.start];
@@ -261,10 +261,10 @@
     map = [G1.start, G2.start, G.start = 0];
     stack = [0];
     if (!G1.sorted) {
-      automata2.trans.sort(G1);
+      automata2.sort(G1);
     }
     if (!G2.sorted) {
-      automata2.trans.sort(G2);
+      automata2.sort(G2);
     }
     t = new Uint32Array(G1.nT * G2.nT * 3 | 0);
     delete G.trans;
