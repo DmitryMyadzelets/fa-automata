@@ -78,7 +78,6 @@ describe "Directed graph, version 2", ->
 				)
 
 
-
 describe "Directed graph", ->
 	describe "Basic operations", ->
 		it "Creates object", ->

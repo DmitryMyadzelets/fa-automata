@@ -5,7 +5,7 @@
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   this.automata2 = (function() {
-    var DELTA_TRANS, getBit, setBit, _this;
+    var DELTA_TRANS, getBit, setBit, sort, _this;
 
     DELTA_TRANS = 10;
     setBit = function(arr, i) {
@@ -15,6 +15,37 @@
     getBit = function(arr, i) {
       return arr[i >> 5] & 1 << (i & 0x1F) && 1;
     };
+    /**
+    	 * [Optimized bubble sort (http://en.wikipedia.org/wiki/Bubble_sort). 
+    	 * Sorts index array instead of the array itself.]
+    	 * @param  {[Array]} a   [Array with data]
+    	 * @param  {[Array]} ix  [Index array to be sorted]
+    	 * @param  {[int]} len [Length of the index array]
+    	 * @param  {[int]} step [Step for items in the data array]
+    	 * @return {[null]}
+    */
+
+    sort = function(a, ix, len) {
+      var i, j, m, n, temp;
+
+      n = len;
+      while (n) {
+        m = 0;
+        j = 0;
+        i = 1;
+        while (i < n) {
+          if (a[ix[j]] > a[ix[i]]) {
+            temp = ix[j];
+            ix[j] = ix[i];
+            ix[i] = temp;
+            m = i;
+          }
+          j = i;
+          i++;
+        }
+        n = m;
+      }
+    };
     return _this = {
       create: function() {
         return {
@@ -22,7 +53,10 @@
           trans: new Uint32Array(3 * DELTA_TRANS),
           nN: 0 | 0,
           nE: 0 | 0,
-          nT: 0 | 0
+          nT: 0 | 0,
+          sorted: false,
+          tix: new Uint32Array(DELTA_TRANS),
+          nix: new Uint32Array()
         };
       },
       trans: {
@@ -36,7 +70,10 @@
             t.set(G.trans);
             delete G.trans;
             G.trans = t;
+            delete G.tix;
+            G.tix = new Uint32Array(G.trans.length / 3);
           }
+          G.sorted = false;
           if ((i == null) || i === G.nT) {
             G.trans[j++] = q | 0;
             G.trans[j++] = e | 0;
@@ -64,6 +101,7 @@
           if ((i == null) || i < 0 || i >= G.nT) {
             return -1;
           }
+          G.sorted = false;
           G.nT -= 1;
           if (i < G.nT) {
             i *= 3;
@@ -78,6 +116,8 @@
             t = new Uint32Array(G.trans.subarray(0, len));
             delete G.trans;
             G.trans = t;
+            delete G.tix;
+            G.tix = new Uint32Array(G.trans.length / 3);
           }
           return G.nT;
         },
@@ -128,39 +168,36 @@
             i += 3;
           }
           return -1 | 0;
-        }
-      },
-      sorted: function(G) {
-        var i, max, n, ret;
+        },
+        sort: function(G) {
+          var i, len, m, max, n;
 
-        ret = [];
-        max = 0;
-        n = G.nT * 3 | 0;
-        i = 0 | 0;
-        while (i < n) {
-          if (G.trans[i] > max) {
-            max = G.trans[i];
+          i = G.nT;
+          while (i-- > 0) {
+            G.tix[i] = i * 3;
           }
-          i += 3;
+          sort(G.trans, G.tix, G.nT);
+          delete G.nix;
+          max = 0;
+          if (G.nT > 0) {
+            max = G.trans[G.tix[G.nT - 1]];
+          }
+          G.nix = new Uint32Array(max + 1);
+          n = -1;
+          i = 0;
+          len = G.nT;
+          while (i < len) {
+            m = G.trans[G.tix[i]];
+            if (m ^ n) {
+              G.nix[m] = i;
+              n = m;
+            }
+            i++;
+          }
+          G.sorted = true;
         }
-        i = 0 | 0;
-        while (i <= max) {
-          ret.push(this.trans.out(G, i));
-          i++;
-        }
-        return ret;
       },
       edges: {}
-      /**
-      		 * Breadth-first Search
-      		 * @param {Automaton} G   
-      		 * @param {function} fnc Callback function. Called with (node_from, label, node_to)
-      		 * where:
-      		 * node_from: index of the outgoing node
-      		 * label: event label
-      		 * node_to: index of the ingoing node
-      */
-
     };
   })();
 
@@ -177,30 +214,32 @@
 
 
   automata2.BFS = function(G, fnc) {
-    var I, e, i, p, q, stack, visited, _i, _len;
+    var call_fnc, e, i, j, p, q, stack, visited;
 
     if (G == null) {
       return;
     }
+    if (!G.sorted) {
+      automata2.trans.sort(G);
+    }
+    call_fnc = typeof fnc === 'function';
     stack = [G.start];
     visited = [G.start];
     while (stack.length) {
       q = stack.pop();
-      I = this.trans.out(G, q);
-      for (_i = 0, _len = I.length; _i < _len; _i++) {
-        i = I[_i];
-        e = G.trans[i + 1];
-        p = G.trans[i + 2];
+      j = G.nix[q];
+      while ((j < G.nT) && (q === G.trans[i = G.tix[j++]])) {
+        e = G.trans[++i];
+        p = G.trans[++i];
         if (__indexOf.call(visited, p) < 0) {
           visited.push(p);
           stack.push(p);
         }
-        if (typeof fnc === 'function') {
+        if (call_fnc) {
           fnc(q, e, p);
         }
       }
     }
-    return null;
   };
 
   /**
@@ -213,7 +252,7 @@
 
 
   automata2.sync = function(G1, G2, common) {
-    var G, I, J, add_transition, e1, e2, i, inMap, j, map, p1, p2, q, q1, q2, sorted_T1, sorted_T2, stack, t, _i, _j, _len, _len1;
+    var G, I, J, add_transition, e1, e2, i, inMap, j, map, p1, p2, q, q1, q2, stack, t, _i, _j, _len, _len1;
 
     G = this.create();
     if ((G1 == null) || (G2 == null)) {
@@ -221,19 +260,23 @@
     }
     map = [G1.start, G2.start, G.start = 0];
     stack = [0];
-    sorted_T1 = this.sorted(G1);
-    sorted_T2 = this.sorted(G2);
+    if (!G1.sorted) {
+      automata2.trans.sort(G1);
+    }
+    if (!G2.sorted) {
+      automata2.trans.sort(G2);
+    }
     t = new Uint32Array(G1.nT * G2.nT * 3 | 0);
     delete G.trans;
     G.trans = t;
     inMap = function(q1, q2) {
       var i, n;
 
-      i = 0;
+      i = 2;
       n = map.length;
-      while (i + 2 < n) {
-        if (map[i] === q1 && map[i + 1] === q2) {
-          return i;
+      while (i < n) {
+        if (map[i - 2] === q1 && map[i - 1] === q2) {
+          return map[i];
         }
         i += 3;
       }

@@ -18,6 +18,33 @@
 		arr[i>>5] & 1 << (i & 0x1F) && 1
 
 
+	###*
+	 * [Optimized bubble sort (http://en.wikipedia.org/wiki/Bubble_sort). 
+	 * Sorts index array instead of the array itself.]
+	 * @param  {[Array]} a   [Array with data]
+	 * @param  {[Array]} ix  [Index array to be sorted]
+	 * @param  {[int]} len [Length of the index array]
+	 * @param  {[int]} step [Step for items in the data array]
+	 * @return {[null]}
+	###
+	sort = (a, ix, len) ->
+		n = len
+		while n
+			m = 0
+			j = 0
+			i = 1
+			while i<n
+				if a[ix[j]] > a[ix[i]]
+					temp = ix[j]
+					ix[j] = ix[i]
+					ix[i] = temp
+					m = i
+				j = i
+				i++
+			n = m
+		return
+
+
 	# 
 	# Public metods
 	# 
@@ -32,6 +59,11 @@
 				nN : 0|0 # Number of Nodes/States
 				nE : 0|0 # Number of Events
 				nT : 0|0 # Number of Transitions
+				sorted : false
+				# Sorted transitions. 'tix' points to 'trans'.
+				tix : new Uint32Array(DELTA_TRANS)
+				# Sorted list of nodes. 'nix' points to 'tix'.
+				nix : new Uint32Array() 
 			}
 
 
@@ -64,6 +96,12 @@
 					t.set(G.trans)
 					delete G.trans
 					G.trans = t
+					# Updgrade sorted array for transitions
+					delete G.tix
+					G.tix = new Uint32Array(G.trans.length/3)
+
+
+				G.sorted = false
 
 				if not i? or i==G.nT
 					# Put the triple to the end of the array
@@ -91,6 +129,9 @@
 			# Returns amount of transitions or -1 if the position is wrong
 			del : (G, i) ->
 				return -1 if not i? or i<0 or i>=G.nT
+
+				G.sorted = false
+
 				G.nT -=1
 				if i < G.nT
 					i *= 3 		# Index of triple we need to delete
@@ -107,6 +148,9 @@
 					t = new Uint32Array(G.trans.subarray(0, len))
 					delete G.trans
 					G.trans = t
+					# Updgrade sorted array for transitions
+					delete G.tix
+					G.tix = new Uint32Array(G.trans.length/3)
 				G.nT
 
 
@@ -151,65 +195,42 @@
 					i+=3
 				-1|0
 
+
+			sort : (G) ->
+				# Reset array of sorted transitions
+				i = G.nT
+				while i-- >0
+					G.tix[i] = i*3
+				sort(G.trans, G.tix, G.nT)
+
+				# Upgrade sorted nodes
+				delete G.nix
+				max = 0
+				if G.nT > 0
+					# The last record contains a maximal state number
+					max = G.trans[G.tix[G.nT-1]]
+				G.nix = new Uint32Array(max + 1)
+				# Fill array of states
+				n = -1
+				i = 0
+				len = G.nT
+				while i < len
+					m = G.trans[G.tix[i]]
+					if m ^ n
+						G.nix[m] = i
+						n = m
+					i++
+
+				G.sorted = true
+				return
+
 		} # trans
-
-		sorted : (G) ->
-			ret = []
-			# Get maximal state number
-			max = 0
-			n = G.nT*3|0
-			i = 0|0
-			while i<n
-				max = G.trans[i] if G.trans[i] > max
-				i+=3
-
-			i = 0|0
-			while i<=max
-				ret.push(@trans.out(G, i))
-				i++
-			ret
-
 
 		edges : {
 
 
 
 			} # edges
-
-		###*
-		 * Breadth-first Search
-		 * @param {Automaton} G   
-		 * @param {function} fnc Callback function. Called with (node_from, label, node_to)
-		 * where:
-		 * node_from: index of the outgoing node
-		 * label: event label
-		 * node_to: index of the ingoing node
-		###
-		# BFS : (G, fnc) ->
-		# 	return null if not G?
-		# 	stack = [G.start]
-		# 	N = G.nN | 0
-		# 	# Size of a binary array presented as Uint32Array
-		# 	M = (N >> 5) + ((N & 0x1F) && 1)
-		# 	visited = new Uint32Array(M)
-		# 	setBit(visited, G.start)
-
-		# 	return null
-
-		# 	while stack.length
-		# 		a = stack.pop()
-		# 		# Get edges going out of the node 'a'
-		# 		E = @edges.out(G, a)
-		# 		for e in E
-		# 			# Get nodes reachabe by the edge 'e'
-		# 			b = G.edges.b[e]
-		# 			if b not in visited
-		# 				visited.push(b)
-		# 				stack.push(b)
-		# 			# Get all event labels for the edge
-		# 			labels = @edges.events.labels(G, e)
-		# 			fnc(a, l, b) for l in labels if typeof fnc == 'function'
-		# 	null
 
 	} # _this
 
@@ -226,24 +247,33 @@
  * node_to: index of the ingoing node
  * @return {null}
 ###
+#  A template for using bits. May be usefull in future.
+# 	N = G.nN | 0
+# 	# Size of a binary array presented as Uint32Array
+# 	M = (N >> 5) + ((N & 0x1F) && 1)
+# 	visited = new Uint32Array(M)
+# 	setBit(visited, G.start)
 automata2.BFS = (G, fnc) ->
 	return if not G?
-	stack = [G.start]
+
+	automata2.trans.sort(G) if not G.sorted
+
+	call_fnc = typeof fnc == 'function'
+	stack 	= [G.start]
 	visited = [G.start]
 	while stack.length
 		q = stack.pop()
-		# Get indexes of transitions going out of the node 'q'
-		I = @trans.out(G, q)
-		for i in I
-			e = G.trans[i+1]
-			p = G.trans[i+2]
+		j = G.nix[q] 
+		# 'j' point to the position in 'tix'
+		# 'i' points to the fist transition of state 'q'
+		while (j<G.nT) and (q == G.trans[i = G.tix[j++]])
+			e = G.trans[++i]
+			p = G.trans[++i]
 			if p not in visited
 				visited.push(p)
 				stack.push(p)
-			fnc(q, e, p) if typeof fnc == 'function'
-	null
-
-
+			fnc(q, e, p) if call_fnc
+	return
 
 
 ###*
@@ -258,14 +288,33 @@ automata2.sync = (G1, G2, common) ->
 	return G if not G1? or not G2?
 	# Map contains supporting triples (q1, q2, q), 
 	# where q1 \in G1, q2 \in G2, q \in G.
-	# map = [[G1.start, G2.start, G.start = 0]]
 	map = [G1.start, G2.start, G.start = 0]
+	# map = new Uint32Array(3*10)
+	# map_ix = 0
+
+	# add_map = (p, e, q) ->
+	# 	len = map.length
+	# 	if (map_ix + 3) * 3|0 < len
+	# 		len+=3*10
+	# 		m = new Uint32Array(len)
+	# 		m.set(map)
+	# 		# delete map
+	# 		map = null
+	# 		map = m
+	# 	map[map_ix++] = p
+	# 	map[map_ix++] = e
+	# 	map[map_ix++] = q
+	# 	return
+
+	# add_map(G1.start, G2.start, G.start = 0)
+
 	stack = [0]
 
 	# Sorting improves the performance x2 times
-	sorted_T1 = @sorted(G1)
-	sorted_T2 = @sorted(G2)
-	# Preallocation impoves performance x20 times
+	automata2.trans.sort(G1) if not G1.sorted
+	automata2.trans.sort(G2) if not G2.sorted
+
+	# Preallocation impoves performance x10 times
 	t = new Uint32Array(G1.nT * G2.nT * 3|0)
 	delete G.trans
 	G.trans = t
@@ -273,14 +322,13 @@ automata2.sync = (G1, G2, common) ->
 
 	# Search if states are in the map
 	inMap = (q1, q2) ->
-		i = 0
+		i = 2
 		n = map.length
-		while i+2 <n 
-			return i if map[i]==q1 and map[i+1]==q2
+		while i<n 
+			return map[i] if map[i-2]==q1 and map[i-1]==q2
 			i+=3
-		# for m, index in map
-		# 	return index if m[0]==q1 and m[1]==q2
 		-1
+	
 
 	add_transition = (a, e, b) ->
 		# Check if next composed state wasn't maped
@@ -288,7 +336,7 @@ automata2.sync = (G1, G2, common) ->
 		if k < 0
 			p = q+1
 			stack.push(p)
-			# map.push([a, b, p])
+			# add_map(a, b, p)
 			map.push(a)
 			map.push(b)
 			map.push(p)
@@ -343,6 +391,7 @@ automata2.sync = (G1, G2, common) ->
 
 	G
 
+
 G = automata2.create()
 
 NUM_STATES = 2
@@ -373,3 +422,4 @@ make_G(G)
 # automata2.BFS(H, (q, e, p) ->
 # 	console.log q, e, p
 # 	)
+
