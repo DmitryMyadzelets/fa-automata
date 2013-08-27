@@ -203,7 +203,12 @@
 			i = G.nT
 			while i-- >0
 				G.tix[i] = i*3
+			
 			sort(G.trans, G.tix, G.nT)
+
+			i = 0
+			while i< G.nT
+				console.log i, G.trans[G.tix[i]], automata2.trans.get(G, i++)
 
 			# Upgrade array of states 'nix'
 			delete G.nix
@@ -281,11 +286,16 @@ automata2.BFS = (G, fnc) ->
  * @param  {automaton} G1
  * @param  {automaton} G2
  * @param  {array} common [Common events]
+ * @param  {automaton} G [Resulting automata. Should be allocated before]
  * @return {automaton} G
 ###
-automata2.sync = (G1, G2, common) ->
-	G = @create()
-	return G if not G1? or not G2?
+# Preallocation impoves performance x10 times
+# t = new Uint32Array(G1.nT * G2.nT * 3|0)
+# delete G.trans
+# G.trans = t
+automata2.sync = (G1, G2, common, G) ->
+	return if not G1? or not G2? or not G?
+	G.nT = 0 # Cancel all transitions (doesn't release memory)
 	# Map contains supporting triples (q1, q2, q), 
 	# where q1 \in G1, q2 \in G2, q \in G.
 	map = [G1.start, G2.start, G.start = 0]
@@ -307,18 +317,13 @@ automata2.sync = (G1, G2, common) ->
 	# 	return
 
 	# add_map(G1.start, G2.start, G.start = 0)
+	# 
 
 	stack = [0]
 
 	# Sorting improves the performance x2 times
 	automata2.sort(G1) if not G1.sorted
 	automata2.sort(G2) if not G2.sorted
-
-	# Preallocation impoves performance x10 times
-	t = new Uint32Array(G1.nT * G2.nT * 3|0)
-	delete G.trans
-	G.trans = t
-
 
 	add_transition = (a, e, b) ->
 		# Search if states are in the map
@@ -330,9 +335,10 @@ automata2.sync = (G1, G2, common) ->
 				k = map[i]
 				break
 			i+=3
-		# Check if next composed state wasn't maped
+		# Check if next composed state wasn't maped,
+		# and calculate state 'p'.
 		if k < 0
-			p = q+1
+			p = q+1 # Note that 'q' is external w.r.t. this funcion
 			stack.push(p)
 			# add_map(a, b, p)
 			map.push(a)
@@ -387,7 +393,7 @@ automata2.sync = (G1, G2, common) ->
 
 G = automata2.create()
 
-NUM_STATES = 2
+NUM_STATES = 3
 make_G = (G) ->
 	q = 0
 	while q <NUM_STATES
@@ -396,23 +402,29 @@ make_G = (G) ->
 			automata2.trans.add(G, q, p, p)
 			p++
 		q++
+	return
 
 make_G(G)
 
-# automata2.trans.add(G, 0, 1, 1)
 
-# console.log "G", G.trans, G.nT
+G1 = automata2.create()
+G2 = automata2.create()
 
-# automata2.BFS(G, (q, e, p) ->
-# 	console.log [q, e, p]
-# 	)
+make_G(G1)
+make_G(G2)
 
-# console.log "sync:"
-# H = automata2.sync(G, G, [])
-# console.log "H", H.trans, H.nT
+console.log "G1:"
+automata2.sort(G1)
+console.log "G2:"
+automata2.sort(G2)
 
-# console.log "BFS:"
-# automata2.BFS(H, (q, e, p) ->
-# 	console.log q, e, p
-# 	)
+G = automata2.create()
 
+automata2.sync(G1, G2, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], G)
+console.log "G:"
+# automata2.sort(G)
+automata2.BFS(G, (q, e, p) -> 
+	console.log q, e, p
+	)
+
+console.log G
