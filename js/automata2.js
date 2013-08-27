@@ -178,10 +178,6 @@
           G.tix[i] = i * 3;
         }
         sort(G.trans, G.tix, G.nT);
-        i = 0;
-        while (i < G.nT) {
-          console.log(i, G.trans[G.tix[i]], automata2.trans.get(G, i++));
-        }
         delete G.nix;
         max = 0;
         if (G.nT > 0) {
@@ -257,13 +253,14 @@
 
 
   automata2.sync = function(G1, G2, common, G) {
-    var I, J, add_transition, e1, e2, i, j, map, p1, p2, q, q1, q2, stack, _i, _j, _len, _len1;
+    var I, J, add_transition, e1, e2, i, j, map, map_n, p1, p2, q, q1, q2, stack, _i, _j, _len, _len1;
 
     if ((G1 == null) || (G2 == null) || (G == null)) {
       return;
     }
     G.nT = 0;
     map = [G1.start, G2.start, G.start = 0];
+    map_n = 1 | 0;
     stack = [0];
     if (!G1.sorted) {
       automata2.sort(G1);
@@ -285,7 +282,7 @@
         i += 3;
       }
       if (k < 0) {
-        p = q + 1;
+        p = map_n++;
         stack.push(p);
         map.push(a);
         map.push(b);
@@ -328,12 +325,13 @@
         }
       }
     }
+    G.nN = map_n;
     return G;
   };
 
   G = automata2.create();
 
-  NUM_STATES = 3;
+  NUM_STATES = 10;
 
   make_G = function(G) {
     var p, q;

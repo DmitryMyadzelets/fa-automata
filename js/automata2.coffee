@@ -206,10 +206,6 @@
 			
 			sort(G.trans, G.tix, G.nT)
 
-			i = 0
-			while i< G.nT
-				console.log i, G.trans[G.tix[i]], automata2.trans.get(G, i++)
-
 			# Upgrade array of states 'nix'
 			delete G.nix
 			max = 0
@@ -299,6 +295,7 @@ automata2.sync = (G1, G2, common, G) ->
 	# Map contains supporting triples (q1, q2, q), 
 	# where q1 \in G1, q2 \in G2, q \in G.
 	map = [G1.start, G2.start, G.start = 0]
+	map_n = 1|0 # Number of items in the map
 	# map = new Uint32Array(3*10)
 	# map_ix = 0
 
@@ -325,8 +322,12 @@ automata2.sync = (G1, G2, common, G) ->
 	automata2.sort(G1) if not G1.sorted
 	automata2.sort(G2) if not G2.sorted
 
+	# Adds transition to the new automaton.
+	# a - state of G1, reached by event 'e'
+	# b - state of G2, reached by event 'e'
+	# Thus, (a, b) is the next composed state.
 	add_transition = (a, e, b) ->
-		# Search if states are in the map
+		# Search if the composed state is in the map
 		i = 2
 		k = -1
 		n = map.length
@@ -335,10 +336,9 @@ automata2.sync = (G1, G2, common, G) ->
 				k = map[i]
 				break
 			i+=3
-		# Check if next composed state wasn't maped,
-		# and calculate state 'p'.
+		# Calculate state 'p'
 		if k < 0
-			p = q+1 # Note that 'q' is external w.r.t. this funcion
+			p = map_n++ # Note that 'q' is external w.r.t. this funcion
 			stack.push(p)
 			# add_map(a, b, p)
 			map.push(a)
@@ -347,6 +347,7 @@ automata2.sync = (G1, G2, common, G) ->
 		else
 			p = k
 		# Add transition to the new automaton
+		# console.log [a, b], [q, e, p], k
 		automata2.trans.add(G, q, e, p)
 		return
 
@@ -387,13 +388,13 @@ automata2.sync = (G1, G2, common, G) ->
 					else
 						if e1 == e2
 							add_transition(p1, e1, p2)
-
+	G.nN = map_n
 	G
 
 
 G = automata2.create()
 
-NUM_STATES = 3
+NUM_STATES = 10
 make_G = (G) ->
 	q = 0
 	while q <NUM_STATES
