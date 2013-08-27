@@ -206,11 +206,11 @@
 			
 			sort(G.trans, G.tix, G.nT)
 
+			# The last record contains the maximal state number
+			max = 0
+			max = G.trans[G.tix[G.nT-1]] if G.nT > 0
 			# Upgrade array of states 'nix'
 			delete G.nix
-			max = 0
-			# The last record contains the maximal state number
-			max = G.trans[G.tix[G.nT-1]] if G.nT > 0
 			G.nix = new Uint32Array(max + 1)
 			# ... and fill it.
 			n = -1
@@ -290,12 +290,19 @@ automata2.BFS = (G, fnc) ->
 # delete G.trans
 # G.trans = t
 automata2.sync = (G1, G2, common, G) ->
-	return if not G1? or not G2? or not G?
+	return if not G1? or not G2?
+	G = automata2.create() if not G?
+	common = [] if not common
 	G.nT = 0 # Cancel all transitions (doesn't release memory)
+	# Sorting improves the performance x2 times
+	automata2.sort(G1) if not G1.sorted
+	automata2.sort(G2) if not G2.sorted
+
 	# Map contains supporting triples (q1, q2, q), 
 	# where q1 \in G1, q2 \in G2, q \in G.
 	map = [G1.start, G2.start, G.start = 0]
 	map_n = 1|0 # Number of items in the map
+	stack = [0]
 	# map = new Uint32Array(3*10)
 	# map_ix = 0
 
@@ -312,15 +319,6 @@ automata2.sync = (G1, G2, common, G) ->
 	# 	map[map_ix++] = e
 	# 	map[map_ix++] = q
 	# 	return
-
-	# add_map(G1.start, G2.start, G.start = 0)
-	# 
-
-	stack = [0]
-
-	# Sorting improves the performance x2 times
-	automata2.sort(G1) if not G1.sorted
-	automata2.sort(G2) if not G2.sorted
 
 	# Adds transition to the new automaton.
 	# a - state of G1, reached by event 'e'
@@ -394,7 +392,7 @@ automata2.sync = (G1, G2, common, G) ->
 
 G = automata2.create()
 
-NUM_STATES = 10
+NUM_STATES = 4
 make_G = (G) ->
 	q = 0
 	while q <NUM_STATES
@@ -407,25 +405,3 @@ make_G = (G) ->
 
 make_G(G)
 
-
-G1 = automata2.create()
-G2 = automata2.create()
-
-make_G(G1)
-make_G(G2)
-
-console.log "G1:"
-automata2.sort(G1)
-console.log "G2:"
-automata2.sort(G2)
-
-G = automata2.create()
-
-automata2.sync(G1, G2, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], G)
-console.log "G:"
-# automata2.sort(G)
-automata2.BFS(G, (q, e, p) -> 
-	console.log q, e, p
-	)
-
-console.log G

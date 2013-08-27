@@ -48,31 +48,39 @@ describe "Directed graph, version 2", ->
 		it "Has 3 transitions (0, 5, 1), (1, 7, 1), (1, 8, 0)",  ->
 			expect(g.nT).toBe(3)
 
-		it ".trans.out(1) return indexes 3 and 6",  ->
+		it ".trans.out(1) returns indexes 3 and 6",  ->
 			t = automata2.trans.out(g, 1)
 			expect(t[0]).toBe(3)
 			expect(t[1]).toBe(6)
 			expect(t.length).toBe(2)
 
-		it ".trans.in(1) return indexes 0 and 3",  ->
+		it ".trans.in(1) returns indexes 0 and 3",  ->
 			t = automata2.trans.in(g, 1)
 			expect(t[0]).toBe(0)
 			expect(t[1]).toBe(3)
 			expect(t.length).toBe(2)
 
-		it ".trans.exists(1, 7, 1) return index 3, .trans.exists(1, 7, 0) retruns -1",  ->
+		it ".trans.exists(1, 7, 1) returns index 3, .trans.exists(1, 7, 0) retruns -1",  ->
 			expect(automata2.trans.exists(g, 1, 7, 1)).toBe(3)
 			expect(automata2.trans.exists(g, 1, 7, 0)).toBe(-1)
 
 		it ".BFS works (check the console)", ->
-			console.log "BFS (Breadth-First Search:"
+			console.log "BFS (Breadth-First Search):"
 			automata2.BFS(g, (q, e, p) ->
+				console.log q, e, p
+				)
+			console.log "And another BFS:"
+			automata2.BFS(g2, (q, e, p) ->
 				console.log q, e, p
 				)
 
 		it ".sync works (check the console)", ->
 			console.log "sync (parallel composition):"
-			h = automata2.sync(g, g2, [5])
+			h = automata2.create()
+			# Preallocation impoves performance x10 times
+			delete h.trans
+			h.trans = new Uint32Array(g.nT * g2.nT * 3|0)
+			automata2.sync(g, g2, [5], h)
 			automata2.BFS(h, (q, e, p) ->
 				console.log q, e, p
 				)
