@@ -6,7 +6,7 @@
 
 	DELTA_TRANS = 10 # Size of the increment for future transitions
 
-	# Set the value to 1 in a  binary array
+	# Set the value to 1 in a binary array
 	# Returns null
 	setBit = (arr, i) ->
 		arr[i>>5] |= 1 << (i & 0x1F)
@@ -209,7 +209,7 @@
 			# The last record contains the maximal state number
 			max = 0
 			max = G.trans[G.tix[G.nT-1]] if G.nT > 0
-			# Upgrade array of states 'nix'
+			# Upgrade array of states 'nix',
 			delete G.nix
 			G.nix = new Uint32Array(max + 1)
 			# ... and fill it.
@@ -240,7 +240,7 @@
 
 ###*
  * Breadth-first Search
- * @param {Automaton} G   
+ * @param {Automaton} G
  * @param {function} fnc Callback function. Called with (node_from, event, node_to)
  * where:
  * node_from: index of the outgoing node
@@ -291,8 +291,8 @@ automata2.BFS = (G, fnc) ->
 # G.trans = t
 automata2.sync = (G1, G2, common, G) ->
 	return if not G1? or not G2?
-	G = automata2.create() if not G?
 	common = [] if not common
+	G = automata2.create() if not G?
 	G.nT = 0 # Cancel all transitions (doesn't release memory)
 	# Sorting improves the performance x2 times
 	automata2.sort(G1) if not G1.sorted
@@ -327,7 +327,7 @@ automata2.sync = (G1, G2, common, G) ->
 	add_transition = (a, e, b) ->
 		# Search if the composed state is in the map
 		i = 2
-		k = -1
+		k = -1 # index in the map
 		n = map.length
 		while i<n
 			if map[i-2]==a and map[i-1]==b
@@ -345,54 +345,50 @@ automata2.sync = (G1, G2, common, G) ->
 		else
 			p = k
 		# Add transition to the new automaton
-		# console.log [a, b], [q, e, p], k
 		automata2.trans.add(G, q, e, p)
 		return
 
 
 	while stack.length
 		q = stack.pop()
+		q1 = map[q*3]
+		q2 = map[q*3+1]
 
-		I = @trans.out(G1, map[q*3])
-		J = @trans.out(G2, map[q*3+1])
+		I = @trans.out(G1, q1)
+		J = @trans.out(G2, q2)
+
+		# Synchronous transition function
+		# We have 5 states in BDD for transitions of G1 and G2:
+		# 1 - none of the transition occures
+		# 2 - G1 does transition, G2 doesn't
+		# 3 - G2 does transition, G1 doesn't
+		# 4 - G1 ang G2 do one transitions together
+		# 5 - G1 ang G2 do separate transitions
 
 		for i in I
-			q1 = G1.trans[i]
 			e1 = G1.trans[i+1]
 			p1 = G1.trans[i+2]
 
 			for j in J
-				q2 = G2.trans[j]
 				e2 = G2.trans[j+1]
 				p2 = G2.trans[j+2]
 
-				# Synchronous transition function
-				# We have 5 states in BDD for transitions of G1 and G2:
-				# 1 - none of the transition occures
-				# 2 - G1 does transition, G2 doesn't
-				# 3 - G2 does transition, G1 doesn't
-				# 4 - G1 ang G2 do one transitions together
-				# 5 - G1 ang G2 do separate transitions
-
-				if e1 not in common
-					if e2 not in common
-						add_transition(p1, e1, q2)
-						add_transition(q1, e2, p2)
-					else
-						add_transition(p1, e1, q2)
+				if e2 not in common
+					add_transition(q1, e2, p2)
 				else
-					if e2 not in common
-						add_transition(q1, e2, p2)
-					else
-						if e1 == e2
-							add_transition(p1, e1, p2)
+					if e1 == e2
+						add_transition(p1, e1, p2)
+
+			if e1 not in common
+				add_transition(p1, e1, q2)
+
+
 	G.nN = map_n
 	G
 
 
-G = automata2.create()
-
 NUM_STATES = 4
+
 make_G = (G) ->
 	q = 0
 	while q <NUM_STATES
@@ -403,5 +399,26 @@ make_G = (G) ->
 		q++
 	return
 
+G = automata2.create()
 make_G(G)
 
+# A = automata2.create()
+# automata2.trans.add(A, 0, 0, 1)
+# automata2.trans.add(A, 1, 0, 3)
+# automata2.trans.add(A, 1, 1, 2)
+# automata2.trans.add(A, 2, 2, 2)
+# automata2.trans.add(A, 3, 3, 4)
+# automata2.trans.add(A, 4, 2, 4)
+
+# B = automata2.create()
+# automata2.trans.add(B, 0, 4, 1)
+# automata2.trans.add(B, 1, 2, 1)
+# automata2.trans.add(B, 0, 3, 2)
+# automata2.trans.add(B, 1, 3, 2)
+# automata2.trans.add(B, 2, 2, 2)
+
+# C = automata2.sync(A, B, [3, 2])
+# automata2.sort(C)
+# automata2.BFS(C, (q,e,p) -> 
+# 	console.log [q, e, p]
+# 	)

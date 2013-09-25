@@ -203,7 +203,7 @@
 
   /**
    * Breadth-first Search
-   * @param {Automaton} G   
+   * @param {Automaton} G
    * @param {function} fnc Callback function. Called with (node_from, event, node_to)
    * where:
    * node_from: index of the outgoing node
@@ -258,11 +258,11 @@
     if ((G1 == null) || (G2 == null)) {
       return;
     }
-    if (G == null) {
-      G = automata2.create();
-    }
     if (!common) {
       common = [];
+    }
+    if (G == null) {
+      G = automata2.create();
     }
     G.nT = 0;
     if (!G1.sorted) {
@@ -300,42 +300,34 @@
     };
     while (stack.length) {
       q = stack.pop();
-      I = this.trans.out(G1, map[q * 3]);
-      J = this.trans.out(G2, map[q * 3 + 1]);
+      q1 = map[q * 3];
+      q2 = map[q * 3 + 1];
+      I = this.trans.out(G1, q1);
+      J = this.trans.out(G2, q2);
       for (_i = 0, _len = I.length; _i < _len; _i++) {
         i = I[_i];
-        q1 = G1.trans[i];
         e1 = G1.trans[i + 1];
         p1 = G1.trans[i + 2];
         for (_j = 0, _len1 = J.length; _j < _len1; _j++) {
           j = J[_j];
-          q2 = G2.trans[j];
           e2 = G2.trans[j + 1];
           p2 = G2.trans[j + 2];
-          if (__indexOf.call(common, e1) < 0) {
-            if (__indexOf.call(common, e2) < 0) {
-              add_transition(p1, e1, q2);
-              add_transition(q1, e2, p2);
-            } else {
-              add_transition(p1, e1, q2);
-            }
+          if (__indexOf.call(common, e2) < 0) {
+            add_transition(q1, e2, p2);
           } else {
-            if (__indexOf.call(common, e2) < 0) {
-              add_transition(q1, e2, p2);
-            } else {
-              if (e1 === e2) {
-                add_transition(p1, e1, p2);
-              }
+            if (e1 === e2) {
+              add_transition(p1, e1, p2);
             }
           }
+        }
+        if (__indexOf.call(common, e1) < 0) {
+          add_transition(p1, e1, q2);
         }
       }
     }
     G.nN = map_n;
     return G;
   };
-
-  G = automata2.create();
 
   NUM_STATES = 4;
 
@@ -352,6 +344,8 @@
       q++;
     }
   };
+
+  G = automata2.create();
 
   make_G(G);
 
