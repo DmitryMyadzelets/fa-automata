@@ -325,7 +325,7 @@ automata2.sync = (G1, G2, common, G) ->
 	# a - state of G1, reached by event 'e'
 	# b - state of G2, reached by event 'e'
 	# Thus, (a, b) is the next composed state.
-	add_transition = (a, e, b) ->
+	add_transition = (e, a, b) ->
 		# Search if the composed state is in the map
 		i = 2
 		k = -1 # index in the map
@@ -350,7 +350,6 @@ automata2.sync = (G1, G2, common, G) ->
 		automata2.trans.add(G, q, e, p)
 		return
 
-
 	while stack.length
 		q = stack.pop()
 		q1 = map[q*3]
@@ -367,31 +366,23 @@ automata2.sync = (G1, G2, common, G) ->
 		# 4 - G1 ang G2 do one transition together
 		# 5 - G1 ang G2 do separate transitions
 
-		ix = I.length-1
-		it = true # Iterate at least once
-		while it
-			if ix >= 0
-				i = I[ix]
-				e1 = G1.trans[i+1]
-				p1 = G1.trans[i+2]
-				if e1 not in common
-					add_transition(p1, e1, q2)
+		for i in I
+			e1 = G1.trans[i+1]
+			p1 = G1.trans[i+2]
+			if e1 not in common
+				add_transition(e1, p1, q2)
 			else
-				e1 = -1
-			
-			for j in J
-				e2 = G2.trans[j+1]
-				p2 = G2.trans[j+2]
-
-				if e2 not in common
-					add_transition(q1, e2, p2)
-				else
+				for j in J
+					e2 = G2.trans[j+1]
+					p2 = G2.trans[j+2]
 					if e1 == e2
-						add_transition(p1, e1, p2)
-
-			it = ix-- >0
-			# end while it
-
+						add_transition(e1, p1, p2)
+		for j in J
+			e2 = G2.trans[j+1]
+			p2 = G2.trans[j+2]
+			if e2 not in common
+				add_transition(e2, q1, p2)
+		
 	G.nN = map_n
 	G
 
@@ -427,7 +418,7 @@ automata2.trans.add(B, 1, 3, 2)
 automata2.trans.add(B, 2, 2, 2)
 
 C = automata2.sync(A, B, [3, 2])
-console.log C.nT
+console.log "Transitions:", C.nT
 automata2.sort(C)
 automata2.BFS(C, (q,e,p) -> 
 	console.log [q, e, p]

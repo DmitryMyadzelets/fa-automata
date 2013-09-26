@@ -253,7 +253,7 @@
 
 
   automata2.sync = function(G1, G2, common, G) {
-    var I, J, add_transition, e1, e2, i, it, ix, j, map, map_n, p1, p2, q, q1, q2, stack, _i, _len;
+    var I, J, add_transition, e1, e2, i, j, map, map_n, p1, p2, q, q1, q2, stack, _i, _j, _k, _len, _len1, _len2;
 
     if ((G1 == null) || (G2 == null)) {
       return;
@@ -274,7 +274,7 @@
     map = [G1.start, G2.start, G.start = 0];
     map_n = 1 | 0;
     stack = [0];
-    add_transition = function(a, e, b) {
+    add_transition = function(e, a, b) {
       var i, k, n, p;
 
       i = 2;
@@ -304,32 +304,30 @@
       q2 = map[q * 3 + 1];
       I = this.trans.out(G1, q1);
       J = this.trans.out(G2, q2);
-      ix = I.length - 1;
-      it = true;
-      while (it) {
-        if (ix >= 0) {
-          i = I[ix];
-          e1 = G1.trans[i + 1];
-          p1 = G1.trans[i + 2];
-          if (__indexOf.call(common, e1) < 0) {
-            add_transition(p1, e1, q2);
-          }
+      for (_i = 0, _len = I.length; _i < _len; _i++) {
+        i = I[_i];
+        e1 = G1.trans[i + 1];
+        p1 = G1.trans[i + 2];
+        if (__indexOf.call(common, e1) < 0) {
+          add_transition(e1, p1, q2);
         } else {
-          e1 = -1;
-        }
-        for (_i = 0, _len = J.length; _i < _len; _i++) {
-          j = J[_i];
-          e2 = G2.trans[j + 1];
-          p2 = G2.trans[j + 2];
-          if (__indexOf.call(common, e2) < 0) {
-            add_transition(q1, e2, p2);
-          } else {
+          for (_j = 0, _len1 = J.length; _j < _len1; _j++) {
+            j = J[_j];
+            e2 = G2.trans[j + 1];
+            p2 = G2.trans[j + 2];
             if (e1 === e2) {
-              add_transition(p1, e1, p2);
+              add_transition(e1, p1, p2);
             }
           }
         }
-        it = ix-- > 0;
+      }
+      for (_k = 0, _len2 = J.length; _k < _len2; _k++) {
+        j = J[_k];
+        e2 = G2.trans[j + 1];
+        p2 = G2.trans[j + 2];
+        if (__indexOf.call(common, e2) < 0) {
+          add_transition(e2, q1, p2);
+        }
       }
     }
     G.nN = map_n;
@@ -384,7 +382,7 @@
 
   C = automata2.sync(A, B, [3, 2]);
 
-  console.log(C.nT);
+  console.log("Transitions:", C.nT);
 
   automata2.sort(C);
 
