@@ -203,9 +203,10 @@
 			i = G.nT
 			while i-- >0
 				G.tix[i] = i*3
-			
+			# Sort transitions
 			sort(G.trans, G.tix, G.nT)
 
+			# Sort states
 			# The last record contains the maximal state number
 			max = 0
 			max = G.trans[G.tix[G.nT-1]] if G.nT > 0
@@ -345,6 +346,7 @@ automata2.sync = (G1, G2, common, G) ->
 		else
 			p = k
 		# Add transition to the new automaton
+		# console.log [a, b], [q, e, p], k, stack, map
 		automata2.trans.add(G, q, e, p)
 		return
 
@@ -362,13 +364,21 @@ automata2.sync = (G1, G2, common, G) ->
 		# 1 - none of the transition occures
 		# 2 - G1 does transition, G2 doesn't
 		# 3 - G2 does transition, G1 doesn't
-		# 4 - G1 ang G2 do one transitions together
+		# 4 - G1 ang G2 do one transition together
 		# 5 - G1 ang G2 do separate transitions
 
-		for i in I
-			e1 = G1.trans[i+1]
-			p1 = G1.trans[i+2]
-
+		ix = I.length-1
+		it = true # Iterate at least once
+		while it
+			if ix >= 0
+				i = I[ix]
+				e1 = G1.trans[i+1]
+				p1 = G1.trans[i+2]
+				if e1 not in common
+					add_transition(p1, e1, q2)
+			else
+				e1 = -1
+			
 			for j in J
 				e2 = G2.trans[j+1]
 				p2 = G2.trans[j+2]
@@ -379,9 +389,8 @@ automata2.sync = (G1, G2, common, G) ->
 					if e1 == e2
 						add_transition(p1, e1, p2)
 
-			if e1 not in common
-				add_transition(p1, e1, q2)
-
+			it = ix-- >0
+			# end while it
 
 	G.nN = map_n
 	G
@@ -402,23 +411,24 @@ make_G = (G) ->
 G = automata2.create()
 make_G(G)
 
-# A = automata2.create()
-# automata2.trans.add(A, 0, 0, 1)
-# automata2.trans.add(A, 1, 0, 3)
-# automata2.trans.add(A, 1, 1, 2)
-# automata2.trans.add(A, 2, 2, 2)
-# automata2.trans.add(A, 3, 3, 4)
-# automata2.trans.add(A, 4, 2, 4)
+A = automata2.create()
+automata2.trans.add(A, 0, 0, 1)
+automata2.trans.add(A, 1, 0, 3)
+automata2.trans.add(A, 1, 1, 2)
+automata2.trans.add(A, 2, 2, 2)
+automata2.trans.add(A, 3, 3, 4)
+automata2.trans.add(A, 4, 2, 4)
 
-# B = automata2.create()
-# automata2.trans.add(B, 0, 4, 1)
-# automata2.trans.add(B, 1, 2, 1)
-# automata2.trans.add(B, 0, 3, 2)
-# automata2.trans.add(B, 1, 3, 2)
-# automata2.trans.add(B, 2, 2, 2)
+B = automata2.create()
+automata2.trans.add(B, 0, 4, 1)
+automata2.trans.add(B, 1, 2, 1)
+automata2.trans.add(B, 0, 3, 2)
+automata2.trans.add(B, 1, 3, 2)
+automata2.trans.add(B, 2, 2, 2)
 
-# C = automata2.sync(A, B, [3, 2])
-# automata2.sort(C)
-# automata2.BFS(C, (q,e,p) -> 
-# 	console.log [q, e, p]
-# 	)
+C = automata2.sync(A, B, [3, 2])
+console.log C.nT
+automata2.sort(C)
+automata2.BFS(C, (q,e,p) -> 
+	console.log [q, e, p]
+	)
