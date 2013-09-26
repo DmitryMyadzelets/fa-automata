@@ -402,24 +402,24 @@ make_G = (G) ->
 G = automata2.create()
 make_G(G)
 
-A = automata2.create()
-automata2.trans.add(A, 0, 0, 1)
-automata2.trans.add(A, 1, 0, 3)
-automata2.trans.add(A, 1, 1, 2)
-automata2.trans.add(A, 2, 2, 2)
-automata2.trans.add(A, 3, 3, 4)
-automata2.trans.add(A, 4, 2, 4)
+# A = automata2.create()
+# automata2.trans.add(A, 0, 0, 1)
+# automata2.trans.add(A, 1, 0, 3)
+# automata2.trans.add(A, 1, 1, 2)
+# automata2.trans.add(A, 2, 2, 2)
+# automata2.trans.add(A, 3, 3, 4)
+# automata2.trans.add(A, 4, 2, 4)
 
-B = automata2.create()
-automata2.trans.add(B, 0, 4, 1)
-automata2.trans.add(B, 1, 2, 1)
-automata2.trans.add(B, 0, 3, 2)
-automata2.trans.add(B, 1, 3, 2)
-automata2.trans.add(B, 2, 2, 2)
+# B = automata2.create()
+# automata2.trans.add(B, 0, 4, 1)
+# automata2.trans.add(B, 1, 2, 1)
+# automata2.trans.add(B, 0, 3, 2)
+# automata2.trans.add(B, 1, 3, 2)
+# automata2.trans.add(B, 2, 2, 2)
 
-C = automata2.sync(A, B, [3, 2])
-console.log "Transitions:", C.nT
-automata2.sort(C)
-automata2.BFS(C, (q,e,p) -> 
-	console.log [q, e, p]
-	)
+# C = automata2.sync(A, B, [3, 2])
+# console.log "Transitions:", C.nT
+# automata2.sort(C)
+# automata2.BFS(C, (q,e,p) -> 
+# 	console.log [q, e, p]
+# 	)
