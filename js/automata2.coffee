@@ -56,8 +56,8 @@
 			{
 				start : 0|0 # Initial node
 				trans : new Uint32Array(3*DELTA_TRANS) # Transition's triples
-				nN : 0|0 # Number of Nodes/States
-				nE : 0|0 # Number of Events
+				# nN : 0|0 # Number of Nodes/States
+				# nE : 0|0 # Number of Events
 				nT : 0|0 # Number of Transitions
 				sorted : false
 				# Sorted transitions. 'tix' points to 'trans'.
@@ -68,7 +68,6 @@
 
 
 		trans : {
-
 
 			# Adds a transition into position i if defined, or to the end
 			# G - automaton structure
@@ -198,6 +197,30 @@
 
 		} # trans
 
+
+		states : {
+			# Deletes states with index ix
+			# Returns number of deleted transitions
+			del : (G, ix) ->
+				ret = 0|0
+				i = G.nT*3|0
+				while (i-=3) >= 0
+					if (G.trans[i] == ix) or (G.trans[i+2] == ix)
+						t = (i/3)|0
+						ret++ if _this.trans.del(G, t) > -1
+						
+				# If the initial state was deleted, then
+				# move it to the state of the first transitions
+				if ix == G.start
+					if G.nT > 0
+						G.start = G.trans[0]
+					else # if no tranitions left
+						G.start = 0
+				ret
+
+			} # states
+
+
 		sort : (G) ->
 			# Reset array of sorted transitions
 			i = G.nT
@@ -210,7 +233,7 @@
 			# The last record contains the maximal state number
 			max = 0
 			max = G.trans[G.tix[G.nT-1]] if G.nT > 0
-			# Upgrade array of states 'nix',
+			# Upgrade array of states 'nix'
 			delete G.nix
 			G.nix = new Uint32Array(max + 1)
 			# ... and fill it.

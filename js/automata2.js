@@ -51,8 +51,6 @@
         return {
           start: 0 | 0,
           trans: new Uint32Array(3 * DELTA_TRANS),
-          nN: 0 | 0,
-          nE: 0 | 0,
           nT: 0 | 0,
           sorted: false,
           tix: new Uint32Array(DELTA_TRANS),
@@ -168,6 +166,30 @@
             i += 3;
           }
           return -1 | 0;
+        }
+      },
+      states: {
+        del: function(G, ix) {
+          var i, ret, t;
+
+          ret = 0 | 0;
+          i = G.nT * 3 | 0;
+          while ((i -= 3) >= 0) {
+            if ((G.trans[i] === ix) || (G.trans[i + 2] === ix)) {
+              t = (i / 3) | 0;
+              if (_this.trans.del(G, t) > -1) {
+                ret++;
+              }
+            }
+          }
+          if (ix === G.start) {
+            if (G.nT > 0) {
+              G.start = G.trans[0];
+            } else {
+              G.start = 0;
+            }
+          }
+          return ret;
         }
       },
       sort: function(G) {

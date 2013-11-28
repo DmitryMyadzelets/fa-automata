@@ -1,4 +1,4 @@
-describe "Directed graph, version 2", ->
+describe "Automaton graph, version 2", ->
 	describe "Basic operations", ->
 		it "Creates object", ->
 			expect(typeof automata2.create()).toBe("object")
@@ -33,6 +33,27 @@ describe "Directed graph, version 2", ->
 			expect(t[1]).toBe(5)
 			expect(t[2]).toBe(1)
 
+	describe "States", ->
+		g = automata2.create()
+		automata2.trans.add(g, 0, 5, 1)
+		automata2.trans.add(g, 1, 7, 1)
+		automata2.trans.add(g, 1, 8, 0)
+
+		it "Automaton has 3 transitions (0, 5, 1), (1, 7, 1), (1, 8, 0)", ->
+			expect(g.nT).toBe(3)
+
+		it "Doesn't delete any transitions with wrong state index 2", ->
+			expect(automata2.states.del(g, 2)).toBe(0)
+
+		it "Deletes 2 transitions with state index 0", ->
+			expect(automata2.states.del(g, 0)).toBe(2)
+
+		it "Has 1 transitions ", ->
+			expect(g.nT).toBe(1)
+
+		it "Has initial state 1", ->
+			expect(g.start).toBe(1)
+
 
 	describe "Operations with automaton", ->
 		g = automata2.create()
@@ -45,8 +66,11 @@ describe "Directed graph, version 2", ->
 		automata2.trans.add(g2, 0, 3, 1)
 		automata2.trans.add(g2, 1, 5, 1, 1)
 
-		it "Has 3 transitions (0, 5, 1), (1, 7, 1), (1, 8, 0)",  ->
+		it "G1 has 3 transitions (0, 5, 1), (1, 7, 1), (1, 8, 0)",  ->
 			expect(g.nT).toBe(3)
+
+		it "G2 has 2 transitions (0, 3, 1), (1, 5, 1)",  ->
+			expect(g2.nT).toBe(2)
 
 		it ".trans.out(1) returns indexes 3 and 6",  ->
 			t = automata2.trans.out(g, 1)
@@ -86,7 +110,7 @@ describe "Directed graph, version 2", ->
 				)
 
 
-describe "Directed graph", ->
+describe "Directed graph, version 1", ->
 	describe "Basic operations", ->
 		it "Creates object", ->
 			expect(typeof automata.create()).toBe("object")
