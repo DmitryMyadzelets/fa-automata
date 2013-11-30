@@ -169,20 +169,20 @@
         }
       },
       states: {
-        del: function(G, ix) {
+        del: function(G, qp) {
           var i, ret, t;
 
           ret = 0 | 0;
           i = G.nT * 3 | 0;
           while ((i -= 3) >= 0) {
-            if ((G.trans[i] === ix) || (G.trans[i + 2] === ix)) {
+            if ((G.trans[i] === qp) || (G.trans[i + 2] === qp)) {
               t = (i / 3) | 0;
               if (_this.trans.del(G, t) > -1) {
                 ret++;
               }
             }
           }
-          if (ix === G.start) {
+          if (qp === G.start) {
             if (G.nT > 0) {
               G.start = G.trans[0];
             } else {

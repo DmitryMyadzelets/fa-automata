@@ -1,6 +1,12 @@
 
 'use strict'
 
+# class Name
+# 	constructor: (@name) ->
+# 		# ...
+	
+
+
 
 @.automata2 = (()->
 
@@ -199,19 +205,20 @@
 
 
 		states : {
-			# Deletes states with index ix
+			# Deletes states by means of deleting 
+			# transitions wich have states q or p.
 			# Returns number of deleted transitions
-			del : (G, ix) ->
+			del : (G, qp) ->
 				ret = 0|0
 				i = G.nT*3|0
 				while (i-=3) >= 0
-					if (G.trans[i] == ix) or (G.trans[i+2] == ix)
+					if (G.trans[i] == qp) or (G.trans[i+2] == qp)
 						t = (i/3)|0
 						ret++ if _this.trans.del(G, t) > -1
 						
 				# If the initial state was deleted, then
 				# move it to the state of the first transitions
-				if ix == G.start
+				if qp == G.start
 					if G.nT > 0
 						G.start = G.trans[0]
 					else # if no tranitions left
