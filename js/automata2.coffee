@@ -1,12 +1,6 @@
 
 'use strict'
 
-# class Name
-# 	constructor: (@name) ->
-# 		# ...
-	
-
-
 
 @.automata2 = (()->
 
@@ -456,3 +450,142 @@ automata2.BFS(C, (q,e,p) ->
 	# console.log [q, e, p]
 	null
 	)
+
+
+class Set
+	self = this
+
+	# Returns bit state {true, false} of Uint32Array
+	get_bit = (arr, i) -> !!(arr[i>>5] & 1 << (i & 0x1F))
+	# Sets bit of Uint32Array
+	set_bit = (arr, i) -> arr[i>>5] |= 1 << (i & 0x1F)
+	# Clears bit of Uint32Array
+	unset_bit = (arr, i) => arr[i>>5] &= ~(1 << (i & 0x1F))
+
+
+	subsets = []
+
+	###*
+	 * Creates Uint32Array array with new length, copies data from source array.
+	 * @param  {Uint32Array}	src
+	 * @param  {[int]} 			len [Length of the new array]
+	 * @return {[Uint32Array]}	[New array]
+	###
+	change_length = (src, len) ->
+		l = src.length
+		if len > l
+			ret = new Uint32Array(len)
+			ret.set(src)
+		else
+			ret = new Uint32Array(src.subarray(0, len))
+		ret
+
+	###*
+	 * Updates size of the binary subsets to a new one
+	###
+	change_subsets_size = (len) ->
+		for key of subsets
+			a = change_length(subsets[key], len)
+			delete subsets[key]
+			subsets[key] = a
+		null
+
+	###*
+	 * Returns indexes of the Uint32Array which are '1'
+	###
+	get_default = (arr) ->
+		ret = []
+		for i, index in arr
+			n = index * 32|0
+			m = 0
+			while i
+				ret.push(n + m) if (i & 1)
+				i >>= 1
+				m++
+		ret
+
+	subsets : () ->
+		for name in arguments
+
+			###*
+			 * If no arguments, then returns indexes of the subset 'name' which are '1',
+			 * else acts like .get() method
+			###
+			@[name] = () -> 
+				if arguments.length
+					return @[name].get.apply(@, arguments) 
+				else
+					return get_default(subsets[name])
+
+			###*
+			 * Returns values of the members of the subset 'name' 
+			 * with indexes given as arguments
+			###
+			@[name].get = () ->
+				console.log '>', subsets[name], arguments
+				for i in arguments
+					get_bit(subsets[name], i)
+
+			###*
+			 * Sets members of subset 'name' as '1'
+			 * Example: set(0, 1, 8, 5)
+			###
+			@[name].set = () -> 
+				for i in arguments
+					set_bit(subsets[name], i)
+				null
+
+			###*
+			 * Sets members of subset 'name' as '0'
+			 * Example: unset(2, 40)
+			###
+			@[name].unset = () -> 
+				for i in arguments
+					unset_bit(subsets[name], i)
+				null
+
+			subsets[name] = new Uint32Array(1)
+		null
+
+	foo : () -> 
+		change_subsets_size(1)
+
+
+class G
+	constructor: () ->
+		@X = new Set
+		@X.subsets('marked')
+		
+
+
+S = {
+	modules : new G
+}
+
+
+# G.X.subsets('marked')
+
+# Create a new set
+# S = new Set
+# Create subsets of the set (binary flags)
+# S.subsets('controllable', 'observable')
+
+# console.log S
+# console.log S.controllable.set(1, 5, 16, 40)
+# console.log S.controllable()
+# console.log S.controllable.unset(0, 2)
+# console.log S.controllable()
+# console.log S.controllable.get(0, 1, 2)
+# console.log S.foo()
+# console.log S.controllable()
+
+@g = S
+
+S.modules.X.marked.set(1) # sets state 1 as marked
+S.modules.X.marked() # returns indexes of marked states
+S.modules.X.marked(1) # returns true if state 1 is marked
+
+# But it should work as shown below!
+# G1 = S.modules[0]
+# G1.X.marked(1)
+
