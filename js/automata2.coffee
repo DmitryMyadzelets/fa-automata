@@ -301,6 +301,7 @@ automata2.BFS = (G, fnc) ->
 	return
 
 
+
 ###*
  * Parallel composition ('sync' name is taken from RW (Ramage & Wonham) theory)
  * @param  {automaton} G1
@@ -453,6 +454,7 @@ automata2.BFS(C, (q,e,p) ->
 	null
 	)
 # console.timeEnd("BFS execution time")
+
 
 
 class Set
