@@ -13,16 +13,9 @@
   };
 
   this.automata2 = (function() {
-    var DELTA_TRANS, getBit, setBit, sort, _this;
+    var DELTA_TRANS, sort, _this;
 
     DELTA_TRANS = 10;
-    setBit = function(arr, i) {
-      arr[i >> 5] |= 1 << (i & 0x1F);
-      return null;
-    };
-    getBit = function(arr, i) {
-      return arr[i >> 5] & 1 << (i & 0x1F) && 1;
-    };
     /**
     	 * [Optimized bubble sort (http://en.wikipedia.org/wiki/Bubble_sort). 
     	 * Sorts the index array instead of the array itself.]

@@ -11,18 +11,6 @@ set_bit = (arr, i) -> arr[i>>5] |= 1 << (i & 0x1F)
 
 	DELTA_TRANS = 10 # Size of the increment for future transitions
 
-	# Set the value to 1 in a binary array
-	# Returns null
-	setBit = (arr, i) ->
-		arr[i>>5] |= 1 << (i & 0x1F)
-		null
-
-
-	# Returns value 1/0 of the bit i
-	getBit = (arr, i) ->
-		arr[i>>5] & 1 << (i & 0x1F) && 1
-
-
 	###*
 	 * [Optimized bubble sort (http://en.wikipedia.org/wiki/Bubble_sort). 
 	 * Sorts the index array instead of the array itself.]
