@@ -290,14 +290,13 @@ automata2.BFS = (G, fnc) ->
 	automata2.sort(G) if not G.sorted
 
 	call_fnc = typeof fnc == 'function'
-	stack 	= [G.start]
+	stack = [G.start]
 
 	# Maximum index of state
 	max = 0
 	max = G.trans[G.tix[G.nT-1]] if G.nT > 0
-	vi = new Uint32Array((max >> 5)+1)
-	set_bit(vi, G.start)
-	# visited = [G.start]
+	visited = new Uint32Array((max >> 5)+1)
+	set_bit(visited, G.start)
 	while stack.length
 		q = stack.pop()
 		j = G.nix[q] 
@@ -306,12 +305,11 @@ automata2.BFS = (G, fnc) ->
 		while (j<G.nT) and (q == G.trans[i = G.tix[j++]])
 			e = G.trans[++i]
 			p = G.trans[++i]
-			if !get_bit(vi, p)
-			# if p not in visited
-				# visited.push(p)
-				set_bit(vi, p)
+			if !get_bit(visited, p)
+				set_bit(visited, p)
 				stack.push(p)
 			fnc(q, e, p) if call_fnc
+	visited = null
 	return
 
 
