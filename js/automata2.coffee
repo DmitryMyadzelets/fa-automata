@@ -1,6 +1,11 @@
 
 'use strict'
 
+# Returns bit state {true, false} of Uint32Array
+get_bit = (arr, i) -> !!(arr[i>>5] & 1 << (i & 0x1F))
+# Sets bit of Uint32Array
+set_bit = (arr, i) -> arr[i>>5] |= 1 << (i & 0x1F)
+
 
 @.automata2 = (()->
 
@@ -286,7 +291,13 @@ automata2.BFS = (G, fnc) ->
 
 	call_fnc = typeof fnc == 'function'
 	stack 	= [G.start]
-	visited = [G.start]
+
+	# Maximum index of state
+	max = 0
+	max = G.trans[G.tix[G.nT-1]] if G.nT > 0
+	vi = new Uint32Array((max >> 5)+1)
+	set_bit(vi, G.start)
+	# visited = [G.start]
 	while stack.length
 		q = stack.pop()
 		j = G.nix[q] 
@@ -295,8 +306,10 @@ automata2.BFS = (G, fnc) ->
 		while (j<G.nT) and (q == G.trans[i = G.tix[j++]])
 			e = G.trans[++i]
 			p = G.trans[++i]
-			if p not in visited
-				visited.push(p)
+			if !get_bit(vi, p)
+			# if p not in visited
+				# visited.push(p)
+				set_bit(vi, p)
 				stack.push(p)
 			fnc(q, e, p) if call_fnc
 	return
@@ -446,10 +459,14 @@ make_G(B)
 
 C = automata2.sync(A, B, [1, 5])
 console.log "Transitions:", C.nT
+
+
+# console.time("BFS execution time")
 automata2.BFS(C, (q,e,p) -> 
 	# console.log [q, e, p]
 	null
 	)
+# console.timeEnd("BFS execution time")
 
 
 class Set
@@ -508,8 +525,8 @@ class Set
 		for name in arguments
 
 			###*
-			 * If no arguments, then returns indexes of the subset 'name' which are '1',
-			 * else acts like .get() method
+			 * If no arguments, then returns indexes of the subset 'name' 
+			 * which are '1', else acts like .get() method
 			###
 			@[name] = () -> 
 				if arguments.length
@@ -522,7 +539,6 @@ class Set
 			 * with indexes given as arguments
 			###
 			@[name].get = () ->
-				console.log '>', subsets[name], arguments
 				for i in arguments
 					get_bit(subsets[name], i)
 
@@ -551,41 +567,22 @@ class Set
 		change_subsets_size(1)
 
 
-class G
-	constructor: () ->
-		@X = new Set
-		@X.subsets('marked')
-		
+# class G
+# 	constructor: () ->
+# 		@X = new Set
+# 		@X.subsets('marked')
 
 
-S = {
-	modules : new G
-}
+# S = {
+# 	modules : [new G]
+# }
 
 
-# G.X.subsets('marked')
-
-# Create a new set
-# S = new Set
-# Create subsets of the set (binary flags)
-# S.subsets('controllable', 'observable')
-
-# console.log S
-# console.log S.controllable.set(1, 5, 16, 40)
-# console.log S.controllable()
-# console.log S.controllable.unset(0, 2)
-# console.log S.controllable()
-# console.log S.controllable.get(0, 1, 2)
-# console.log S.foo()
-# console.log S.controllable()
-
-@g = S
-
-S.modules.X.marked.set(1) # sets state 1 as marked
-S.modules.X.marked() # returns indexes of marked states
-S.modules.X.marked(1) # returns true if state 1 is marked
-
-# But it should work as shown below!
 # G1 = S.modules[0]
-# G1.X.marked(1)
+# G1.X.marked.set(1) # sets state 1 as marked
+# console.log G1.X.marked() # returns indexes of marked states
+# console.log G1.X.marked(1)[0] # returns true if state 1 is marked
+# console.log G1.X.marked.get(1) # returns [true] if state 1 is marked
 
+# @g = S
+# # debugger
