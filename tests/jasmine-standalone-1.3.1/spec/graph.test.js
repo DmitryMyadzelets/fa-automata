@@ -65,7 +65,7 @@
         return expect(g.start).toBe(1);
       });
     });
-    return describe("Operations with automaton", function() {
+    describe("Operations with automaton", function() {
       var g, g2;
 
       g = automata2.create();
@@ -122,6 +122,27 @@
         return automata2.BFS(h, function(q, e, p) {
           return console.log(q, e, p);
         });
+      });
+    });
+    return describe("System", function() {
+      var G1, S;
+
+      S = null;
+      G1 = null;
+      it("Creates System object", function() {
+        return expect(typeof (S = new DES)).toBe("object");
+      });
+      it("Creates a module G1", function() {
+        return expect(typeof (G1 = S.create_module())).toBe("object");
+      });
+      it("Module G1 has set X of object type", function() {
+        return expect(typeof G1.X).toBe("object");
+      });
+      it("Module G1 has set E of object type", function() {
+        return expect(typeof G1.E).toBe("object");
+      });
+      return it("Module G1 has set T of object type", function() {
+        return expect(typeof G1.T).toBe("object");
       });
     });
   });

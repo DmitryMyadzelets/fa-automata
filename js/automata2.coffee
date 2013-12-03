@@ -458,7 +458,8 @@ automata2.BFS(C, (q,e,p) ->
 
 
 class Set
-	self = this
+
+	constructor:(@name) ->
 
 	# Returns bit state {true, false} of Uint32Array
 	get_bit = (arr, i) -> !!(arr[i>>5] & 1 << (i & 0x1F))
@@ -509,9 +510,8 @@ class Set
 				m++
 		ret
 
-	subsets : () ->
+	boolean_subsets : () ->
 		for name in arguments
-
 			###*
 			 * If no arguments, then returns indexes of the subset 'name' 
 			 * which are '1', else acts like .get() method
@@ -548,11 +548,51 @@ class Set
 					unset_bit(subsets[name], i)
 				null
 
-			subsets[name] = new Uint32Array(1)
+			subsets[name] = new Uint32Array(1)          # !!!! check the scope!
 		null
+
+
+	object_subsets : () ->
+		null
+
 
 	foo : () -> 
 		change_subsets_size(1)
+
+
+
+###*
+ * Class representing a Discrete-Event System (DES)
+###
+class DES
+	modules = []
+	create_module : () ->
+		modules.push(g = new G)
+		g
+
+	foo :() -> modules
+
+
+
+###*
+ * Class representing a Module of the DES
+###
+class G
+	constructor: () ->
+		@X = new Set('States')
+		@E = new Set('Events')
+		@T = new Set('Transitions')
+		# 
+		@E.boolean_subsets('observable', 'controllable')
+		@X.boolean_subsets('marked', 'faulty')
+		@X.object_subsets('x', 'y', 'label')
+
+
+
+# Let it access from a global namespace
+@DES = DES
+
+
 
 
 # class G

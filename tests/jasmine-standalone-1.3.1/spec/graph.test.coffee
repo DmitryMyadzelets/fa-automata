@@ -109,6 +109,25 @@ describe "Automaton graph, version 2", ->
 				console.log q, e, p
 				)
 
+	describe "System", ->
+		S = null
+		G1 = null
+		it "Creates System object", ->
+			expect(typeof (S = new DES)).toBe("object")
+
+		it "Creates a module G1", ->
+			expect(typeof (G1 = S.create_module())).toBe("object")
+
+		it "Module G1 has set X of object type", ->
+			expect(typeof (G1.X)).toBe("object")
+
+		it "Module G1 has set E of object type", ->
+			expect(typeof (G1.E)).toBe("object")
+
+		it "Module G1 has set T of object type", ->
+			expect(typeof (G1.T)).toBe("object")
+
+
 
 describe "Directed graph, version 1", ->
 	describe "Basic operations", ->
