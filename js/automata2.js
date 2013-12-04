@@ -485,7 +485,9 @@
   };
 
   /**
-   * Class representing a set of elements
+   * Object-function representing a set of elements
+   * Given a set of indexes (0,...,n) as arguments, it returns 
+   * an array of correspondent objects with their properties filled.
   */
 
 
