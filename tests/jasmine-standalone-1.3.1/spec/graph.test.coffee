@@ -116,7 +116,8 @@ describe "Automaton graph, version 2", ->
 			expect(typeof (S = new DES)).toBe("object")
 
 		it "Creates a module G1", ->
-			expect(typeof (G1 = S.create_module())).toBe("object")
+			expect(typeof (G1 = S.create_module("Valve"))).toBe("object")
+			console.log S, G1
 
 		it "Module G1 has set X of object type", ->
 			expect(typeof (G1.X)).toBe("object")

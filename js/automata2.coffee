@@ -456,49 +456,19 @@ automata2.BFS(C, (q,e,p) ->
 # console.timeEnd("BFS execution time")
 
 
-
-class Set
-
-	constructor:(@name) ->
-
-	# Returns bit state {true, false} of Uint32Array
+###*
+ * [binary_set description]
+ * @param  {[type]} name [description]
+ * @param  {[type]} arr  [description]
+ * @return {[type]}      [description]
+###
+make_binary_set = (name, arr) ->
+	# Helper functions to deal with bits of Uint32Array
 	get_bit = (arr, i) -> !!(arr[i>>5] & 1 << (i & 0x1F))
-	# Sets bit of Uint32Array
 	set_bit = (arr, i) -> arr[i>>5] |= 1 << (i & 0x1F)
-	# Clears bit of Uint32Array
-	unset_bit = (arr, i) => arr[i>>5] &= ~(1 << (i & 0x1F))
+	clr_bit = (arr, i) -> arr[i>>5] &= ~(1 << (i & 0x1F))
 
-
-	subsets = []
-
-	###*
-	 * Creates Uint32Array array with new length, copies data from source array.
-	 * @param  {Uint32Array}	src
-	 * @param  {[int]} 			len [Length of the new array]
-	 * @return {[Uint32Array]}	[New array]
-	###
-	change_length = (src, len) ->
-		l = src.length
-		if len > l
-			ret = new Uint32Array(len)
-			ret.set(src)
-		else
-			ret = new Uint32Array(src.subarray(0, len))
-		ret
-
-	###*
-	 * Updates size of the binary subsets to a new one
-	###
-	change_subsets_size = (len) ->
-		for key of subsets
-			a = change_length(subsets[key], len)
-			delete subsets[key]
-			subsets[key] = a
-		null
-
-	###*
-	 * Returns indexes of the Uint32Array which are '1'
-	###
+	# Returns an array of indexs of the array wich are true
 	get_default = (arr) ->
 		ret = []
 		for i, index in arr
@@ -510,82 +480,65 @@ class Set
 				m++
 		ret
 
-	boolean_subsets : () ->
+	# Creates Uint32Array array with new length, copies data from source array.
+	resize = (src, len) ->
+		l = src.length
+		if len > l
+			ret = new Uint32Array(len)
+			ret.set(src)
+		else
+			ret = new Uint32Array(src.subarray(0, len))
+		ret
+
+	@[name] = () -> get_default(arr)
+	@[name].set = (i) -> set_bit(arr, i)
+	@[name].get = (i) -> get_bit(arr, i)
+	@[name].clr = (i) -> clr_bit(arr, i)
+	@[name].resize = (len) -> resize(arr, len)
+
+
+###*
+ * Class representin a set of elements
+###
+Set = () ->
+	subsets : []
+	# 
+	resize : (len) -> @[name].resize(len) for name in @subsets
+	# 
+	add_binary_subsets : () ->
 		for name in arguments
-			###*
-			 * If no arguments, then returns indexes of the subset 'name' 
-			 * which are '1', else acts like .get() method
-			###
-			@[name] = () -> 
-				if arguments.length
-					return @[name].get.apply(@, arguments) 
-				else
-					return get_default(subsets[name])
-
-			###*
-			 * Returns values of the members of the subset 'name' 
-			 * with indexes given as arguments
-			###
-			@[name].get = () ->
-				for i in arguments
-					get_bit(subsets[name], i)
-
-			###*
-			 * Sets members of subset 'name' as '1'
-			 * Example: set(0, 1, 8, 5)
-			###
-			@[name].set = () -> 
-				for i in arguments
-					set_bit(subsets[name], i)
-				null
-
-			###*
-			 * Sets members of subset 'name' as '0'
-			 * Example: unset(2, 40)
-			###
-			@[name].unset = () -> 
-				for i in arguments
-					unset_bit(subsets[name], i)
-				null
-
-			subsets[name] = new Uint32Array(1)          # !!!! check the scope!
+			arr = @subsets[name] = new Uint32Array(1)
+			make_binary_set.apply(@, [name, arr])
 		null
-
-
-	object_subsets : () ->
-		null
-
-
-	foo : () -> 
-		change_subsets_size(1)
 
 
 
 ###*
  * Class representing a Discrete-Event System (DES)
 ###
-class DES
-	modules = []
-	create_module : () ->
-		modules.push(g = new G)
+DES = () ->
+	modules : []
+	create_module : (name) ->
+		@modules.push(g = new G(name))
 		g
-
-	foo :() -> modules
 
 
 
 ###*
  * Class representing a Module of the DES
 ###
-class G
-	constructor: () ->
-		@X = new Set('States')
-		@E = new Set('Events')
-		@T = new Set('Transitions')
-		# 
-		@E.boolean_subsets('observable', 'controllable')
-		@X.boolean_subsets('marked', 'faulty')
-		@X.object_subsets('x', 'y', 'label')
+G = (name) ->
+	G = {
+		name : name
+		X : new Set()
+		E : new Set()
+		T : new Set()
+	}
+	G.X.add_binary_subsets('marked', 'faulty')
+	G.E.add_binary_subsets('observable', 'controllable')
+	# @X.object_subsets('x', 'y', 'label')
+	G
+	
 
 
 
@@ -593,25 +546,31 @@ class G
 @DES = DES
 
 
-
-
-# class G
-# 	constructor: () ->
-# 		@X = new Set
-# 		@X.subsets('marked')
-
-
-# S = {
-# 	modules : [new G]
-# }
-
-
-# G1 = S.modules[0]
-# G1.X.marked.set(1) # sets state 1 as marked
-# console.log G1.X.marked() # returns indexes of marked states
-# console.log G1.X.marked(1)[0] # returns true if state 1 is marked
-# console.log G1.X.marked.get(1) # returns [true] if state 1 is marked
-
 # @g = S
 # # debugger
 
+
+
+# X.resize(10)
+
+	# E
+	# 	controllable()	# set of booleans
+	# 		get()
+	# 		set()
+	# 		clr()
+	# 	observable()	# set of booleans
+	# 		get()
+	# 		set()
+	# 		clr()
+	# 	label() 		# set of objects
+	# 		get()
+	# 		set(v)
+
+	# X
+	# 	faulty()		# set of booleans
+	# 		get()
+	# 		set()
+	# 		clr()
+	# 	label() 		# set of objects
+	# 		get()
+	# 		set(v)

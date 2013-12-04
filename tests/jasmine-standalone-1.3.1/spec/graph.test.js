@@ -133,7 +133,8 @@
         return expect(typeof (S = new DES)).toBe("object");
       });
       it("Creates a module G1", function() {
-        return expect(typeof (G1 = S.create_module())).toBe("object");
+        expect(typeof (G1 = S.create_module("Valve"))).toBe("object");
+        return console.log(S, G1);
       });
       it("Module G1 has set X of object type", function() {
         return expect(typeof G1.X).toBe("object");
