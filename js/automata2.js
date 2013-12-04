@@ -400,10 +400,14 @@
   });
 
   /**
-   * [binary_set description]
-   * @param  {[type]} name [description]
-   * @param  {[type]} arr  [description]
-   * @return {[type]}      [description]
+   * Creates object-function 'name' with correspondent methods
+   * to work with Uint32Array.
+   * The methods are:
+   * name.set(i,...,n)	// Sets bits
+   * name.get(i)			// Returns state of bit {true\false}
+   * name.clr(i,...,n)	// Clears bits
+   * name.resize(len)		// Changes size of array
+   * The object-function returns all the indexes if bits which are 'true'
   */
 
 
@@ -453,13 +457,27 @@
       return get_default(arr);
     };
     this[name].set = function(i) {
-      return set_bit(arr, i);
+      var _i, _len, _results;
+
+      _results = [];
+      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+        i = arguments[_i];
+        _results.push(set_bit(arr, i));
+      }
+      return _results;
     };
     this[name].get = function(i) {
       return get_bit(arr, i);
     };
     this[name].clr = function(i) {
-      return clr_bit(arr, i);
+      var _i, _len, _results;
+
+      _results = [];
+      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+        i = arguments[_i];
+        _results.push(clr_bit(arr, i));
+      }
+      return _results;
     };
     return this[name].resize = function(len) {
       return resize(arr, len);
@@ -467,35 +485,50 @@
   };
 
   /**
-   * Class representin a set of elements
+   * Class representing a set of elements
   */
 
 
   Set = function() {
-    return {
-      subsets: [],
-      resize: function(len) {
-        var name, _i, _len, _ref, _results;
+    var self;
 
-        _ref = this.subsets;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          name = _ref[_i];
-          _results.push(this[name].resize(len));
-        }
-        return _results;
-      },
-      add_binary_subsets: function() {
-        var arr, name, _i, _len;
+    self = function() {
+      var i, name, obj, ret, _i, _len;
 
-        for (_i = 0, _len = arguments.length; _i < _len; _i++) {
-          name = arguments[_i];
-          arr = this.subsets[name] = new Uint32Array(1);
-          make_binary_set.apply(this, [name, arr]);
+      ret = [];
+      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+        i = arguments[_i];
+        obj = {};
+        for (name in self.subsets) {
+          obj[name] = self[name].get(i);
         }
-        return null;
+        ret.push(obj);
       }
+      return ret;
     };
+    self.subsets = [];
+    self.resize = function(len) {
+      var name, _i, _len, _ref, _results;
+
+      _ref = this.subsets;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        name = _ref[_i];
+        _results.push(this[name].resize(len));
+      }
+      return _results;
+    };
+    self.add_binary_subsets = function() {
+      var arr, name, _i, _len;
+
+      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+        name = arguments[_i];
+        arr = this.subsets[name] = new Uint32Array(1);
+        make_binary_set.apply(this, [name, arr]);
+      }
+      return null;
+    };
+    return self;
   };
 
   /**
@@ -521,15 +554,17 @@
 
 
   G = function(name) {
-    G = {
+    var obj;
+
+    obj = {
       name: name,
       X: new Set(),
       E: new Set(),
       T: new Set()
     };
-    G.X.add_binary_subsets('marked', 'faulty');
-    G.E.add_binary_subsets('observable', 'controllable');
-    return G;
+    obj.X.add_binary_subsets('marked', 'faulty');
+    obj.E.add_binary_subsets('observable', 'controllable');
+    return obj;
   };
 
   this.DES = DES;

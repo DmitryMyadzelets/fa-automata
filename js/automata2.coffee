@@ -456,11 +456,19 @@ automata2.BFS(C, (q,e,p) ->
 # console.timeEnd("BFS execution time")
 
 
+
+
+# =============================================================================
+
 ###*
- * [binary_set description]
- * @param  {[type]} name [description]
- * @param  {[type]} arr  [description]
- * @return {[type]}      [description]
+ * Creates object-function 'name' with correspondent methods
+ * to work with Uint32Array.
+ * The methods are:
+ * name.set(i,...,n)	// Sets bits
+ * name.get(i)			// Returns state of bit {true\false}
+ * name.clr(i,...,n)	// Clears bits
+ * name.resize(len)		// Changes size of array
+ * The object-function returns all the indexes if bits which are 'true'
 ###
 make_binary_set = (name, arr) ->
 	# Helper functions to deal with bits of Uint32Array
@@ -491,25 +499,34 @@ make_binary_set = (name, arr) ->
 		ret
 
 	@[name] = () -> get_default(arr)
-	@[name].set = (i) -> set_bit(arr, i)
+	@[name].set = (i) -> set_bit(arr, i) for i in arguments
 	@[name].get = (i) -> get_bit(arr, i)
-	@[name].clr = (i) -> clr_bit(arr, i)
+	@[name].clr = (i) -> clr_bit(arr, i) for i in arguments
 	@[name].resize = (len) -> resize(arr, len)
 
 
+
 ###*
- * Class representin a set of elements
+ * Class representing a set of elements
 ###
 Set = () ->
-	subsets : []
-	# 
-	resize : (len) -> @[name].resize(len) for name in @subsets
-	# 
-	add_binary_subsets : () ->
+	self = () -> 
+		ret = []
+		for i in arguments
+			obj = {}
+			obj[name] = self[name].get(i) for name of self.subsets
+			ret.push(obj)
+		ret
+
+	self.subsets = []
+	self.resize = (len) -> @[name].resize(len) for name in @subsets
+	self.add_binary_subsets = () ->
 		for name in arguments
 			arr = @subsets[name] = new Uint32Array(1)
 			make_binary_set.apply(@, [name, arr])
 		null
+	self
+
 
 
 
@@ -528,16 +545,16 @@ DES = () ->
  * Class representing a Module of the DES
 ###
 G = (name) ->
-	G = {
+	obj = {
 		name : name
 		X : new Set()
 		E : new Set()
 		T : new Set()
 	}
-	G.X.add_binary_subsets('marked', 'faulty')
-	G.E.add_binary_subsets('observable', 'controllable')
+	obj.X.add_binary_subsets('marked', 'faulty')
+	obj.E.add_binary_subsets('observable', 'controllable')
 	# @X.object_subsets('x', 'y', 'label')
-	G
+	obj
 	
 
 
@@ -549,28 +566,3 @@ G = (name) ->
 # @g = S
 # # debugger
 
-
-
-# X.resize(10)
-
-	# E
-	# 	controllable()	# set of booleans
-	# 		get()
-	# 		set()
-	# 		clr()
-	# 	observable()	# set of booleans
-	# 		get()
-	# 		set()
-	# 		clr()
-	# 	label() 		# set of objects
-	# 		get()
-	# 		set(v)
-
-	# X
-	# 	faulty()		# set of booleans
-	# 		get()
-	# 		set()
-	# 		clr()
-	# 	label() 		# set of objects
-	# 		get()
-	# 		set(v)

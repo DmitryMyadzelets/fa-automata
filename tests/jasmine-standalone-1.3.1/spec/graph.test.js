@@ -125,25 +125,40 @@
       });
     });
     return describe("System", function() {
-      var G1, S;
+      var G1, G2, S;
 
       S = null;
       G1 = null;
+      G2 = null;
       it("Creates System object", function() {
         return expect(typeof (S = new DES)).toBe("object");
       });
       it("Creates a module G1", function() {
-        expect(typeof (G1 = S.create_module("Valve"))).toBe("object");
-        return console.log(S, G1);
+        return expect(typeof (G1 = S.create_module("Valve"))).toBe("object");
       });
       it("Module G1 has set X of object type", function() {
-        return expect(typeof G1.X).toBe("object");
+        return expect(typeof G1.X).toBe("function");
       });
       it("Module G1 has set E of object type", function() {
-        return expect(typeof G1.E).toBe("object");
+        return expect(typeof G1.E).toBe("function");
       });
-      return it("Module G1 has set T of object type", function() {
-        return expect(typeof G1.T).toBe("object");
+      it("Module G1 has set T of object type", function() {
+        return expect(typeof G1.T).toBe("function");
+      });
+      it("Creates modules G1, G2", function() {
+        return expect(typeof (G2 = S.create_module("Motor"))).toBe("object");
+      });
+      return it("Sets events 1 and 5 of G1 as observable", function() {
+        var ee;
+
+        G1.E.observable.set(1, 5);
+        G1.E.controllable.set(3);
+        ee = G1.E.observable();
+        expect(ee.length).toBe(2);
+        expect(ee[0]).toBe(1);
+        expect(ee[1]).toBe(5);
+        ee = G2.E.observable;
+        return expect(ee.length).toBe(0);
       });
     });
   });
