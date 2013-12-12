@@ -1,47 +1,15 @@
 'use strict'
 
+# Configuration of sets
 
-DES = {
-    E : {
-        size : 0
-        label : []
-        observable : []
-        controllable : []
-    }
-    modules : [
-        # Module G1
-        {
-            X : {
-                start : 0
-                size : 0
-                x : []
-                y : []
-                label : []
-                marked : []
-                faulty : []
-            },
-            T : {
-                size : 0
-                sorted : true/false 
-            }
-        }
-        # Module G2
-        {
-            X : {}
-            T : {}
-        }
-    ]
-    
-    create_module : () ->
-}
-        
-# Keep configuration of sets and subsets! You can use it to distinguish arrays!
+# Events
 E_CONFIG = {
     label           : 'object'
     observable      : 'boolean'
     controllable    : 'boolean'
 }
 
+# States
 X_CONFIG = {
     x               : 'integer'
     y               : 'integer'
@@ -50,16 +18,22 @@ X_CONFIG = {
     faulty          : 'boolean'
 }
 
+# Transitions
 T_CONFIG = {
     trans           : 'integer_triple'
     bends           : 'boolean'
 }
+
+
 
 ###############################################################################
 # 
 # Helper functions to deal with bits of Uint16Array
 # 
 # 
+
+DELTA_UINT_ARRAY = 10|0 # size of increment
+
 getUint16ArrayBit = (arr, i) -> !!(arr[i>>4] & 1 << (i & 0xF))
 setUint16ArrayBit = (arr, i) -> arr[i>>4] |= 1 << (i & 0xF)
 clrUint16ArrayBit = (arr, i) -> arr[i>>4] &= ~(1 << (i & 0xF))
@@ -106,19 +80,24 @@ enumUint16ArrayBit = (arr, len) ->
     ret
 
 
+
+# Returns an array of values
+enumArray = (arr, len) ->
+    ret = []
+    i = 0
+    l = arr.length
+    while (i < l)
+        ret.push(arr[i])
+        i++
+    ret
+
+
 ###############################################################################
 # 
 # Helper functions to deal with integers of Uint16Array
 # 
 # 
 
-DELTA_UINT_ARRAY = 10|0 # size of increment
-# Adds a new element (no value) to the end of array; resizes array if necessary
-addUint16ArrayValue = (arr, old_len) ->
-    len = old_len +1
-    if len >= arr.length
-        arr = resizeUint16Array(arr, len)
-    len
 
 
 
@@ -144,7 +123,7 @@ BINARY_SUBSET = () ->
 OBJECT_SUBSET = () ->
     arr = []
     self = @
-    o = () -> null
+    o = () -> enumArray(arr, self.size())
     o.get = (i) -> arr[i] if i < self.size()
     o.set = (i, v) -> arr[i] = v if i < self.size()
     o.add = () -> arr.push(null) if @ == self
@@ -155,10 +134,14 @@ OBJECT_SUBSET = () ->
 NUMBER_SUBSET = () ->
     arr = new Uint16Array(1)
     self = @
-    o = () ->
+    o = () -> enumArray(arr, self.size())
     o.get = (i) -> arr[i] if i < self.size()
     o.set = (i, v) -> arr[i] = v if i < self.size()
-    o.add = () -> addUint16ArrayValue(arr, self.size()) if @ == self
+    o.add = () ->
+        if @ == self
+            if arr.length + 1 >= self.size()
+                arr = resizeUint16Array(arr, arr.length + DELTA_UINT_ARRAY)
+        null
     o
 
 
@@ -205,6 +188,49 @@ create_general_set = (config) ->
 
 
 
+###############################################################################
+# 
+# Discret-Event System
+# 
+# 
+DES = {
+    # Events events
+    E : create_general_set(E_CONFIG)
+
+    modules : [
+        # Module G1
+        # {
+        #     X : {
+        #         start : 0
+        #         size : 0
+        #         x : []
+        #         y : []
+        #         label : []
+        #         marked : []
+        #         faulty : []
+        #     },
+        #     T : {
+        #         size : 0
+        #         sorted : true/false 
+        #     }
+        # }
+        # # Module G2
+        # {
+        #     X : {}
+        #     T : {}
+        # }
+    ]
+    
+    create_module : (name) ->
+        module = {
+            name : name
+            X : create_general_set(X_CONFIG)
+        }
+        @modules.push(module)
+        module
+}
+
+
 # DES.foo = () ->
 #     G1
 #     G2
@@ -239,16 +265,24 @@ create_general_set = (config) ->
 
 console.clear()
 
-o = create_general_set(E_CONFIG)
+# 
+# How to use ==================================================================
+# 
 
-i = 33
-while i--
-    o.add()
+# Events
+# 
+e = DES.E # just shortcut
+# Add new event and set its label
+e.label.set(e.add(), 'open')
+# Add another event
+e.label.set(i = e.add(), 'close')
+# The event is observable
+e.observable.set(i)
+# Show events in console of your browser (Chrome)
+console.table(e())
 
-o.observable.set(0)
-o.controllable.set(32)
-o.label.set(0, 'test')
-
-console.log o.size(), o.observable(), o.controllable(), o.label.get(0)
-console.log o(32)
-
+# Modules
+# 
+# Create new module
+m = DES.create_module('Motor')
+console.table(DES.modules)
