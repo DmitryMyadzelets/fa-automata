@@ -55,9 +55,9 @@ set_bit = (arr, i) -> arr[i>>5] |= 1 << (i & 0x1F)
 				sorted : false
 				# Sorted transitions. 'tix' points to 'trans'.
 				tix : new Uint32Array(DELTA_TRANS)
-				# Sorted list of nodes. 'nix' points to 'tix'.
+			}				# Sorted list of nodes. 'nix' points to 'tix'.
 				nix : new Uint32Array() 
-			}
+
 
 
 		trans : {
@@ -506,65 +506,361 @@ make_binary_set = (name, arr) ->
 
 
 
+
+# Helper functions to deal with bits of Uint32Array
+getUint32ArrayBit = (arr, i) -> !!(arr[i>>5] & 1 << (i & 0x1F))
+setUint32ArrayBit = (arr, i) -> arr[i>>5] |= 1 << (i & 0x1F)
+clrUint32ArrayBit = (arr, i) -> arr[i>>5] &= ~(1 << (i & 0x1F))
+# Creates Uint32Array array with new length, copies data from source array.
+# Don't foget to delete the source array, if necessary!
+resizeUint32Array = (arr, len) ->
+	if len > arr.length
+		ret = new Uint32Array(len)
+		ret.set(arr)
+	else # len < arr.length
+		ret = new Uint32Array(arr.subarray(0, len))
+	ret
+
+# Delets a bit of the array and puts the last bit to the vacant position
+delUint32ArrayBit = (arr, i, bits_len) ->
+	bits_len -= 1 # Index of the last element
+	if i != bits_len # Do only if it makes sense
+		if getUint32ArrayBit(arr, bits_len)
+			setUint32ArrayBit(arr, i)
+		else
+			clrUint32ArrayBit(arr, i)
+	bits_len # Return new size of the array (always old length -1)
+
+
+
+delUint32ArrayValue = (arr, i, len) ->
+	len -= 1 # Index of the last element
+	if i != len # Do only if it makes sense
+		arr[i] = arr[len]
+	len # Return new size of the array (always old length -1)
+
+
+
+delObjectArrayValue = (arr, i, len) ->
+	len -= 1 # Index of the last element
+	if i != len # Do only if it makes sense
+		delete arr[i]
+		arr[i] = arr[len]
+	len # Return new size of the array (always old length -1)
+
+
+
+# Adds a bit (no value) to the end of the array; resizes the array if necessary
+# Returns a new length of bits
+addUint32ArrayBit = (arr, old_bit_len) ->
+	len = old_bit_len +1 # new length in bits
+	ret = len
+	len >>= 5 # index of Uint32
+	old_bit_len >>= 5 # old index of Uint32
+	if (old_bit_len|0) ^ (len|0)
+		len += 1
+		arr = resizeUint32Array(arr, len)
+	ret
+
+
+
+# Returns an array of indexs of the array wich are true
+enumUint32ArrayBit = (arr, len) ->
+	ret = []
+	for i, index in arr
+		n = index * 32|0
+		m = 0
+		while i
+			ret.push(n + m) if (i & 1)
+			i >>= 1
+			m++
+	ret
+
+
+DELTA_UINT_ARRAY = 10|0 # size of increment
+# Adds a new element (no value) to the end of array; resizes array if necessary
+addUint32ArrayValue = (arr, old_len) ->
+	len = old_len +1
+	if len >= arr.length
+		arr = resizeUint32Array(arr, len)
+	len
+
+
+
+# Creates binary type keys for the given object
+create_binary_keys = (obj, names) ->
+	i = names.length
+	while i--
+		obj[names[i]] = new Uint32Array(1)
+		obj[names[i]]['type'] = 'b'
+	obj
+
+
+
+# Creates integer type keys for the given object
+create_integer_keys = (obj, names) ->
+	i = names.length
+	while i--
+		obj[names[i]] = new Uint32Array(1)
+		obj[names[i]]['type'] = 'i'
+	obj
+
+
+
+# Creates object type keys for the given object
+create_object_keys = (obj, names) ->
+	i = names.length
+	while i--
+		obj[names[i]] = []
+		obj[names[i]]['type'] = 'o'
+	obj
+
+
+
+add_binary_method = (obj, set, name) ->
+	o = obj[name] = () -> enumUint32ArrayBit(set.subsets[name], obj.size())
+	o.set = () -> setUint32ArrayBit(set.subsets[name], i) for i in arguments
+	o.get = () -> getUint32ArrayBit(set.subsets[name], i) for i in arguments
+	o.clr = () -> clrUint32ArrayBit(set.subsets[name], i) for i in arguments
+	null
+
+
+add_binary_methods = (obj, set, names) ->
+	i = names.length
+	while i--
+		add_binary_method(obj, set, names[i])
+	null
+
+
+
+# add_binary_properties = (obj, names) ->
+# 	i = names.length
+# 	while i--
+# 		name = names[i]
+# 		o = obj[name] = () -> enumUint32ArrayBit.apply(o, [arr, o.len])
+# 		arr = obj.subsets[names[i]] = new Uint32Array(1)
+# 		add_binary_methods.apply(obj[name], [arr])
+# 		o.len = 0
+# 		# arr.resize = (len) -> resizeUint32Array(arr, len)
+# 		# arr.del = () -> 
+# 		# 	arr.len = delUint32ArrayBit(arr, i, arr.len) for i in arguments
+# 		# 	null
+# 		# arr.add = () -> 
+# 		# 	arr.len = addUint32ArrayBit(arr, arr.len)
+# 		# 	null
+# 	obj
+
+
+# DES.X.marked.set(G1, [5]) -> set(G1.X.marked) 
+# DES.module(G1).X.marked.set(3, 5) or
+# DES.module(G1.X).marked.set(3, 5) or
+# G = DES.module(G1).
+# G.X.marked.set(3, 5) ----> setUint32ArrayBit(G1.X, 3); setUint32ArrayBit(G1.X, 5)
+
+
+# # General mathematical set object with methods stabs
+# SET = {
+# 	add : () -> null
+# 	get : () -> null
+# 	set : () -> null
+# 	resize : (len) -> 0
+# }
+
+# BITSET = Object.create(SET)
+# BITSET.resize = (len) -> resizeUint32Array(len)
+# BITSET.set = (i) -> setUint32ArrayBit()
+
+
 ###*
  * Object-function representing a set of elements
  * Given a set of indexes (0,...,n) as arguments, it returns 
  * an array of correspondent objects with their properties filled.
 ###
 Set = () ->
-	self = () -> 
-		ret = []
-		for i in arguments
-			obj = {}
-			obj[name] = self[name].get(i) for name of self.subsets
-			ret.push(obj)
-		ret
+	size = 0
+	ret = () ->
+	# ret = () -> 
+	# 	arr = []
+	# 	for i in arguments
+	# 		obj = {}
+	# 		obj[name] = ret[name].get(i) for name of ret.subsets
+	# 		arr.push(obj)
+	# 	arr
 
-	self.subsets = []
-	self.resize = (len) -> @[name].resize(len) for name in @subsets
-	self.add_binary_subsets = () ->
-		for name in arguments
-			arr = @subsets[name] = new Uint32Array(1)
-			make_binary_set.apply(@, [name, arr])
-		null
-	self
+	ret.subsets = []
+	ret.size = () -> size
+	# ret.length = () -> length
+	# ret.resize = (len) -> @[name].resize(len) for name in @subsets
+	# ret.add_binary_subsets = () ->
+	# 	for name in arguments
+	# 		arr = @subsets[name] = new Uint32Array(1)
+	# 		make_binary_set.apply(@, [name, arr])
+	# 	null
+	ret
+
+
+
+BINARY_SUBSET = (name) ->
+	@name = name
+
+
+BINARY_SUBSET.prototype.foo = () -> console.log @name
+BINARY_SUBSET.prototype.set = () -> console.log @subsets
+
+
+# ADD = (obj, names) ->
+# 	i = names.length
+# 	while i--
+# 		name = names[i]
+# 		o = obj[name] = () -> 'im a function'
+# 		o.set = () -> 
+# 			console.log @
+# 			# setUint32ArrayBit(obj.subsets[name], i) for i in arguments
+# 	null
+
+
+# ADD(BINARY_SUBSET.prototype, ['observable'])
+
+
+SET = () ->
+	subsets = {}
+	subsets.controllable = new BINARY_SUBSET('controllable')
+	ret = () -> console.log subsets
+	ret.prototype = SET
+	ret
+
+SET.prototype.set = () -> console.log @subsets
+
+
+a = new BINARY_SUBSET("A")
+b = new BINARY_SUBSET("B")
+a.foo()
+b.foo()
+c = new SET()
+# console.log c
+
+
 
 
 
 
 ###*
- * Class representing a Discrete-Event System (DES)
+ * Object representing a Discrete-Event System (DES)
 ###
 DES = () ->
-	modules : []
-	create_module : (name) ->
+
+	@current_module = new G('stab')
+
+	self = {
+		# Modules of DES, i.e. automata
+		modules : []
+		# Set of events. It's shared by all automata
+		E : new Set()
+		X : new Set()
+	}
+
+	add_binary_methods(self.E, ['controllable', 'observable'])
+	# add_binary_methods.apply(@, [self.E, self.E, ['controllable', 'observable']])
+	# Make namespace for access to methods
+	# self.E.observable = {}
+	# self.E.controllable = {}
+	# Make methods
+	# self.E.observable.set = () ->  setUint32ArrayBit(self.E.subsets.observable, i) for i in arguments
+	# self.E.controllable.set = () -> setUint32ArrayBit(self.E.subsets.controllable, i) for i in arguments
+	# Make structure for data
+	
+	create_binary_keys(self.E.subsets, ['observable', 'controllable'])
+	# 
+	# self.X.faulty = () -> enumUint32ArrayBit(current_module.X.subsets.faulty, self.X.size())
+	# self.X.faulty.set = () -> setUint32ArrayBit(current_module.X.subsets.faulty, i) for i in arguments
+	# self.X.faulty.clr = () -> clrUint32ArrayBit(current_module.X.subsets.faulty, i) for i in arguments
+	self.current_module = () -> @current_module
+	add_binary_methods(self.X, @current_module.X, ['faulty'])
+
+	self.create_module = (name) ->
 		@modules.push(g = new G(name))
+		create_binary_keys(g.X.subsets, ['marked', 'faulty'])
+		g.a = new BINARY_SUBSET()
+		g.a.foo()
 		g
 
+	self.module = (aModule) -> 
+		@current_module = aModule
+		@
+	self
+
+# Add necessary subsets. In Control Theory the common subsets are 
+# 'controllable' and 'observable'. In fault diagnosis - 'fault'.
+# DES.E.add_binary_subsets('observable', 'controllable', 'fault')
+# create_binary_keys(DES.E.subsets, ['observable', 'controllable', 'fault'])
+# add_binary_methods(DES.E, ['observable', 'controllable', 'fault'])
+# console.log '>>>', DES.E
+# create_object_keys(DES.E, ['label'])
+# create_binary_keys(DES.E.subsets, ['marked', 'faulty'])
+
+# add_binary_properties(DES.E, ['observable', 'controllable', 'fault'])
+
+# DES.add_binary_methods('E', ['observable', 'controllable', 'fault'])
+
+# console.log DES
 
 
 ###*
- * Class representing a Module of the DES
+ * Class representing a Module of a DES
 ###
 G = (name) ->
-	obj = {
+	ret = {
 		name : name
 		X : new Set()
-		E : new Set()
 		T : new Set()
 	}
-	obj.X.add_binary_subsets('marked', 'faulty')
-	obj.E.add_binary_subsets('observable', 'controllable')
+	# Add necessary subsets
+	# ret.X.add_binary_subsets('marked', 'faulty')
 	# @X.object_subsets('x', 'y', 'label')
-	obj
+	ret
 	
-
 
 
 # Let it access from a global namespace
 @DES = DES
 
+# S = new DES()
+
 
 # @g = S
 # # debugger
+
+# Working with System
+# 
+# Create a Discrete-Event System
+# des = new DES()
+# 
+# Events set belongs to the System, and used by all the modules
+# des.E.add_binay_subsets('contollable', 'observable')
+# 
+# Add a new event
+# e = des.E.add()
+# des.E.observable.set(e)
+# des.E.label(e)
+#  
+# des.E.add()
+
+# Working with Modules
+# 
+# Access to an array of the System's modules
+# des.modules	
+# 
+# Creates and returns new module, puts it into array.
+# G1 = des.create_module('Valve')
+# 
+# Returns an array of objects for specified events,
+# des.E(5, 0, 87)
+# where each object is:
+# {
+# 	label : 'Command Open'
+# 	contollable : false
+# 	observable : true
+# 	...
+# }
+
 

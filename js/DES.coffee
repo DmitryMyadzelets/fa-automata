@@ -20,7 +20,7 @@ X_CONFIG = {
 
 # Transitions
 T_CONFIG = {
-    trans           : 'integer_triple'
+    transition      : 'integer_triple'
     bends           : 'boolean'
 }
 
@@ -32,7 +32,8 @@ T_CONFIG = {
 # 
 # 
 
-DELTA_UINT_ARRAY = 10|0 # size of increment
+ARRAY_INCREMENT = 10|0 # size of increment
+
 
 getUint16ArrayBit = (arr, i) -> !!(arr[i>>4] & 1 << (i & 0xF))
 setUint16ArrayBit = (arr, i) -> arr[i>>4] |= 1 << (i & 0xF)
@@ -48,6 +49,16 @@ resizeUint16Array = (arr, len) ->
         ret.set(arr)
     else # len < arr.length
         ret = new Uint16Array(arr.subarray(0, len))
+    ret
+
+
+# The same as above for Uint32Array
+resizeUint32Array = (arr, len) ->
+    if len > arr.length
+        ret = new Uint32Array(len)
+        ret.set(arr)
+    else # len < arr.length
+        ret = new Uint32Array(arr.subarray(0, len))
     ret
 
 
@@ -86,18 +97,38 @@ enumArray = (arr, len) ->
     ret = []
     i = 0
     l = arr.length
+    l = len if len < l
     while (i < l)
         ret.push(arr[i])
         i++
     ret
 
 
-###############################################################################
-# 
-# Helper functions to deal with integers of Uint16Array
-# 
-# 
 
+###############################################################################
+#
+# Methods for a set of triples if integers
+# 
+# 
+resizeTripleArray = (arr, len) ->
+    if len*3 > arr.length # make a bigger array
+        ret = new Uint32Array(len*3)
+        ret.set(arr)
+    else # make a smaller array
+        ret = new Uint32Array(arr.subarray(0, len*3))
+    ret
+
+
+
+# Returns an array of triples
+enumTripleArray = (arr, len) ->
+    ret = []
+    i = 0
+    l = arr.length
+    l = len*3 if len*3 < l
+    while (i < l)
+        ret.push(arr.subarray(i, i+=3))
+    ret
 
 
 
@@ -108,8 +139,8 @@ BINARY_SUBSET = () ->
     self = @
     o = () -> enumUint16ArrayBit(arr, self.size())
     o.get = (i) -> getUint16ArrayBit(arr, i) if i < self.size()
-    o.set = (i) -> setUint16ArrayBit(arr, i) if i < self.size()
-    o.clr = (i) -> clrUint16ArrayBit(arr, i) if i < self.size()
+    o.set = (i) -> setUint16ArrayBit(arr, i) if i < self.size(); self
+    o.clr = (i) -> clrUint16ArrayBit(arr, i) if i < self.size(); self
     # Works only when called by a parent, not user
     o.add = () -> 
         if @ == self
@@ -125,22 +156,50 @@ OBJECT_SUBSET = () ->
     self = @
     o = () -> enumArray(arr, self.size())
     o.get = (i) -> arr[i] if i < self.size()
-    o.set = (i, v) -> arr[i] = v if i < self.size()
+    o.set = (i, v) -> arr[i] = v if i < self.size(); self
     o.add = () -> arr.push(null) if @ == self
     o
 
 
 
 NUMBER_SUBSET = () ->
-    arr = new Uint16Array(1)
+    arr = new Uint16Array(ARRAY_INCREMENT)
     self = @
     o = () -> enumArray(arr, self.size())
     o.get = (i) -> arr[i] if i < self.size()
-    o.set = (i, v) -> arr[i] = v if i < self.size()
+    o.set = (i, v) -> arr[i] = v if i < self.size(); self
     o.add = () ->
         if @ == self
-            if arr.length + 1 >= self.size()
-                arr = resizeUint16Array(arr, arr.length + DELTA_UINT_ARRAY)
+            if arr.length < self.size() + 1
+                arr = resizeUint16Array(arr, arr.length + ARRAY_INCREMENT)
+        null
+    o
+
+
+
+TRIPLE_SUBSET = () ->
+    arr = new Uint32Array(ARRAY_INCREMENT*3)
+    # Sorted transitions. 'tix' points to 'arr'
+    tix = new Uint32Array(ARRAY_INCREMENT)
+    # Sorted list of nodes. 'nix' points to 'tix'.
+    nix = new Uint32Array()
+    self = @
+    sorted = false
+    o = () -> enumTripleArray(arr, self.size())
+    o.get = (i) -> arr.subarray(i*=3, i+3) if i < self.size()
+    o.set = (i, q, e, p) -> 
+        i *= 3
+        if i < arr.length-2
+            arr[i++] = q|0
+            arr[i++] = e|0
+            arr[i  ] = p|0
+            sorted = false
+        self
+    o.add = () -> 
+        if @ == self
+            if arr.length < (self.size() + 1)*3
+                arr = resizeTripleArray(arr, (self.size()+ARRAY_INCREMENT)*3)
+                tix = resizeUint32Array(tix, (self.size()+ARRAY_INCREMENT))
         null
     o
 
@@ -179,11 +238,13 @@ create_general_set = (config) ->
             when 'boolean'
                 o[key] = BINARY_SUBSET.apply(o)
             when 'integer'
-                o[key] = new Uint16Array(1)
+                o[key] = NUMBER_SUBSET.apply(o)
             when 'object'
                 o[key] = OBJECT_SUBSET.apply(o)
             when 'integer_triple'
-                null
+                o[key] = TRIPLE_SUBSET.apply(o)
+            else
+                console.log 'Uknown configuration value'
     o
 
 
@@ -225,28 +286,14 @@ DES = {
         module = {
             name : name
             X : create_general_set(X_CONFIG)
+            T : create_general_set(T_CONFIG)
         }
         @modules.push(module)
         module
 }
 
 
-# DES.foo = () ->
-#     G1
-#     G2
-
-#     DES.E.label.set(i, 'open valve')
-    
-#     # Methods of the object
-#     i = G.X.add()
-#     G.X.set(i, {x:87, y:15, label:'NF'}) 
-#     # Methods of arrays
-#     G.X.x.set(i, 87)
-#     G.X.y.set(i, 15)
-#     G.X.label.set(i, 'NF')
-#     G.X.marked.set(i)
-#     G.X.faulty.clr(i)
-    
+   
     
 #     # Search for a value
 #     idx = -1 
@@ -258,16 +305,16 @@ DES = {
 #     )
     
     
-#     G.X()
-#     G.X.marked()
 #     G.X.marked.set(1, 5, 4)
 
 
+
+###############################################################################
+# 
+# How to use
+# 
 console.clear()
 
-# 
-# How to use ==================================================================
-# 
 
 # Events
 # 
@@ -279,10 +326,44 @@ e.label.set(i = e.add(), 'close')
 # The event is observable
 e.observable.set(i)
 # Show events in console of your browser (Chrome)
+console.log 'Events'
 console.table(e())
+
 
 # Modules
 # 
 # Create new module
 m = DES.create_module('Motor')
+console.log 'Modules'
 console.table(DES.modules)
+
+
+# States
+# 
+# Create new state
+i = m.X.add()
+# Define values
+m.X.x.set(i, 12).y.set(i, 57).label.set(i, 'Initial').marked.set(i)
+# Add another state and define values
+i = m.X.add()
+m.X.label.set(i, 'NF')
+m.X.faulty.set(i, 'F')
+# 
+console.log 'States'
+console.table(m.X())
+console.log 'Marked states'
+console.table([m.X.marked()])
+
+
+# Transitions
+# 
+# Create new transition
+i = m.T.add()
+# Set transition's data (state, event, state)
+m.T.transition.set(i, 0, 0, 1)
+i = m.T.add()
+m.T.transition.set(i, 1, 2, 1)
+m.T.bends.set(i)
+# 
+console.log 'Transitions'
+console.table(m.T.transition())

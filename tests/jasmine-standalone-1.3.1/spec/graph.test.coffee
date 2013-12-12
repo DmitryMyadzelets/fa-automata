@@ -1,4 +1,4 @@
-describe "Automaton graph, version 2", ->
+describe "Automaton graph, version 2.", ->
 	describe "Basic operations", ->
 		it "Creates object", ->
 			expect(typeof automata2.create()).toBe("object")
@@ -109,38 +109,50 @@ describe "Automaton graph, version 2", ->
 				console.log q, e, p
 				)
 
-	describe "System", ->
+	describe "System.", ->
 		S = null
 		G1 = null
 		G2 = null
-		it "Creates System object", ->
-			expect(typeof (S = new DES)).toBe("object")
+		# it "Creates System object", ->
+		# 	expect(typeof (S = new DES())).toBe("object")
 
-		it "Creates a module G1", ->
-			expect(typeof (G1 = S.create_module("Valve"))).toBe("object")
+		# it "Creates a module G1", ->
+		# 	expect(typeof (G1 = S.create_module("Valve"))).toBe("object")
 
-		it "Module G1 has set X of object type", ->
-			expect(typeof (G1.X)).toBe("function")
+		# it "Module G1 has set X of object type", ->
+		# 	expect(typeof (G1.X)).toBe("function")
 
-		it "Module G1 has set E of object type", ->
-			expect(typeof (G1.E)).toBe("function")
+		# it "System has set E of object type", ->
+		# 	expect(typeof (S.E)).toBe("function")
 
-		it "Module G1 has set T of object type", ->
-			expect(typeof (G1.T)).toBe("function")
+		# it "Module G1 has set T of object type", ->
+		# 	expect(typeof (G1.T)).toBe("function")
 
-		it "Creates modules G1, G2", ->
-			expect(typeof (G2 = S.create_module("Motor"))).toBe("object")
+		# it "Creates modules G1, G2", ->
+		# 	expect(typeof (G2 = S.create_module("Motor"))).toBe("object")
 
-		it "Sets events 1 and 5 of G1 as observable", ->
-			G1.E.observable.set(1, 5)
-			G1.E.controllable.set(3)
-			ee = G1.E.observable();
-			expect(ee.length).toBe(2)
-			expect(ee[0]).toBe(1)
-			expect(ee[1]).toBe(5)
-			ee = G2.E.observable
-			expect(ee.length).toBe(0)
-			# console.log G1.E(1, 3, 5)
+		# it "Sets events 1 and 5 as observable, 3 as controllable", ->
+		# 	S = new DES()
+		# 	# S.E.observable.set(1, 5)
+		# 	# S.E.controllable.set(3)
+		# 	# ee = S.E.observable;
+		# 	# expect(ee.length).toBe(2)
+		# 	console.log S.E.controllable(), S.E.observable()
+		# 	# expect(ee[0]).toBe(1)
+		# 	# expect(ee[1]).toBe(5)
+		# 	# ee = S.E.observable
+		# 	# expect(ee.length).toBe(0)
+		# 	# console.log S.E(0, 5)
+			
+		it "Sets states 2 as faulty", ->
+			# S = new DES()
+			# G = S.create_module("Valve")
+			# S.X.faulty.set(G, [2])
+			# console.log S.X.faulty.set
+			# S.module(G).X.faulty.set(2)
+			# S.module(G).X.faulty.set(10)
+			# S.module(G).X.faulty.clr(10)
+			# console.log S.X.faulty()
 
 
 
