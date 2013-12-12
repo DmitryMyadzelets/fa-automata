@@ -222,7 +222,7 @@
     o.add = function() {
       if (this === self) {
         if (arr.length < self.size() + 1) {
-          arr = resizeUint16Array(arr, arr.length + ARRAY_INCREMENT);
+          arr = resizeUint16Array(arr, self.size() + ARRAY_INCREMENT);
         }
       }
       return null;
@@ -259,7 +259,7 @@
     o.add = function() {
       if (this === self) {
         if (arr.length < (self.size() + 1) * 3) {
-          arr = resizeTripleArray(arr, (self.size() + ARRAY_INCREMENT) * 3);
+          arr = resizeTripleArray(arr, self.size() + ARRAY_INCREMENT);
           tix = resizeUint32Array(tix, self.size() + ARRAY_INCREMENT);
         }
       }
@@ -393,5 +393,9 @@
   console.log('Transitions');
 
   console.table(m.T.transition());
+
+  console.table(m.T.transition().map(function(v) {
+    return [v[0], DES.E.label.get(v[1]), v[2]];
+  }));
 
 }).call(this);

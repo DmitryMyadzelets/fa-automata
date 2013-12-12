@@ -171,7 +171,7 @@ NUMBER_SUBSET = () ->
     o.add = () ->
         if @ == self
             if arr.length < self.size() + 1
-                arr = resizeUint16Array(arr, arr.length + ARRAY_INCREMENT)
+                arr = resizeUint16Array(arr, self.size() + ARRAY_INCREMENT)
         null
     o
 
@@ -181,7 +181,7 @@ TRIPLE_SUBSET = () ->
     arr = new Uint32Array(ARRAY_INCREMENT*3)
     # Sorted transitions. 'tix' points to 'arr'
     tix = new Uint32Array(ARRAY_INCREMENT)
-    # Sorted list of nodes. 'nix' points to 'tix'.
+    # Sorted list of nodes. 'nix' points to 'tix'
     nix = new Uint32Array()
     self = @
     sorted = false
@@ -198,8 +198,8 @@ TRIPLE_SUBSET = () ->
     o.add = () -> 
         if @ == self
             if arr.length < (self.size() + 1)*3
-                arr = resizeTripleArray(arr, (self.size()+ARRAY_INCREMENT)*3)
-                tix = resizeUint32Array(tix, (self.size()+ARRAY_INCREMENT))
+                arr = resizeTripleArray(arr, self.size() + ARRAY_INCREMENT)
+                tix = resizeUint32Array(tix, self.size() + ARRAY_INCREMENT)
         null
     o
 
@@ -366,4 +366,12 @@ m.T.transition.set(i, 1, 2, 1)
 m.T.bends.set(i)
 # 
 console.log 'Transitions'
+# Raw data of transitions
 console.table(m.T.transition())
+# Replace event index by event name
+console.table(m.T.transition().map(
+    (v) -> [
+        v[0], 
+        DES.E.label.get(v[1]), 
+        v[2]]
+    ))
