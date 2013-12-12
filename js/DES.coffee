@@ -258,29 +258,7 @@ DES = {
     # Events events
     E : create_general_set(E_CONFIG)
 
-    modules : [
-        # Module G1
-        # {
-        #     X : {
-        #         start : 0
-        #         size : 0
-        #         x : []
-        #         y : []
-        #         label : []
-        #         marked : []
-        #         faulty : []
-        #     },
-        #     T : {
-        #         size : 0
-        #         sorted : true/false 
-        #     }
-        # }
-        # # Module G2
-        # {
-        #     X : {}
-        #     T : {}
-        # }
-    ]
+    modules : []
     
     create_module : (name) ->
         module = {
@@ -368,10 +346,11 @@ m.T.bends.set(i)
 console.log 'Transitions'
 # Raw data of transitions
 console.table(m.T.transition())
-# Replace event index by event name
+# Replace indexes by names
 console.table(m.T.transition().map(
-    (v) -> [
-        v[0], 
-        DES.E.label.get(v[1]), 
-        v[2]]
+    (v) -> {
+        from : m.X.label.get(v[0])
+        event : DES.E.label.get(v[1])
+        to : m.X.label.get(v[2])
+        }
     ))

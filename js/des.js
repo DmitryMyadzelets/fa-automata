@@ -395,7 +395,11 @@
   console.table(m.T.transition());
 
   console.table(m.T.transition().map(function(v) {
-    return [v[0], DES.E.label.get(v[1]), v[2]];
+    return {
+      from: m.X.label.get(v[0]),
+      event: DES.E.label.get(v[1]),
+      to: m.X.label.get(v[2])
+    };
   }));
 
 }).call(this);
