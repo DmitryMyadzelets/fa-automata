@@ -52,6 +52,7 @@ resizeUint16Array = (arr, len) ->
     ret
 
 
+
 # The same as above for Uint32Array
 resizeUint32Array = (arr, len) ->
     if len > arr.length
@@ -60,6 +61,7 @@ resizeUint32Array = (arr, len) ->
     else # len < arr.length
         ret = new Uint32Array(arr.subarray(0, len))
     ret
+
 
 
 # Delets a bit of the array and puts the last bit to the vacant position
@@ -132,6 +134,32 @@ enumTripleArray = (arr, len) ->
 
 
 
+###*
+ * [Optimized bubble sort (http://en.wikipedia.org/wiki/Bubble_sort). 
+ * Sorts the index array instead of the array itself.]
+ * @param  {[Array]} a   [Array with data]
+ * @param  {[Array]} ix  [Index array to be sorted]
+ * @param  {[int]} len [Length of the index array]
+ ###
+sortIndexArray = (a, ix, len) ->
+    n = len
+    while n
+        m = 0
+        j = 0
+        i = 1
+        while i<n
+            if a[ix[j]] > a[ix[i]]
+                temp = ix[j]
+                ix[j] = ix[i]
+                ix[i] = temp
+                m = i
+            j = i
+            i++
+        n = m
+    return
+
+
+
 ###############################################################################
 
 BINARY_SUBSET = () -> 
@@ -179,7 +207,8 @@ NUMBER_SUBSET = () ->
 
 TRIPLE_SUBSET = () ->
     arr = new Uint32Array(ARRAY_INCREMENT*3)
-    # Sorted transitions. 'tix' points to 'arr'
+    # Array of indexes of transitions, sorted wrt 'from' state
+    # 'tix' points to 'arr'
     tix = new Uint32Array(ARRAY_INCREMENT)
     # Sorted list of nodes. 'nix' points to 'tix'
     nix = new Uint32Array()
@@ -195,12 +224,21 @@ TRIPLE_SUBSET = () ->
             arr[i  ] = p|0
             sorted = false
         self
+
     o.add = () -> 
         if @ == self
             if arr.length < (self.size() + 1)*3
                 arr = resizeTripleArray(arr, self.size() + ARRAY_INCREMENT)
                 tix = resizeUint32Array(tix, self.size() + ARRAY_INCREMENT)
         null
+
+    o.sort = () ->
+        # Reset array of sorted transitions
+        i = self.size()
+        tix[i] = i*3 while i-- >0
+        # Sort transitions
+        sortIndexArray(arr, tix, self.size())
+
     o
 
 
@@ -265,13 +303,44 @@ DES = {
             name : name
             X : create_general_set(X_CONFIG)
             T : create_general_set(T_CONFIG)
+            sorted : false
         }
+        module.X.start = 0
         @modules.push(module)
         module
+
+
+    # Sort module's data for p
+    sort : (module) ->
+        # Sort transitions
+        module.T.transition.sort()
+        module.sorted = true
+
+        # # Sort states
+        # # The last record contains the maximal state number
+        # max = 0
+        # max = G.trans[G.tix[G.nT-1]] if G.nT > 0
+        # # Upgrade array of states 'nix'
+        # delete G.nix
+        # G.nix = new Uint32Array(max + 1)
+        # # ... and fill it.
+        # n = -1
+        # i = 0
+        # len = G.nT
+        # while i < len           # Enumerate sorted transitions
+        #     m = G.trans[G.tix[i]]
+        #     if m ^ n            # When number of state 'q' changes,
+        #         G.nix[m] = i    # rember its position.
+        #         n = m
+        #     i++
+
+        return
+
 }
 
 
-   
+@DES = DES
+
     
 #     # Search for a value
 #     idx = -1 
@@ -354,3 +423,4 @@ console.table(m.T.transition().map(
         to : m.X.label.get(v[2])
         }
     ))
+

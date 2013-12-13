@@ -822,7 +822,7 @@ G = (name) ->
 
 
 # Let it access from a global namespace
-@DES = DES
+# @DES = DES
 
 # S = new DES()
 
