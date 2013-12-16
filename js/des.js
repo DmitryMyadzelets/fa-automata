@@ -299,11 +299,73 @@
     o.sort = function() {
       var i;
 
+      if (sorted) {
+        return sorted;
+      }
       i = self.size();
       while (i-- > 0) {
-        tix[i] = i * 3;
+        tix[i] = i * 3 | 0;
       }
-      return sortIndexArray(arr, tix, self.size());
+      sortIndexArray(arr, tix, self.size());
+      return sorted = true;
+    };
+    o.max_state = function() {
+      var i, max;
+
+      i = 3 * self.size() | 0;
+      max = 0;
+      while (i-- > 0) {
+        if (arr[i] > max) {
+          max = arr[i];
+        }
+        i -= 2;
+        if (arr[i] > max) {
+          max = arr[i];
+        }
+      }
+      return max;
+    };
+    o.out = function(q) {
+      var i, ret;
+
+      ret = [];
+      i = 3 * self.size() | 0;
+      i -= 3;
+      while (i >= 0) {
+        if (arr[i] === q) {
+          ret.push((i / 3) | 0);
+        }
+        i -= 3;
+      }
+      return ret;
+    };
+    o.dfs = function(start, fnc) {
+      var e, has_callback, i, ii, max, p, q, stack, t, visited, _i, _len;
+
+      o.sort();
+      has_callback = typeof fnc === 'function';
+      max = o.max_state();
+      visited = new Uint16Array(1 + (max >> 4));
+      setUint16ArrayBit(visited, start);
+      stack = [start];
+      while (stack.length) {
+        q = stack.pop();
+        ii = o.out(q);
+        for (_i = 0, _len = ii.length; _i < _len; _i++) {
+          i = ii[_i];
+          t = o.get(i);
+          e = t[1];
+          p = t[2];
+          if (!getUint16ArrayBit(visited, p)) {
+            setUint16ArrayBit(visited, p);
+            stack.push(p);
+          }
+          if (has_callback) {
+            fnc(q, e, p);
+          }
+        }
+      }
+      return visited = null;
     };
     return o;
   };
@@ -375,16 +437,14 @@
       module = {
         name: name,
         X: create_general_set(X_CONFIG),
-        T: create_general_set(T_CONFIG),
-        sorted: false
+        T: create_general_set(T_CONFIG)
       };
       module.X.start = 0;
       this.modules.push(module);
       return module;
     },
-    sort: function(module) {
-      module.T.transition.sort();
-      module.sorted = true;
+    DFS: function(module, fnc) {
+      return module.T.transition.dfs(module.X.start, fnc);
     }
   };
 
@@ -438,6 +498,10 @@
 
   m.T.bends.set(i);
 
+  m.T.transition.set(m.T.add(), 1, 3, 2);
+
+  m.T.transition.set(m.T.add(), 0, 0, 0);
+
   console.log('Transitions');
 
   console.table(m.T.transition());
@@ -449,5 +513,13 @@
       to: m.X.label.get(v[2])
     };
   }));
+
+  console.log('Depth-First Search');
+
+  console.log('( X E X )');
+
+  DES.DFS(m, function(q, e, p) {
+    return console.log('(', q, e, p, ')');
+  });
 
 }).call(this);

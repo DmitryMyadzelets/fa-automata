@@ -214,6 +214,8 @@ TRIPLE_SUBSET = () ->
     nix = new Uint32Array()
     self = @
     sorted = false
+
+
     o = () -> enumTripleArray(arr, self.size())
     o.get = (i) -> arr.subarray(i*=3, i+3) if i < self.size()
     o.set = (i, q, e, p) -> 
@@ -234,10 +236,65 @@ TRIPLE_SUBSET = () ->
 
     o.sort = () ->
         # Reset array of sorted transitions
+        return sorted if sorted
         i = self.size()
-        tix[i] = i*3 while i-- >0
+        tix[i] = i*3|0 while i-- >0
         # Sort transitions
         sortIndexArray(arr, tix, self.size())
+        sorted = true
+
+
+    # Returns the maximal state stored in transition triples
+    o.max_state = () ->
+        i = 3*self.size()|0
+        max = 0
+        while i-- >0
+            max = arr[i] if arr[i] > max
+            i-=2
+            max = arr[i] if arr[i] > max
+        max
+
+
+    # Returns array of indexes of 'q' for triples (q, e, p) in transitions
+    # if 'q' matches
+    o.out = (q) ->
+        ret = []
+        i = 3*self.size()|0
+        i-=3 # Index of 'q' in the last triple
+        while i >=0
+            ret.push((i/3)|0) if arr[i] == q
+            i-=3
+        ret
+
+
+    # Depth-First Search
+    # start - initial state
+    o.dfs = (start, fnc) ->
+        o.sort()
+        has_callback = typeof fnc == 'function'
+
+        # Maximal state index
+        max = o.max_state()
+        # Each item of array contains 16 bits
+        visited = new Uint16Array(1 + (max>>4))
+        setUint16ArrayBit(visited, start)
+
+        stack = [start]
+
+        while stack.length
+            q = stack.pop()
+            # array of transitions' indexes with 'q' out state
+            ii = o.out(q)
+            for i in ii
+                t = o.get(i)
+                e = t[1]
+                p = t[2]
+                if !getUint16ArrayBit(visited, p)
+                    setUint16ArrayBit(visited, p)
+                    stack.push(p)
+                fnc(q, e, p) if has_callback
+
+        visited = null
 
     o
 
@@ -303,38 +360,13 @@ DES = {
             name : name
             X : create_general_set(X_CONFIG)
             T : create_general_set(T_CONFIG)
-            sorted : false
         }
         module.X.start = 0
         @modules.push(module)
         module
 
-
-    # Sort module's data for p
-    sort : (module) ->
-        # Sort transitions
-        module.T.transition.sort()
-        module.sorted = true
-
-        # # Sort states
-        # # The last record contains the maximal state number
-        # max = 0
-        # max = G.trans[G.tix[G.nT-1]] if G.nT > 0
-        # # Upgrade array of states 'nix'
-        # delete G.nix
-        # G.nix = new Uint32Array(max + 1)
-        # # ... and fill it.
-        # n = -1
-        # i = 0
-        # len = G.nT
-        # while i < len           # Enumerate sorted transitions
-        #     m = G.trans[G.tix[i]]
-        #     if m ^ n            # When number of state 'q' changes,
-        #         G.nix[m] = i    # rember its position.
-        #         n = m
-        #     i++
-
-        return
+    # Depth-First Search
+    DFS : (module, fnc) -> module.T.transition.dfs(module.X.start, fnc)
 
 }
 
@@ -411,6 +443,9 @@ m.T.transition.set(i, 0, 0, 1)
 i = m.T.add()
 m.T.transition.set(i, 1, 2, 1)
 m.T.bends.set(i)
+m.T.transition.set(m.T.add(), 1, 3, 2)
+m.T.transition.set(m.T.add(), 0, 0, 0)
+
 # 
 console.log 'Transitions'
 # Raw data of transitions
@@ -424,3 +459,8 @@ console.table(m.T.transition().map(
         }
     ))
 
+console.log 'Depth-First Search'
+console.log '( X E X )'
+DES.DFS(m, (q, e, p) ->
+    console.log '(', q, e, p, ')'
+    )
