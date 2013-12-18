@@ -20,7 +20,7 @@ X_CONFIG = {
 
 # Transitions
 T_CONFIG = {
-    transition      : 'integer_triple'
+    transitions     : 'integer_triple'
     bends           : 'boolean'
 }
 
@@ -104,6 +104,16 @@ enumArray = (arr, len) ->
         ret.push(arr[i])
         i++
     ret
+
+
+# Compares two arrays
+equal_arrays = (a, b) ->
+    i = a.length
+    return false if i != b.length
+    while i-- >0
+        return false if a[i] != b[i]
+    return true
+
 
 
 
@@ -267,9 +277,9 @@ TRIPLE_SUBSET = () ->
         ret
 
 
-    # Depth-First Search
+    # Breadth-First Search
     # start - initial state
-    o.dfs = (start, fnc) ->
+    o.bfs = (start, fnc) ->
         o.sort()
         has_callback = typeof fnc == 'function'
 
@@ -284,9 +294,9 @@ TRIPLE_SUBSET = () ->
         while stack.length
             q = stack.pop()
             # array of transitions' indexes with 'q' out state
-            ii = o.out(q)
+            ii = o.out(q) #TODO : improve the speed
             for i in ii
-                t = o.get(i)
+                t = o.get(i) #TODO : improve the speed
                 e = t[1]
                 p = t[2]
                 if !getUint16ArrayBit(visited, p)
@@ -295,6 +305,75 @@ TRIPLE_SUBSET = () ->
                 fnc(q, e, p) if has_callback
 
         visited = null
+
+
+
+    # Returns array of states reachable from state 'start', 
+    # by events not in 'events' array
+    o.reach = (start, events) ->
+        stack = [start]
+        reach = [start]
+        while stack.length
+            q = stack.pop()
+            ii = o.out(q)
+            for i in ii
+                t = o.get(i)
+                e = t[1]
+                p = t[2]
+                if e not in events
+                    if p not in reach
+                        stack.push(p)
+                        reach.push(p)
+        reach.sort()
+
+
+    # Makes a projection to 'events'
+    o.projection = (start, events, callback) ->
+        has_callback = typeof callback == 'function'
+        # Initial reachable set of states
+        reach = o.reach(start, events)
+        # 
+        stack = [reach]
+        states = [reach]
+        # Indexes of states in the projection
+        qix = 0 # from
+        pix = 0 # to
+        # Returns index of state in 'states', -1 otherwise
+        in_states = (state) ->
+            i = states.length
+            while --i >=0
+                break if equal_arrays(states[i], state)
+            i
+        # 
+        while stack.length
+            reach = stack.pop()
+            qix = in_states(reach)
+            # Check every single state in the set of states
+            for q in reach
+                # Indexes of transitions from the state
+                ii = o.out(q)
+                for i in ii
+                    t = o.get(i)
+                    # Event and next state of the transition
+                    e = t[1]
+                    p = t[2]
+                    continue if e not in events
+                    # Do this only if 'e' in 'events', since
+                    # it will result in the same set of states
+                    next = o.reach(p, events)
+                    # Check if 'next' is in 'states' already
+                    ix = in_states(next)
+                    if ix < 0
+                        pix = states.length
+                        stack.push(next)
+                        states.push(next)
+                    else
+                        pix = ix
+                    callback(qix, e, pix, reach, next) if has_callback
+            qix++
+        states
+
+
 
     o
 
@@ -354,19 +433,34 @@ DES = {
     E : create_general_set(E_CONFIG)
 
     modules : []
+
+    make_module_from_T : (T, name) ->
+        module = {
+            T : T
+            X : create_general_set(X_CONFIG)
+        }
+        module.name = name
+        module.X.start = 0
+        module
     
     create_module : (name) ->
-        module = {
-            name : name
-            X : create_general_set(X_CONFIG)
-            T : create_general_set(T_CONFIG)
-        }
-        module.X.start = 0
+        module = @make_module_from_T(create_general_set(T_CONFIG), name)
         @modules.push(module)
         module
 
-    # Depth-First Search
-    DFS : (module, fnc) -> module.T.transition.dfs(module.X.start, fnc)
+    # Breadth-First Search
+    # Calls the callback function 'fnc' at each transition
+    BFS : (module, fnc) -> module.T.transitions.bfs(module.X.start, fnc)
+
+    # Returns a projection of the module (set of transitions only)
+    # Events which are not in 'events' are replaced with '0'
+    Projection : (module, events) -> 
+        T = create_general_set(T_CONFIG)
+        @BFS(module, (q, e, p) ->
+            e = 0 if events.indexOf(e) < 0
+            T.transitions.set(T.add(), q, e, p)
+            )
+        T
 
 }
 
@@ -439,19 +533,19 @@ console.table([m.X.marked()])
 # Create new transition
 i = m.T.add()
 # Set transition's data (state, event, state)
-m.T.transition.set(i, 0, 0, 1)
+m.T.transitions.set(i, 0, 0, 1)
 i = m.T.add()
-m.T.transition.set(i, 1, 2, 1)
+m.T.transitions.set(i, 1, 2, 1)
 m.T.bends.set(i)
-m.T.transition.set(m.T.add(), 1, 3, 2)
-m.T.transition.set(m.T.add(), 0, 0, 0)
+m.T.transitions.set(m.T.add(), 1, 3, 2)
+m.T.transitions.set(m.T.add(), 0, 0, 0)
 
 # 
 console.log 'Transitions'
 # Raw data of transitions
-console.table(m.T.transition())
+console.table(m.T.transitions())
 # Replace indexes by names
-console.table(m.T.transition().map(
+console.table(m.T.transitions().map(
     (v) -> {
         from : m.X.label.get(v[0])
         event : DES.E.label.get(v[1])
@@ -459,8 +553,130 @@ console.table(m.T.transition().map(
         }
     ))
 
-console.log 'Depth-First Search'
-console.log '( X E X )'
-DES.DFS(m, (q, e, p) ->
+
+# Depth-First Search
+console.log 'Breadth-First Search'
+console.log '( X E X )', m.name
+DES.BFS(m, (q, e, p) ->
     console.log '(', q, e, p, ')'
     )
+
+
+# Projection
+console.log 'Projection'
+m.projection = DES.Projection(m, [2, 3])
+m.projection.transitions.bfs(m.X.start, (q, e, p) ->
+    console.log '(', q, e, p, ')'
+    )
+
+
+# Reachable set of states
+console.log 'Reachable set of states. From state 0, by events not [2, 3]'
+reach = m.T.transitions.reach(0, [2, 3])
+console.log reach
+
+
+# Projection
+console.log 'Projection'
+# Create new object to store result of projection
+T = create_general_set(T_CONFIG)
+XX = [] # Array of composed states
+m.T.transitions.projection(m.X.start, [2, 3], (q, e, p, qq, pp) ->
+    T.transitions.set(T.add(), q, e, p)
+    XX[q] = qq if not XX[q]
+    XX[p] = pp if not XX[p]
+    # console.log q, e, p, qq, pp
+    )
+# States of each transition in T have mapping to non-determenistic member of XX
+m = DES.make_module_from_T(T)
+console.log '( X E X )'
+DES.BFS(m, (q, e, p) ->
+    console.log '(', q, e, p, ')'
+    )
+console.log 'Projection with mapped states'
+DES.BFS(m, (q, e, p) ->
+    console.log '(', XX[q], e, XX[p], ')'
+    )
+
+
+
+serialize = () ->
+    modules = []
+    for module in DES.modules
+        m = {}
+        m.name = module.name
+        m.T = module.T()
+        m.X = module.X()
+        modules.push(m)
+    JSON.stringify(modules)
+
+
+
+deserialize = (str) ->
+    # Delete modules of DES
+    i = DES.modules.length
+    while i-- >0
+        delete DES.modules[i]
+        DES.modules[i] = null
+    DES.modules.length = 0
+    # 
+    o = JSON.parse(str)
+    i = o.length
+    while i-- >0
+        m = o[i]
+        module = DES.create_module(m.name)
+        # 
+        T = m.T.length
+        for T in m.T
+            ix = module.T.add()
+            module.T.bends.set(ix, T.bends)
+            module.T.transitions.set(ix, 
+                T.transitions[0], T.transitions[1], T.transitions[2])
+        
+        # 
+        console.log m.X
+        X = m.X.length
+        for X in m.X
+            ix = module.X.add()
+            module.X.x.set(ix, X.x)
+            module.X.y.set(ix, X.y)
+            module.X.label.set(ix, X.label)
+            module.X.marked.set(ix) if X.marked
+            module.X.faulty.set(ix) if X.faulty
+    null
+
+
+
+
+o = {
+    name : m.name
+    T : {
+        transitions : m.T.transitions()
+    }
+}
+
+str = serialize()
+deserialize(str)
+
+
+for m in DES.modules
+    console.log '( X E X )', m.name
+    DES.BFS(m, (q, e, p) ->
+        console.log '(', q, e, p, ')'
+        )
+    # 
+    console.log 'States'
+    console.table(m.X())
+    console.log 'Marked states'
+    console.table([m.X.marked()])
+
+
+console.table(m.T.transitions().map(
+    (v) -> {
+        from : m.X.label.get(v[0])
+        event : DES.E.label.get(v[1])
+        to : m.X.label.get(v[2])
+        }
+    ))
+
+
