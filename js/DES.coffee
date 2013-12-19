@@ -8,6 +8,7 @@ E_CONFIG = {
     observable      : 'boolean'
     fault           : 'boolean'
     # controllable    : 'boolean'
+    modules         : 'object'
 }
 
 # States
@@ -701,7 +702,8 @@ for e in events
     i = E.add()
     for key of e
         E[key].set(i, e[key])
-# 
+#
+console.log 'Events' 
 console.table(E())
 
 
@@ -749,7 +751,7 @@ transitions = [
     [2, 'c', 2]
     [0, 'c', 0]
 ]
-m = DES.create_module('G3')
+m = DES.create_module('G3 Valve')
 set_transitions(m, transitions)
 
 transitions = [
@@ -759,7 +761,7 @@ transitions = [
     [3, 'c', 3]
     [0, 'c', 0]
 ]
-m = DES.create_module('G4')
+m = DES.create_module('G4 Motor')
 set_transitions(m, transitions)
 
 
@@ -780,3 +782,19 @@ show_transitions = (m) ->
 for m in DES.modules
     console.log 'Module', m.name
     show_transitions(m)
+
+
+for m, index in DES.modules
+    i = m.T.size()
+    while i-- >0
+        t = m.T.transitions.get(i)
+        eid = t[1]
+        modules = DES.E.modules.get(eid)
+        modules = [] if not modules
+        if index not in modules
+            modules.push(index)
+            DES.E.modules.set(eid, modules)
+        
+
+
+console.table(E())
