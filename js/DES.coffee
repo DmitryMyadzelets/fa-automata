@@ -6,7 +6,8 @@
 E_CONFIG = {
     label           : 'object'
     observable      : 'boolean'
-    controllable    : 'boolean'
+    fault           : 'boolean'
+    # controllable    : 'boolean'
 }
 
 # States
@@ -489,194 +490,293 @@ DES = {
 console.clear()
 
 
-# Events
-# 
-e = DES.E # just shortcut
-# Add new event and set its label
-e.label.set(e.add(), 'open')
-# Add another event
-e.label.set(i = e.add(), 'close')
-# The event is observable
-e.observable.set(i)
-# Show events in console of your browser (Chrome)
-console.log 'Events'
-console.table(e())
+# # Events
+# # 
+# e = DES.E # just shortcut
+# # Add new event and set its label
+# e.label.set(e.add(), 'open')
+# # Add another event
+# e.label.set(i = e.add(), 'close')
+# # The event is observable
+# e.observable.set(i)
+# # Show events in console of your browser (Chrome)
+# console.log 'Events'
+# console.table(e())
 
 
-# Modules
-# 
-# Create new module
-m = DES.create_module('Motor')
-console.log 'Modules'
-console.table(DES.modules)
+# # Modules
+# # 
+# # Create new module
+# m = DES.create_module('Motor')
+# console.log 'Modules'
+# console.table(DES.modules)
 
 
-# States
-# 
-# Create new state
-i = m.X.add()
-# Define values
-m.X.x.set(i, 12).y.set(i, 57).label.set(i, 'Initial').marked.set(i)
-# Add another state and define values
-i = m.X.add()
-m.X.label.set(i, 'NF')
-m.X.faulty.set(i, 'F')
-# 
-console.log 'States'
-console.table(m.X())
-console.log 'Marked states'
-console.table([m.X.marked()])
+# # States
+# # 
+# # Create new state
+# i = m.X.add()
+# # Define values
+# m.X.x.set(i, 12).y.set(i, 57).label.set(i, 'Initial').marked.set(i)
+# # Add another state and define values
+# i = m.X.add()
+# m.X.label.set(i, 'NF')
+# m.X.faulty.set(i, 'F')
+# # 
+# console.log 'States'
+# console.table(m.X())
+# console.log 'Marked states'
+# console.table([m.X.marked()])
 
 
-# Transitions
-# 
-# Create new transition
-i = m.T.add()
-# Set transition's data (state, event, state)
-m.T.transitions.set(i, 0, 0, 1)
-i = m.T.add()
-m.T.transitions.set(i, 1, 2, 1)
-m.T.bends.set(i)
-m.T.transitions.set(m.T.add(), 1, 3, 2)
-m.T.transitions.set(m.T.add(), 0, 0, 0)
-
-# 
-console.log 'Transitions'
-# Raw data of transitions
-console.table(m.T.transitions())
-# Replace indexes by names
-console.table(m.T.transitions().map(
-    (v) -> {
-        from : m.X.label.get(v[0])
-        event : DES.E.label.get(v[1])
-        to : m.X.label.get(v[2])
-        }
-    ))
+# # Transitions
+# # 
+# # Create new transition
+# i = m.T.add()
+# # Set transition's data (state, event, state)
+# m.T.transitions.set(i, 0, 0, 1)
+# i = m.T.add()
+# m.T.transitions.set(i, 1, 2, 1)
+# m.T.bends.set(i)
+# m.T.transitions.set(m.T.add(), 1, 3, 2)
+# m.T.transitions.set(m.T.add(), 0, 0, 0)
 
 
-# Depth-First Search
-console.log 'Breadth-First Search'
-console.log '( X E X )', m.name
-DES.BFS(m, (q, e, p) ->
-    console.log '(', q, e, p, ')'
-    )
+# # 
+# console.log 'Transitions'
+# # Raw data of transitions
+# console.table(m.T.transitions())
+# # Replace indexes by names
+# console.table(m.T.transitions().map(
+#     (v) -> {
+#         from : m.X.label.get(v[0])
+#         event : DES.E.label.get(v[1])
+#         to : m.X.label.get(v[2])
+#         }
+#     ))
 
 
-# Projection
-console.log 'Projection'
-m.projection = DES.Projection(m, [2, 3])
-m.projection.transitions.bfs(m.X.start, (q, e, p) ->
-    console.log '(', q, e, p, ')'
-    )
+# # Depth-First Search
+# console.log 'Breadth-First Search'
+# console.log '( X E X )', m.name
+# DES.BFS(m, (q, e, p) ->
+#     console.log '(', q, e, p, ')'
+#     )
 
 
-# Reachable set of states
-console.log 'Reachable set of states. From state 0, by events not [2, 3]'
-reach = m.T.transitions.reach(0, [2, 3])
-console.log reach
+# # Projection
+# console.log 'Projection'
+# m.projection = DES.Projection(m, [2, 3])
+# m.projection.transitions.bfs(m.X.start, (q, e, p) ->
+#     console.log '(', q, e, p, ')'
+#     )
 
 
-# Projection
-console.log 'Projection'
-# Create new object to store result of projection
-T = create_general_set(T_CONFIG)
-XX = [] # Array of composed states
-m.T.transitions.projection(m.X.start, [2, 3], (q, e, p, qq, pp) ->
-    T.transitions.set(T.add(), q, e, p)
-    XX[q] = qq if not XX[q]
-    XX[p] = pp if not XX[p]
-    # console.log q, e, p, qq, pp
-    )
-# States of each transition in T have mapping to non-determenistic member of XX
-m = DES.make_module_from_T(T)
-console.log '( X E X )'
-DES.BFS(m, (q, e, p) ->
-    console.log '(', q, e, p, ')'
-    )
-console.log 'Projection with mapped states'
-DES.BFS(m, (q, e, p) ->
-    console.log '(', XX[q], e, XX[p], ')'
-    )
+# # Reachable set of states
+# console.log 'Reachable set of states. From state 0, by events not [2, 3]'
+# reach = m.T.transitions.reach(0, [2, 3])
+# console.log reach
 
 
-
-serialize = () ->
-    modules = []
-    for module in DES.modules
-        m = {}
-        m.name = module.name
-        m.T = module.T()
-        m.X = module.X()
-        modules.push(m)
-    JSON.stringify(modules)
+# # Projection
+# console.log 'Projection'
+# # Create new object to store result of projection
+# T = create_general_set(T_CONFIG)
+# XX = [] # Array of composed states
+# m.T.transitions.projection(m.X.start, [2, 3], (q, e, p, qq, pp) ->
+#     T.transitions.set(T.add(), q, e, p)
+#     XX[q] = qq if not XX[q]
+#     XX[p] = pp if not XX[p]
+#     # console.log q, e, p, qq, pp
+#     )
+# # States of each transition in T have mapping to non-determenistic member of XX
+# m = DES.make_module_from_T(T)
+# console.log '( X E X )'
+# DES.BFS(m, (q, e, p) ->
+#     console.log '(', q, e, p, ')'
+#     )
+# console.log 'Projection with mapped states'
+# DES.BFS(m, (q, e, p) ->
+#     console.log '(', XX[q], e, XX[p], ')'
+#     )
 
 
 
-deserialize = (str) ->
-    # Delete modules of DES
-    i = DES.modules.length
-    while i-- >0
-        delete DES.modules[i]
-        DES.modules[i] = null
-    DES.modules.length = 0
-    # 
-    o = JSON.parse(str)
-    i = o.length
-    while i-- >0
-        m = o[i]
-        module = DES.create_module(m.name)
-        # 
-        T = m.T.length
-        for T in m.T
-            ix = module.T.add()
-            module.T.bends.set(ix, T.bends)
-            module.T.transitions.set(ix, 
-                T.transitions[0], T.transitions[1], T.transitions[2])
+# serialize = () ->
+#     modules = []
+#     for module in DES.modules
+#         m = {}
+#         m.name = module.name
+#         m.T = module.T()
+#         m.X = module.X()
+#         modules.push(m)
+#     JSON.stringify(modules)
+
+
+
+# deserialize = (str) ->
+#     # Delete modules of DES
+#     i = DES.modules.length
+#     while i-- >0
+#         delete DES.modules[i]
+#         DES.modules[i] = null
+#     DES.modules.length = 0
+#     # 
+#     o = JSON.parse(str)
+#     i = o.length
+#     while i-- >0
+#         m = o[i]
+#         module = DES.create_module(m.name)
+#         # 
+#         T = m.T.length
+#         for T in m.T
+#             ix = module.T.add()
+#             module.T.bends.set(ix, T.bends)
+#             module.T.transitions.set(ix, 
+#                 T.transitions[0], T.transitions[1], T.transitions[2])
         
-        # 
-        console.log m.X
-        X = m.X.length
-        for X in m.X
-            ix = module.X.add()
-            module.X.x.set(ix, X.x)
-            module.X.y.set(ix, X.y)
-            module.X.label.set(ix, X.label)
-            module.X.marked.set(ix) if X.marked
-            module.X.faulty.set(ix) if X.faulty
+#         # 
+#         console.log m.X
+#         X = m.X.length
+#         for X in m.X
+#             ix = module.X.add()
+#             module.X.x.set(ix, X.x)
+#             module.X.y.set(ix, X.y)
+#             module.X.label.set(ix, X.label)
+#             module.X.marked.set(ix) if X.marked
+#             module.X.faulty.set(ix) if X.faulty
+#     null
+
+
+
+
+# o = {
+#     name : m.name
+#     T : {
+#         transitions : m.T.transitions()
+#     }
+# }
+
+# str = serialize()
+# deserialize(str)
+
+
+# for m in DES.modules
+#     console.log '( X E X )', m.name
+#     DES.BFS(m, (q, e, p) ->
+#         console.log '(', q, e, p, ')'
+#         )
+#     # 
+#     console.log 'States'
+#     console.table(m.X())
+#     console.log 'Marked states'
+#     console.table([m.X.marked()])
+
+
+# console.table(m.T.transitions().map(
+#     (v) -> {
+#         from : m.X.label.get(v[0])
+#         event : DES.E.label.get(v[1])
+#         to : m.X.label.get(v[2])
+#         }
+#     ))
+
+console.clear()
+
+
+# Events 
+events = [
+    { label : 'a'}
+    { label : 'b'}
+    { label : 'c'}
+    { label : 'd'}
+    { label : 'e'}
+    { label : 'f',  fault: true }
+    { label : 'o1',  observable: true }
+    { label : 'o2',  observable: true }
+]
+# 
+E = DES.E
+for e in events
+    i = E.add()
+    for key of e
+        E[key].set(i, e[key])
+# 
+console.table(E())
+
+
+# Helper function
+get_event_by_label = (label) ->
+    i = DES.E.size()
+    while i-- >0
+        break if DES.E.label.get(i) == label
+    i
+
+set_transitions = (m, transitions) ->
+    for t in transitions
+        if (eid = get_event_by_label(t[1])) >= 0
+            m.T.transitions.set(m.T.add(), t[0], eid, t[2])
+        else
+            console.log 'Error:', t[1], 'label not found'
     null
 
 
+# Transitions
+transitions = [
+    [0, 'f', 1]
+    [1, 'a', 2]
+    [2, 'o1', 3]
+    [3, 'b', 4]
+    [4, 'c', 4]
+    [0, 'o1', 5]
+    [5, 'c', 5]
+]
+m = DES.create_module('G1')
+set_transitions(m, transitions)
+
+transitions = [
+    [0, 'a', 1]
+    [1, 'd', 2]
+    [2, 'c', 2]
+    [0, 'c', 0]
+]
+m = DES.create_module('G2')
+set_transitions(m, transitions)
+
+transitions = [
+    [0, 'b', 1]
+    [1, 'e', 2]
+    [2, 'c', 2]
+    [0, 'c', 0]
+]
+m = DES.create_module('G3')
+set_transitions(m, transitions)
+
+transitions = [
+    [0, 'e', 1]
+    [1, 'o2', 2]
+    [2, 'd', 3]
+    [3, 'c', 3]
+    [0, 'c', 0]
+]
+m = DES.create_module('G4')
+set_transitions(m, transitions)
 
 
-o = {
-    name : m.name
-    T : {
-        transitions : m.T.transitions()
-    }
-}
 
-str = serialize()
-deserialize(str)
-
+show_transitions = (m) ->
+    console.log 'Transitions'
+    # Raw data of transitions
+    # console.table(m.T.transitions())
+    # Replace indexes by names
+    console.table(m.T.transitions().map(
+        (v) -> {
+            from : v[0] # m.X.label.get(v[0])
+            event : DES.E.label.get(v[1])
+            to : v[2]# m.X.label.get(v[2])
+            }
+        ))
 
 for m in DES.modules
-    console.log '( X E X )', m.name
-    DES.BFS(m, (q, e, p) ->
-        console.log '(', q, e, p, ')'
-        )
-    # 
-    console.log 'States'
-    console.table(m.X())
-    console.log 'Marked states'
-    console.table([m.X.marked()])
-
-
-console.table(m.T.transitions().map(
-    (v) -> {
-        from : m.X.label.get(v[0])
-        event : DES.E.label.get(v[1])
-        to : m.X.label.get(v[2])
-        }
-    ))
-
-
+    console.log 'Module', m.name
+    show_transitions(m)
