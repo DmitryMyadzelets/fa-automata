@@ -13,8 +13,8 @@ E_CONFIG = {
 
 # States
 X_CONFIG = {
-    x               : 'integer'
-    y               : 'integer'
+    # x               : 'integer'
+    # y               : 'integer'
     labels          : 'object'
     marked          : 'boolean'
     faulty          : 'boolean'
@@ -324,7 +324,7 @@ TRIPLE_SUBSET = () ->
     # Returns the maximal state stored in transition triples
     o.max_state = () ->
         i = 3*self.size()|0
-        max = 0
+        max = -1
         while i-- >0
             max = arr[i] if arr[i] > max
             i-=2
@@ -539,6 +539,10 @@ DES = {
             X : create_general_set(X_CONFIG)
         }
         module.name = name
+        # Add states from information of transitions
+        i = 1 + T.transitions.max_state()
+        module.X.add() while i-- >0
+        # Inital state
         module.X.start = 0
         module
     
@@ -806,8 +810,6 @@ for e in events
     for key of e
         E[key].set(i, e[key])
 #
-console.log 'Events' 
-console.table(E())
 
 
 
@@ -872,13 +874,18 @@ m = DES.create_module('G4 Motor')
 set_transitions(m, transitions)
 
 
+show_events = () ->
+    console.log 'Events' 
+    console.table(E())
+
+
 show_states = (m) ->
-    console.log 'States'
+    console.log 'States of module', m.name
     console.table(m.X())
 
 
 show_transitions = (m) ->
-    console.log 'Transitions'
+    console.log 'Transitions of module', m.name
     # Raw data of transitions
     # console.table(m.T.transitions())
     # Replace indexes by names
@@ -890,9 +897,10 @@ show_transitions = (m) ->
             }
         ))
 
-for m in DES.modules
-    console.log 'Module', m.name
-    show_transitions(m)
+
+show_modules_transitions = () ->
+    for m in DES.modules
+        show_transitions(m)
 
 
 # For each event define which modules use it
@@ -908,45 +916,82 @@ for m, index in DES.modules
             DES.E.modules.set(eid, modules)
         
 
-console.log 'Events with modules'
-console.table(E())
-
-# Breadth-First Search
-# m = DES.modules[0]
-# console.log 'Breadth-First Search for module', m.name
-# DES.BFS(m, (q, e, p)-> 
-#     console.log q, DES.E.labels.get(e), p
-#     )
-
+# console.log 'Events with modules'
+# console.table(E())
 
 # 
-# Faulty sublanguage
+# Marks faulty and non-faulty sublanguages
 # 
 faulty_sublanguage = (m) ->
-    console.log 'Faulty sublanguage of', m.name
     E = DES.E
+    X = m.X
     DES.DFS(m
         (q, e, p) ->
-            if E.fault.get(e) or m.X.faulty.get(q)
-                m.X.faulty.set(p)
+            if E.fault.get(e) or X.faulty.get(q)
+                X.faulty.set(p)
             else
-                m.X.in_nonfaulty.set(p)
+                if X.faulty.get(p)
+                    X.in_faulty.set(p)
+                else
+                    X.in_nonfaulty.set(p)
             return
         (q, e, p) ->
-            m.X.in_faulty.set(q) if m.X.faulty.get(p) or m.X.in_faulty.get(p)
-            m.X.in_nonfaulty.set(q) if m.X.in_nonfaulty.get(p)
+            X.in_faulty.set(q) if (X.faulty.get(p) or X.in_faulty.get(p))
+            X.in_nonfaulty.set(q) if X.in_nonfaulty.get(p)
             return
         )
-
     return
 
-faulty_sublanguage(DES.modules[0])
 
-show_states(DES.modules[0])
+# Returns faulty projection
+faulty_projection = (m, events) ->
+    T = create_general_set(T_CONFIG)
+    # Get transitons only of faulty language
+    DES.BFS(m, (q, e, p) ->
+        T.transitions.set(T.add(), q, e, p) if m.X.in_faulty.get(p)
+        )
+
+    # Transitons of projection
+    PT = create_general_set(T_CONFIG)
+    P = DES.make_module_from_T(PT, 'Faulty Projection')
+    # 
+    T.transitions.projection(m.X.start, events,
+        # 'q' and 'p' refer to new states of projection
+        # 'qq' and 'pp' refer to set of original states
+        (q, e, p, qq, pp) ->
+            # Enumerate composed successor state
+            for i in pp
+                # if it least one state is in faulty language
+                if m.X.in_faulty.get(i)
+                    PT.transitions.set(PT.add(), q, e, p)
+                    # how many states are missing
+                    n = p - P.X.size() + 1
+                    # add states if necessary
+                    P.X.add() while n-- >0
+                    # Mark state as faulty parent's state is faulty
+                    P.X.faulty.set(p) if m.X.faulty.get(i)
+                    break
+            return
+        )
+    P
+
+
+show_events()
+# show_modules_transitions()
+
+m = DES.modules[0]
+faulty_sublanguage(m)
+p = faulty_projection(m, [6])
+faulty_sublanguage(p)
+
+
+show_states(m)
+show_states(p)
 
 console.log 'Depth-First Search'
-DES.modules[0].T.transitions.dfs(0, (q, e, p)->
-    console.log q, DES.E.labels.get(e), p
+p.T.transitions.dfs(0, (q, e, p)->
+    # if m.X.in_nonfaulty.get(q) and m.X.in_nonfaulty.get(p)
+        console.log q, DES.E.labels.get(e), p
     )
 
 # # Projection
