@@ -4,7 +4,7 @@
 
 # Events
 E_CONFIG = {
-    label           : 'object'
+    labels          : 'object'
     observable      : 'boolean'
     fault           : 'boolean'
     # controllable    : 'boolean'
@@ -15,9 +15,11 @@ E_CONFIG = {
 X_CONFIG = {
     x               : 'integer'
     y               : 'integer'
-    label           : 'object'
+    labels          : 'object'
     marked          : 'boolean'
     faulty          : 'boolean'
+    in_faulty       : 'boolean'
+    in_nonfaulty    : 'boolean'
 }
 
 # Transitions
@@ -37,10 +39,9 @@ class bitArray
         # Privat mebers of the instance
         # 
         # 
-        o = {
-            # self : @
-            num_bits : if bits then bits else 0    # Number of bits
-        }
+        o = {}
+        # Number of bits
+        o.num_bits = if bits then bits else 0
         # Number of items in array
         o.num_items = 1 + b2i(@num_bits) 
         o.array = new Uint16Array(o.num_items)
@@ -351,14 +352,10 @@ TRIPLE_SUBSET = () ->
 
         # Maximal state index
         max = o.max_state()
-        # Each item of array contains 16 bits
-        # visited = new Uint16Array(1 + (max>>4))
-        # setUint16ArrayBit(visited, start)
         visited = new bitArray(1+max)
         visited.set(start)
 
         stack = [start]
-
 
         while stack.length
             q = stack.pop()
@@ -368,12 +365,40 @@ TRIPLE_SUBSET = () ->
                 t = o.get(i) #TODO : improve the speed
                 e = t[1]
                 p = t[2]
-                # if !getUint16ArrayBit(visited, p)
-                #     setUint16ArrayBit(visited, p)
                 if !visited.get(p)
                     visited.set(p)
                     stack.push(p)
                 fnc(q, e, p) if has_callback
+
+        visited = null
+        return
+
+
+
+    # Depth-First Search
+    # start - initial state
+    # callback_before - called before successor states processed
+    # callback_after - called after successor states processed
+    o.dfs = (start, callback_before, callback_after) ->
+        o.sort()
+        has_callback_b = typeof callback_before == 'function'
+        has_callback_a = typeof callback_after == 'function'
+        visited = new bitArray(1 + o.max_state())
+
+        process_state = (q) ->
+            visited.set(q)
+            # array of transitions' indexes with 'q' out state
+            ii = o.out(q) #TODO : improve the speed
+            for i in ii
+                t = o.get(i) #TODO : improve the speed
+                e = t[1]
+                p = t[2]
+                callback_before(q, e, p) if has_callback_b
+                process_state(p) if !visited.get(p)
+                callback_after(q, e, p) if has_callback_a
+            return
+
+        process_state(start)
 
         visited = null
         return
@@ -524,17 +549,23 @@ DES = {
 
     # Breadth-First Search
     # Calls the callback function 'fnc' at each transition
-    BFS : (module, fnc) -> module.T.transitions.bfs(module.X.start, fnc)
+    BFS : (module, callback) -> module.T.transitions.bfs(module.X.start, callback)
+
+    # Depth-First Search
+    # Calls the callback functions at each transition,
+    # before and after the successor state processed
+    DFS : (module, before, after) -> 
+        module.T.transitions.dfs(module.X.start, before, after)
 
     # Returns a projection of the module (set of transitions only)
     # Events which are not in 'events' are replaced with '0'
-    Projection : (module, events) -> 
-        T = create_general_set(T_CONFIG)
-        @BFS(module, (q, e, p) ->
-            e = 0 if events.indexOf(e) < 0
-            T.transitions.set(T.add(), q, e, p)
-            )
-        T
+    # Projection : (module, events) -> 
+    #     T = create_general_set(T_CONFIG)
+    #     @BFS(module, (q, e, p) ->
+    #         e = 0 if events.indexOf(e) < 0
+    #         T.transitions.set(T.add(), q, e, p)
+    #         )
+    #     T
 
 }
 
@@ -566,10 +597,10 @@ console.clear()
 # # Events
 # # 
 # e = DES.E # just shortcut
-# # Add new event and set its label
-# e.label.set(e.add(), 'open')
+# # Add new event and set its labels
+# e.labels.set(e.add(), 'open')
 # # Add another event
-# e.label.set(i = e.add(), 'close')
+# e.labels.set(i = e.add(), 'close')
 # # The event is observable
 # e.observable.set(i)
 # # Show events in console of your browser (Chrome)
@@ -590,10 +621,10 @@ console.clear()
 # # Create new state
 # i = m.X.add()
 # # Define values
-# m.X.x.set(i, 12).y.set(i, 57).label.set(i, 'Initial').marked.set(i)
+# m.X.x.set(i, 12).y.set(i, 57).labels.set(i, 'Initial').marked.set(i)
 # # Add another state and define values
 # i = m.X.add()
-# m.X.label.set(i, 'NF')
+# m.X.labels.set(i, 'NF')
 # m.X.faulty.set(i, 'F')
 # # 
 # console.log 'States'
@@ -622,14 +653,14 @@ console.clear()
 # # Replace indexes by names
 # console.table(m.T.transitions().map(
 #     (v) -> {
-#         from : m.X.label.get(v[0])
-#         event : DES.E.label.get(v[1])
-#         to : m.X.label.get(v[2])
+#         from : m.X.labels.get(v[0])
+#         event : DES.E.labels.get(v[1])
+#         to : m.X.labels.get(v[2])
 #         }
 #     ))
 
 
-# # Depth-First Search
+# # Breadth-First Search
 # console.log 'Breadth-First Search'
 # console.log '( X E X )', m.name
 # DES.BFS(m, (q, e, p) ->
@@ -715,7 +746,7 @@ console.clear()
 #             ix = module.X.add()
 #             module.X.x.set(ix, X.x)
 #             module.X.y.set(ix, X.y)
-#             module.X.label.set(ix, X.label)
+#             module.X.labels.set(ix, X.labels)
 #             module.X.marked.set(ix) if X.marked
 #             module.X.faulty.set(ix) if X.faulty
 #     null
@@ -748,9 +779,9 @@ console.clear()
 
 # console.table(m.T.transitions().map(
 #     (v) -> {
-#         from : m.X.label.get(v[0])
-#         event : DES.E.label.get(v[1])
-#         to : m.X.label.get(v[2])
+#         from : m.X.labels.get(v[0])
+#         event : DES.E.labels.get(v[1])
+#         to : m.X.labels.get(v[2])
 #         }
 #     ))
 
@@ -759,14 +790,14 @@ console.clear()
 
 # Events 
 events = [
-    { label : 'a'}
-    { label : 'b'}
-    { label : 'c'}
-    { label : 'd'}
-    { label : 'e'}
-    { label : 'f',  fault: true }
-    { label : 'o1',  observable: true }
-    { label : 'o2',  observable: true }
+    { labels : 'a'}
+    { labels : 'b'}
+    { labels : 'c'}
+    { labels : 'd'}
+    { labels : 'e'}
+    { labels : 'f',  fault: true }
+    { labels : 'o1',  observable: true }
+    { labels : 'o2',  observable: true }
 ]
 # 
 E = DES.E
@@ -781,18 +812,21 @@ console.table(E())
 
 
 # Helper function
-get_event_by_label = (label) ->
+get_event_by_labels = (labels) ->
     i = DES.E.size()
     while i-- >0
-        break if DES.E.label.get(i) == label
+        break if DES.E.labels.get(i) == labels
     i
 
 set_transitions = (m, transitions) ->
     for t in transitions
-        if (eid = get_event_by_label(t[1])) >= 0
+        if (eid = get_event_by_labels(t[1])) >= 0
             m.T.transitions.set(m.T.add(), t[0], eid, t[2])
         else
-            console.log 'Error:', t[1], 'label not found'
+            console.log 'Error:', t[1], 'labels not found'
+    # Define states
+    i = 1 + m.T.transitions.max_state()
+    m.X.add() while i-- >0
     null
 
 
@@ -838,6 +872,10 @@ m = DES.create_module('G4 Motor')
 set_transitions(m, transitions)
 
 
+show_states = (m) ->
+    console.log 'States'
+    console.table(m.X())
+
 
 show_transitions = (m) ->
     console.log 'Transitions'
@@ -846,9 +884,9 @@ show_transitions = (m) ->
     # Replace indexes by names
     console.table(m.T.transitions().map(
         (v) -> {
-            from : v[0] # m.X.label.get(v[0])
-            event : DES.E.label.get(v[1])
-            to : v[2]# m.X.label.get(v[2])
+            from : v[0] # m.X.labels.get(v[0])
+            event : DES.E.labels.get(v[1])
+            to : v[2]# m.X.labels.get(v[2])
             }
         ))
 
@@ -857,6 +895,7 @@ for m in DES.modules
     show_transitions(m)
 
 
+# For each event define which modules use it
 for m, index in DES.modules
     i = m.T.size()
     while i-- >0
@@ -869,10 +908,67 @@ for m, index in DES.modules
             DES.E.modules.set(eid, modules)
         
 
-
+console.log 'Events with modules'
 console.table(E())
 
+# Breadth-First Search
+# m = DES.modules[0]
+# console.log 'Breadth-First Search for module', m.name
+# DES.BFS(m, (q, e, p)-> 
+#     console.log q, DES.E.labels.get(e), p
+#     )
 
 
-# @c = new bitArray()
-# @d = new bitArray()
+# 
+# Faulty sublanguage
+# 
+faulty_sublanguage = (m) ->
+    console.log 'Faulty sublanguage of', m.name
+    E = DES.E
+    DES.DFS(m
+        (q, e, p) ->
+            if E.fault.get(e) or m.X.faulty.get(q)
+                m.X.faulty.set(p)
+            else
+                m.X.in_nonfaulty.set(p)
+            return
+        (q, e, p) ->
+            m.X.in_faulty.set(q) if m.X.faulty.get(p) or m.X.in_faulty.get(p)
+            m.X.in_nonfaulty.set(q) if m.X.in_nonfaulty.get(p)
+            return
+        )
+
+    return
+
+faulty_sublanguage(DES.modules[0])
+
+show_states(DES.modules[0])
+
+console.log 'Depth-First Search'
+DES.modules[0].T.transitions.dfs(0, (q, e, p)->
+    console.log q, DES.E.labels.get(e), p
+    )
+
+# # Projection
+# visible = [6, 7]
+# console.log 'Projection of module', m.name, 'to events', visible.map((e)->DES.E.labels.get(e))
+# # Create new object to store result of projection
+# T = create_general_set(T_CONFIG)
+# XX = [] # Array of composed states
+# m.T.transitions.projection(m.X.start, visible, (q, e, p, qq, pp) ->
+#     T.transitions.set(T.add(), q, e, p)
+#     XX[q] = qq if not XX[q]
+#     XX[p] = pp if not XX[p]
+#     # console.log q, e, p, qq, pp
+#     )
+# # States of each transition in T have mapping to non-determenistic member of XX
+# m = DES.make_module_from_T(T)
+# console.log '( X E X )'
+# DES.BFS(m, (q, e, p) ->
+#     console.log '(', q, DES.E.labels.get(e), p, ')'
+#     )
+# console.log 'Projection with mapped states'
+# DES.BFS(m, (q, e, p) ->
+#     console.log XX[q], DES.E.labels.get(e), XX[p]
+#     )
+
