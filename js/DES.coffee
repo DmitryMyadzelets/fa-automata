@@ -27,6 +27,68 @@ T_CONFIG = {
 }
 
 
+###############################################################################
+# 
+# Set of bits - array implmentation
+# 
+# 
+class bitArray 
+    constructor : (bits) -> 
+        # Privat mebers of the instance
+        # 
+        # 
+        o = {
+            # self : @
+            num_bits : if bits then bits else 0    # Number of bits
+        }
+        # Number of items in array
+        o.num_items = 1 + b2i(@num_bits) 
+        o.array = new Uint16Array(o.num_items)
+        # Public members of the instance
+        # 
+        # Returns privat object if called from prototype.
+        # This way we protect access to privat members by user, and
+        # can access to privat members from prototype.
+        @privat = () -> o if @ is bitArray.prototype
+
+    # Prototype privat members (common for all instances)
+    # 
+    # 
+    privat = null
+    # bit to item calculation for Uint16
+    b2i = (bit) -> (bit >> 4)|0
+    # Risizes array its size is not small or small
+    resize = (bits) ->
+        len = 1|0 + b2i(bits)
+        if len ^ @array.length
+            if len > @array.length
+                tmp = new Uint16Array(len)
+                tmp.set(@array)
+            else # len < arraylength
+                tmp = new Uint16Array(@array.subarray(0, len))
+            @array = tmp
+        bits
+
+
+    # Prototype public members (common for all instances)
+    # 
+    # 
+    add : () -> 
+        privat = @privat.apply(@__proto__)
+        resize.apply(privat, [privat.num_bits+=1])
+
+    set : (i) -> 
+        privat = @privat.apply(@__proto__)
+        privat.array[i>>4] |= 1 << (i & 0xF) if i<privat.num_bits
+        return
+
+    get : (i) -> 
+        privat = @privat.apply(@__proto__)
+        !!(privat.array[i>>4] & 1 << (i & 0xF)) if i<privat.num_bits
+
+    length : () -> @privat.apply(@__proto__).num_bits
+
+
 
 ###############################################################################
 # 
@@ -37,9 +99,9 @@ T_CONFIG = {
 ARRAY_INCREMENT = 10|0 # size of increment
 
 
-getUint16ArrayBit = (arr, i) -> !!(arr[i>>4] & 1 << (i & 0xF))
-setUint16ArrayBit = (arr, i) -> arr[i>>4] |= 1 << (i & 0xF)
-clrUint16ArrayBit = (arr, i) -> arr[i>>4] &= ~(1 << (i & 0xF))
+# getUint16ArrayBit = (arr, i) -> !!(arr[i>>4] & 1 << (i & 0xF))
+# setUint16ArrayBit = (arr, i) -> arr[i>>4] |= 1 << (i & 0xF)
+# clrUint16ArrayBit = (arr, i) -> arr[i>>4] &= ~(1 << (i & 0xF))
 
 
 
@@ -57,11 +119,13 @@ resizeUint16Array = (arr, len) ->
 
 # The same as above for Uint32Array
 resizeUint32Array = (arr, len) ->
-    if len > arr.length
-        ret = new Uint32Array(len)
-        ret.set(arr)
-    else # len < arr.length
-        ret = new Uint32Array(arr.subarray(0, len))
+    ret = arr
+    if len ^ arr.length
+        if len > arr.length
+            ret = new Uint32Array(len)
+            ret.set(arr)
+        else # len < arr.length
+            ret = new Uint32Array(arr.subarray(0, len))
     ret
 
 
@@ -79,20 +143,20 @@ delUint16ArrayBit = (arr, i, bits_len) ->
 
 
 # Returns an array of indexs of the array wich are true
-enumUint16ArrayBit = (arr, len) ->
-    ret = []
-    i = 0
-    l = arr.length
-    while (i < l)
-        v = arr[i]
-        m = 0
-        n = i*16
-        while v and n+m < len
-            ret.push(n+m) if (v & 1)
-            v >>= 1
-            m++
-        i++
-    ret
+# enumUint16ArrayBit = (arr, len) ->
+#     ret = []
+#     i = 0
+#     l = arr.length
+#     while (i < l)
+#         v = arr[i]
+#         m = 0
+#         n = i*16
+#         while v and n+m < len
+#             ret.push(n+m) if (v & 1)
+#             v >>= 1
+#             m++
+#         i++
+#     ret
 
 
 
@@ -174,20 +238,20 @@ sortIndexArray = (a, ix, len) ->
 
 ###############################################################################
 
-BINARY_SUBSET = () -> 
-    arr = new Uint16Array(1)
-    self = @
-    o = () -> enumUint16ArrayBit(arr, self.size())
-    o.get = (i) -> getUint16ArrayBit(arr, i) if i < self.size()
-    o.set = (i) -> setUint16ArrayBit(arr, i) if i < self.size(); self
-    o.clr = (i) -> clrUint16ArrayBit(arr, i) if i < self.size(); self
-    # Works only when called by a parent, not user
-    o.add = () -> 
-        if @ == self
-            if (arr.length<<4) <= self.size()
-                arr = resizeUint16Array(arr, arr.length+1)
-        null
-    o
+# BINARY_SUBSET = () -> 
+#     arr = new Uint16Array(1)
+#     self = @
+#     o = () -> enumUint16ArrayBit(arr, self.size())
+#     o.get = (i) -> getUint16ArrayBit(arr, i) if i < self.size()
+#     o.set = (i) -> setUint16ArrayBit(arr, i) if i < self.size(); self
+#     o.clr = (i) -> clrUint16ArrayBit(arr, i) if i < self.size(); self
+#     # Works only when called by a parent, not user
+#     o.add = () -> 
+#         if @ == self
+#             if (arr.length<<4) <= self.size()
+#                 arr = resizeUint16Array(arr, arr.length+1)
+#         null
+#     o
 
 
 
@@ -288,10 +352,13 @@ TRIPLE_SUBSET = () ->
         # Maximal state index
         max = o.max_state()
         # Each item of array contains 16 bits
-        visited = new Uint16Array(1 + (max>>4))
-        setUint16ArrayBit(visited, start)
+        # visited = new Uint16Array(1 + (max>>4))
+        # setUint16ArrayBit(visited, start)
+        visited = new bitArray(1+max)
+        visited.set(start)
 
         stack = [start]
+
 
         while stack.length
             q = stack.pop()
@@ -301,12 +368,15 @@ TRIPLE_SUBSET = () ->
                 t = o.get(i) #TODO : improve the speed
                 e = t[1]
                 p = t[2]
-                if !getUint16ArrayBit(visited, p)
-                    setUint16ArrayBit(visited, p)
+                # if !getUint16ArrayBit(visited, p)
+                #     setUint16ArrayBit(visited, p)
+                if !visited.get(p)
+                    visited.set(p)
                     stack.push(p)
                 fnc(q, e, p) if has_callback
 
         visited = null
+        return
 
 
 
@@ -406,13 +476,15 @@ create_general_set = (config) ->
 
     o.size = () -> size
     o.add = () ->
-        @[key].add.apply(@) for key of config
+        # @[key].add.apply(@) for key of config
+        @[key].add() for key of config
         size++
 
     for key of config
         switch config[key]
             when 'boolean'
-                o[key] = BINARY_SUBSET.apply(o)
+                # o[key] = BINARY_SUBSET.apply(o)
+                o[key] = new bitArray()
             when 'integer'
                 o[key] = NUMBER_SUBSET.apply(o)
             when 'object'
@@ -707,6 +779,7 @@ console.log 'Events'
 console.table(E())
 
 
+
 # Helper function
 get_event_by_label = (label) ->
     i = DES.E.size()
@@ -798,3 +871,8 @@ for m, index in DES.modules
 
 
 console.table(E())
+
+
+
+# @c = new bitArray()
+# @d = new bitArray()
