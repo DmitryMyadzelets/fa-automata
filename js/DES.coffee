@@ -74,9 +74,9 @@ class bitArray
     # Prototype public members (common for all instances)
     # 
     # 
-    add : () -> 
+    add : (num = 1) -> 
         privat = @privat.apply(@__proto__)
-        resize.apply(privat, [privat.num_bits+=1])
+        resize.apply(privat, [privat.num_bits+=num])
 
     set : (i) -> 
         privat = @privat.apply(@__proto__)
@@ -500,7 +500,7 @@ create_general_set = (config) ->
 
 
     o.size = () -> size
-    o.add = () ->
+    o.add = (n=1) ->
         # @[key].add.apply(@) for key of config
         @[key].add() for key of config
         size++
@@ -793,23 +793,27 @@ console.clear()
 
 
 # Events 
-events = [
-    { labels : 'a'}
-    { labels : 'b'}
-    { labels : 'c'}
-    { labels : 'd'}
-    { labels : 'e'}
-    { labels : 'f',  fault: true }
-    { labels : 'o1',  observable: true }
-    { labels : 'o2',  observable: true }
-]
-# 
-E = DES.E
-for e in events
-    i = E.add()
-    for key of e
-        E[key].set(i, e[key])
-#
+(() ->
+    events = [
+        { labels : 'a'}
+        { labels : 'b'}
+        { labels : 'c'}
+        { labels : 'd'}
+        { labels : 'e'}
+        { labels : 'f',  fault: true }
+        { labels : 'o1',  observable: true }
+        { labels : 'o2',  observable: true }
+    ]
+    # 
+    E = DES.E
+    for e in events
+        i = E.add()
+        for key of e
+            E[key].set(i, e[key])
+    #
+
+)()
+
 
 
 
@@ -830,6 +834,47 @@ set_transitions = (m, transitions) ->
     i = 1 + m.T.transitions.max_state()
     m.X.add() while i-- >0
     null
+
+
+show_events = () ->
+    console.log 'Events' 
+    console.table(DES.E())
+
+
+show_states = (m) ->
+    console.log 'States of module', m.name
+    console.table(m.X())
+
+
+show_transitions = (m) ->
+    console.log 'Transitions of module', m.name
+    # Raw data of transitions
+    # console.table(m.T.transitions())
+    # Replace indexes by names
+    console.table(m.T.transitions().map(
+        (v) -> {
+            from : v[0] # m.X.labels.get(v[0])
+            event : DES.E.labels.get(v[1])
+            to : v[2]# m.X.labels.get(v[2])
+            }
+        ))
+
+
+show_modules_transitions = () ->
+    for m in DES.modules
+        show_transitions(m)
+    return
+
+
+
+show_dfs = (m) ->
+    console.log 'Depth-First Search of module', m.name
+    m.T.transitions.dfs(0, (q, e, p)->
+        # if m.X.in_nonfaulty.get(q) and m.X.in_nonfaulty.get(p)
+            console.log q, DES.E.labels.get(e), p
+        )
+    return
+
 
 
 # Transitions
@@ -873,47 +918,31 @@ transitions = [
 m = DES.create_module('G4 Motor')
 set_transitions(m, transitions)
 
-
-show_events = () ->
-    console.log 'Events' 
-    console.table(E())
-
-
-show_states = (m) ->
-    console.log 'States of module', m.name
-    console.table(m.X())
-
-
-show_transitions = (m) ->
-    console.log 'Transitions of module', m.name
-    # Raw data of transitions
-    # console.table(m.T.transitions())
-    # Replace indexes by names
-    console.table(m.T.transitions().map(
-        (v) -> {
-            from : v[0] # m.X.labels.get(v[0])
-            event : DES.E.labels.get(v[1])
-            to : v[2]# m.X.labels.get(v[2])
-            }
-        ))
-
-
-show_modules_transitions = () ->
-    for m in DES.modules
-        show_transitions(m)
+# This module is for partitioning to [non]faulty sublanguage
+transitions = [
+    [0, 'a', 1]
+    [1, 'b', 2]
+    [2, 'c', 2]
+    [2, 'f', 1]
+    [0, 'b', 3]
+]
+m = DES.create_module('[Non]faulty')
+set_transitions(m, transitions)
 
 
 # For each event define which modules use it
-for m, index in DES.modules
-    i = m.T.size()
-    while i-- >0
-        t = m.T.transitions.get(i)
-        eid = t[1]
-        modules = DES.E.modules.get(eid)
-        modules = [] if not modules
-        if index not in modules
-            modules.push(index)
-            DES.E.modules.set(eid, modules)
+(() ->
+    for m, index in DES.modules
+        i = m.T.size()
+        while i-- >0
+            t = m.T.transitions.get(i)
+            eid = t[1]
+            modules = DES.E.modules.get(eid)
+            modules = [] if not modules
+            if index not in modules
+                modules.push(index)
+                DES.E.modules.set(eid, modules)
+    )()
         
 
 # console.log 'Events with modules'
@@ -922,25 +951,98 @@ for m, index in DES.modules
 # 
 # Marks faulty and non-faulty sublanguages
 # 
-faulty_sublanguage = (m) ->
-    E = DES.E
-    X = m.X
-    DES.DFS(m
+# faulty_sublanguage = (m) ->
+#     E = DES.E
+#     X = m.X
+#     DES.DFS(m
+#         (q, e, p) ->
+#             if E.fault.get(e) or X.faulty.get(q)
+#                 X.faulty.set(p)
+#             else
+#                 if X.faulty.get(p)
+#                     X.in_faulty.set(p)
+#                 else
+#                     X.in_nonfaulty.set(p)
+#             return
+#         (q, e, p) ->
+#             X.in_faulty.set(q) if (X.faulty.get(p) or X.in_faulty.get(p))
+#             X.in_nonfaulty.set(q) if X.in_nonfaulty.get(p)
+#             return
+#         )
+#     return
+
+
+
+# 
+# Returns module such that it has determenistic faulty information w.r.t states
+# 
+make_NF_module = (m) ->
+    tt = m.T.transitions # caching
+    # Two arrays act as a set of tuples (state, fault)
+    map = [] # Indexes of original states
+    flt = [] # Flags of faulty
+    
+
+    T = create_general_set(T_CONFIG) # Transitions for new module
+    NF = DES.make_module_from_T(T, 'NF('+m.name+')') # Extended module
+
+    in_map = (q, fault) ->
+        i = map.length
+        while i-- >0
+            break if (map[i] == q) and (flt[i] == fault)
+        i
+
+    to_map = (q, fault) ->
+        map.push(q)
+        flt.push(fault)
+        # Add states
+        x = NF.X.add()
+        NF.X.faulty.set(x) if fault
+        # 
+        map.length-1
+
+    process_state = (q, fault) ->
+        qq = to_map(q, fault) # index of new state
+        fault = true if m.X.faulty.get(q)
+        ii = tt.out(q) #TODO : improve the speed
+        for i in ii
+            t = tt.get(i) #TODO : improve the speed
+            e = t[1]
+            p = t[2]
+            f = fault or DES.E.fault.get(e)
+            pp = in_map(p, f)
+            pp = process_state(p, f) if pp<0
+            # 
+            T.transitions.set(T.add(), qq, e, pp)
+        qq
+
+    process_state(m.X.start, false)
+    return NF
+
+
+
+make_N_module = (m) ->
+    T = create_general_set(T_CONFIG)
+    N = DES.make_module_from_T(T, 'N('+m.name+')')
+    DES.DFS(m, 
         (q, e, p) ->
-            if E.fault.get(e) or X.faulty.get(q)
-                X.faulty.set(p)
-            else
-                if X.faulty.get(p)
-                    X.in_faulty.set(p)
-                else
-                    X.in_nonfaulty.set(p)
-            return
-        (q, e, p) ->
-            X.in_faulty.set(q) if (X.faulty.get(p) or X.in_faulty.get(p))
-            X.in_nonfaulty.set(q) if X.in_nonfaulty.get(p)
-            return
+            if not DES.E.fault.get(e) and not m.X.faulty.get(q)
+                T.transitions.set(T.add(), q, e, p) 
         )
-    return
+    N
+
+
+
+make_F_module = (m) ->
+    T = create_general_set(T_CONFIG)
+    F = DES.make_module_from_T(T, 'F('+m.name+')')
+    DES.DFS(m,
+        (q, e, p) -> null
+        (q, e, p) ->
+            null
+        )
+    F
+
 
 
 # Returns faulty projection
@@ -976,23 +1078,28 @@ faulty_projection = (m, events) ->
     P
 
 
+
 show_events()
 # show_modules_transitions()
 
-m = DES.modules[0]
-faulty_sublanguage(m)
-p = faulty_projection(m, [6])
-faulty_sublanguage(p)
+(()->
+    m = DES.modules[DES.modules.length-1]
+    nf = make_NF_module(m)
+    n = make_N_module(nf)
+    # faulty_sublanguage(m)
+    # show_states(m)
+    show_dfs(nf)
+    show_states(nf)
+    show_dfs(n)    
+)()
 
 
-show_states(m)
-show_states(p)
 
-console.log 'Depth-First Search'
-p.T.transitions.dfs(0, (q, e, p)->
-    # if m.X.in_nonfaulty.get(q) and m.X.in_nonfaulty.get(p)
-        console.log q, DES.E.labels.get(e), p
-    )
+# p = faulty_projection(m, [6])
+# faulty_sublanguage(p)
+# show_states(p)
+
+
 
 # # Projection
 # visible = [6, 7]
