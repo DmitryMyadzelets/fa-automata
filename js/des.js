@@ -14,9 +14,7 @@
   X_CONFIG = {
     labels: 'object',
     marked: 'boolean',
-    faulty: 'boolean',
-    in_faulty: 'boolean',
-    in_nonfaulty: 'boolean'
+    faulty: 'boolean'
   };
 
   T_CONFIG = {
@@ -75,6 +73,13 @@
       privat = this.privat.apply(this.__proto__);
       if (i < privat.num_bits) {
         privat.array[i >> 4] |= 1 << (i & 0xF);
+      }
+    };
+
+    bitArray.prototype.clr = function(i) {
+      privat = this.privat.apply(this.__proto__);
+      if (i < privat.num_bits) {
+        privat.array[i >> 4] &= ~(1 << (i & 0xF));
       }
     };
 
@@ -701,7 +706,7 @@
 
   show_dfs = function(m) {
     console.log('Depth-First Search of module', m.name);
-    m.T.transitions.dfs(0, function(q, e, p) {
+    DES.DFS(m, function(q, e, p) {
       return console.log(q, DES.E.labels.get(e), p);
     });
   };
@@ -769,13 +774,13 @@
   })();
 
   make_NF_module = function(m) {
-    var NF, T, flt, in_map, map, process_state, to_map, tt;
+    var M, T, flt, in_map, map, process_state, to_map, tt;
 
     tt = m.T.transitions;
     map = [];
     flt = [];
     T = create_general_set(T_CONFIG);
-    NF = DES.make_module_from_T(T, 'NF(' + m.name + ')');
+    M = DES.make_module_from_T(T, 'NF(' + m.name + ')');
     in_map = function(q, fault) {
       var i;
 
@@ -792,9 +797,9 @@
 
       map.push(q);
       flt.push(fault);
-      x = NF.X.add();
+      x = M.X.add();
       if (fault) {
-        NF.X.faulty.set(x);
+        M.X.faulty.set(x);
       }
       return map.length - 1;
     };
@@ -821,33 +826,99 @@
       return qq;
     };
     process_state(m.X.start, false);
-    return NF;
+    return M;
   };
 
   make_N_module = function(m) {
-    var N, T;
+    var M, T, in_map, map, process_state, to_map, tt;
 
+    tt = m.T.transitions;
     T = create_general_set(T_CONFIG);
-    N = DES.make_module_from_T(T, 'N(' + m.name + ')');
-    DES.DFS(m, function(q, e, p) {
-      if (!DES.E.fault.get(e) && !m.X.faulty.get(q)) {
-        return T.transitions.set(T.add(), q, e, p);
+    M = DES.make_module_from_T(T, 'N(' + m.name + ')');
+    map = [];
+    in_map = function(q) {
+      var i;
+
+      i = map.length;
+      while (i-- > 0) {
+        if (map[i] === q) {
+          break;
+        }
       }
-    });
-    return N;
+      return i;
+    };
+    to_map = function(q) {
+      var x;
+
+      map.push(q);
+      x = M.X.add();
+      return map.length - 1;
+    };
+    process_state = function(q) {
+      var e, i, ii, p, pp, qq, t, _i, _len;
+
+      qq = to_map(q);
+      ii = tt.out(q);
+      for (_i = 0, _len = ii.length; _i < _len; _i++) {
+        i = ii[_i];
+        t = tt.get(i);
+        e = t[1];
+        p = t[2];
+        if (DES.E.fault.get(e) || m.X.faulty.get(p)) {
+          continue;
+        }
+        pp = in_map(p);
+        if (pp < 0) {
+          pp = process_state(p);
+        }
+        T.transitions.set(T.add(), qq, e, pp);
+      }
+      return qq;
+    };
+    process_state(m.X.start);
+    return M;
   };
 
   make_F_module = function(m) {
-    var F, T;
+    var M, T, faulty, in_map, map;
 
     T = create_general_set(T_CONFIG);
-    F = DES.make_module_from_T(T, 'F(' + m.name + ')');
+    M = DES.make_module_from_T(T, 'F(' + m.name + ')');
+    map = [];
+    faulty = new bitArray(m.X.size());
+    in_map = function(q) {
+      var i;
+
+      i = map.length;
+      while (i-- > 0) {
+        if (map[i] === q) {
+          break;
+        }
+      }
+      return i;
+    };
     DES.DFS(m, function(q, e, p) {
+      if (!faulty.get(p) && (m.X.faulty.get(q) || DES.E.fault.get(e))) {
+        faulty.set(p);
+        map.push(p);
+        M.X.faulty.set(M.X.add());
+      }
       return null;
     }, function(q, e, p) {
+      if (!faulty.get(q) && faulty.get(p)) {
+        faulty.set(q);
+        map.push(q);
+        M.X.add();
+      }
       return null;
     });
-    return F;
+    DES.DFS(m, function(q, e, p) {
+      if (faulty.get(p)) {
+        return T.transitions.set(T.add(), in_map(q), e, in_map(p));
+      }
+    });
+    M.X.start = in_map(m.X.start);
+    return M;
   };
 
   faulty_projection = function(m, events) {
@@ -885,14 +956,16 @@
   show_events();
 
   (function() {
-    var n, nf;
+    var f, n, nf;
 
     m = DES.modules[DES.modules.length - 1];
     nf = make_NF_module(m);
     n = make_N_module(nf);
-    show_dfs(nf);
-    show_states(nf);
-    return show_dfs(n);
+    f = make_F_module(nf);
+    show_dfs(n);
+    show_states(n);
+    show_dfs(f);
+    return show_states(f);
   })();
 
 }).call(this);

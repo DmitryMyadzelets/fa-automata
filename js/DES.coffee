@@ -18,8 +18,6 @@ X_CONFIG = {
     labels          : 'object'
     marked          : 'boolean'
     faulty          : 'boolean'
-    in_faulty       : 'boolean'
-    in_nonfaulty    : 'boolean'
 }
 
 # Transitions
@@ -82,6 +80,12 @@ class bitArray
         privat = @privat.apply(@__proto__)
         privat.array[i>>4] |= 1 << (i & 0xF) if i<privat.num_bits
         return
+
+    clr : (i) -> 
+        privat = @privat.apply(@__proto__)
+        privat.array[i>>4] &= ~(1 << (i & 0xF)) if i<privat.num_bits
+        return
+
 
     get : (i) -> 
         privat = @privat.apply(@__proto__)
@@ -869,7 +873,9 @@ show_modules_transitions = () ->
 
 show_dfs = (m) ->
     console.log 'Depth-First Search of module', m.name
-    m.T.transitions.dfs(0, (q, e, p)->
+    DES.DFS(m 
+    # m.T.transitions.dfs(, 
+        (q, e, p)->
         # if m.X.in_nonfaulty.get(q) and m.X.in_nonfaulty.get(p)
             console.log q, DES.E.labels.get(e), p
         )
@@ -948,30 +954,6 @@ set_transitions(m, transitions)
 # console.log 'Events with modules'
 # console.table(E())
 
-# 
-# Marks faulty and non-faulty sublanguages
-# 
-# faulty_sublanguage = (m) ->
-#     E = DES.E
-#     X = m.X
-#     DES.DFS(m
-#         (q, e, p) ->
-#             if E.fault.get(e) or X.faulty.get(q)
-#                 X.faulty.set(p)
-#             else
-#                 if X.faulty.get(p)
-#                     X.in_faulty.set(p)
-#                 else
-#                     X.in_nonfaulty.set(p)
-#             return
-#         (q, e, p) ->
-#             X.in_faulty.set(q) if (X.faulty.get(p) or X.in_faulty.get(p))
-#             X.in_nonfaulty.set(q) if X.in_nonfaulty.get(p)
-#             return
-#         )
-#     return
-
-
 
 # 
 # Returns module such that it has determenistic faulty information w.r.t states
@@ -984,7 +966,7 @@ make_NF_module = (m) ->
     
 
     T = create_general_set(T_CONFIG) # Transitions for new module
-    NF = DES.make_module_from_T(T, 'NF('+m.name+')') # Extended module
+    M = DES.make_module_from_T(T, 'NF('+m.name+')') # Extended module
 
     in_map = (q, fault) ->
         i = map.length
@@ -996,8 +978,8 @@ make_NF_module = (m) ->
         map.push(q)
         flt.push(fault)
         # Add states
-        x = NF.X.add()
-        NF.X.faulty.set(x) if fault
+        x = M.X.add()
+        M.X.faulty.set(x) if fault
         # 
         map.length-1
 
@@ -1017,31 +999,85 @@ make_NF_module = (m) ->
         qq
 
     process_state(m.X.start, false)
-    return NF
+    return M
 
 
 
 make_N_module = (m) ->
+    tt = m.T.transitions # caching
     T = create_general_set(T_CONFIG)
-    N = DES.make_module_from_T(T, 'N('+m.name+')')
-    DES.DFS(m, 
-        (q, e, p) ->
-            if not DES.E.fault.get(e) and not m.X.faulty.get(q)
-                T.transitions.set(T.add(), q, e, p) 
-        )
-    N
+    M = DES.make_module_from_T(T, 'N('+m.name+')')
+    map = []
+
+    in_map = (q) ->
+        i = map.length
+        while i-- >0
+            break if map[i] == q
+        i
+
+    to_map = (q) ->
+        map.push(q)
+        x = M.X.add()
+        map.length-1
+
+    process_state = (q) ->
+        qq = to_map(q)
+        ii = tt.out(q) #TODO : improve the speed
+        for i in ii
+            t = tt.get(i) #TODO : improve the speed
+            e = t[1]
+            p = t[2]
+            continue if DES.E.fault.get(e) or m.X.faulty.get(p)
+            pp = in_map(p)
+            pp = process_state(p) if pp<0
+            T.transitions.set(T.add(), qq, e, pp)
+        qq
+
+    process_state(m.X.start)
+    return M
 
 
 
 make_F_module = (m) ->
-    T = create_general_set(T_CONFIG)
-    F = DES.make_module_from_T(T, 'F('+m.name+')')
-    DES.DFS(m,
-        (q, e, p) -> null
+
+    T = create_general_set(T_CONFIG) # Transitions for new module
+    M = DES.make_module_from_T(T, 'F('+m.name+')') # Extended module
+
+    map = [] # Indexes of original states
+    faulty = new bitArray(m.X.size())
+
+    in_map = (q) ->
+        i = map.length
+        while i-- >0
+            break if (map[i] == q)
+        i
+
+    DES.DFS(m
         (q, e, p) ->
+            # Record states reachable by fault
+            if !faulty.get(p) and (m.X.faulty.get(q) or DES.E.fault.get(e))
+                faulty.set(p)
+                map.push(p)
+                M.X.faulty.set(M.X.add())
+            null
+                
+        (q, e, p) ->
+            # Record states co-reachable to fault
+            if !faulty.get(q) and faulty.get(p)
+                faulty.set(q)
+                map.push(q)
+                M.X.add()
             null
         )
-    F
+
+    DES.DFS(m
+        (q, e, p) ->
+            if faulty.get(p)
+                T.transitions.set(T.add(), in_map(q), e, in_map(p))
+        )
+
+    M.X.start = in_map(m.X.start)
+    return M
 
 
 
@@ -1086,18 +1122,15 @@ show_events()
     m = DES.modules[DES.modules.length-1]
     nf = make_NF_module(m)
     n = make_N_module(nf)
-    # faulty_sublanguage(m)
+    f = make_F_module(nf)
     # show_states(m)
-    show_dfs(nf)
-    show_states(nf)
-    show_dfs(n)    
+    # show_dfs(nf)
+    # show_states(nf)
+    show_dfs(n)
+    show_states(n)
+    show_dfs(f)
+    show_states(f)
 )()
-
-
-
-# p = faulty_projection(m, [6])
-# faulty_sublanguage(p)
-# show_states(p)
 
 
 
