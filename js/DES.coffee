@@ -1097,7 +1097,7 @@ make_projection = (m, events) ->
     # 
     m.T.transitions.projection(m.X.start, events,
         (q, e, p, qq, pp) ->
-            console.log q, DES.E.labels.get(e), p, qq, pp
+            # console.log q, DES.E.labels.get(e), p, qq, pp
             T.transitions.set(T.add(), q, e, p)
             # Note! Due to implementation of projection algorithm for transitions,
             # q == M.X.add() always, so the following marking is valid.
@@ -1117,46 +1117,46 @@ make_projection = (m, events) ->
 show_events()
 # show_modules_transitions()
  
- # Make projection to common events for each module
+# 
+# Make projection to common events for each module
+# 
 (() ->
     i = DES.modules.length
-    i = 1
     while i-- >0
-        # find common events
-        events = []
+        m = DES.modules[i]
+        # Find common events
+        m.common = []
         j = DES.E.size()
         while j-- >0
             modules = DES.E.modules.get(j)
             # A module shares this event if this event is owned by more 
             # then one module, one of which is the current one.
-            events.push(j) if (modules.length > 1)  and (i in modules)
+            m.common.push(j) if (modules.length > 1)  and (i in modules)
         # Create projection
-        m = DES.modules[i]
-        m.C = make_projection(m, events)
-        # 
-        show_dfs(m)
-        show_dfs(m.C)
+        m.C = make_projection(m, m.common)
     )()
 
 
+# 
+# Fault propagation algorithm. Preparation steps
 
 (() ->
-    m = DES.modules[DES.modules.length-1]
+    i = 0 # Index of faulty module
+    m = DES.modules[i]
+    # Extend module to determenistic wrt faulty states
     nf = make_NF_module(m)
+    # Make faulty and non-faulty sublanguages
     n = make_N_module(nf)
     f = make_F_module(nf)
-    # show_states(m)
-    show_dfs(nf)
-    show_states(nf)
-    show_dfs(n)
-    show_states(n)
-    show_dfs(f)
-    show_states(f)
     # 
     events = [1]
-    p = make_projection(f, [1])
-    show_dfs(p)
-    show_states(p)
+    m.N = make_projection(n, m.common)
+    m.F = make_projection(f, m.common)
+    # 
+    show_dfs(m.N)
+    show_states(m.N)
+    show_dfs(m.F)
+    show_states(m.F)
 )()
 
 

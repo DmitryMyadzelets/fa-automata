@@ -954,7 +954,6 @@
     m.T.transitions.projection(m.X.start, events, function(q, e, p, qq, pp) {
       var i, _i, _len, _results;
 
-      console.log(q, DES.E.labels.get(e), p, qq, pp);
       T.transitions.set(T.add(), q, e, p);
       if (q >= M.X.size()) {
         q = M.X.add();
@@ -982,45 +981,40 @@
   show_events();
 
   (function() {
-    var events, i, j, modules, _results;
+    var i, j, modules, _results;
 
     i = DES.modules.length;
-    i = 1;
     _results = [];
     while (i-- > 0) {
-      events = [];
+      m = DES.modules[i];
+      m.common = [];
       j = DES.E.size();
       while (j-- > 0) {
         modules = DES.E.modules.get(j);
         if ((modules.length > 1) && (__indexOf.call(modules, i) >= 0)) {
-          events.push(j);
+          m.common.push(j);
         }
       }
-      m = DES.modules[i];
-      m.C = make_projection(m, events);
-      show_dfs(m);
-      _results.push(show_dfs(m.C));
+      _results.push(m.C = make_projection(m, m.common));
     }
     return _results;
   })();
 
   (function() {
-    var events, f, n, nf, p;
+    var events, f, i, n, nf;
 
-    m = DES.modules[DES.modules.length - 1];
+    i = 0;
+    m = DES.modules[i];
     nf = make_NF_module(m);
     n = make_N_module(nf);
     f = make_F_module(nf);
-    show_dfs(nf);
-    show_states(nf);
-    show_dfs(n);
-    show_states(n);
-    show_dfs(f);
-    show_states(f);
     events = [1];
-    p = make_projection(f, [1]);
-    show_dfs(p);
-    return show_states(p);
+    m.N = make_projection(n, m.common);
+    m.F = make_projection(f, m.common);
+    show_dfs(m.N);
+    show_states(m.N);
+    show_dfs(m.F);
+    return show_states(m.F);
   })();
 
 }).call(this);
