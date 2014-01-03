@@ -409,30 +409,33 @@ TRIPLE_SUBSET = () ->
 
 
 
-    # Returns array of states reachable from state 'start', 
+    # Returns array of states reachable from set of states 
     # by events not in 'events' array
-    o.reach = (start, events) ->
-        stack = [start]
-        reach = [start]
-        while stack.length
-            q = stack.pop()
-            ii = o.out(q)
-            for i in ii
-                t = o.get(i)
-                e = t[1]
-                p = t[2]
-                if e not in events
-                    if p not in reach
-                        stack.push(p)
-                        reach.push(p)
+    o.reach = (qq, events) ->
+        reach = qq.slice()
+        stack = []
+        for q in qq
+            stack.push(q)
+            while stack.length
+                q = stack.pop()
+                ii = o.out(q)
+                for i in ii
+                    t = o.get(i)
+                    e = t[1]
+                    p = t[2]
+                    if e not in events
+                        if p not in reach
+                            stack.push(p)
+                            reach.push(p)
         reach.sort()
+
 
 
     # Makes a projection to 'events'
     o.projection = (start, events, callback) ->
         has_callback = typeof callback == 'function'
         # Initial reachable set of states
-        reach = o.reach(start, events)
+        reach = o.reach([start], events)
         # 
         stack = [reach]
         states = [reach]
@@ -446,9 +449,22 @@ TRIPLE_SUBSET = () ->
                 break if equal_arrays(states[i], state)
             i
         # 
+        # Maps each event to array of states
+        map = {}
+        to_map = (e, p) ->
+            if map[e]
+                map[e].push(p) if p not in map[e]
+            else
+                map[e] = [p]
+            return
+
+        clear_map = () ->  delete map[i] for e of map; return
+
+        # 
         while stack.length
             reach = stack.pop()
             qix = in_states(reach)
+            clear_map()
             # Check every single state in the set of states
             for q in reach
                 # Indexes of transitions from the state
@@ -461,16 +477,23 @@ TRIPLE_SUBSET = () ->
                     continue if e not in events
                     # Do this only if 'e' in 'events', since
                     # it will result in the same set of states
-                    next = o.reach(p, events)
-                    # Check if 'next' is in 'states' already
-                    ix = in_states(next)
-                    if ix < 0
-                        pix = states.length
-                        stack.push(next)
-                        states.push(next)
-                    else
-                        pix = ix
-                    callback(qix, e, pix, reach, next) if has_callback
+                    to_map(e, p)
+            # Now we have determenistic (wrt events) map:
+            # reach -> e1 -> pp
+            #             -> pp
+            #       -> e2 -> pp
+            # Next step is to find reachable set for each event
+            for e of map
+                next = o.reach(map[e], events)
+                ix = in_states(next)
+                if ix < 0
+                    pix = states.length
+                    stack.push(next)
+                    states.push(next)
+                else
+                    pix = ix
+                callback(qix, e, pix, reach, next) if has_callback
+
             qix++
         states
 
@@ -932,7 +955,7 @@ transitions = [
     [2, 'f', 1]
     [0, 'b', 3]
 ]
-m = DES.create_module('[Non]faulty')
+m = DES.create_module('Test')
 set_transitions(m, transitions)
 
 
@@ -955,6 +978,7 @@ set_transitions(m, transitions)
 # console.table(E())
 
 
+# =============================================================================
 # 
 # Returns module such that it has determenistic faulty information w.r.t states
 # 
@@ -1003,6 +1027,7 @@ make_NF_module = (m) ->
 
 
 
+# =============================================================================
 make_N_module = (m) ->
     tt = m.T.transitions # caching
     T = create_general_set(T_CONFIG)
@@ -1030,6 +1055,7 @@ make_N_module = (m) ->
             continue if DES.E.fault.get(e) or m.X.faulty.get(p)
             pp = in_map(p)
             pp = process_state(p) if pp<0
+            M.X.marked.set(pp) # Mark reachabe state
             T.transitions.set(T.add(), qq, e, pp)
         qq
 
@@ -1038,6 +1064,7 @@ make_N_module = (m) ->
 
 
 
+# =============================================================================
 make_F_module = (m) ->
 
     T = create_general_set(T_CONFIG) # Transitions for new module
@@ -1058,7 +1085,9 @@ make_F_module = (m) ->
             if !faulty.get(p) and (m.X.faulty.get(q) or DES.E.fault.get(e))
                 faulty.set(p)
                 map.push(p)
-                M.X.faulty.set(M.X.add())
+                x = M.X.add()
+                M.X.faulty.set(x)
+                M.X.marked.set(x) # Mark reachable faulty state
             null
                 
         (q, e, p) ->
@@ -1081,37 +1110,28 @@ make_F_module = (m) ->
 
 
 
-# Returns faulty projection
-faulty_projection = (m, events) ->
+# =============================================================================
+make_projection = (m, events) ->
     T = create_general_set(T_CONFIG)
-    # Get transitons only of faulty language
-    DES.BFS(m, (q, e, p) ->
-        T.transitions.set(T.add(), q, e, p) if m.X.in_faulty.get(p)
-        )
-
-    # Transitons of projection
-    PT = create_general_set(T_CONFIG)
-    P = DES.make_module_from_T(PT, 'Faulty Projection')
+    M = DES.make_module_from_T(T, 'P('+m.name+')')
+    M.X.start = 0 # start state is always 0 for projection
     # 
-    T.transitions.projection(m.X.start, events,
-        # 'q' and 'p' refer to new states of projection
-        # 'qq' and 'pp' refer to set of original states
+    m.T.transitions.projection(m.X.start, events,
         (q, e, p, qq, pp) ->
-            # Enumerate composed successor state
-            for i in pp
-                # if it least one state is in faulty language
-                if m.X.in_faulty.get(i)
-                    PT.transitions.set(PT.add(), q, e, p)
-                    # how many states are missing
-                    n = p - P.X.size() + 1
-                    # add states if necessary
-                    P.X.add() while n-- >0
-                    # Mark state as faulty parent's state is faulty
-                    P.X.faulty.set(p) if m.X.faulty.get(i)
-                    break
-            return
+            # console.log q, DES.E.labels.get(e), p, qq, pp
+            T.transitions.set(T.add(), q, e, p)
+            # Note! Due to implementation of projection algorithm for transitions,
+            # q == M.X.add() always, so the following marking is valid.
+            q = M.X.add() if q >= M.X.size()
+            p = M.X.add() if p >= M.X.size()
+            # Mark reachable state if at least one of source states is marked
+            if not M.X.marked.get(p)
+                for i in pp
+                    if m.X.marked.get(i)
+                        M.X.marked.set(p)
+                        break;
         )
-    P
+    M
 
 
 
@@ -1126,10 +1146,15 @@ show_events()
     # show_states(m)
     # show_dfs(nf)
     # show_states(nf)
-    show_dfs(n)
-    show_states(n)
+    # show_dfs(n)
+    # show_states(n)
     show_dfs(f)
     show_states(f)
+    # 
+    events = [1]
+    p = make_projection(f, [1])
+    show_dfs(p)
+    show_states(p)
 )()
 
 
