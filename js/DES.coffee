@@ -458,15 +458,15 @@ TRIPLE_SUBSET = () ->
                 map[e] = [p]
             return
 
-        clear_map = () ->  delete map[i] for e of map; return
+        clear_map = () ->  delete map[e] for e of map; return
 
         # 
         while stack.length
-            reach = stack.pop()
-            qix = in_states(reach)
+            qq = stack.pop()
+            qix = in_states(qq)
             clear_map()
             # Check every single state in the set of states
-            for q in reach
+            for q in qq
                 # Indexes of transitions from the state
                 ii = o.out(q)
                 for i in ii
@@ -475,24 +475,25 @@ TRIPLE_SUBSET = () ->
                     e = t[1]
                     p = t[2]
                     continue if e not in events
+                    # console.log '>', q, DES.E.labels.get(e), p
                     # Do this only if 'e' in 'events', since
                     # it will result in the same set of states
                     to_map(e, p)
             # Now we have determenistic (wrt events) map:
-            # reach -> e1 -> pp
-            #             -> pp
-            #       -> e2 -> pp
+            # qq -> e1 -> pp
+            #          -> pp
+            #    -> e2 -> pp
             # Next step is to find reachable set for each event
             for e of map
-                next = o.reach(map[e], events)
-                ix = in_states(next)
+                pp = o.reach(map[e], events)
+                ix = in_states(pp)
                 if ix < 0
                     pix = states.length
-                    stack.push(next)
-                    states.push(next)
+                    stack.push(pp)
+                    states.push(pp)
                 else
                     pix = ix
-                callback(qix, e, pix, reach, next) if has_callback
+                callback(qix, e, pix, qq, pp) if has_callback
 
             qix++
         states
@@ -713,28 +714,6 @@ console.clear()
 # console.log reach
 
 
-# # Projection
-# console.log 'Projection'
-# # Create new object to store result of projection
-# T = create_general_set(T_CONFIG)
-# XX = [] # Array of composed states
-# m.T.transitions.projection(m.X.start, [2, 3], (q, e, p, qq, pp) ->
-#     T.transitions.set(T.add(), q, e, p)
-#     XX[q] = qq if not XX[q]
-#     XX[p] = pp if not XX[p]
-#     # console.log q, e, p, qq, pp
-#     )
-# # States of each transition in T have mapping to non-determenistic member of XX
-# m = DES.make_module_from_T(T)
-# console.log '( X E X )'
-# DES.BFS(m, (q, e, p) ->
-#     console.log '(', q, e, p, ')'
-#     )
-# console.log 'Projection with mapped states'
-# DES.BFS(m, (q, e, p) ->
-#     console.log '(', XX[q], e, XX[p], ')'
-#     )
-
 
 
 # serialize = () ->
@@ -948,15 +927,15 @@ m = DES.create_module('G4 Motor')
 set_transitions(m, transitions)
 
 # This module is for partitioning to [non]faulty sublanguage
-transitions = [
-    [0, 'a', 1]
-    [1, 'b', 2]
-    [2, 'c', 2]
-    [2, 'f', 1]
-    [0, 'b', 3]
-]
-m = DES.create_module('Test')
-set_transitions(m, transitions)
+# transitions = [
+#     [0, 'a', 1]
+#     [1, 'b', 2]
+#     [2, 'c', 2]
+#     [2, 'f', 1]
+#     [0, 'b', 3]
+# ]
+# m = DES.create_module('Test')
+# set_transitions(m, transitions)
 
 
 # For each event define which modules use it
@@ -1118,7 +1097,7 @@ make_projection = (m, events) ->
     # 
     m.T.transitions.projection(m.X.start, events,
         (q, e, p, qq, pp) ->
-            # console.log q, DES.E.labels.get(e), p, qq, pp
+            console.log q, DES.E.labels.get(e), p, qq, pp
             T.transitions.set(T.add(), q, e, p)
             # Note! Due to implementation of projection algorithm for transitions,
             # q == M.X.add() always, so the following marking is valid.
@@ -1137,17 +1116,40 @@ make_projection = (m, events) ->
 
 show_events()
 # show_modules_transitions()
+ 
+ # Make projection to common events for each module
+(() ->
+    i = DES.modules.length
+    i = 1
+    while i-- >0
+        # find common events
+        events = []
+        j = DES.E.size()
+        while j-- >0
+            modules = DES.E.modules.get(j)
+            # A module shares this event if this event is owned by more 
+            # then one module, one of which is the current one.
+            events.push(j) if (modules.length > 1)  and (i in modules)
+        # Create projection
+        m = DES.modules[i]
+        m.C = make_projection(m, events)
+        # 
+        show_dfs(m)
+        show_dfs(m.C)
+    )()
 
-(()->
+
+
+(() ->
     m = DES.modules[DES.modules.length-1]
     nf = make_NF_module(m)
     n = make_N_module(nf)
     f = make_F_module(nf)
     # show_states(m)
-    # show_dfs(nf)
-    # show_states(nf)
-    # show_dfs(n)
-    # show_states(n)
+    show_dfs(nf)
+    show_states(nf)
+    show_dfs(n)
+    show_states(n)
     show_dfs(f)
     show_states(f)
     # 

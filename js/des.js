@@ -450,7 +450,7 @@
       return reach.sort();
     };
     o.projection = function(start, events, callback) {
-      var clear_map, e, has_callback, i, ii, in_states, ix, map, next, p, pix, q, qix, reach, stack, states, t, to_map, _i, _j, _len, _len1;
+      var clear_map, e, has_callback, i, ii, in_states, ix, map, p, pix, pp, q, qix, qq, reach, stack, states, t, to_map, _i, _j, _len, _len1;
 
       has_callback = typeof callback === 'function';
       reach = o.reach([start], events);
@@ -483,15 +483,15 @@
         var e;
 
         for (e in map) {
-          delete map[i];
+          delete map[e];
         }
       };
       while (stack.length) {
-        reach = stack.pop();
-        qix = in_states(reach);
+        qq = stack.pop();
+        qix = in_states(qq);
         clear_map();
-        for (_i = 0, _len = reach.length; _i < _len; _i++) {
-          q = reach[_i];
+        for (_i = 0, _len = qq.length; _i < _len; _i++) {
+          q = qq[_i];
           ii = o.out(q);
           for (_j = 0, _len1 = ii.length; _j < _len1; _j++) {
             i = ii[_j];
@@ -505,17 +505,17 @@
           }
         }
         for (e in map) {
-          next = o.reach(map[e], events);
-          ix = in_states(next);
+          pp = o.reach(map[e], events);
+          ix = in_states(pp);
           if (ix < 0) {
             pix = states.length;
-            stack.push(next);
-            states.push(next);
+            stack.push(pp);
+            states.push(pp);
           } else {
             pix = ix;
           }
           if (has_callback) {
-            callback(qix, e, pix, reach, next);
+            callback(qix, e, pix, qq, pp);
           }
         }
         qix++;
@@ -760,12 +760,6 @@
 
   set_transitions(m, transitions);
 
-  transitions = [[0, 'a', 1], [1, 'b', 2], [2, 'c', 2], [2, 'f', 1], [0, 'b', 3]];
-
-  m = DES.create_module('Test');
-
-  set_transitions(m, transitions);
-
   (function() {
     var eid, i, index, modules, t, _i, _len, _ref, _results;
 
@@ -960,6 +954,7 @@
     m.T.transitions.projection(m.X.start, events, function(q, e, p, qq, pp) {
       var i, _i, _len, _results;
 
+      console.log(q, DES.E.labels.get(e), p, qq, pp);
       T.transitions.set(T.add(), q, e, p);
       if (q >= M.X.size()) {
         q = M.X.add();
@@ -987,12 +982,39 @@
   show_events();
 
   (function() {
+    var events, i, j, modules, _results;
+
+    i = DES.modules.length;
+    i = 1;
+    _results = [];
+    while (i-- > 0) {
+      events = [];
+      j = DES.E.size();
+      while (j-- > 0) {
+        modules = DES.E.modules.get(j);
+        if ((modules.length > 1) && (__indexOf.call(modules, i) >= 0)) {
+          events.push(j);
+        }
+      }
+      m = DES.modules[i];
+      m.C = make_projection(m, events);
+      show_dfs(m);
+      _results.push(show_dfs(m.C));
+    }
+    return _results;
+  })();
+
+  (function() {
     var events, f, n, nf, p;
 
     m = DES.modules[DES.modules.length - 1];
     nf = make_NF_module(m);
     n = make_N_module(nf);
     f = make_F_module(nf);
+    show_dfs(nf);
+    show_states(nf);
+    show_dfs(n);
+    show_states(n);
     show_dfs(f);
     show_states(f);
     events = [1];
