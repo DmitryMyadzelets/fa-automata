@@ -1,5 +1,5 @@
 
-'use strict'
+'use strict' 
 
 # Returns bit state {true, false} of Uint32Array
 get_bit = (arr, i) -> !!(arr[i>>5] & 1 << (i & 0x1F))
