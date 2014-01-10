@@ -187,6 +187,10 @@ equal_arrays = (a, b) ->
 
 
 
+# Returns intersection of two arrays
+intersection = (A, B) -> A.filter((x) -> B.indexOf(x) >= 0)
+
+
 
 ###############################################################################
 #
@@ -499,6 +503,80 @@ TRIPLE_SUBSET = () ->
         states
 
 
+    # Makes parallel composition with another set of transitions
+    o.sync = (start, T2, start2, common, callback) ->
+        # console.log common.map((e)->DES.E.labels.get(e)).sort()
+        has_callback = typeof callback == 'function'
+        o2 = T2.transitions
+        # Map contains supporting triples (q1, q2), 
+        # where q1 \in G1, q2 \in G2.
+        map = [start, start2]
+        map_n = 1|0 # Number of items in the map
+        stack = [0]
+        # Adds transition to the new automaton.
+        # a - state of T1, reached by event 'e'
+        # b - state of T2, reached by event 'e'
+        # Thus, (a, b) is the next composed state.
+        add_transition = (e, a, b) ->
+            # Search if the composed state is in the map
+            i = 0
+            k = -1 # index in the map
+            n = map.length
+            while i<n
+                if map[i]==a and map[i+1]==b
+                    k = (i|0)>>1
+                    break
+                i+=2
+            # Calculate state 'p'
+            if k < 0
+                p = map_n++
+                stack.push(p)
+                map.push(a)
+                map.push(b)
+            else
+                p = k
+            # Note that 'q' is external w.r.t. this funcion
+            callback(q, e, p) if has_callback
+            return
+
+        while stack.length
+            q = stack.pop()
+            q1 = map[q*2]
+            q2 = map[q*2+1]
+
+            I = o.out(q1)
+            J = o2.out(q2)
+
+            # Synchronous transition function
+            # We have 5 states in BDD (binary decisision diagram) 
+            # for transitions of G1 and G2:
+            # 1 - none of the transition occures
+            # 2 - G1 does transition, G2 doesn't
+            # 3 - G2 does transition, G1 doesn't
+            # 4 - G1 ang G2 do one transition together
+            # 5 - G1 ang G2 do separate transitions
+
+            for i in I
+                t1 = o.get(i)
+                e1 = t1[1]
+                p1 = t1[2]
+                if e1 not in common
+                    add_transition(e1, p1, q2)
+                else
+                    for j in J
+                        t2 = o2.get(j)
+                        e2 = t2[1]
+                        p2 = t2[2]
+                        if e1 == e2
+                            add_transition(e1, p1, p2)
+            for j in J
+                t2 = o2.get(j)
+                e2 = t2[1]
+                p2 = t2[2]
+                if e2 not in common
+                    add_transition(e2, q1, p2)
+
+        return
 
     o
 
@@ -603,20 +681,6 @@ DES = {
 
 
 @DES = DES
-
-    
-#     # Search for a value
-#     idx = -1 
-#     G.X.x.enumerate((i, x) ->
-#         if x > 100
-#             idx = i
-#             return false
-#         true
-#     )
-    
-    
-#     G.X.marked.set(1, 5, 4)
-
 
 
 ###############################################################################
@@ -843,7 +907,7 @@ set_transitions = (m, transitions) ->
 
 
 show_events = () ->
-    console.log 'Events' 
+    console.log 'Events:'
     console.table(DES.E())
 
 
@@ -864,6 +928,14 @@ show_transitions = (m) ->
             to : v[2]# m.X.labels.get(v[2])
             }
         ))
+
+
+
+show_modules = () ->
+    console.log 'Modules:'
+    console.table(DES.modules)
+    return
+
 
 
 show_modules_transitions = () ->
@@ -937,8 +1009,9 @@ set_transitions(m, transitions)
 # m = DES.create_module('Test')
 # set_transitions(m, transitions)
 
-
-# For each event define which modules use it
+# 
+# Assign the modules to events.
+# 
 (() ->
     for m, index in DES.modules
         i = m.T.size()
@@ -953,13 +1026,10 @@ set_transitions(m, transitions)
     )()
         
 
-# console.log 'Events with modules'
-# console.table(E())
-
 
 # =============================================================================
 # 
-# Returns module such that it has determenistic faulty information w.r.t states
+# Returns module such that it has deterministic faulty information w.r.t states
 # 
 make_NF_module = (m) ->
     tt = m.T.transitions # caching
@@ -1109,11 +1179,37 @@ make_projection = (m, events) ->
                     if m.X.marked.get(i)
                         M.X.marked.set(p)
                         break;
+            return
         )
     M
 
 
 
+# =============================================================================
+make_sync = (m1, m2) ->
+    T = create_general_set(T_CONFIG)
+    M = DES.make_module_from_T(T, 'sync('+m.name+')')
+    M.X.start = 0 # start state is always 0
+    # Common eventS for both modules
+    common = intersection(m1.common, m2.common)
+    
+    m1.T.transitions.sync(m1.X.start, m2.T, m2.X.start, common,
+        (q, e, p) ->
+            # console.log '>', q, DES.E.labels.get(e), p
+            # console.log q, DES.E.labels.get(e), p, qq, pp
+            T.transitions.set(T.add(), q, e, p)
+            # Note! Due to implementation of projection algorithm for transitions,
+            # q == M.X.add() always, so the following marking is valid.
+            q = M.X.add() if q >= M.X.size()
+            p = M.X.add() if p >= M.X.size()
+            return
+        )
+    #  
+    M
+
+
+console.log '===================================================='
+show_modules()
 show_events()
 # show_modules_transitions()
  
@@ -1134,6 +1230,7 @@ show_events()
             m.common.push(j) if (modules.length > 1)  and (i in modules)
         # Create projection
         m.C = make_projection(m, m.common)
+        m.C.common = m.common
     )()
 
 
@@ -1152,35 +1249,15 @@ show_events()
     events = [1]
     m.N = make_projection(n, m.common)
     m.F = make_projection(f, m.common)
+    m.N.common = m.common
+    m.F.common = m.common
     # 
-    show_dfs(m.N)
-    show_states(m.N)
+    # show_dfs(m.N)
+    # show_states(m.N)
     show_dfs(m.F)
-    show_states(m.F)
+    # show_states(m.F)
+    # 
+    j = 1
+    s = make_sync(m.F, DES.modules[j].C)
+    show_dfs(s)
 )()
-
-
-
-# # Projection
-# visible = [6, 7]
-# console.log 'Projection of module', m.name, 'to events', visible.map((e)->DES.E.labels.get(e))
-# # Create new object to store result of projection
-# T = create_general_set(T_CONFIG)
-# XX = [] # Array of composed states
-# m.T.transitions.projection(m.X.start, visible, (q, e, p, qq, pp) ->
-#     T.transitions.set(T.add(), q, e, p)
-#     XX[q] = qq if not XX[q]
-#     XX[p] = pp if not XX[p]
-#     # console.log q, e, p, qq, pp
-#     )
-# # States of each transition in T have mapping to non-determenistic member of XX
-# m = DES.make_module_from_T(T)
-# console.log '( X E X )'
-# DES.BFS(m, (q, e, p) ->
-#     console.log '(', q, DES.E.labels.get(e), p, ')'
-#     )
-# console.log 'Projection with mapped states'
-# DES.BFS(m, (q, e, p) ->
-#     console.log XX[q], DES.E.labels.get(e), XX[p]
-#     )
-
