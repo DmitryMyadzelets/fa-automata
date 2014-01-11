@@ -401,9 +401,11 @@ TRIPLE_SUBSET = () ->
                 t = o.get(i) #TODO : improve the speed
                 e = t[1]
                 p = t[2]
-                callback_before(q, e, p) if has_callback_b
+                if has_callback_b
+                    break if not callback_before(q, e, p)
                 process_state(p) if !visited.get(p)
-                callback_after(q, e, p) if has_callback_a
+                if has_callback_a
+                    break if not callback_after(q, e, p) 
             return
 
         process_state(start)
@@ -503,82 +505,8 @@ TRIPLE_SUBSET = () ->
         states
 
 
-    # Makes parallel composition with another set of transitions
-    o.sync = (start, T2, start2, common, callback) ->
-        # console.log common.map((e)->DES.E.labels.get(e)).sort()
-        has_callback = typeof callback == 'function'
-        o2 = T2.transitions
-        # Map contains supporting triples (q1, q2), 
-        # where q1 \in G1, q2 \in G2.
-        map = [start, start2]
-        map_n = 1|0 # Number of items in the map
-        stack = [0]
-        # Adds transition to the new automaton.
-        # a - state of T1, reached by event 'e'
-        # b - state of T2, reached by event 'e'
-        # Thus, (a, b) is the next composed state.
-        add_transition = (e, a, b) ->
-            # Search if the composed state is in the map
-            i = 0
-            k = -1 # index in the map
-            n = map.length
-            while i<n
-                if map[i]==a and map[i+1]==b
-                    k = (i|0)>>1
-                    break
-                i+=2
-            # Calculate state 'p'
-            if k < 0
-                p = map_n++
-                stack.push(p)
-                map.push(a)
-                map.push(b)
-            else
-                p = k
-            # Note that 'q' is external w.r.t. this funcion
-            callback(q, e, p) if has_callback
-            return
-
-        while stack.length
-            q = stack.pop()
-            q1 = map[q*2]
-            q2 = map[q*2+1]
-
-            I = o.out(q1)
-            J = o2.out(q2)
-
-            # Synchronous transition function
-            # We have 5 states in BDD (binary decisision diagram) 
-            # for transitions of G1 and G2:
-            # 1 - none of the transition occures
-            # 2 - G1 does transition, G2 doesn't
-            # 3 - G2 does transition, G1 doesn't
-            # 4 - G1 ang G2 do one transition together
-            # 5 - G1 ang G2 do separate transitions
-
-            for i in I
-                t1 = o.get(i)
-                e1 = t1[1]
-                p1 = t1[2]
-                if e1 not in common
-                    add_transition(e1, p1, q2)
-                else
-                    for j in J
-                        t2 = o2.get(j)
-                        e2 = t2[1]
-                        p2 = t2[2]
-                        if e1 == e2
-                            add_transition(e1, p1, p2)
-            for j in J
-                t2 = o2.get(j)
-                e2 = t2[1]
-                p2 = t2[2]
-                if e2 not in common
-                    add_transition(e2, q1, p2)
-
-        return
-
     o
+
 
 
 
@@ -653,9 +581,13 @@ DES = {
         module
     
     create_module : (name) ->
-        module = @make_module_from_T(create_general_set(T_CONFIG), name)
-        @modules.push(module)
+        @make_module_from_T(create_general_set(T_CONFIG), name)
+
+
+    add_module : (name) ->
+        @modules.push(module = @create_module(name))
         module
+
 
     # Breadth-First Search
     # Calls the callback function 'fnc' at each transition
@@ -667,15 +599,179 @@ DES = {
     DFS : (module, before, after) -> 
         module.T.transitions.dfs(module.X.start, before, after)
 
-    # Returns a projection of the module (set of transitions only)
-    # Events which are not in 'events' are replaced with '0'
-    # Projection : (module, events) -> 
-    #     T = create_general_set(T_CONFIG)
-    #     @BFS(module, (q, e, p) ->
-    #         e = 0 if events.indexOf(e) < 0
-    #         T.transitions.set(T.add(), q, e, p)
-    #         )
-    #     T
+       
+    # Makes parallel composition with another set of transitions
+    # sync = (start, T2, start2, common, callback) ->
+    sync : (m1, m2, common) ->
+        T = create_general_set(T_CONFIG)
+        M = DES.make_module_from_T(T, 'sync('+m1.name+','+m2.name+')')
+        M.X.start = 0 # start state is always 0
+        # has_callback = typeof callback == 'function'
+        o = m1.T.transitions
+        o2 = m2.T.transitions
+        common = [] if not common
+        stack = []
+        # Map contains supporting triples (q1, q2), 
+        # where q1 \in G1, q2 \in G2.
+        map = []
+        map_n = 0 # Number of items in the map
+        to_map = (q1, q2) ->
+            map.push(q1)
+            map.push(q2)
+            # Marking
+            x = M.X.add()
+            M.X.marked.set(x) if m1.X.marked.get(q1) or m2.X.marked.get(q2)
+            # 
+            stack.push(map_n++)
+            map_n-1
+
+        in_map = (q1, q2) ->
+            i = 0
+            n = map.length
+            while i<n
+                return (i|0)>>1 if map[i]==q1 and map[i+1]==q2
+                i+=2
+            -1
+
+        to_map(m1.X.start, m2.X.start)
+
+        # Adds transition to the new automaton.
+        # a - state of T1, reached by event 'e'
+        # b - state of T2, reached by event 'e'
+        # Thus, (a, b) is the next composed state.
+        add_transition = (e, a, b) ->
+            # Search if the composed state is in the map
+            # Calculate state 'p'
+            p = to_map(a, b) if (p = in_map(a, b)) < 0
+            # Note that 'q' is external w.r.t. this funcion
+            # callback(q, e, p) if has_callback
+            # console.log '>', q, e, p, map, e, a, b
+            T.transitions.set(T.add(), q, e, p)
+            return
+
+        while stack.length
+            q = stack.pop()
+            q1 = map[q*2]
+            q2 = map[q*2+1]
+
+            I = o.out(q1)
+            J = o2.out(q2)
+
+            # Synchronous transition function
+            # We have 5 states in BDD (binary decisision diagram) 
+            # for transitions of G1 and G2:
+            # 1 - none of the transition occures
+            # 2 - G1 does transition, G2 doesn't
+            # 3 - G2 does transition, G1 doesn't
+            # 4 - G1 ang G2 do one transition together
+            # 5 - G1 ang G2 do separate transitions
+
+            for i in I
+                t1 = o.get(i)
+                e1 = t1[1]
+                p1 = t1[2]
+                if e1 not in common
+                    add_transition(e1, p1, q2)
+                else
+                    for j in J
+                        t2 = o2.get(j)
+                        e2 = t2[1]
+                        p2 = t2[2]
+                        if e1 == e2
+                            add_transition(e1, p1, p2)
+            for j in J
+                t2 = o2.get(j)
+                e2 = t2[1]
+                p2 = t2[2]
+                if e2 not in common
+                    add_transition(e2, q1, p2)
+
+        return M
+
+
+
+    intersection : (m1, m2) ->
+        T = create_general_set(T_CONFIG)
+        M = DES.make_module_from_T(T, 'cap('+m1.name+','+m2.name+')')
+        o = m1.T.transitions
+        o2 = m2.T.transitions
+        o = m1.T.transitions
+        o2 = m2.T.transitions
+        stack = []
+        # Map contains supporting triples (q1, q2), 
+        # where q1 \in G1, q2 \in G2.
+        map = []
+        map_n = 0 # Number of items in the map
+        to_map = (q1, q2) ->
+            map.push(q1)
+            map.push(q2)
+            # Marking
+            x = M.X.add()
+            M.X.marked.set(x) if m1.X.marked.get(q1) or m2.X.marked.get(q2)
+            # 
+            stack.push(map_n++)
+            map_n-1
+
+        in_map = (q1, q2) ->
+            i = 0
+            n = map.length
+            while i<n
+                return (i|0)>>1 if map[i]==q1 and map[i+1]==q2
+                i+=2
+            -1
+
+        to_map(m1.X.start, m2.X.start)
+
+        # Adds transition to the new automaton.
+        # a - state of T1, reached by event 'e'
+        # b - state of T2, reached by event 'e'
+        # Thus, (a, b) is the next composed state.
+        add_transition = (e, a, b) ->
+            # to_map(a, b)
+            p = to_map(a, b) if (p = in_map(a, b)) < 0
+            T.transitions.set(T.add(), q, e, p)
+            # T.transitions.set(T.add(), q, e, a)
+            return
+
+        while stack.length
+            q = stack.pop()
+            q1 = map[q*2]
+            q2 = map[q*2+1]
+
+            I = o.out(q1)
+            J = o2.out(q2)
+
+            for i in I
+                t1 = o.get(i)
+                e1 = t1[1]
+                p1 = t1[2]
+                for j in J
+                    t2 = o2.get(j)
+                    e2 = t2[1]
+                    p2 = t2[2]
+                    if e1 == e2
+                        add_transition(e1, p1, p2)
+
+        return M
+
+
+    # Performes Kleen closure on the module (marks all reachable states)
+    closure : (m) ->
+        @BFS(m, (q, e, p) -> m.X.marked.set(p))
+        m
+
+
+
+    # Subtracts language of module 2 from language of module 1
+    subtract : (m1, m2) ->
+        @DFS(m1,
+            null,
+            (q, e, p) ->
+                true
+            )
+        return
+
+
 
 }
 
@@ -707,7 +803,7 @@ console.clear()
 # # Modules
 # # 
 # # Create new module
-# m = DES.create_module('Motor')
+# m = DES.add_module('Motor')
 # console.log 'Modules'
 # console.table(DES.modules)
 
@@ -804,7 +900,7 @@ console.clear()
 #     i = o.length
 #     while i-- >0
 #         m = o[i]
-#         module = DES.create_module(m.name)
+#         module = DES.add_module(m.name)
 #         # 
 #         T = m.T.length
 #         for T in m.T
@@ -894,6 +990,8 @@ get_event_by_labels = (labels) ->
         break if DES.E.labels.get(i) == labels
     i
 
+
+
 set_transitions = (m, transitions) ->
     for t in transitions
         if (eid = get_event_by_labels(t[1])) >= 0
@@ -906,14 +1004,17 @@ set_transitions = (m, transitions) ->
     null
 
 
+
 show_events = () ->
     console.log 'Events:'
     console.table(DES.E())
 
 
+
 show_states = (m) ->
     console.log 'States of module', m.name
     console.table(m.X())
+
 
 
 show_transitions = (m) ->
@@ -952,6 +1053,7 @@ show_dfs = (m) ->
         (q, e, p)->
         # if m.X.in_nonfaulty.get(q) and m.X.in_nonfaulty.get(p)
             console.log q, DES.E.labels.get(e), p
+            true
         )
     return
 
@@ -967,7 +1069,7 @@ transitions = [
     [0, 'o1', 5]
     [5, 'c', 5]
 ]
-m = DES.create_module('G1')
+m = DES.add_module('G1')
 set_transitions(m, transitions)
 
 transitions = [
@@ -976,7 +1078,7 @@ transitions = [
     [2, 'c', 2]
     [0, 'c', 0]
 ]
-m = DES.create_module('G2')
+m = DES.add_module('G2')
 set_transitions(m, transitions)
 
 transitions = [
@@ -985,7 +1087,7 @@ transitions = [
     [2, 'c', 2]
     [0, 'c', 0]
 ]
-m = DES.create_module('G3 Valve')
+m = DES.add_module('G3 Valve')
 set_transitions(m, transitions)
 
 transitions = [
@@ -995,7 +1097,7 @@ transitions = [
     [3, 'c', 3]
     [0, 'c', 0]
 ]
-m = DES.create_module('G4 Motor')
+m = DES.add_module('G4 Motor')
 set_transitions(m, transitions)
 
 # This module is for partitioning to [non]faulty sublanguage
@@ -1006,7 +1108,7 @@ set_transitions(m, transitions)
 #     [2, 'f', 1]
 #     [0, 'b', 3]
 # ]
-# m = DES.create_module('Test')
+# m = DES.add_module('Test')
 # set_transitions(m, transitions)
 
 # 
@@ -1137,7 +1239,7 @@ make_F_module = (m) ->
                 x = M.X.add()
                 M.X.faulty.set(x)
                 M.X.marked.set(x) # Mark reachable faulty state
-            null
+            true
                 
         (q, e, p) ->
             # Record states co-reachable to fault
@@ -1145,13 +1247,14 @@ make_F_module = (m) ->
                 faulty.set(q)
                 map.push(q)
                 M.X.add()
-            null
+            true
         )
 
     DES.DFS(m
         (q, e, p) ->
             if faulty.get(p)
                 T.transitions.set(T.add(), in_map(q), e, in_map(p))
+            true
         )
 
     M.X.start = in_map(m.X.start)
@@ -1185,29 +1288,6 @@ make_projection = (m, events) ->
 
 
 
-# =============================================================================
-make_sync = (m1, m2) ->
-    T = create_general_set(T_CONFIG)
-    M = DES.make_module_from_T(T, 'sync('+m.name+')')
-    M.X.start = 0 # start state is always 0
-    # Common eventS for both modules
-    common = intersection(m1.common, m2.common)
-    
-    m1.T.transitions.sync(m1.X.start, m2.T, m2.X.start, common,
-        (q, e, p) ->
-            # console.log '>', q, DES.E.labels.get(e), p
-            # console.log q, DES.E.labels.get(e), p, qq, pp
-            T.transitions.set(T.add(), q, e, p)
-            # Note! Due to implementation of projection algorithm for transitions,
-            # q == M.X.add() always, so the following marking is valid.
-            q = M.X.add() if q >= M.X.size()
-            p = M.X.add() if p >= M.X.size()
-            return
-        )
-    #  
-    M
-
-
 console.log '===================================================='
 show_modules()
 show_events()
@@ -1230,8 +1310,17 @@ show_events()
             m.common.push(j) if (modules.length > 1)  and (i in modules)
         # Create projection
         m.C = make_projection(m, m.common)
-        m.C.common = m.common
     )()
+
+# 
+# Make empty faulty and non-faulty sub-languages
+# 
+(() ->
+    for m in DES.modules
+        m.F = DES.make_module_from_T(create_general_set(T_CONFIG), 'F')
+        m.N = DES.make_module_from_T(create_general_set(T_CONFIG), 'N')
+    )()
+
 
 
 # 
@@ -1246,18 +1335,26 @@ show_events()
     n = make_N_module(nf)
     f = make_F_module(nf)
     # 
-    events = [1]
     m.N = make_projection(n, m.common)
     m.F = make_projection(f, m.common)
-    m.N.common = m.common
-    m.F.common = m.common
-    # 
-    # show_dfs(m.N)
-    # show_states(m.N)
+    #
     show_dfs(m.F)
-    # show_states(m.F)
-    # 
-    j = 1
-    s = make_sync(m.F, DES.modules[j].C)
-    show_dfs(s)
+
+    propagate_FN = (k, F, N) ->
+        for j, index in DES.modules
+            continue if index == i # Don't process the faulty module
+            common = intersection(k.common, j.common)
+            continue if common.length == 0
+            # continue if j.subcommon.length == 0
+            Fc = DES.sync(F, j.C, common)
+            Nc = DES.sync(N, j.C, common)
+            Fj = make_projection(Fc, j.common)
+            Nj = make_projection(Nc, j.common)
+            K = DES.intersection(Fj, Nj)
+            DES.closure(K)
+            F_ = DES.subtract(Fj, K)
+
+        return
+
+    propagate_FN(m, m.F, m.N)
 )()
