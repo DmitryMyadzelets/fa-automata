@@ -352,6 +352,18 @@ TRIPLE_SUBSET = () ->
         ret
 
 
+    # Returns array of indexes of 'q' for triples (q, e, p) in transitions
+    # if 'p' matches
+    o.in = (p) ->
+        ret = []
+        i = 3*self.size()|0
+        i-=1 # Index of 'p' in the last triple
+        while i >=0
+            ret.push((i/3)|0) if arr[i] == p
+            i-=3
+        ret
+
+
     # Breadth-First Search
     # start - initial state
     o.bfs = (start, fnc) ->
@@ -401,11 +413,13 @@ TRIPLE_SUBSET = () ->
                 t = o.get(i) #TODO : improve the speed
                 e = t[1]
                 p = t[2]
+                is_continue = true
                 if has_callback_b
-                    break if not callback_before(q, e, p)
-                process_state(p) if !visited.get(p)
+                    is_continue = !!callback_before(q, e, p) 
+                process_state(p) if is_continue and !visited.get(p)
                 if has_callback_a
-                    break if not callback_after(q, e, p) 
+                    is_continue &&= callback_after(q, e, p) 
+                break if not is_continue
             return
 
         process_state(start)
@@ -764,13 +778,53 @@ DES = {
 
     # Subtracts language of module 2 from language of module 1
     subtract : (m1, m2) ->
+        stack = [m2.X.start]
         @DFS(m1,
-            null,
             (q, e, p) ->
-                true
+                q2 = stack[stack.length-1]
+                tt = m2.T.transitions.out(q2)
+                # Check if transitions of m2 have the same event
+                for i in tt
+                    t2 = m2.T.transitions.get(i)
+                    if e == t2[1]
+                        q2 = t2[2]
+                        stack.push(q2)
+                        m1.X.marked.clr(p) if m2.X.marked.get(q2)
+                        return true
+                false
+            (q, e, p) -> 
+                stack.pop()
+                false
             )
         return
 
+
+
+    # Returns 'true' if the language of the module is empty 
+    # (i.e. no reachable marked states), 'false' otherwise.
+    is_empty : (m) ->
+        @BFS(m, (q, e, p) ->
+            return true if m.X.marked.get(p)
+            )
+        false
+
+
+
+    # Returns a copy of module (not full copy, only some fields!)
+    copy : (m) ->
+        T = create_general_set(T_CONFIG)
+        M = DES.make_module_from_T(T, m.name)
+        # copy transitions
+        @BFS(m, (q, e, p) -> T.transitions.set(T.add(), q, e, p))
+        # copy states, and [not]marked
+        n = m.X.size()
+        i = 0
+        while i < n
+            x = M.X.add()
+            M.X.marked.set(x) if m.X.marked.get(i)
+            i++
+        M.X.start = m.X.start
+        M
 
 
 }
@@ -1319,6 +1373,7 @@ show_events()
     for m in DES.modules
         m.F = DES.make_module_from_T(create_general_set(T_CONFIG), 'F')
         m.N = DES.make_module_from_T(create_general_set(T_CONFIG), 'N')
+        m.subcommon = m.common.slice()
     )()
 
 
@@ -1338,21 +1393,43 @@ show_events()
     m.N = make_projection(n, m.common)
     m.F = make_projection(f, m.common)
     #
-    show_dfs(m.F)
-
     propagate_FN = (k, F, N) ->
         for j, index in DES.modules
             continue if index == i # Don't process the faulty module
             common = intersection(k.common, j.common)
             continue if common.length == 0
-            # continue if j.subcommon.length == 0
+            continue if j.subcommon.length == 0
             Fc = DES.sync(F, j.C, common)
             Nc = DES.sync(N, j.C, common)
-            Fj = make_projection(Fc, j.common)
-            Nj = make_projection(Nc, j.common)
-            K = DES.intersection(Fj, Nj)
+            Fj_ = make_projection(Fc, j.common)
+            Nj_ = make_projection(Nc, j.common)
+            K = DES.intersection(Fj_, Nj_)
             DES.closure(K)
-            F_ = DES.subtract(Fj, K)
+            DES.subtract(Fj_, K)
+            DES.subtract(Nj_, K)
+            DES.subtract(Fj_, j.F)
+            DES.subtract(Nj_, j.N)
+            if !DES.is_empty(Fj_) or !DES.is_empty(Nj_)
+                j.F = DES.sync(j.F, Fj_)
+                j.N = DES.sync(j.N, Nj_)
+                j.F.name = 'F'
+                j.N.name = 'N'
+                console.log 'updated', j.name
+                F_ = DES.copy(j.F)
+                N_ = DES.copy(j.N)
+                DES.closure(F_)
+                DES.closure(N_)
+                cap = DES.intersection(F_, N_)
+                DES.subtract(F_, j.F)
+                DES.subtract(N_, j.N)
+                NF_ = DES.sync(F_, N_, j.common)
+                DES.subtract(NF_, cap)
+                show_dfs(NF_)
+                show_states(NF_)
+                # show_states(NF_)
+                
+
+            break
 
         return
 

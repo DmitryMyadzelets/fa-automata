@@ -354,6 +354,19 @@
       }
       return ret;
     };
+    o["in"] = function(p) {
+      var i, ret;
+      ret = [];
+      i = 3 * self.size() | 0;
+      i -= 1;
+      while (i >= 0) {
+        if (arr[i] === p) {
+          ret.push((i / 3) | 0);
+        }
+        i -= 3;
+      }
+      return ret;
+    };
     o.bfs = function(start, fnc) {
       var e, has_callback, i, ii, max, p, q, stack, t, visited, _i, _len;
       o.sort();
@@ -388,7 +401,7 @@
       has_callback_a = typeof callback_after === 'function';
       visited = new bitArray(1 + o.max_state());
       process_state = function(q) {
-        var e, i, ii, p, t, _i, _len;
+        var e, i, ii, is_continue, p, t, _i, _len;
         visited.set(q);
         ii = o.out(q);
         for (_i = 0, _len = ii.length; _i < _len; _i++) {
@@ -396,18 +409,18 @@
           t = o.get(i);
           e = t[1];
           p = t[2];
+          is_continue = true;
           if (has_callback_b) {
-            if (!callback_before(q, e, p)) {
-              break;
-            }
+            is_continue = !!callback_before(q, e, p);
           }
-          if (!visited.get(p)) {
+          if (is_continue && !visited.get(p)) {
             process_state(p);
           }
           if (has_callback_a) {
-            if (!callback_after(q, e, p)) {
-              break;
-            }
+            is_continue && (is_continue = callback_after(q, e, p));
+          }
+          if (!is_continue) {
+            break;
           }
         }
       };
@@ -756,9 +769,56 @@
       return m;
     },
     subtract: function(m1, m2) {
-      this.DFS(m1, null, function(q, e, p) {
-        return true;
+      var stack;
+      stack = [m2.X.start];
+      this.DFS(m1, function(q, e, p) {
+        var i, q2, t2, tt, _i, _len;
+        q2 = stack[stack.length - 1];
+        tt = m2.T.transitions.out(q2);
+        for (_i = 0, _len = tt.length; _i < _len; _i++) {
+          i = tt[_i];
+          t2 = m2.T.transitions.get(i);
+          if (e === t2[1]) {
+            q2 = t2[2];
+            stack.push(q2);
+            if (m2.X.marked.get(q2)) {
+              m1.X.marked.clr(p);
+            }
+            return true;
+          }
+        }
+        return false;
+      }, function(q, e, p) {
+        stack.pop();
+        return false;
       });
+    },
+    is_empty: function(m) {
+      this.BFS(m, function(q, e, p) {
+        if (m.X.marked.get(p)) {
+          return true;
+        }
+      });
+      return false;
+    },
+    copy: function(m) {
+      var M, T, i, n, x;
+      T = create_general_set(T_CONFIG);
+      M = DES.make_module_from_T(T, m.name);
+      this.BFS(m, function(q, e, p) {
+        return T.transitions.set(T.add(), q, e, p);
+      });
+      n = m.X.size();
+      i = 0;
+      while (i < n) {
+        x = M.X.add();
+        if (m.X.marked.get(i)) {
+          M.X.marked.set(x);
+        }
+        i++;
+      }
+      M.X.start = m.X.start;
+      return M;
     }
   };
 
@@ -1136,7 +1196,8 @@
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       m = _ref[_i];
       m.F = DES.make_module_from_T(create_general_set(T_CONFIG), 'F');
-      _results.push(m.N = DES.make_module_from_T(create_general_set(T_CONFIG), 'N'));
+      m.N = DES.make_module_from_T(create_general_set(T_CONFIG), 'N');
+      _results.push(m.subcommon = m.common.slice());
     }
     return _results;
   })();
@@ -1150,9 +1211,8 @@
     f = make_F_module(nf);
     m.N = make_projection(n, m.common);
     m.F = make_projection(f, m.common);
-    show_dfs(m.F);
     propagate_FN = function(k, F, N) {
-      var F_, Fc, Fj, K, Nc, Nj, common, index, j, _i, _len, _ref;
+      var F_, Fc, Fj_, K, NF_, N_, Nc, Nj_, cap, common, index, j, _i, _len, _ref;
       _ref = DES.modules;
       for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
         j = _ref[index];
@@ -1163,13 +1223,38 @@
         if (common.length === 0) {
           continue;
         }
+        if (j.subcommon.length === 0) {
+          continue;
+        }
         Fc = DES.sync(F, j.C, common);
         Nc = DES.sync(N, j.C, common);
-        Fj = make_projection(Fc, j.common);
-        Nj = make_projection(Nc, j.common);
-        K = DES.intersection(Fj, Nj);
+        Fj_ = make_projection(Fc, j.common);
+        Nj_ = make_projection(Nc, j.common);
+        K = DES.intersection(Fj_, Nj_);
         DES.closure(K);
-        F_ = DES.subtract(Fj, K);
+        DES.subtract(Fj_, K);
+        DES.subtract(Nj_, K);
+        DES.subtract(Fj_, j.F);
+        DES.subtract(Nj_, j.N);
+        if (!DES.is_empty(Fj_) || !DES.is_empty(Nj_)) {
+          j.F = DES.sync(j.F, Fj_);
+          j.N = DES.sync(j.N, Nj_);
+          j.F.name = 'F';
+          j.N.name = 'N';
+          console.log('updated', j.name);
+          F_ = DES.copy(j.F);
+          N_ = DES.copy(j.N);
+          DES.closure(F_);
+          DES.closure(N_);
+          cap = DES.intersection(F_, N_);
+          DES.subtract(F_, j.F);
+          DES.subtract(N_, j.N);
+          NF_ = DES.sync(F_, N_, j.common);
+          DES.subtract(NF_, cap);
+          show_dfs(NF_);
+          show_states(NF_);
+        }
+        break;
       }
     };
     return propagate_FN(m, m.F, m.N);
