@@ -417,10 +417,7 @@
             process_state(p);
           }
           if (has_callback_a) {
-            is_continue && (is_continue = callback_after(q, e, p));
-          }
-          if (!is_continue) {
-            break;
+            callback_after(q, e, p);
           }
         }
       };
@@ -787,10 +784,10 @@
             return true;
           }
         }
+        stack.push(null);
         return false;
       }, function(q, e, p) {
         stack.pop();
-        return false;
       });
     },
     is_empty: function(m) {
@@ -1252,7 +1249,6 @@
           NF_ = DES.sync(F_, N_, j.common);
           DES.subtract(NF_, cap);
           show_dfs(NF_);
-          show_states(NF_);
         }
         break;
       }

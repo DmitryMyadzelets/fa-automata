@@ -417,9 +417,7 @@ TRIPLE_SUBSET = () ->
                 if has_callback_b
                     is_continue = !!callback_before(q, e, p) 
                 process_state(p) if is_continue and !visited.get(p)
-                if has_callback_a
-                    is_continue &&= callback_after(q, e, p) 
-                break if not is_continue
+                callback_after(q, e, p) if has_callback_a
             return
 
         process_state(start)
@@ -769,6 +767,7 @@ DES = {
         return M
 
 
+
     # Performes Kleen closure on the module (marks all reachable states)
     closure : (m) ->
         @BFS(m, (q, e, p) -> m.X.marked.set(p))
@@ -791,10 +790,11 @@ DES = {
                         stack.push(q2)
                         m1.X.marked.clr(p) if m2.X.marked.get(q2)
                         return true
+                stack.push(null) # no transition of m2
                 false
             (q, e, p) -> 
                 stack.pop()
-                false
+                return
             )
         return
 
@@ -1410,8 +1410,8 @@ show_events()
             DES.subtract(Fj_, j.F)
             DES.subtract(Nj_, j.N)
             if !DES.is_empty(Fj_) or !DES.is_empty(Nj_)
-                j.F = DES.sync(j.F, Fj_)
-                j.N = DES.sync(j.N, Nj_)
+                j.F = DES.sync(j.F, Fj_) # Union
+                j.N = DES.sync(j.N, Nj_) # Union
                 j.F.name = 'F'
                 j.N.name = 'N'
                 console.log 'updated', j.name
@@ -1422,10 +1422,12 @@ show_events()
                 cap = DES.intersection(F_, N_)
                 DES.subtract(F_, j.F)
                 DES.subtract(N_, j.N)
-                NF_ = DES.sync(F_, N_, j.common)
+                NF_ = DES.sync(F_, N_, j.common) # Union
                 DES.subtract(NF_, cap)
+                # TODO: find events in the strings of NF_
+
                 show_dfs(NF_)
-                show_states(NF_)
+                # show_states(NF_)
                 # show_states(NF_)
                 
 
@@ -1435,3 +1437,29 @@ show_events()
 
     propagate_FN(m, m.F, m.N)
 )()
+
+
+# m1 = DES.create_module('test')
+# m2 = DES.create_module()
+# Checking subtraction. It works !
+# m1.T.transitions.set(m1.T.add(), 0, 0, 1)
+# m1.T.transitions.set(m1.T.add(), 1, 0, 2)
+# m1.T.transitions.set(m1.T.add(), 0, 0, 3)
+# m1.X.add() # 0
+# m1.X.marked.set(m1.X.add()) # 1
+# m1.X.marked.set(m1.X.add()) # 2
+# m1.X.marked.set(m1.X.add()) # 3
+
+# m2.T.transitions.set(m2.T.add(), 0, 0, 1)
+# m2.T.transitions.set(m2.T.add(), 1, 0, 2)
+# m2.T.transitions.set(m2.T.add(), 2, 0, 3)
+# m2.X.marked.set(m2.X.add()) # 0
+# m2.X.marked.set(m2.X.add()) # 1
+# m2.X.marked.set(m2.X.add()) # 2
+# m2.X.marked.set(m2.X.add()) # 3
+
+# console.log 'TEST'
+# show_dfs(m1)
+# show_states(m1)
+# DES.subtract(m1, m2)
+# show_states(m1)
