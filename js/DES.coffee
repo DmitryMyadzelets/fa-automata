@@ -1426,7 +1426,7 @@ show_events()
                 DES.subtract(NF_, cap)
                 # TODO: find events in the strings of NF_
 
-                show_dfs(NF_)
+                # show_dfs(NF_)
                 # show_states(NF_)
                 # show_states(NF_)
                 

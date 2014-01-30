@@ -40,9 +40,9 @@ set_links()
 
 
 
-width = 800
+width = 600
 height = 500
-node_radius = 15
+node_radius = 20
 
 force = d3.layout.force()
     .charge(-120)
@@ -73,7 +73,7 @@ node = svg.selectAll('.node')
     .enter().append('circle')
     .attr('class', 'node')
     .attr('r', node_radius)  
-    .style('fill', (d)-> 'red' )
+    .style('fill', (d)-> 'gray' )
     .call(force.drag)
 
 text = svg.selectAll('.node_name')

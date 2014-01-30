@@ -1248,7 +1248,6 @@
           DES.subtract(N_, j.N);
           NF_ = DES.sync(F_, N_, j.common);
           DES.subtract(NF_, cap);
-          show_dfs(NF_);
         }
         break;
       }
