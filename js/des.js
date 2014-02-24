@@ -582,7 +582,11 @@
         n = 1;
       }
       for (key in config) {
-        this[key].add();
+        if (this[key] instanceof bitArray) {
+          this[key].add();
+        } else {
+          this[key].add.apply(this);
+        }
       }
       return size++;
     };
@@ -643,8 +647,8 @@
     sync: function(m1, m2, common) {
       var I, J, M, T, add_transition, e1, e2, i, in_map, j, map, map_n, o, o2, p1, p2, q, q1, q2, stack, t1, t2, to_map, _i, _j, _k, _len, _len1, _len2;
 
-      T = create_general_set(T_CONFIG);
-      M = DES.make_module_from_T(T, 'sync(' + m1.name + ',' + m2.name + ')');
+      M = DES.create_module('sync(' + m1.name + ',' + m2.name + ')');
+      T = M.T;
       M.X.start = 0;
       o = m1.T.transitions;
       o2 = m2.T.transitions;

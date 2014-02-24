@@ -51,11 +51,20 @@ show_modules_transitions = () ->
 show_dfs = (m) ->
     console.log 'Depth-First Search of module', m.name
     DES.DFS(m 
-    # m.T.transitions.dfs(, 
         (q, e, p)->
-        # if m.X.in_nonfaulty.get(q) and m.X.in_nonfaulty.get(p)
             console.log q, DES.E.labels.get(e), p
             true
+        )
+    return
+
+
+
+show_bfs = (m) ->
+    console.log 'Breadth-First Search of module', m.name
+    DES.BFS(m 
+        (q, e, p)->
+            console.log q, DES.E.labels.get(e), p
+            return
         )
     return
 
@@ -170,12 +179,15 @@ show_modules_transitions()
     m2 = DES.modules[1]
     m3 = DES.modules[2]
 
+    # debugger
     m1_2 = sync(m1, m2)
+    # console.log  cnt, m1_2.T.transitions.out(1)
     # show_dfs(m1)
     # show_dfs(m2)
-    show_dfs(m1_2)
+    # show_dfs(m1_2)
+    # show_bfs(m1_2)
+
     # show_dfs(m3)
-    debugger
     m1_2_3 = sync(m1_2, m3)
     show_dfs(m1_2_3)
 

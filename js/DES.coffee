@@ -547,8 +547,15 @@ create_general_set = (config) ->
 
     o.size = () -> size
     o.add = (n=1) ->
-        # @[key].add.apply(@) for key of config
-        @[key].add() for key of config
+        # This double way of adding values is due to different implementations
+        # of arrays. FIXIT
+        # The idea was to make adding fields from outside forbiden, and allowed 
+        # when adding an element to the whole object.
+        for key of config
+            if @[key] instanceof bitArray
+                @[key].add()
+            else
+                @[key].add.apply(@)
         size++
 
     for key of config
@@ -616,8 +623,8 @@ DES = {
     # Returns a module, result of the composition
     # sync = (start, T2, start2, common, callback) ->
     sync : (m1, m2, common) ->
-        T = create_general_set(T_CONFIG)
-        M = DES.make_module_from_T(T, 'sync('+m1.name+','+m2.name+')')
+        M = DES.create_module('sync('+m1.name+','+m2.name+')')
+        T = M.T
         M.X.start = 0 # start state is always 0
         # has_callback = typeof callback == 'function'
         o = m1.T.transitions
