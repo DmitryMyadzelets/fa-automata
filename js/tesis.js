@@ -223,13 +223,13 @@
 
   svg.append("defs").selectAll("marker").data(["arrow"]).enter().append("marker").attr("id", function(d) {
     return d;
-  }).attr("viewBox", "-10 -5 10 10").attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto").append("path").attr("d", "M-10,-5L0,0L-10,5 Z").attr('fill', 'context-stroke');
+  }).attr("viewBox", "-12 -5 12 10").attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto").append("path").attr("d", "M-10,-5L0,0L-10,5 Z").attr('fill', 'context-stroke');
 
-  force = d3.layout.force().charge(-400).gravity(.02).linkDistance(function(d) {
+  force = d3.layout.force().charge(-2000).chargeDistance(500).linkDistance(function(d) {
     if (d.loop != null) {
       return 0;
     } else {
-      return 100;
+      return 50;
     }
   }).linkStrength(function(d) {
     if (d.loop != null) {

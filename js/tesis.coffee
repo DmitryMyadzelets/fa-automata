@@ -276,7 +276,7 @@ svg.append("defs").selectAll("marker")
         .data(["arrow"])
     .enter().append("marker")
         .attr("id", (d) -> d)
-        .attr("viewBox", "-10 -5 10 10")
+        .attr("viewBox", "-12 -5 12 10")
         # .attr("refX", 15)
         # .attr("refY", -1.5)
         .attr("markerWidth", 6)
@@ -288,11 +288,11 @@ svg.append("defs").selectAll("marker")
 
 
 force = d3.layout.force()
-    .charge(-400)
-    # .chargeDistance(400)
-    .gravity(.02)
-    # .friction(.1) # range [0,1], 1 is frictioneless, defaut
-    .linkDistance((d)-> if d.loop? then 0 else 100 )
+    .charge(-2000)
+    .chargeDistance(500)
+    # .gravity(.02)
+    # .friction(.5) # range [0,1], 1 is frictioneless
+    .linkDistance((d)-> if d.loop? then 0 else 50 )
     .linkStrength((d)-> if d.loop? then 0 else 1 )
     .size([width, height])
     .nodes(graph.nodes)
@@ -334,38 +334,24 @@ node.append('text')
 
 
 # Add arrowed line to the initial state
+# The line appears always at the left side (have a better idea?)
 node.filter((d)-> d.start?)
     .append('path')
-        # This line appears always at the left side (have a better idea?)
         .attr('d', 'M'+ -2.5*node_radius + ',0L' + -node_radius + ',0')
         .attr('marker-end', (d) -> "url(#arrow)" )
 
 
 force.on('tick', ()->
-    # link.attr('x1', (d)-> d.source.x )
-    #     .attr('y1', (d)-> d.source.y )
-    #     .attr('x2', (d)-> d.target.x )
-    #     .attr('y2', (d)-> d.target.y )
-
     link.attr('d', linkCurve)
-
     node.attr('transform', (d) -> 'translate('+ d.x + ','+ d.y + ')')
-
     label.attr('transform', (d) -> 
         if d.cv?
             'translate('+ 
             d.cv[0] + ','+ 
             d.cv[1] + ')'
     )
-    
-    # node.attr('cx', (d)-> d.x )
-    #     .attr('cy', (d)-> d.y )
-
-    # text.attr('x', (d)-> d.x|0 )
-    #     .attr('y', (d)-> (d.y|0)-20 )
-
     return
-    )
+)
 
 
 
