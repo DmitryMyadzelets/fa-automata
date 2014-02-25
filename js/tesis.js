@@ -243,7 +243,7 @@
     return "url(#arrow)";
   });
 
-  label = svg.selectAll('.label').data(graph.links).enter().append('g').append('text').text(function(d) {
+  label = svg.selectAll('.label').data(graph.links).enter().append('g').append('text').attr('class', 'label').text(function(d) {
     return d.label;
   });
 

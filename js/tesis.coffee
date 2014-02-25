@@ -311,6 +311,7 @@ link = svg.selectAll('.link')
 label = svg.selectAll('.label')
         .data(graph.links)
     .enter().append('g').append('text')
+        .attr('class', 'label')
         .text((d)-> d.label)
 
 

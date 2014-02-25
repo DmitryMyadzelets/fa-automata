@@ -129,3 +129,8 @@ path
   text-anchor: middle;
 }
 
+.label {
+  font: 10px sans-serif;
+  pointer-events: none;
+  /*text-anchor: middle;*/
+}
