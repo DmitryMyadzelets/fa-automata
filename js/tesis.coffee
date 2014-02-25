@@ -136,7 +136,6 @@ find_common_events = (m1, m2) ->
 	        E[key].set(i, e[key])
 
 
-
 	# Transitions
 	set_transitions(DES.add_module('DO'), [
 	    [0, 'do_hi', 1]
@@ -211,15 +210,15 @@ show_events()
 # 
 
 @graph = {
-    'nodes' : [
-        # {'name':'A'}
-        # {'name':'B'}
-    ]
-    'links' : [
-        # {'source':0, 'target':1 }
-    ]
+    'nodes' : []
+    'links' : []
 }
 
+
+is_linked = (q, p) ->
+    for link in graph.links
+        return link if (link.source == q) and (link.target == p)
+    null
 
 
 bind_module = (m) ->
@@ -234,19 +233,24 @@ bind_module = (m) ->
         graph.nodes.push(node)
 
     DES.BFS(m, (q, e, p) ->
-        link = {
-            source : q
-            target : p
-            label : DES.E.labels.get(e)
-        }
-        link.loop = true if q == p
-        graph.links.push(link)
+        link = is_linked(q, p)
+        if link?
+            link.label += (', '+DES.E.labels.get(e))
+        else
+            link = {
+                source : q
+                target : p
+                label : DES.E.labels.get(e)
+            }
+            link.loop = true if q == p
+            graph.links.push(link)
         )
     return
 
 
 
 bind_module(DES.modules[DES.modules.length-1])
+# bind_module(DES.modules[0])
 
 
 width = 600
@@ -257,6 +261,9 @@ node_radius = 16
 # 
 # Good SVG examples:
 # https://leanpub.com/D3-Tips-and-Tricks/read#leanpub-auto-force-layout-diagrams
+# 
+# Description of how it works:
+# https://github.com/mbostock/d3/wiki/Force-Layout
 # 
 
 svg = d3.select('body').append('svg')
@@ -281,12 +288,12 @@ svg.append("defs").selectAll("marker")
 
 
 force = d3.layout.force()
-    .charge(-500)
+    .charge(-400)
+    # .chargeDistance(400)
     .gravity(.02)
-    .linkDistance((d)-> 
-        # return 0 if d.source == d.target
-        100
-        )
+    # .friction(.1) # range [0,1], 1 is frictioneless, defaut
+    .linkDistance((d)-> if d.loop? then 0 else 100 )
+    .linkStrength((d)-> if d.loop? then 0 else 1 )
     .size([width, height])
     .nodes(graph.nodes)
     .links(graph.links)
@@ -358,6 +365,7 @@ force.on('tick', ()->
 
     return
     )
+
 
 
 vec = {
