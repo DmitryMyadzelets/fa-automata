@@ -635,6 +635,10 @@ DES = {
         # where q1 \in G1, q2 \in G2.
         map = []
         map_n = 0 # Number of items in the map
+        
+        # Attach map to the module
+        M.X.map = map
+
         to_map = (q1, q2) ->
             map.push(q1)
             map.push(q2)

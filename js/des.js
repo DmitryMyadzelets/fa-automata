@@ -658,6 +658,7 @@
       stack = [];
       map = [];
       map_n = 0;
+      M.X.map = map;
       to_map = function(q1, q2) {
         var x;
 

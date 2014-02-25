@@ -155,16 +155,16 @@ window.onload = () ->
 )()
 
 
-# // make a new graph
-graph = new Springy.Graph()
+# # // make a new graph
+# graph = new Springy.Graph()
 
-# // make some nodes
-spruce = graph.newNode({label: 'Norway Spruce'})
-fir = graph.newNode({label: 'Sicilian Fir'})
+# # // make some nodes
+# spruce = graph.newNode({label: 'Norway Spruce'})
+# fir = graph.newNode({label: 'Sicilian Fir'})
 
-# // connect them with an edge
-graph.newEdge(spruce, fir)
-# 
+# # // connect them with an edge
+# graph.newEdge(spruce, fir)
+# # 
 
-console.log  $('#myCanvas')
+# console.log  $('#myCanvas')
 	# { graph: graph })
