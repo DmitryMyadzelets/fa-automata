@@ -254,6 +254,8 @@ update_svg_size = () ->
     return
 
 
+force_stop = false
+
 
 update_SVG = () ->
 
@@ -263,7 +265,12 @@ update_SVG = () ->
         .attr('width', '100%')
         .attr('height', '100%')
 
+
     update_svg_size()
+
+    if (width==0) or (height==0)
+        console.log 'ahtung!'
+        return
 
     # Per-type markers, as they don't inherit styles.
     svg.append("defs").selectAll("marker")
@@ -281,6 +288,12 @@ update_SVG = () ->
             .attr('fill', 'context-stroke')
 
     force = d3.layout.force()    
+
+    # To stop forces when clicked
+    svg.on('click', ()-> 
+        force_stop = true
+        force.stop()
+        )
 
     force
         .charge(link_charge)

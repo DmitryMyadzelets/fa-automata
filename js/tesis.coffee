@@ -210,16 +210,11 @@ show_events()
 # 
 # 
 
-UI.show_module(DES.modules[DES.modules.length-1])
-# UI.show_module(DES.modules[0])
+# UI.show_module(DES.modules[DES.modules.length-1])
+ix = 0
+ix = DES.modules.length-1
+UI.show_module(DES.modules[ix])
 # 
-i_look = 0
-
-@look = () ->
-    i_look = 0 if i_look >= DES.modules.length
-    if (i_look >=0) and (i_look < DES.modules.length)
-        UI.show_module(DES.modules[i_look++])
-    null
 
 
 
