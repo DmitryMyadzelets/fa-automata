@@ -82,6 +82,10 @@ body {
     top: 0;
     /*display: block auto;*/
 }
+#svg_container svg{
+  display: block;
+  margin: 0 auto;
+}
 #automaton-node {
     visibility: hidden;
     background: #fec867;
@@ -108,11 +112,17 @@ body {
 }
 
 /* SVG */
-.node circle {
+circle {
   fill: dodgerblue;
   stroke: #333;
   stroke-width: 1.5px;
   fill-opacity: 0.5;
+}
+
+.marked {
+  fill: none;
+  stroke: #333;
+  stroke-width: 0.8px;
 }
 
 line,
@@ -133,4 +143,5 @@ path
   font: 10px sans-serif;
   pointer-events: none;
   /*text-anchor: middle;*/
+  text-shadow: 2px 2px 1px white, -2px -2px 1px white, 2px -2px 1px white, -2px 2px 1px white;
 }
