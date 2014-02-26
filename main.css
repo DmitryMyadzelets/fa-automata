@@ -82,9 +82,19 @@ body {
     top: 0;
     /*display: block auto;*/
 }
+#svg_container {
+  position: absolute;
+  /*border:solid 1px orange;*/
+  /*overflow: hidden;*/
+  bottom: 0;
+  right: 0;
+  left: 0;
+  top: 0;
+}
 #svg_container svg{
-  display: block;
-  margin: 0 auto;
+  /*display: block;*/
+  /*margin: 0 0 0 0;*/
+  /*padding: 0 0 0 0;*/
 }
 #automaton-node {
     visibility: hidden;

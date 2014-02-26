@@ -246,32 +246,41 @@ getLinkCurve = (d) ->
 # https://github.com/mbostock/d3/wiki/Force-Layout
 # 
 
-svg = d3.select('#'+svg_container_id).append('svg')
-    .attr('width', '100%')
-    .attr('height', '100%')
 
+update_svg_size = () ->
+    div = document.getElementById(svg_container_id)
+    width = div.offsetWidth
+    height = div.offsetHeight
+    return
 
-# Per-type markers, as they don't inherit styles.
-svg.append("defs").selectAll("marker")
-        .data(["arrow"])
-    .enter().append("marker")
-        .attr("id", (d) -> d)
-        .attr("viewBox", "-12 -5 12 10")
-        # .attr("refX", 15)
-        # .attr("refY", -1.5)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
-        .attr("orient", "auto")
-    .append("path")
-        .attr("d", "M-10,-5L0,0L-10,5 Z")
-        .attr('fill', 'context-stroke')
-
-force = d3.layout.force()
 
 
 update_SVG = () ->
 
+    d3.select('#'+svg_container_id).select("svg").remove()
+
+    svg = d3.select('#'+svg_container_id).append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+
     update_svg_size()
+
+    # Per-type markers, as they don't inherit styles.
+    svg.append("defs").selectAll("marker")
+            .data(["arrow"])
+        .enter().append("marker")
+            .attr("id", (d) -> d)
+            .attr("viewBox", "-12 -5 12 10")
+            # .attr("refX", 15)
+            # .attr("refY", -1.5)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+        .append("path")
+            .attr("d", "M-10,-5L0,0L-10,5 Z")
+            .attr('fill', 'context-stroke')
+
+    force = d3.layout.force()    
 
     force
         .charge(link_charge)
@@ -346,6 +355,15 @@ update_SVG = () ->
             .attr('marker-end', (d) -> "url(#arrow)" )
 
 
+    # Browser events
+
+    window.onresize = () ->
+        update_svg_size()
+        svg.attr('width', width).attr('height', height)
+        force.size([width, height]).resume()
+        return
+
+
 
 
 # ============================================================================
@@ -389,23 +407,8 @@ update_SVG = () ->
 
 
 
-# Browser events
-# 
-
-update_svg_size = () ->
-    div = document.getElementById(svg_container_id)
-    width = div.offsetWidth
-    height = div.offsetHeight
-    return
-
-window.onload = () ->
-    return
 
 
 
-window.onresize = () ->
-    update_svg_size()
-    svg.attr('width', width).attr('height', height)
-    force.size([width, height]).resume()
-    return
+
     
