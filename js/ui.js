@@ -303,8 +303,9 @@
       DES.BFS(m, function(q, e, p) {
         var link, type;
 
-        type = q === p ? 1 : 0;
-        link = is_linked(q, p, [type]);
+        type = [0];
+        type[0] = q === p ? 1 : 0;
+        link = is_linked(q, p, type);
         if (link != null) {
           return link.label += ', ' + DES.E.labels.get(e);
         } else {
@@ -312,7 +313,7 @@
             source: q,
             target: p,
             label: DES.E.labels.get(e),
-            type: type
+            type: type[0]
           };
           return graph.links.push(link);
         }

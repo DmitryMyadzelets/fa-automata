@@ -404,8 +404,9 @@ update_SVG = () ->
 
         DES.BFS(m, (q, e, p) ->
             # Search if link already exists in the list
-            type = if q == p then 1 else 0
-            link = is_linked(q, p, [type])
+            type = [0]
+            type[0] = if q == p then 1 else 0
+            link = is_linked(q, p, type)
             if link?
                 link.label += (', '+DES.E.labels.get(e))
             else
@@ -413,7 +414,7 @@ update_SVG = () ->
                     source : q
                     target : p
                     label : DES.E.labels.get(e)
-                    type : type
+                    type : type[0]
                 }
                 graph.links.push(link)
             )
