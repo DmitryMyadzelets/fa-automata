@@ -124,6 +124,10 @@
       }, {
         labels: 'r_f0',
         fault: true
+      }, {
+        labels: 'c_hi'
+      }, {
+        labels: 'c_lo'
       }
     ];
     E = DES.E;
@@ -135,14 +139,16 @@
       }
     }
     set_transitions(DES.add_module('DO'), [[0, 'do_hi', 1], [0, 'do_lo', 0], [1, 'do_hi', 1], [1, 'do_lo', 0]]);
-    set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0], [0, 'r_f0', 2], [1, 'r_f0', 2]]);
-    return set_transitions(DES.add_module('DO2Relay'), [[0, 'r_lo', 0], [0, 'do_lo', 0], [0, 'do_hi', 2], [2, 'r_hi', 1], [1, 'r_hi', 1], [1, 'do_hi', 1], [1, 'do_lo', 3], [3, 'r_lo', 0]]);
+    set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0]]);
+    set_transitions(DES.add_module('DO2Relay'), [[0, 'r_lo', 0], [0, 'do_lo', 0], [0, 'do_hi', 2], [2, 'r_hi', 1], [1, 'r_hi', 1], [1, 'do_hi', 1], [1, 'do_lo', 3], [3, 'r_lo', 0]]);
+    set_transitions(DES.add_module('Contactor'), [[0, 'c_hi', 1], [0, 'c_lo', 0], [1, 'c_hi', 1], [1, 'c_lo', 0]]);
+    return set_transitions(DES.add_module('Relay2Contactor'), [[0, 'c_lo', 0], [0, 'r_lo', 0], [0, 'r_hi', 2], [2, 'c_hi', 1], [1, 'c_hi', 1], [1, 'r_hi', 1], [1, 'r_lo', 3], [3, 'c_lo', 0]]);
   })();
 
   show_events();
 
   (function() {
-    var m1, m1_2, m1_2_3, m2, m3, sync;
+    var i, sync, sys;
 
     sync = function(m1, m2) {
       var common;
@@ -150,13 +156,12 @@
       common = find_common_events(m1, m2);
       return DES.sync(m1, m2, common);
     };
-    m1 = DES.modules[0];
-    m2 = DES.modules[1];
-    m3 = DES.modules[2];
-    m1_2 = sync(m1, m2);
-    m1_2_3 = sync(m1_2, m3);
-    m1_2_3.X.marked.set(0);
-    return DES.modules.push(m1_2_3);
+    i = DES.modules.length - 1;
+    sys = DES.modules[i--];
+    while (i-- > 0) {
+      sys = sync(sys, DES.modules[i]);
+    }
+    return DES.modules.push(sys);
   })();
 
   ix = 0;

@@ -216,19 +216,19 @@ getLinkCurve = (d) ->
             makeLink.loop([d.source.x, d.source.y], $)
             d.cv[0] = ($.cv[0] + $.cv[2])/2
             d.cv[1] = ($.cv[1] + $.cv[3])/2
-            return 'M' + $.v1[0] + ',' + $.v1[1] + 
-                   'C' + $.cv[0] + ',' + $.cv[1] + 
-                   ' ' + $.cv[2] + ',' + $.cv[3] +
-                   ' ' + $.v2[0] + ',' + $.v2[1]
+            return 'M' + $.v1[0].toFixed(1) + ',' + $.v1[1].toFixed(1) + 
+                   'C' + $.cv[0].toFixed(1) + ',' + $.cv[1].toFixed(1) + 
+                   ' ' + $.cv[2].toFixed(1) + ',' + $.cv[3].toFixed(1) +
+                   ' ' + $.v2[0].toFixed(1) + ',' + $.v2[1].toFixed(1)
         else if d.type == 0 # stright
             makeLink.stright(v1, v2, norm, d.cv)
-            return 'M' + v1[0] + ',' + v1[1] + 
-                   'L' + v2[0] + ',' + v2[1]
+            return 'M' + v1[0].toFixed(1) + ',' + v1[1].toFixed(1) + 
+                   'L' + v2[0].toFixed(1) + ',' + v2[1].toFixed(1)
 
     makeLink.curved(v1, v2, norm, d.cv)
-    return 'M' + v1[0] + ',' + v1[1] + 
-           'Q' + d.cv[0] + ',' + d.cv[1] + 
-           ' ' + v2[0] + ',' + v2[1]
+    return 'M' + v1[0].toFixed(1) + ',' + v1[1].toFixed(1) + 
+           'Q' + d.cv[0].toFixed(1) + ',' + d.cv[1].toFixed(1) + 
+           ' ' + v2[0].toFixed(1) + ',' + v2[1]
 
 
 
@@ -310,12 +310,14 @@ update_SVG = () ->
 
     force.on('tick', ()->
         link.attr('d', getLinkCurve)
-        node.attr('transform', (d) -> 'translate('+ d.x + ','+ d.y + ')')
+        node.attr('transform', (d) -> 'translate('+ 
+            d.x.toFixed(2) + ','+ 
+            d.y.toFixed(2) + ')')
         label.attr('transform', (d) -> 
             if d.cv?
                 'translate('+ 
-                d.cv[0] + ','+ 
-                d.cv[1] + ')'
+                d.cv[0].toFixed(0) + ','+ 
+                d.cv[1].toFixed(0) + ')'
         )
         return
     )
@@ -389,14 +391,16 @@ update_SVG = () ->
     show_module :(m) ->
         graph.nodes.length = 0
         graph.links.length = 0
-        i = m.X.size()
-        while i-- >0
+        i = 0
+        n = m.X.size()
+        while i<n
             node = {
                 name : i
             }
             node.start = true if i == m.X.start
             node.marked = true if m.X.marked.get(i)
             graph.nodes.push(node)
+            i++
 
         DES.BFS(m, (q, e, p) ->
             # Search if link already exists in the list
