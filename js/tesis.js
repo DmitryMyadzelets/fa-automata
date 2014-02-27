@@ -139,10 +139,7 @@
       }
     }
     set_transitions(DES.add_module('DO'), [[0, 'do_hi', 1], [0, 'do_lo', 0], [1, 'do_hi', 1], [1, 'do_lo', 0]]);
-    set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0]]);
-    set_transitions(DES.add_module('DO2Relay'), [[0, 'r_lo', 0], [0, 'do_lo', 0], [0, 'do_hi', 2], [2, 'r_hi', 1], [1, 'r_hi', 1], [1, 'do_hi', 1], [1, 'do_lo', 3], [3, 'r_lo', 0]]);
-    set_transitions(DES.add_module('Contactor'), [[0, 'c_hi', 1], [0, 'c_lo', 0], [1, 'c_hi', 1], [1, 'c_lo', 0]]);
-    return set_transitions(DES.add_module('Relay2Contactor'), [[0, 'c_lo', 0], [0, 'r_lo', 0], [0, 'r_hi', 2], [2, 'c_hi', 1], [1, 'c_hi', 1], [1, 'r_hi', 1], [1, 'r_lo', 3], [3, 'c_lo', 0]]);
+    return set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0], [0, 'r_f0', 2], [1, 'r_f0', 2], [2, 'r_lo', 2]]);
   })();
 
   show_events();
@@ -157,9 +154,9 @@
       return DES.sync(m1, m2, common);
     };
     i = DES.modules.length - 1;
-    sys = DES.modules[i--];
+    sys = DES.modules[i];
     while (i-- > 0) {
-      sys = sync(sys, DES.modules[i]);
+      sys = sync(DES.modules[i], sys);
     }
     return DES.modules.push(sys);
   })();
