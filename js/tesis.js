@@ -108,7 +108,7 @@
   };
 
   (function() {
-    var E, e, events, i, key, _i, _len;
+    var E, e, events, i, key, module, _i, _len;
 
     events = [
       {
@@ -139,7 +139,10 @@
       }
     }
     set_transitions(DES.add_module('DO'), [[0, 'do_hi', 1], [0, 'do_lo', 0], [1, 'do_hi', 1], [1, 'do_lo', 0]]);
-    return set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0], [0, 'r_f0', 2], [1, 'r_f0', 2], [2, 'r_lo', 2]]);
+    set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0]]);
+    set_transitions(module = DES.add_module('DO2Relay'), [[0, 'r_lo', 0], [0, 'do_lo', 0], [0, 'do_hi', 1], [1, 'r_hi', 1], [1, 'do_hi', 1], [1, 'do_lo', 0], [1, 'r_lo', 2], [2, 'r_lo', 2], [2, 'do_lo', 2], [2, 'do_hi', 2], [1, 'r_hi', 3], [3, 'r_hi', 3], [3, 'do_lo', 3], [3, 'do_hi', 3]]);
+    module.X.marked.set(2);
+    return module.X.marked.set(3);
   })();
 
   show_events();

@@ -9,11 +9,11 @@
 
   node_radius = 16;
 
-  link_charge = -2000;
-
-  link_charge_distance = 500;
-
   link_distance = 100;
+
+  link_charge = link_distance * -20;
+
+  link_charge_distance = link_distance * 5;
 
   link_gravity = 0.05;
 

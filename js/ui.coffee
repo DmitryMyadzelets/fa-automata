@@ -15,9 +15,9 @@ width = 600
 height = 500
 node_radius = 16
 
-link_charge = -2000
-link_charge_distance = 500 # Maximal distance where charge works
 link_distance = 100
+link_charge = link_distance*-20 # How strong the nodes push each other away
+link_charge_distance = link_distance*5 # Maximal distance where charge works
 link_gravity = 0.05
 friction = 0.9 # [0..1]
 

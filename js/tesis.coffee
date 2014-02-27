@@ -153,27 +153,34 @@ find_common_events = (m1, m2) ->
         [1, 'r_hi', 1]
         [1, 'r_lo', 0]
         # to faulty state
-        [0, 'r_f0', 2]
-        [1, 'r_f0', 2]
-        [2, 'r_lo', 2]
+        # [0, 'r_f0', 2]
+        # [1, 'r_f0', 2]
+        # [2, 'r_lo', 2]
     ])
 
-    # set_transitions(DES.add_module('DO2Relay'), [
-    #     [0, 'r_lo', 0]
-    #     [0, 'do_lo', 0]
-    #     [0, 'do_hi', 2]
-    #     [2, 'r_hi', 1]
-    #     [1, 'r_hi', 1]
-    #     [1, 'do_hi', 1]
-    #     [1, 'do_lo', 3]
-    #     [3, 'r_lo', 0]
-    #     # to faulty state
-    #     # [1, 'r_lo', 4]
-    #     # [4, 'r_lo', 4]
-    #     # [4, 'r_hi', 4]
-    #     # [4, 'do_lo', 4]
-    #     # [4, 'do_hi', 4]
-    # ])
+    set_transitions(module = DES.add_module('DO2Relay'), [
+        [0, 'r_lo', 0]
+        [0, 'do_lo', 0]
+        [0, 'do_hi', 1]
+        [1, 'r_hi', 1]
+        [1, 'do_hi', 1]
+        [1, 'do_lo', 0]
+        # to faulty state (Relay stacks to 0)
+        [1, 'r_lo', 2]
+        [2, 'r_lo', 2]
+        [2, 'do_lo', 2]
+        [2, 'do_hi', 2]
+        # to faulty state (Relay stacks to 1)
+        [1, 'r_hi', 3]
+        [3, 'r_hi', 3]
+        [3, 'do_lo', 3]
+        [3, 'do_hi', 3]
+    ])
+
+    # Mark faulty states
+    module.X.marked.set(2)
+    module.X.marked.set(3)
+
 
     # set_transitions(DES.add_module('Contactor'), [
     #     [0, 'c_hi', 1]
@@ -185,12 +192,10 @@ find_common_events = (m1, m2) ->
     # set_transitions(DES.add_module('Relay2Contactor'), [
     #     [0, 'c_lo', 0]
     #     [0, 'r_lo', 0]
-    #     [0, 'r_hi', 2]
-    #     [2, 'c_hi', 1]
+    #     [0, 'r_hi', 1]
     #     [1, 'c_hi', 1]
     #     [1, 'r_hi', 1]
-    #     [1, 'r_lo', 3]
-    #     [3, 'c_lo', 0]
+    #     [1, 'r_lo', 0]
     # ])
 
 
