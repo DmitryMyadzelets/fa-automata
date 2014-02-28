@@ -130,6 +130,15 @@ find_common_events = (m1, m2) ->
         # Contactor
         { labels : 'c_hi'}
         { labels : 'c_lo'}
+        # Gate valve
+        { labels : 'v_mo'} # moves to open
+        { labels : 'v_mc'} # moves to closed
+        { labels : 'v_op_hi'} # is open
+        { labels : 'v_op_lo'} # is not open
+        { labels : 'v_cl_hi'} # is closed
+        { labels : 'v_cl_lo'} # is not closed
+        
+
 	]
 
 	E = DES.E
@@ -140,64 +149,80 @@ find_common_events = (m1, m2) ->
 
 
     # Transitions
-    set_transitions(DES.add_module('DO'), [
-        [0, 'do_hi', 1]
-        [0, 'do_lo', 0]
-        [1, 'do_hi', 1]
-        [1, 'do_lo', 0]
-    ])
-
-    set_transitions(DES.add_module('Relay'), [
-        [0, 'r_hi', 1]
-        [0, 'r_lo', 0]
-        [1, 'r_hi', 1]
-        [1, 'r_lo', 0]
-        # to faulty state
-        # [0, 'r_f0', 2]
-        # [1, 'r_f0', 2]
-        # [2, 'r_lo', 2]
-    ])
-
-    set_transitions(module = DES.add_module('DO2Relay'), [
-        [0, 'r_lo', 0]
-        [0, 'do_lo', 0]
-        [0, 'do_hi', 1]
-        [1, 'r_hi', 1]
-        [1, 'do_hi', 1]
-        [1, 'do_lo', 0]
-        # to faulty state (Relay stacks to 0)
-        [1, 'r_lo', 2]
-        [2, 'r_lo', 2]
-        [2, 'do_lo', 2]
-        [2, 'do_hi', 2]
-        # to faulty state (Relay stacks to 1)
-        [1, 'r_hi', 3]
-        [3, 'r_hi', 3]
-        [3, 'do_lo', 3]
-        [3, 'do_hi', 3]
-    ])
-
-    # Mark faulty states
-    module.X.marked.set(2)
-    module.X.marked.set(3)
-
-
-    # set_transitions(DES.add_module('Contactor'), [
-    #     [0, 'c_hi', 1]
-    #     [0, 'c_lo', 0]
-    #     [1, 'c_hi', 1]
-    #     [1, 'c_lo', 0]
+    
+    # # Digital Output (DO) and Relay System
+    # # 
+    # set_transitions(DES.add_module('DO'), [
+    #     [0, 'do_hi', 1]
+    #     [0, 'do_lo', 0]
+    #     [1, 'do_hi', 1]
+    #     [1, 'do_lo', 0]
     # ])
 
-    # set_transitions(DES.add_module('Relay2Contactor'), [
-    #     [0, 'c_lo', 0]
-    #     [0, 'r_lo', 0]
+    # set_transitions(DES.add_module('Relay'), [
     #     [0, 'r_hi', 1]
-    #     [1, 'c_hi', 1]
+    #     [0, 'r_lo', 0]
     #     [1, 'r_hi', 1]
     #     [1, 'r_lo', 0]
+    #     # to faulty state
+    #     # [0, 'r_f0', 2]
+    #     # [1, 'r_f0', 2]
+    #     # [2, 'r_lo', 2]
     # ])
 
+    # set_transitions(module = DES.add_module('DO2Relay'), [
+    #     [0, 'r_lo', 0]
+    #     [0, 'do_lo', 0]
+    #     [0, 'do_hi', 1]
+    #     [1, 'r_hi', 1]
+    #     [1, 'do_hi', 1]
+    #     [1, 'do_lo', 0]
+    #     # to faulty state (Relay stacks to 0)
+    #     [1, 'r_lo', 2]
+    #     [2, 'r_lo', 2]
+    #     [2, 'do_lo', 2]
+    #     [2, 'do_hi', 2]
+    #     # # to faulty state (Relay stacks to 1)
+    #     [0, 'r_hi', 3]
+    #     [3, 'r_hi', 3]
+    #     [3, 'do_lo', 3]
+    #     [3, 'do_hi', 3]
+    # ])
+
+    # # Mark faulty states
+    # module.X.marked.set(2)
+    # module.X.marked.set(3)
+
+
+    # # set_transitions(DES.add_module('Contactor'), [
+    # #     [0, 'c_hi', 1]
+    # #     [0, 'c_lo', 0]
+    # #     [1, 'c_hi', 1]
+    # #     [1, 'c_lo', 0]
+    # # ])
+
+    # # set_transitions(DES.add_module('Relay2Contactor'), [
+    # #     [0, 'c_lo', 0]
+    # #     [0, 'r_lo', 0]
+    # #     [0, 'r_hi', 1]
+    # #     [1, 'c_hi', 1]
+    # #     [1, 'r_hi', 1]
+    # #     [1, 'r_lo', 0]
+    # # ])
+
+
+    set_transitions(DES.add_module('Gate valve'), [
+        [0, 'v_cl_hi', 0]
+        [0, 'v_op_lo', 0]
+        [0, 'v_cl_lo', 2]
+        [2, 'v_cl_lo', 2]
+        [2, 'v_op_lo', 2]
+        [2, 'v_op_hi', 1]
+        [1, 'v_op_hi', 1]
+        [1, 'v_cl_lo', 1]
+        [1, 'v_op_lo', 2]
+        [2, 'v_cl_hi', 0]
+    ])
 
 )()
 
@@ -218,6 +243,7 @@ show_events()
     sys = DES.modules[i]
     while i-- >0
         sys = sync(DES.modules[i], sys)
+        console.log 
 
     DES.modules.push(sys)
         
@@ -252,8 +278,6 @@ show_events()
 ix = 0
 ix = DES.modules.length-1
 UI.show_module(DES.modules[ix])
-# 
-
 
 
 

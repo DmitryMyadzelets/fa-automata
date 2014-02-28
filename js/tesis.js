@@ -108,7 +108,7 @@
   };
 
   (function() {
-    var E, e, events, i, key, module, _i, _len;
+    var E, e, events, i, key, _i, _len;
 
     events = [
       {
@@ -128,6 +128,18 @@
         labels: 'c_hi'
       }, {
         labels: 'c_lo'
+      }, {
+        labels: 'v_mo'
+      }, {
+        labels: 'v_mc'
+      }, {
+        labels: 'v_op_hi'
+      }, {
+        labels: 'v_op_lo'
+      }, {
+        labels: 'v_cl_hi'
+      }, {
+        labels: 'v_cl_lo'
       }
     ];
     E = DES.E;
@@ -138,11 +150,7 @@
         E[key].set(i, e[key]);
       }
     }
-    set_transitions(DES.add_module('DO'), [[0, 'do_hi', 1], [0, 'do_lo', 0], [1, 'do_hi', 1], [1, 'do_lo', 0]]);
-    set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0]]);
-    set_transitions(module = DES.add_module('DO2Relay'), [[0, 'r_lo', 0], [0, 'do_lo', 0], [0, 'do_hi', 1], [1, 'r_hi', 1], [1, 'do_hi', 1], [1, 'do_lo', 0], [1, 'r_lo', 2], [2, 'r_lo', 2], [2, 'do_lo', 2], [2, 'do_hi', 2], [1, 'r_hi', 3], [3, 'r_hi', 3], [3, 'do_lo', 3], [3, 'do_hi', 3]]);
-    module.X.marked.set(2);
-    return module.X.marked.set(3);
+    return set_transitions(DES.add_module('Gate valve'), [[0, 'v_cl_hi', 0], [0, 'v_op_lo', 0], [0, 'v_cl_lo', 2], [2, 'v_cl_lo', 2], [2, 'v_op_lo', 2], [2, 'v_op_hi', 1], [1, 'v_op_hi', 1], [1, 'v_cl_lo', 1], [1, 'v_op_lo', 2], [2, 'v_cl_hi', 0]]);
   })();
 
   show_events();
@@ -160,6 +168,7 @@
     sys = DES.modules[i];
     while (i-- > 0) {
       sys = sync(DES.modules[i], sys);
+      console.log;
     }
     return DES.modules.push(sys);
   })();
