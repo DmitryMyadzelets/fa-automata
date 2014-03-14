@@ -860,6 +860,54 @@
       }
       M.X.start = m.X.start;
       return M;
+    },
+    projection: function(m, events) {
+      var M, T;
+
+      M = this.create_module('P(' + m.name + ')');
+      T = M.T;
+      m.T.transitions.projection(m.X.start, events, function(q, e, p, qq, pp) {
+        var i, _i, _len;
+
+        T.transitions.set(T.add(), q, e, p);
+        if (q >= M.X.size()) {
+          q = M.X.add();
+        }
+        if (p >= M.X.size()) {
+          p = M.X.add();
+        }
+        if (!M.X.marked.get(p)) {
+          for (_i = 0, _len = pp.length; _i < _len; _i++) {
+            i = pp[_i];
+            if (m.X.marked.get(i)) {
+              M.X.marked.set(p);
+              break;
+            }
+          }
+        }
+      });
+      return M;
+    },
+    get_common_events: function(m1, m2) {
+      var common, e, e2, i, j;
+
+      common = [];
+      i = m1.T.size();
+      while (i-- > 0) {
+        e = m1.T.transitions.get(i)[1];
+        if (__indexOf.call(common, e) >= 0) {
+          continue;
+        }
+        j = m2.T.size();
+        while (j-- > 0) {
+          e2 = m2.T.transitions.get(j)[1];
+          if (e2 === e) {
+            common.push(e);
+            break;
+          }
+        }
+      }
+      return common;
     }
   };
 

@@ -310,10 +310,15 @@ update_SVG = () ->
 
     force.on('tick', ()->
         link.attr('d', getLinkCurve)
-        node.attr('transform', (d) -> 'translate('+ 
+        node.attr('transform', (d) -> 
+            # # fixed 4th node
+            # if d.index == 4
+            #     d.x = (width / 2)|0
+            #     d.y = (height / 2)|0
+            'translate('+ 
             d.x.toFixed(2) + ','+ 
             d.y.toFixed(2) + ')')
-        label.attr('transform', (d) -> 
+        label.attr('transform', (d) ->  
             if d.cv?
                 'translate('+ 
                 d.cv[0].toFixed(0) + ','+ 
@@ -329,6 +334,7 @@ update_SVG = () ->
         .enter().append('path')
         # .attr('class', 'link')
             .attr("marker-end", (d) -> "url(#arrow)" )
+            .attr("style", "fill: none; stroke: #000000" )
 
 
     label = svg.selectAll('.label')
@@ -348,6 +354,9 @@ update_SVG = () ->
     # Add circle to each node
     node.append('circle')
         .attr('r', node_radius)  
+        .attr("style", "fill: gray; stroke: #000000")
+        .attr('fill-opacity', '0.5')
+
 
 
     # Add second circle for marked node
@@ -355,11 +364,14 @@ update_SVG = () ->
         .append('circle')
             .attr('class', 'marked')
             .attr('r', node_radius-2)
+            .attr("style", "fill: none; stroke: #000000")
 
     # Add text to each node
     node.append('text')
-        .attr('dy', '0.35em') # shifts text down (should be depended on the font size)
+        # .attr('dy', '0.35em') # shifts text down (should be depended on the font size)
         .text((d)-> d.name)
+        .attr('text-anchor', 'middle')
+        .attr('y', '4')
 
 
     # Add arrowed line to the initial state
@@ -368,6 +380,7 @@ update_SVG = () ->
         .append('path')
             .attr('d', 'M'+ -2.5*node_radius + ',0L' + -node_radius + ',0')
             .attr('marker-end', (d) -> "url(#arrow)" )
+            .attr("style", "fill: none; stroke: #000000" )
 
 
     # Browser events
@@ -402,7 +415,12 @@ update_SVG = () ->
             graph.nodes.push(node)
             i++
 
-        DES.BFS(m, (q, e, p) ->
+        cnt = 0
+
+        i = 0
+        n = m.T.size()
+        while i<n
+            [q, e, p] = m.T.transitions.get(i)
             # Search if link already exists in the list
             type = [0]
             type[0] = if q == p then 1 else 0
@@ -417,7 +435,24 @@ update_SVG = () ->
                     type : type[0]
                 }
                 graph.links.push(link)
-            )
+            i++
+
+        # DES.DFS(m, (q, e, p) ->
+        #     # Search if link already exists in the list
+        #     type = [0]
+        #     type[0] = if q == p then 1 else 0
+        #     link = is_linked(q, p, type)
+        #     if link?
+        #         link.label += (', '+DES.E.labels.get(e))
+        #     else
+        #         link = {
+        #             source : q
+        #             target : p
+        #             label : DES.E.labels.get(e)
+        #             type : type[0]
+        #         }
+        #         graph.links.push(link)
+        #     )
 
         update_SVG()
         return
@@ -425,6 +460,10 @@ update_SVG = () ->
 
 
 
+UI.show_module(DES.modules[DES.modules.length-1])
+ix = 0
+ix = DES.modules.length-1
+UI.show_module(DES.modules[ix]) if DES.modules.length
 
 
 

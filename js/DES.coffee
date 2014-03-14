@@ -838,6 +838,46 @@ DES = {
         M.X.start = m.X.start
         M
 
+    # Returns new module - projection to events
+    projection : (m, events) ->
+        M = @create_module('P('+m.name+')')
+        T = M.T
+        # 
+        m.T.transitions.projection(m.X.start, events,
+            (q, e, p, qq, pp) ->
+                # console.log q, DES.E.labels.get(e), p, qq, pp
+                T.transitions.set(T.add(), q, e, p)
+                # Note! Due to implementation of projection algorithm for transitions,
+                # q == M.X.add() always, so the following marking is valid.
+                q = M.X.add() if q >= M.X.size()
+                p = M.X.add() if p >= M.X.size()
+                # Mark reachable state if at least one of source states is marked
+                if not M.X.marked.get(p)
+                    for i in pp
+                        if m.X.marked.get(i)
+                            M.X.marked.set(p)
+                            break;
+                return
+            )
+        M
+
+    # Returns array of events common for two modules
+    get_common_events : (m1, m2) ->
+        common = []
+        i = m1.T.size()
+        # Iterate all the transition of the first module
+        while i-- >0
+            # Event index from the transtion
+            e = m1.T.transitions.get(i)[1]
+            continue if e in common
+            # Iterate all the transition of the second module
+            j = m2.T.size()
+            while j-- >0
+                e2 = m2.T.transitions.get(j)[1]
+                if e2 == e
+                    common.push(e)
+                    break                
+        common
 
 }
 

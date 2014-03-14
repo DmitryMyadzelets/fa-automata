@@ -140,13 +140,13 @@ path
 {
   stroke: #333;
   stroke-width: 1.5px;
-  fill: none;
+  /*fill: none;*/
 }
 
 .node text {
   font: 10px sans-serif;
   pointer-events: none;
-  text-anchor: middle;
+  /*text-anchor: middle;*/
 }
 
 .label {

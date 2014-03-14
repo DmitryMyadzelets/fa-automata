@@ -2,7 +2,7 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="main.css">
-	<title>Test</title>
+	<title>DES coupling</title>
 <!--
     <script src="./lib/json2.js"></script>
     <script src="./lib/jstorage.js"></script>
@@ -40,7 +40,21 @@
  --> 
 
 </body>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+    <div id="svg_container"></div>
+    <div id="automaton-node"></div>
+    <div id="automaton-edge"></div>
+    <div id="top_panel">
+        <span class="caption">Automata Editor</span>        
+        <a href="#" class="menu-link" id="btn_undo">Undo</a>
+        <a href="#" class="menu-link" id="btn_redo">Redo</a>
+    </div>
+
+    <script src="./lib/d3.min.js"></script>
     <script src="./js/des.js"></script>
+    <!-- Thesis example -->
+    <script src="./js/tesis.js"></script>
+    
     <script src="./js/ModulesCoupling.js"></script>
+
 <html>
