@@ -430,12 +430,16 @@ set_transitions = (m, transitions) ->
         ])
         m
 
+
     # DI/DO, sensor, relay, motor, etc.
-    make_2states_automaton = (name) ->
+    make_2states_automaton = (name, observable = false) ->
         events = [
-            { labels : name+'_lo'  , observable: true }
-            { labels : name+'_hi'  , observable: true }
+            { labels : name+'_lo' }
+            { labels : name+'_hi' }
         ]
+
+        e.observable = true for e in events if observable
+
         put_events_to_system(events)
         m = set_transitions(DES.add_module(name), [
             [0, name+'_lo', 0]
@@ -445,28 +449,52 @@ set_transitions = (m, transitions) ->
         ])
         m
 
+
+    # DI/DO, sensor, relay, motor, etc.
+    make_2states_automaton_faulty = (name, observable = false) ->
+        events = [
+            { labels : name+'_lo', observable: true}
+            { labels : name+'_hi', observable: true }
+            { labels : name+'_f0', fault: true}
+            { labels : 'tout', observable: true}
+        ]
+
+        put_events_to_system(events)
+        m = set_transitions(DES.add_module(name), [
+            [0, name+'_lo', 0]
+            [0, name+'_hi', 1]
+            [1, name+'_hi', 1]
+            [1, name+'_lo', 0]
+
+            [0, name+'_f0', 2]
+            [1, name+'_f0', 2]
+            [2, name+'_lo', 2]
+            [2, 'tout', 2]
+        ])
+        m
+
     # Actuator
     make_3states_automaton = (name) ->
         events = [
-            { labels : name+'a_lo'  , observable: true }
-            { labels : name+'a_hi'  , observable: true }
-            { labels : name+'b_lo'  , observable: true }
-            { labels : name+'b_hi'  , observable: true }
+            { labels : name+'_a_lo'  , observable: true }
+            { labels : name+'_a_hi'  , observable: true }
+            { labels : name+'_b_lo'  , observable: true }
+            { labels : name+'_b_hi'  , observable: true }
         ]
         put_events_to_system(events)
         m = set_transitions(DES.add_module(name), [
-            [0, name+'a_lo', 0]
-            [0, name+'b_lo', 0]
+            [0, name+'_a_lo', 0]
+            [0, name+'_b_lo', 0]
 
-            [0, name+'a_hi', 1]
-            [1, name+'a_hi', 1]
-            [1, name+'b_lo', 1]
-            [1, name+'a_lo', 0]
+            [0, name+'_a_hi', 1]
+            [1, name+'_a_hi', 1]
+            [1, name+'_b_lo', 1]
+            [1, name+'_a_lo', 0]
 
-            [0, name+'b_hi', 2]
-            [2, name+'b_hi', 2]
-            [2, name+'a_lo', 2]
-            [2, name+'b_lo', 0]
+            [0, name+'_b_hi', 2]
+            [2, name+'_b_hi', 2]
+            [2, name+'_a_lo', 2]
+            [2, name+'_b_lo', 0]
         ])
         m
 
@@ -485,22 +513,153 @@ set_transitions = (m, transitions) ->
         ])
         m
 
-    # make_valve_automaton('v1')
-    # make_2states_automaton('v1sc')
-    # make_2states_automaton('v1so')
-    # make_cause_effect_automaton('v1', 'v1sc', ['closed', 'hi', 'opening', 'lo'])
-    # make_cause_effect_automaton('v1', 'v1so', ['open', 'hi', 'closing', 'lo'])
-    # 
+    make_compleate_valve = (name) ->
+        # names
+        v = name
+        sc = v+'sc'
+        so = v+'so'
+        a  = v+'a'
+        aa = v+'a_a'
+        ab = v+'a_b'
+        # 
+        make_valve_automaton(v)
+        # sensors
+        make_2states_automaton(sc)
+        make_2states_automaton(so)
+        # valve to sensors
+        make_cause_effect_automaton(v, sc, ['closed', 'hi', 'opening', 'lo'])
+        make_cause_effect_automaton(v, so, ['open', 'hi', 'closing', 'lo'])
+        # actuator
+        make_3states_automaton(a)
+        # actuator to valve
+        make_cause_effect_automaton(aa, v, ['hi', 'opening', 'lo', 'stoped'])
+        make_cause_effect_automaton(ab, v, ['hi', 'closing', 'lo', 'stoped'])
 
-    make_3states_automaton('')
 
-    # make_valve_automaton('v2')
-    # make_2states_automaton('v2sc')
-    # make_2states_automaton('v2so')
-    # make_cause_effect_automaton('v2', 'v2sc', ['closed', 'hi', 'opening', 'lo'])
-    # make_cause_effect_automaton('v2', 'v2so', ['open', 'hi', 'closing', 'lo'])
+
+    # # 2 Butterfly valves
+    # make_compleate_valve('V1')
+    # make_compleate_valve('V2')
+    # # # 3 Gate valves
+    # make_compleate_valve('V3')
+    # make_compleate_valve('V4')
+    # make_compleate_valve('V5')
+    # # Screw conveyer
+    # make_2states_automaton('M2')
+    # # Belt conveyer 1
+    # make_2states_automaton('M3', true)  #####
+    # # Vibrator      1
+    # make_2states_automaton('M1')
+    # # Fork level sensor 4
+    make_2states_automaton('LT1', true)
+    # make_2states_automaton('LT2', true)
+    
+    # make_2states_automaton('LT3', true) ####
+    # make_2states_automaton_faulty('LT3', true) #####
+
+    # make_2states_automaton('LT4', true)
+    # # Air pump  1
+    # make_2states_automaton('P1', true)
+
+    # # Control cycle 1. Dust bucket emptiness
+    # set_transitions(DES.add_module('Control1'), [
+    #     [0, 'LT3_hi', 1]
+    #     [1, 'V4a_a_hi', 2]
+    #     [2, 'V4a_a_hi', 2]
+    #     [2, 'LT4_hi', 3]
+    #     [3, 'V4a_b_hi', 4]
+    #     [4, 'V4a_b_hi', 4]
+    #     [4, 'V5a_a_hi', 0]
+    # ])
+
+
+    # Control cycle 2. Dust bucket loading
+    # make_cause_effect_automaton('LT3', 'M3', ['lo', 'hi', 'hi', 'lo'])
+    # put_events_to_system([{ labels : 'tout', observable: true }])
+    # set_transitions(DES.add_module('Control2'), [
+    #     [0, 'LT3_lo', 1]
+    #     [1, 'M3_hi', 2]
+    #     [2, 'LT3_hi', 3]
+    #     [3, 'M3_lo', 0]
+
+    #     [0, 'LT3_hi', 0]
+    #     [0, 'M3_lo', 0]
+
+    #     [2, 'LT3_lo', 2]
+    #     [2, 'M3_hi', 2]
+
+    #     [2, 'tout', 4]
+    #     [4, 'LT3_hi', 3]
+    #     [4, 'LT3_lo', 4]
+    #     [4, 'M3_hi', 4]
+    # ])
+    # .X.faulty.set(4)
+    
+
+    make_2states_automaton('A') #### Bunker A
+    make_2states_automaton('B') #### Bunker B
+
+    set_transitions(DES.add_module('Technology'), [
+        [0, 'A_lo', 0]
+        [0, 'A_hi', 1]
+        [1, 'B_lo', 2]
+
+        [2, 'B_hi', 3]
+        [3, 'B_lo', 4]
+        # [4, 'B_hi', 5]
+        [4, 'B_hi', 0]
+        # [5, 'B_lo', 6]
+        # [6, 'B_hi', 7]
+        # [7, 'B_lo', 8]
+        # [8, 'A_lo', 0]
+
+        # [1, 'B_hi', 9]
+        [3, 'A_lo', 5]
+        # [8, 'A_hi', 9]
+
+    ])
+    .X.faulty.set(5)
+
+    make_cause_effect_automaton('A', 'LT1', ['hi', 'hi', 'lo', 'lo'])
+    # make_cause_effect_automaton('B', 'LT3', ['hi', 'hi', 'lo', 'lo'])
+
+
+
+    # # Control cycle 3. Filter unloading
+    # set_transitions(DES.add_module('Control3'), [
+    #     [0, 'LT1_hi', 1]
+    #     [1, 'LT1_hi', 1]
+    #     [1, 'M2_hi', 1]
+    #     [1, 'M3_hi', 1]
+    #     [1, 'V3a_a_hi', 1]
+    #     [1, 'LT2_hi', 0]
+    #     [0, 'LT2_hi', 0]
+    #     [0, 'M2_hi', 0]
+    #     [0, 'M3_hi', 0]
+    # ])
+
+    # # Vabrating while opened
+    # set_transitions(DES.add_module('Control4'), [
+    #     [0, 'V3so_hi', 1]
+    #     [1, 'V3so_hi', 1]
+    #     [1, 'M1_hi', 1]
+    #     [1, 'V3sc_hi', 0]
+    # ])
+
+    # # Just connecton of air regualtion with the filter unloading
+    # set_transitions(DES.add_module('Control5'), [
+    #     [0, 'V1sc_hi', 0]
+    #     [0, 'V2sc_hi', 0]
+    #     [0, 'P1_lo', 0]
+    #     [0, 'V3sc_hi', 0]
+    # ])
+
+
+
 
     # Leave the code below as an example!
+    # 
+    # Begining of the example
     
     # Sensor 1
     # set_transitions(DES.add_module('S1'), [
@@ -531,6 +690,7 @@ set_transitions = (m, transitions) ->
     #     [0, 'v1_closing', 0]
     # ])
 
+    # End of the example
 
 )()
 
@@ -547,12 +707,49 @@ show_events()
         DES.sync(m1, m2, common)
 
     # Parallel composition of all modules
-    i = DES.modules.length-1
-    return if i<0
-    sys = DES.modules[i]
-    while i-- >0
-        sys = sync(DES.modules[i], sys)
+    number_of_modules = DES.modules.length
+    console.log number_of_modules, 'modules in DES'
+
+    return if number_of_modules < 1
+
+    sys = DES.modules[0]
+
+
+    start = window.performance.now()
+    stop = start
+    table = []
+    cnt = 2
+
+    ix = 1
+    while ix < number_of_modules
+        start = stop
+
+        # console.log i, sys.X.size(), 'states and', sys.T.size(), 'transitions', DES.modules[i].name
+        sys = sync(DES.modules[ix], sys)
+        ix++
     
+        stop = window.performance.now()
+    
+        dt = stop - start
+        s = (dt/1000)|0
+        m = (s/60)|0
+        s -= m*60
+        ms = (dt - ((m*60)+s)*1000)|0
+        console.log cnt++, 'X:', sys.X.size(), 'T:', sys.T.size(), 'm:', m, 's:', s, 'ms:', ms
+
+        table.push({
+            X: sys.X.size()
+            T: sys.T.size()
+            'm:s.ms': m + ':' + s + '.' + ms
+                })
+
+        if (m>5)
+            console.log 'Interruped due to the time limit'
+            console.table(table)
+            return
+
+    console.table(table)
+
     # sys = DES.projection(sys, get_events_by_labels([
     #     'open_ac', 
     #     'open_de', 
@@ -564,7 +761,16 @@ show_events()
     #     'close_lo'
     #     ]))
 
+    # Get array of observable events
+    observed = []
+    i = DES.E.size()
+    while i-- > 0
+        observed.push(i) if DES.E.observable.get(i)
+    console.log observed.map((e)->DES.E.labels.get(e))
+    # sys = DES.projection(sys, observed)
+
     DES.modules.push(sys)
+    # console.log 'DES has', sys.X.size(), 'states and', sys.T.size(), 'transitions'
         
     # m1 = DES.modules[0]
     # m2 = DES.modules[1]
@@ -576,7 +782,7 @@ show_events()
     #     while i-- >0
     #         console.log  i, [ m1_2_3.X.map[i*2], m1_2_3.X.map[i*2+1] ]
 
-)()
+)
 
 
 

@@ -215,7 +215,7 @@
   });
 
   (function() {
-    var events, make_2states_automaton, make_3states_automaton, make_cause_effect_automaton, make_valve_automaton, put_events_to_system;
+    var events, make_2states_automaton, make_2states_automaton_faulty, make_3states_automaton, make_cause_effect_automaton, make_compleate_valve, make_valve_automaton, put_events_to_system;
 
     events = [];
     put_events_to_system = function(events) {
@@ -252,9 +252,35 @@
       m = set_transitions(DES.add_module(name), [[0, name + '_opening', 1], [1, name + '_opening', 1], [1, name + '_open', 2], [2, name + '_open', 2], [2, name + '_closing', 3], [3, name + '_closing', 3], [3, name + '_closed', 0], [0, name + '_closed', 0], [1, name + '_stoped', 4], [3, name + '_stoped', 4], [4, name + '_stoped', 4], [4, name + '_opening', 1], [4, name + '_closing', 3]]);
       return m;
     };
-    make_2states_automaton = function(name) {
+    make_2states_automaton = function(name, observable) {
+      var e, m, _i, _len;
+
+      if (observable == null) {
+        observable = false;
+      }
+      events = [
+        {
+          labels: name + '_lo'
+        }, {
+          labels: name + '_hi'
+        }
+      ];
+      if (observable) {
+        for (_i = 0, _len = events.length; _i < _len; _i++) {
+          e = events[_i];
+          e.observable = true;
+        }
+      }
+      put_events_to_system(events);
+      m = set_transitions(DES.add_module(name), [[0, name + '_lo', 0], [0, name + '_hi', 1], [1, name + '_hi', 1], [1, name + '_lo', 0]]);
+      return m;
+    };
+    make_2states_automaton_faulty = function(name, observable) {
       var m;
 
+      if (observable == null) {
+        observable = false;
+      }
       events = [
         {
           labels: name + '_lo',
@@ -262,10 +288,16 @@
         }, {
           labels: name + '_hi',
           observable: true
+        }, {
+          labels: name + '_f0',
+          fault: true
+        }, {
+          labels: 'tout',
+          observable: true
         }
       ];
       put_events_to_system(events);
-      m = set_transitions(DES.add_module(name), [[0, name + '_lo', 0], [0, name + '_hi', 1], [1, name + '_hi', 1], [1, name + '_lo', 0]]);
+      m = set_transitions(DES.add_module(name), [[0, name + '_lo', 0], [0, name + '_hi', 1], [1, name + '_hi', 1], [1, name + '_lo', 0], [0, name + '_f0', 2], [1, name + '_f0', 2], [2, name + '_lo', 2], [2, 'tout', 2]]);
       return m;
     };
     make_3states_automaton = function(name) {
@@ -273,21 +305,21 @@
 
       events = [
         {
-          labels: name + 'a_lo',
+          labels: name + '_a_lo',
           observable: true
         }, {
-          labels: name + 'a_hi',
+          labels: name + '_a_hi',
           observable: true
         }, {
-          labels: name + 'b_lo',
+          labels: name + '_b_lo',
           observable: true
         }, {
-          labels: name + 'b_hi',
+          labels: name + '_b_hi',
           observable: true
         }
       ];
       put_events_to_system(events);
-      m = set_transitions(DES.add_module(name), [[0, name + 'a_lo', 0], [0, name + 'b_lo', 0], [0, name + 'a_hi', 1], [1, name + 'a_hi', 1], [1, name + 'b_lo', 1], [1, name + 'a_lo', 0], [0, name + 'b_hi', 2], [2, name + 'b_hi', 2], [2, name + 'a_lo', 2], [2, name + 'b_lo', 0]]);
+      m = set_transitions(DES.add_module(name), [[0, name + '_a_lo', 0], [0, name + '_b_lo', 0], [0, name + '_a_hi', 1], [1, name + '_a_hi', 1], [1, name + '_b_lo', 1], [1, name + '_a_lo', 0], [0, name + '_b_hi', 2], [2, name + '_b_hi', 2], [2, name + '_a_lo', 2], [2, name + '_b_lo', 0]]);
       return m;
     };
     make_cause_effect_automaton = function(name1, name2, events) {
@@ -299,13 +331,35 @@
       m = set_transitions(DES.add_module(name1 + '-' + name2), [[0, name2 + '_' + events[3], 0], [1, name2 + '_' + events[1], 1], [0, name1 + '_' + events[0], 1], [1, name1 + '_' + events[0], 1], [1, name1 + '_' + events[2], 0], [0, name1 + '_' + events[2], 0]]);
       return m;
     };
-    return make_3states_automaton('');
+    make_compleate_valve = function(name) {
+      var a, aa, ab, sc, so, v;
+
+      v = name;
+      sc = v + 'sc';
+      so = v + 'so';
+      a = v + 'a';
+      aa = v + 'a_a';
+      ab = v + 'a_b';
+      make_valve_automaton(v);
+      make_2states_automaton(sc);
+      make_2states_automaton(so);
+      make_cause_effect_automaton(v, sc, ['closed', 'hi', 'opening', 'lo']);
+      make_cause_effect_automaton(v, so, ['open', 'hi', 'closing', 'lo']);
+      make_3states_automaton(a);
+      make_cause_effect_automaton(aa, v, ['hi', 'opening', 'lo', 'stoped']);
+      return make_cause_effect_automaton(ab, v, ['hi', 'closing', 'lo', 'stoped']);
+    };
+    make_2states_automaton('LT1', true);
+    make_2states_automaton('A');
+    make_2states_automaton('B');
+    set_transitions(DES.add_module('Technology'), [[0, 'A_lo', 0], [0, 'A_hi', 1], [1, 'B_lo', 2], [2, 'B_hi', 3], [3, 'B_lo', 4], [4, 'B_hi', 0], [3, 'A_lo', 5]]).X.faulty.set(5);
+    return make_cause_effect_automaton('A', 'LT1', ['hi', 'hi', 'lo', 'lo']);
   })();
 
   show_events();
 
   (function() {
-    var i, sync, sys;
+    var cnt, dt, i, ix, m, ms, number_of_modules, observed, s, start, stop, sync, sys, table;
 
     sync = function(m1, m2) {
       var common;
@@ -313,15 +367,51 @@
       common = DES.get_common_events(m1, m2);
       return DES.sync(m1, m2, common);
     };
-    i = DES.modules.length - 1;
-    if (i < 0) {
+    number_of_modules = DES.modules.length;
+    console.log(number_of_modules, 'modules in DES');
+    if (number_of_modules < 1) {
       return;
     }
-    sys = DES.modules[i];
-    while (i-- > 0) {
-      sys = sync(DES.modules[i], sys);
+    sys = DES.modules[0];
+    start = window.performance.now();
+    stop = start;
+    table = [];
+    cnt = 2;
+    ix = 1;
+    while (ix < number_of_modules) {
+      start = stop;
+      sys = sync(DES.modules[ix], sys);
+      ix++;
+      stop = window.performance.now();
+      dt = stop - start;
+      s = (dt / 1000) | 0;
+      m = (s / 60) | 0;
+      s -= m * 60;
+      ms = (dt - ((m * 60) + s) * 1000) | 0;
+      console.log(cnt++, 'X:', sys.X.size(), 'T:', sys.T.size(), 'm:', m, 's:', s, 'ms:', ms);
+      table.push({
+        X: sys.X.size(),
+        T: sys.T.size(),
+        'm:s.ms': m + ':' + s + '.' + ms
+      });
+      if (m > 5) {
+        console.log('Interruped due to the time limit');
+        console.table(table);
+        return;
+      }
     }
+    console.table(table);
+    observed = [];
+    i = DES.E.size();
+    while (i-- > 0) {
+      if (DES.E.observable.get(i)) {
+        observed.push(i);
+      }
+    }
+    console.log(observed.map(function(e) {
+      return DES.E.labels.get(e);
+    }));
     return DES.modules.push(sys);
-  })();
+  });
 
 }).call(this);

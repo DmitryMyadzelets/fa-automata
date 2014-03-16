@@ -288,6 +288,7 @@ update_SVG = () ->
             .attr('fill', 'context-stroke')
 
     force = d3.layout.force()    
+    window.force = force
 
     # To stop forces when clicked
     svg.on('click', ()-> 
@@ -307,8 +308,7 @@ update_SVG = () ->
         .links(graph.links)
         .start()
 
-
-    force.on('tick', ()->
+    tick = () ->
         link.attr('d', getLinkCurve)
         node.attr('transform', (d) -> 
             # # fixed 4th node
@@ -325,7 +325,9 @@ update_SVG = () ->
                 d.cv[1].toFixed(0) + ')'
         )
         return
-    )
+
+
+    force.on('tick', tick)
 
 
     link = svg.selectAll('.link')
@@ -343,12 +345,37 @@ update_SVG = () ->
             .attr('class', 'label')
             .text((d)-> d.label)
 
+    dragstart = (d, i) ->
+        force.stop() 
+
+    dragmove = (d, i) ->
+        d.px += d3.event.dx
+        d.py += d3.event.dy
+        d.x += d3.event.dx
+        d.y += d3.event.dy 
+        tick()
+        # // this is the key to make it work together with updating both px,py,x,y on d !
+
+    dragend = (d, i) ->
+        # // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
+        d.fixed = true 
+        tick()
+        force.resume()
+
+
+    node_drag = d3.behavior.drag()
+        .on("dragstart", dragstart)
+        .on("drag", dragmove)
+        .on("dragend", dragend)
+
+
 
     node = svg.selectAll('.node')
             .data(graph.nodes)
         .enter().append('g')
             .attr('class', 'node')
-            .call(force.drag)
+            # .call(force.drag)
+            .call(node_drag)
 
 
     # Add circle to each node
@@ -365,6 +392,13 @@ update_SVG = () ->
             .attr('class', 'marked')
             .attr('r', node_radius-2)
             .attr("style", "fill: none; stroke: #000000")
+
+    # Add circle for faulty node
+    node.filter((d)-> d.faulty?)
+        .append('circle')
+            .attr('r', node_radius+1)
+            .attr("style", "fill: none; stroke: #ff0000")
+
 
     # Add text to each node
     node.append('text')
@@ -412,6 +446,7 @@ update_SVG = () ->
             }
             node.start = true if i == m.X.start
             node.marked = true if m.X.marked.get(i)
+            node.faulty =  true if m.X.faulty.get(i)
             graph.nodes.push(node)
             i++
 
@@ -460,11 +495,10 @@ update_SVG = () ->
 
 
 
-UI.show_module(DES.modules[DES.modules.length-1])
 ix = 0
 ix = DES.modules.length-1
-UI.show_module(DES.modules[ix]) if DES.modules.length
-
+# UI.show_module(DES.modules[ix]) if DES.modules.length
+UI.show_module(window.ui_module) if window.ui_module?
 
 
 

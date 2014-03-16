@@ -58,7 +58,7 @@ class @bitArray
     b2i = (bit) -> (bit >> 4)|0
     # Risizes array its size is not small or small
     resize = (bits) ->
-        len = 1|0 + b2i(bits)
+        len = b2i(bits) + 1|0
         if len ^ @array.length
             if len > @array.length
                 tmp = new Uint16Array(len)
@@ -731,7 +731,7 @@ DES = {
             map.push(q2)
             # Marking
             x = M.X.add()
-            M.X.marked.set(x) if m1.X.marked.get(q1) or m2.X.marked.get(q2)
+            M.X.marked.set(x) if m1.X.marked.get(q1) and m2.X.marked.get(q2)
             # 
             stack.push(map_n++)
             map_n-1
@@ -782,43 +782,23 @@ DES = {
 
     # Performes Kleen closure on the module (marks all reachable states)
     closure : (m) ->
-        @BFS(m, (q, e, p) -> m.X.marked.set(p))
+        @DFS(m, null, (q, e, p) -> m.X.marked.set(q) if m.X.marked.get(p))
         m
 
 
-
     # Subtracts language of module 2 from language of module 1
-    subtract : (m1, m2) ->
-        stack = [m2.X.start]
-        @DFS(m1,
-            (q, e, p) ->
-                q2 = stack[stack.length-1]
-                tt = m2.T.transitions.out(q2)
-                # Check if transitions of m2 have the same event
-                for i in tt
-                    t2 = m2.T.transitions.get(i)
-                    if e == t2[1]
-                        q2 = t2[2]
-                        stack.push(q2)
-                        m1.X.marked.clr(p) if m2.X.marked.get(q2)
-                        return true
-                stack.push(null) # no transition of m2
-                false
-            (q, e, p) -> 
-                stack.pop()
-                return
-            )
-        return
+    subtract : (m1, m2) -> @intersection(m1, @complement(m2))
 
 
 
     # Returns 'true' if the language of the module is empty 
     # (i.e. no reachable marked states), 'false' otherwise.
     is_empty : (m) ->
+        empty = true
         @BFS(m, (q, e, p) ->
-            return true if m.X.marked.get(p)
+            empty = false if m.X.marked.get(p)
             )
-        false
+        empty
 
 
 
@@ -856,10 +836,49 @@ DES = {
                     for i in pp
                         if m.X.marked.get(i)
                             M.X.marked.set(p)
-                            break;
+                            break
                 return
             )
         M
+
+
+    # Returns complement of the language
+    complement : (m) ->
+        M = @copy(m)
+
+        # Get all events 
+        events = []
+        i = M.T.size()
+        while i-- >0
+            e = M.T.transitions.get(i)[1] 
+            events.push(e) if e not in events
+
+        # index of new 'complement' state
+        new_p = -1
+
+        # Inverse state marking
+        q = M.X.size()
+        while q-- >0
+            if M.X.marked.get(q)
+                M.X.marked.clr(q)
+            else
+                M.X.marked.set(q)
+            # get array of indexes of transition from state q
+            arr_tix = m.T.transitions.out(q)
+            # get array of events from state q
+            q_events = arr_tix.map((t)->m.T.transitions.get(t)[1])
+            # get events wich have no transitions for state q
+            p_events = events.filter((e) -> q_events.indexOf(e) < 0)
+            for e in p_events
+                if new_p < 0
+                    new_p = M.X.add()
+                    M.X.marked.set(new_p)
+                M.T.transitions.set(M.T.add(), q, e, new_p)
+        # Add loops to new event
+        if new_p >= 0
+            M.T.transitions.set(M.T.add(), new_p, e, new_p) for e in events
+        M
+
 
     # Returns array of events common for two modules
     get_common_events : (m1, m2) ->

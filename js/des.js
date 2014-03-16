@@ -48,7 +48,7 @@
     resize = function(bits) {
       var len, tmp;
 
-      len = 1 | 0 + b2i(bits);
+      len = b2i(bits) + 1 | 0;
       if (len ^ this.array.length) {
         if (len > this.array.length) {
           tmp = new Uint16Array(len);
@@ -748,7 +748,7 @@
         map.push(q1);
         map.push(q2);
         x = M.X.add();
-        if (m1.X.marked.get(q1) || m2.X.marked.get(q2)) {
+        if (m1.X.marked.get(q1) && m2.X.marked.get(q2)) {
           M.X.marked.set(x);
         }
         stack.push(map_n++);
@@ -801,45 +801,26 @@
       return M;
     },
     closure: function(m) {
-      this.BFS(m, function(q, e, p) {
-        return m.X.marked.set(p);
+      this.DFS(m, null, function(q, e, p) {
+        if (m.X.marked.get(p)) {
+          return m.X.marked.set(q);
+        }
       });
       return m;
     },
     subtract: function(m1, m2) {
-      var stack;
-
-      stack = [m2.X.start];
-      this.DFS(m1, function(q, e, p) {
-        var i, q2, t2, tt, _i, _len;
-
-        q2 = stack[stack.length - 1];
-        tt = m2.T.transitions.out(q2);
-        for (_i = 0, _len = tt.length; _i < _len; _i++) {
-          i = tt[_i];
-          t2 = m2.T.transitions.get(i);
-          if (e === t2[1]) {
-            q2 = t2[2];
-            stack.push(q2);
-            if (m2.X.marked.get(q2)) {
-              m1.X.marked.clr(p);
-            }
-            return true;
-          }
-        }
-        stack.push(null);
-        return false;
-      }, function(q, e, p) {
-        stack.pop();
-      });
+      return this.intersection(m1, this.complement(m2));
     },
     is_empty: function(m) {
+      var empty;
+
+      empty = true;
       this.BFS(m, function(q, e, p) {
         if (m.X.marked.get(p)) {
-          return true;
+          return empty = false;
         }
       });
-      return false;
+      return empty;
     },
     copy: function(m) {
       var M, T, i, n, x;
@@ -886,6 +867,50 @@
           }
         }
       });
+      return M;
+    },
+    complement: function(m) {
+      var M, arr_tix, e, events, i, new_p, p_events, q, q_events, _i, _j, _len, _len1;
+
+      M = this.copy(m);
+      events = [];
+      i = M.T.size();
+      while (i-- > 0) {
+        e = M.T.transitions.get(i)[1];
+        if (__indexOf.call(events, e) < 0) {
+          events.push(e);
+        }
+      }
+      new_p = -1;
+      q = M.X.size();
+      while (q-- > 0) {
+        if (M.X.marked.get(q)) {
+          M.X.marked.clr(q);
+        } else {
+          M.X.marked.set(q);
+        }
+        arr_tix = m.T.transitions.out(q);
+        q_events = arr_tix.map(function(t) {
+          return m.T.transitions.get(t)[1];
+        });
+        p_events = events.filter(function(e) {
+          return q_events.indexOf(e) < 0;
+        });
+        for (_i = 0, _len = p_events.length; _i < _len; _i++) {
+          e = p_events[_i];
+          if (new_p < 0) {
+            new_p = M.X.add();
+            M.X.marked.set(new_p);
+          }
+          M.T.transitions.set(M.T.add(), q, e, new_p);
+        }
+      }
+      if (new_p >= 0) {
+        for (_j = 0, _len1 = events.length; _j < _len1; _j++) {
+          e = events[_j];
+          M.T.transitions.set(M.T.add(), new_p, e, new_p);
+        }
+      }
       return M;
     },
     get_common_events: function(m1, m2) {

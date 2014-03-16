@@ -212,7 +212,7 @@
   force_stop = false;
 
   update_SVG = function() {
-    var force, label, link, node, svg;
+    var dragend, dragmove, dragstart, force, label, link, node, node_drag, svg, tick;
 
     d3.select('#' + svg_container_id).select("svg").remove();
     svg = d3.select('#' + svg_container_id).append('svg').attr('width', '100%').attr('height', '100%');
@@ -225,6 +225,7 @@
       return d;
     }).attr("viewBox", "-12 -5 12 10").attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto").append("path").attr("d", "M-10,-5L0,0L-10,5 Z").attr('fill', 'context-stroke');
     force = d3.layout.force();
+    window.force = force;
     svg.on('click', function() {
       force_stop = true;
       return force.stop();
@@ -242,7 +243,7 @@
         return 1;
       }
     }).size([width, height]).nodes(graph.nodes).links(graph.links).start();
-    force.on('tick', function() {
+    tick = function() {
       link.attr('d', getLinkCurve);
       node.attr('transform', function(d) {
         return 'translate(' + d.x.toFixed(2) + ',' + d.y.toFixed(2) + ')';
@@ -252,18 +253,38 @@
           return 'translate(' + d.cv[0].toFixed(0) + ',' + d.cv[1].toFixed(0) + ')';
         }
       });
-    });
+    };
+    force.on('tick', tick);
     link = svg.selectAll('.link').data(graph.links).enter().append('path').attr("marker-end", function(d) {
       return "url(#arrow)";
     }).attr("style", "fill: none; stroke: #000000");
     label = svg.selectAll('.label').data(graph.links).enter().append('g').append('text').attr('class', 'label').text(function(d) {
       return d.label;
     });
-    node = svg.selectAll('.node').data(graph.nodes).enter().append('g').attr('class', 'node').call(force.drag);
+    dragstart = function(d, i) {
+      return force.stop();
+    };
+    dragmove = function(d, i) {
+      d.px += d3.event.dx;
+      d.py += d3.event.dy;
+      d.x += d3.event.dx;
+      d.y += d3.event.dy;
+      return tick();
+    };
+    dragend = function(d, i) {
+      d.fixed = true;
+      tick();
+      return force.resume();
+    };
+    node_drag = d3.behavior.drag().on("dragstart", dragstart).on("drag", dragmove).on("dragend", dragend);
+    node = svg.selectAll('.node').data(graph.nodes).enter().append('g').attr('class', 'node').call(node_drag);
     node.append('circle').attr('r', node_radius).attr("style", "fill: gray; stroke: #000000").attr('fill-opacity', '0.5');
     node.filter(function(d) {
       return d.marked != null;
     }).append('circle').attr('class', 'marked').attr('r', node_radius - 2).attr("style", "fill: none; stroke: #000000");
+    node.filter(function(d) {
+      return d.faulty != null;
+    }).append('circle').attr('r', node_radius + 1).attr("style", "fill: none; stroke: #ff0000");
     node.append('text').text(function(d) {
       return d.name;
     }).attr('text-anchor', 'middle').attr('y', '4');
@@ -297,6 +318,9 @@
         if (m.X.marked.get(i)) {
           node.marked = true;
         }
+        if (m.X.faulty.get(i)) {
+          node.faulty = true;
+        }
         graph.nodes.push(node);
         i++;
       }
@@ -325,14 +349,12 @@
     }
   };
 
-  UI.show_module(DES.modules[DES.modules.length - 1]);
-
   ix = 0;
 
   ix = DES.modules.length - 1;
 
-  if (DES.modules.length) {
-    UI.show_module(DES.modules[ix]);
+  if (window.ui_module != null) {
+    UI.show_module(window.ui_module);
   }
 
 }).call(this);
