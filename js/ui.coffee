@@ -497,8 +497,8 @@ update_SVG = () ->
 
 ix = 0
 ix = DES.modules.length-1
-# UI.show_module(DES.modules[ix]) if DES.modules.length
-UI.show_module(window.ui_module) if window.ui_module?
+UI.show_module(DES.modules[ix]) if DES.modules.length
+# UI.show_module(window.ui_module) if window.ui_module?
 
 
 

@@ -731,7 +731,7 @@ DES = {
             map.push(q2)
             # Marking
             x = M.X.add()
-            M.X.marked.set(x) if m1.X.marked.get(q1) and m2.X.marked.get(q2)
+            M.X.marked.set(x) if (m1.X.marked.get(q1) and m2.X.marked.get(q2))
             # 
             stack.push(map_n++)
             map_n-1
@@ -787,7 +787,20 @@ DES = {
 
 
     # Subtracts language of module 2 from language of module 1
-    subtract : (m1, m2) -> @intersection(m1, @complement(m2))
+    subtract : (m1, m2) -> 
+        events = []
+        # get events from m1
+        i = m1.T.size()
+        while i-- >0
+            e = m1.T.transitions.get(i)[1]
+            events.push(e) if e not in events
+        # get events from m1
+        i = m2.T.size()
+        while i-- >0
+            e = m2.T.transitions.get(i)[1]
+            events.push(e) if e not in events
+
+        @intersection(m1, @complement(m2, events))
 
 
 
@@ -804,12 +817,13 @@ DES = {
 
     # Returns a copy of module (not full copy, only some fields!)
     copy : (m) ->
-        T = create_general_set(T_CONFIG)
-        M = DES.make_module_from_T(T, m.name)
+        M = @create_module(m.name)
+        T = M.T
         # copy transitions
         @BFS(m, (q, e, p) -> T.transitions.set(T.add(), q, e, p))
         # copy states, and [not]marked
         n = m.X.size()
+        # make initial state at least
         i = 0
         while i < n
             x = M.X.add()
@@ -817,6 +831,7 @@ DES = {
             i++
         M.X.start = m.X.start
         M
+
 
     # Returns new module - projection to events
     projection : (m, events) ->
@@ -843,15 +858,10 @@ DES = {
 
 
     # Returns complement of the language
-    complement : (m) ->
+    complement : (m, events) ->
         M = @copy(m)
 
-        # Get all events 
-        events = []
-        i = M.T.size()
-        while i-- >0
-            e = M.T.transitions.get(i)[1] 
-            events.push(e) if e not in events
+        events = [] if not events?
 
         # index of new 'complement' state
         new_p = -1
@@ -874,6 +884,8 @@ DES = {
                     new_p = M.X.add()
                     M.X.marked.set(new_p)
                 M.T.transitions.set(M.T.add(), q, e, new_p)
+        # Create state if there is no states 
+        M.X.marked.set(new_p = M.X.add()) if (new_p < 0) and events.length
         # Add loops to new event
         if new_p >= 0
             M.T.transitions.set(M.T.add(), new_p, e, new_p) for e in events

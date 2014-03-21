@@ -96,7 +96,7 @@
   };
 
   (function() {
-    var E, e, events, i, key, _i, _len;
+    var E, e, events, i, key, module, _i, _len;
 
     events = [
       {
@@ -139,7 +139,10 @@
       }
     }
     set_transitions(DES.add_module('DO'), [[0, 'do_hi', 1], [0, 'do_lo', 0], [1, 'do_hi', 1], [1, 'do_lo', 0]]);
-    return set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0], [0, 'f0', 2], [1, 'f0', 2], [2, 'r_lo', 2]]);
+    set_transitions(DES.add_module('Relay'), [[0, 'r_hi', 1], [0, 'r_lo', 0], [1, 'r_hi', 1], [1, 'r_lo', 0], [0, 'f0', 2], [1, 'f0', 2], [2, 'r_lo', 2]]);
+    set_transitions(module = DES.add_module('DO2R'), [[0, 'r_lo', 0], [0, 'do_lo', 0], [0, 'do_hi', 1], [1, 'r_hi', 1], [1, 'do_hi', 1], [1, 'do_lo', 0]]);
+    module.X.marked.set(2);
+    return module.X.marked.set(3);
   });
 
   (function() {
@@ -349,11 +352,9 @@
       make_cause_effect_automaton(aa, v, ['hi', 'opening', 'lo', 'stoped']);
       return make_cause_effect_automaton(ab, v, ['hi', 'closing', 'lo', 'stoped']);
     };
-    make_2states_automaton('LT1', true);
-    make_2states_automaton('A');
-    make_2states_automaton('B');
-    set_transitions(DES.add_module('Technology'), [[0, 'A_lo', 0], [0, 'A_hi', 1], [1, 'B_lo', 2], [2, 'B_hi', 3], [3, 'B_lo', 4], [4, 'B_hi', 0], [3, 'A_lo', 5]]).X.faulty.set(5);
-    return make_cause_effect_automaton('A', 'LT1', ['hi', 'hi', 'lo', 'lo']);
+    make_compleate_valve('V4');
+    make_2states_automaton_faulty('LT3', true);
+    return make_2states_automaton('LT4', true);
   })();
 
   show_events();

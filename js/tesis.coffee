@@ -154,28 +154,28 @@ set_transitions = (m, transitions) ->
         [2, 'r_lo', 2]
     ])
 
-    # set_transitions(module = DES.add_module('DO2Relay'), [
-    #     [0, 'r_lo', 0]
-    #     [0, 'do_lo', 0]
-    #     [0, 'do_hi', 1]
-    #     [1, 'r_hi', 1]
-    #     [1, 'do_hi', 1]
-    #     [1, 'do_lo', 0]
-    #     # # to faulty state (Relay stacks to 0)
-    #     # [1, 'r_lo', 2]
-    #     # [2, 'r_lo', 2]
-    #     # [2, 'do_lo', 2]
-    #     # [2, 'do_hi', 2]
-    #     # # # to faulty state (Relay stacks to 1)
-    #     # [0, 'r_hi', 3]
-    #     # [3, 'r_hi', 3]
-    #     # [3, 'do_lo', 3]
-    #     # [3, 'do_hi', 3]
-    # ])
+    set_transitions(module = DES.add_module('DO2R'), [
+        [0, 'r_lo', 0]
+        [0, 'do_lo', 0]
+        [0, 'do_hi', 1]
+        [1, 'r_hi', 1]
+        [1, 'do_hi', 1]
+        [1, 'do_lo', 0]
+        # # to faulty state (Relay stacks to 0)
+        # [1, 'r_lo', 2]
+        # [2, 'r_lo', 2]
+        # [2, 'do_lo', 2]
+        # [2, 'do_hi', 2]
+        # # # to faulty state (Relay stacks to 1)
+        # [0, 'r_hi', 3]
+        # [3, 'r_hi', 3]
+        # [3, 'do_lo', 3]
+        # [3, 'do_hi', 3]
+    ])
 
-    # # Mark faulty states
-    # module.X.marked.set(2)
-    # module.X.marked.set(3)
+    # Mark faulty states
+    module.X.marked.set(2)
+    module.X.marked.set(3)
 
 
     # # set_transitions(DES.add_module('Contactor'), [
@@ -537,12 +537,12 @@ set_transitions = (m, transitions) ->
 
 
 
-    # # 2 Butterfly valves
+    # # # 2 Butterfly valves
     # make_compleate_valve('V1')
     # make_compleate_valve('V2')
     # # # 3 Gate valves
     # make_compleate_valve('V3')
-    # make_compleate_valve('V4')
+    make_compleate_valve('V4')
     # make_compleate_valve('V5')
     # # Screw conveyer
     # make_2states_automaton('M2')
@@ -550,18 +550,18 @@ set_transitions = (m, transitions) ->
     # make_2states_automaton('M3', true)  #####
     # # Vibrator      1
     # make_2states_automaton('M1')
-    # # Fork level sensor 4
-    make_2states_automaton('LT1', true)
+    # Fork level sensor 4
+    # make_2states_automaton('LT1', true)
     # make_2states_automaton('LT2', true)
     
     # make_2states_automaton('LT3', true) ####
-    # make_2states_automaton_faulty('LT3', true) #####
+    make_2states_automaton_faulty('LT3', true) #####
 
-    # make_2states_automaton('LT4', true)
-    # # Air pump  1
+    make_2states_automaton('LT4', true)
+    # Air pump  1
     # make_2states_automaton('P1', true)
 
-    # # Control cycle 1. Dust bucket emptiness
+    # Control cycle 1. Dust bucket emptiness
     # set_transitions(DES.add_module('Control1'), [
     #     [0, 'LT3_hi', 1]
     #     [1, 'V4a_a_hi', 2]
@@ -596,32 +596,56 @@ set_transitions = (m, transitions) ->
     # .X.faulty.set(4)
     
 
-    make_2states_automaton('A') #### Bunker A
-    make_2states_automaton('B') #### Bunker B
+    # make_2states_automaton('A') #### Bunker A
+    # make_2states_automaton('B') #### Bunker B
 
-    set_transitions(DES.add_module('Technology'), [
-        [0, 'A_lo', 0]
-        [0, 'A_hi', 1]
-        [1, 'B_lo', 2]
+    # set_transitions(DES.add_module('Technology'), [
+    #     [0, 'A_lo', 0]
+    #     [0, 'A_hi', 1]
+    #     [1, 'B_lo', 2]
 
-        [2, 'B_hi', 3]
-        [3, 'B_lo', 4]
-        # [4, 'B_hi', 5]
-        [4, 'B_hi', 0]
-        # [5, 'B_lo', 6]
-        # [6, 'B_hi', 7]
-        # [7, 'B_lo', 8]
-        # [8, 'A_lo', 0]
+    #     [2, 'B_hi', 3]
+    #     [3, 'B_lo', 4]
+    #     # [4, 'B_hi', 5]
+    #     [4, 'B_hi', 5]
+    #     [5, 'B_lo', 6]
+    #     # [6, 'B_hi', 7]
+    #     # [7, 'B_lo', 8]
+    #     [6, 'A_lo', 0]
+    #     # [8, 'A_lo', 0]
 
-        # [1, 'B_hi', 9]
-        [3, 'A_lo', 5]
-        # [8, 'A_hi', 9]
+    #     # [1, 'B_hi', 9]
+    #     [3, 'A_lo', 7]
+    #     # [8, 'A_hi', 9]
 
-    ])
-    .X.faulty.set(5)
+    # ])
+    # .X.marked.set(7)
+    # .X.faulty.set(7)
 
-    make_cause_effect_automaton('A', 'LT1', ['hi', 'hi', 'lo', 'lo'])
+    # make_cause_effect_automaton('A', 'LT1', ['hi', 'hi', 'lo', 'lo'])
     # make_cause_effect_automaton('B', 'LT3', ['hi', 'hi', 'lo', 'lo'])
+    # set_transitions(DES.add_module('A_LT1'), [
+    #     [0, 'A_hi', 1]
+    #     [1, 'LT1_hi', 2]
+    #     [2, 'A_lo', 3]
+    #     [3, 'LT1_lo', 0]
+
+    #     # [0, 'A_lo', 0]
+    #     [0, 'LT1_lo', 0]
+    #     [2, 'A_hi', 2]
+    #     [2, 'LT1_hi', 2]
+    # ])
+    # set_transitions(DES.add_module('B_LT3'), [
+    #     [0, 'B_hi', 1]
+    #     [1, 'LT3_hi', 2]
+    #     [2, 'B_lo', 3]
+    #     [3, 'LT3_lo', 0]
+
+    #     [0, 'B_lo', 0]
+    #     [0, 'LT3_lo', 0]
+    #     [2, 'B_hi', 2]
+    #     [2, 'LT3_hi', 2]
+    # ])
 
 
 
@@ -692,6 +716,28 @@ set_transitions = (m, transitions) ->
 
     # End of the example
 
+    # put_events_to_system([
+    #     { labels: 'A_full' }
+    #     { labels: 'A_empty' }
+    #     { labels: 'B_full'}
+    #     { labels: 'B_empty'}
+    #     ])
+
+    # set_transitions(DES.add_module('A'), [
+    #     [0, 'A_full', 1]
+    #     [1, 'B_full', 2]
+    #     [2, 'B_empty', 3]
+    #     [3, 'B_full', 4]
+    #     [4, 'B_empty', 5]
+    #     [5, 'B_full', 6]
+    #     [6, 'B_empty', 7]
+    #     [7, 'A_empty', 0]
+
+    #     [3, 'A_empty', 8]
+    #     [7, 'A_full', 8]
+
+    #     ])
+    # .X.marked.set(8)
 )()
 
 
@@ -770,6 +816,10 @@ show_events()
     # sys = DES.projection(sys, observed)
 
     DES.modules.push(sys)
+
+    # i = sys.X.size()
+    # while i-- >0
+    #     sys.X.faulty.set(i) if sys.X.marked.get(i)
     # console.log 'DES has', sys.X.size(), 'states and', sys.T.size(), 'transitions'
         
     # m1 = DES.modules[0]

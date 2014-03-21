@@ -353,8 +353,8 @@
 
   ix = DES.modules.length - 1;
 
-  if (window.ui_module != null) {
-    UI.show_module(window.ui_module);
+  if (DES.modules.length) {
+    UI.show_module(DES.modules[ix]);
   }
 
 }).call(this);

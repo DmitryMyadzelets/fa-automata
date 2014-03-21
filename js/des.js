@@ -809,7 +809,24 @@
       return m;
     },
     subtract: function(m1, m2) {
-      return this.intersection(m1, this.complement(m2));
+      var e, events, i;
+
+      events = [];
+      i = m1.T.size();
+      while (i-- > 0) {
+        e = m1.T.transitions.get(i)[1];
+        if (__indexOf.call(events, e) < 0) {
+          events.push(e);
+        }
+      }
+      i = m2.T.size();
+      while (i-- > 0) {
+        e = m2.T.transitions.get(i)[1];
+        if (__indexOf.call(events, e) < 0) {
+          events.push(e);
+        }
+      }
+      return this.intersection(m1, this.complement(m2, events));
     },
     is_empty: function(m) {
       var empty;
@@ -825,8 +842,8 @@
     copy: function(m) {
       var M, T, i, n, x;
 
-      T = create_general_set(T_CONFIG);
-      M = DES.make_module_from_T(T, m.name);
+      M = this.create_module(m.name);
+      T = M.T;
       this.BFS(m, function(q, e, p) {
         return T.transitions.set(T.add(), q, e, p);
       });
@@ -869,17 +886,12 @@
       });
       return M;
     },
-    complement: function(m) {
-      var M, arr_tix, e, events, i, new_p, p_events, q, q_events, _i, _j, _len, _len1;
+    complement: function(m, events) {
+      var M, arr_tix, e, new_p, p_events, q, q_events, _i, _j, _len, _len1;
 
       M = this.copy(m);
-      events = [];
-      i = M.T.size();
-      while (i-- > 0) {
-        e = M.T.transitions.get(i)[1];
-        if (__indexOf.call(events, e) < 0) {
-          events.push(e);
-        }
+      if (events == null) {
+        events = [];
       }
       new_p = -1;
       q = M.X.size();
@@ -904,6 +916,9 @@
           }
           M.T.transitions.set(M.T.add(), q, e, new_p);
         }
+      }
+      if ((new_p < 0) && events.length) {
+        M.X.marked.set(new_p = M.X.add());
       }
       if (new_p >= 0) {
         for (_j = 0, _len1 = events.length; _j < _len1; _j++) {

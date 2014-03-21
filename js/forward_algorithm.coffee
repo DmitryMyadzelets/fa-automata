@@ -306,7 +306,6 @@ console.log '===================================================='
 # 
 (() ->
     for m in DES.modules
-
         m.F = DES.create_module('F')
         m.N = DES.create_module('N')
         m.subcommon = m.common.slice()
@@ -317,6 +316,10 @@ console.log '===================================================='
 # ix = 0
 # m = DES.modules[ix].N
 # DES.modules.push(m)
+
+start = window.performance.now()
+stop = start
+cnt = 0
 
 # 
 # Fault propagation algorithm. Preparation steps
@@ -337,10 +340,11 @@ console.log '===================================================='
         for j, index in DES.modules
             continue if index == i # Don't process the faulty module
             continue if index == k # Don't process itself
-            console.log 'Processing:', j.name, [k, '-', index]
             common = intersection(DES.modules[k].common, j.common)
             continue if common.length == 0
             continue if j.subcommon.length == 0
+            # cnt++
+            console.log 'Processing:', j.name, [k, '-', index]
 
             Fc = DES.sync(F, j.C, common)
             Nc = DES.sync(N, j.C, common)
@@ -348,41 +352,111 @@ console.log '===================================================='
             Nj_ = DES.projection(Nc, j.common)
             K = DES.intersection(Fj_, Nj_)
             DES.closure(K)
+
+            # if k == 4
+            #     window.ui_module = Nc
+            #     return true
+
             Fj_ = DES.subtract(Fj_, K)
             Nj_ = DES.subtract(Nj_, K)
-            DES.subtract(Fj_, j.F)
-            DES.subtract(Nj_, j.N)
 
-            if !DES.is_empty(Fj_) or !DES.is_empty(Nj_)
-                j.F = DES.sync(j.F, Fj_) # Union
-                j.N = DES.sync(j.N, Nj_) # Union
-                j.F.name = 'F'
-                j.N.name = 'N'
+            Fj__ = DES.subtract(Fj_, j.F)
+            Nj__ = DES.subtract(Nj_, j.N)
+
+
+
+
+            if !DES.is_empty(Fj__) or !DES.is_empty(Nj__)
+                j.F = DES.sync(j.F, Fj_, DES.get_common_events(j.F, Fj_)) # Union
+                j.N = DES.sync(j.N, Nj_, DES.get_common_events(j.N, Nj_)) # Union
+
+
+                # if k == 1
+                #     window.ui_module = j.N
+                #     return true
+
+                # cnt++
                 console.log 'updated', j.name
-                F_ = DES.copy(j.F)
-                N_ = DES.copy(j.N)
-                DES.closure(F_)
-                DES.closure(N_)
+                F_ = DES.closure(DES.copy(j.F))
+                N_ = DES.closure(DES.copy(j.N))
                 cap = DES.intersection(F_, N_)
-                DES.subtract(F_, j.F)
-                DES.subtract(N_, j.N)
+                F_ = DES.subtract(F_, j.F)
+                N_ = DES.subtract(N_, j.N)
                 NF_ = DES.sync(F_, N_, j.common) # Union
                 DES.subtract(NF_, cap)
 
                 j.subcommon = get_last_events(j)
-                propagate_FN(index, j.F, j.N)
-                # TODO: find events in the strings of NF_
-
-                # show_dfs(NF_)
-                # show_states(NF_)
-                # show_states(NF_)
+                return true if propagate_FN(index, j.F, j.N)
             else
                 console.log 'empty'
+                null
 
     propagate_FN(i, m.F, m.N)
 
     console.log 'DONE'
-    window.ui_module = DES.modules[2].F
+    # window.ui_module = DES.modules[43].N
 
-)()
+)
 
+N = null
+F = null
+
+console.log 'not Empty:'
+for m, ix in DES.modules
+    if (!DES.is_empty(m.N)) or (!DES.is_empty(m.F))
+        if !DES.is_empty(m.N)
+            if not N?
+                N = m.N
+            else
+                N = DES.sync(N, m.N, DES.get_common_events(N, m.N))
+
+        if !DES.is_empty(m.F)
+            if not F?
+                F = m.F
+            else
+                F = DES.sync(F, m.F, DES.get_common_events(F, m.F))
+        console.log ix, m.name, [!DES.is_empty(m.N), !DES.is_empty(m.F)]
+
+# events = []
+# i = N.T.size()
+# while i-- >0
+#     e  = N.T.transitions.get(i)[1]
+#     # console.log Object.keys(N.E)
+#     events.push(e) if DES.E.observable.get(e)  and (e not in events)
+
+# i = F.T.size()
+# while i-- >0
+#     e  = F.T.transitions.get(i)[1]
+#     # console.log Object.keys(N.E)
+#     events.push(e) if DES.E.observable.get(e)  and (e not in events)
+
+
+# N = DES.projection(N, events)
+# F = DES.projection(F, events)
+
+
+# window.ui_module = DES.modules[2].N
+
+
+stop = window.performance.now()
+
+dt = stop - start
+s = (dt/1000)|0
+m = (s/60)|0
+s -= m*60
+ms = (dt - ((m*60)+s)*1000)|0
+console.log 'm:', m, 's:', s, 'ms:', ms
+console.log 'compositions:', cnt
+
+(() ->
+    ix = DES.modules.length-1 
+    return if ix < 0
+    m = DES.modules[DES.modules.length-1]
+    m.X.faulty.set(2)
+    m = make_NF_module(m)
+    f = make_F_module(m)
+    # n = make_N_module(m)
+    debugger
+    DES.modules.push(f)
+    null
+)
