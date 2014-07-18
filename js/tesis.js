@@ -218,7 +218,7 @@
   });
 
   (function() {
-    var events, make_2states_automaton, make_2states_automaton_faulty, make_3states_automaton, make_cause_effect_automaton, make_compleate_valve, make_valve_automaton, put_events_to_system;
+    var events, make_2states_automaton, make_2states_automaton_faulty, make_3states_automaton, make_cause_effect_automaton, make_compleate_valve, make_test_automaton, make_valve_automaton, put_events_to_system;
 
     events = [];
     put_events_to_system = function(events) {
@@ -240,19 +240,19 @@
 
       events = [
         {
-          labels: name + '_open'
+          labels: 'b'
         }, {
-          labels: name + '_closed'
+          labels: 'a'
         }, {
-          labels: name + '_stoped'
+          labels: 'e'
         }, {
-          labels: name + '_opening'
+          labels: 'c'
         }, {
-          labels: name + '_closing'
+          labels: 'd'
         }
       ];
       put_events_to_system(events);
-      m = set_transitions(DES.add_module(name), [[0, name + '_opening', 1], [1, name + '_opening', 1], [1, name + '_open', 2], [2, name + '_open', 2], [2, name + '_closing', 3], [3, name + '_closing', 3], [3, name + '_closed', 0], [0, name + '_closed', 0], [1, name + '_stoped', 4], [3, name + '_stoped', 4], [4, name + '_stoped', 4], [4, name + '_opening', 1], [4, name + '_closing', 3]]);
+      m = set_transitions(DES.add_module(name), [[0, 'c', 1], [1, 'c', 1], [1, 'b', 2], [2, 'b', 2], [2, 'd', 3], [3, 'd', 3], [3, 'a', 0], [0, 'a', 0], [1, 'e', 4], [3, 'e', 4], [4, 'e', 4], [4, 'c', 1], [4, 'd', 3]]);
       return m;
     };
     make_2states_automaton = function(name, observable) {
@@ -352,9 +352,23 @@
       make_cause_effect_automaton(aa, v, ['hi', 'opening', 'lo', 'stoped']);
       return make_cause_effect_automaton(ab, v, ['hi', 'closing', 'lo', 'stoped']);
     };
-    make_compleate_valve('V4');
-    make_2states_automaton_faulty('LT3', true);
-    return make_2states_automaton('LT4', true);
+    make_test_automaton = function(name) {
+      var m;
+
+      events = [
+        {
+          labels: name + 'e',
+          observable: true
+        }, {
+          labels: name + 'o',
+          observable: true
+        }
+      ];
+      put_events_to_system(events);
+      m = set_transitions(DES.add_module(name), [[0, name + 'e', 1], [1, name + 'o', 0]]);
+      return m;
+    };
+    return make_test_automaton('');
   })();
 
   show_events();

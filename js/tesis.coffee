@@ -404,31 +404,58 @@ set_transitions = (m, transitions) ->
 
     put_events_to_system(events)
 
+
     make_valve_automaton = (name) ->
         events = [
-            { labels : name+'_open'}
-            { labels : name+'_closed'}
-            { labels : name+'_stoped'}
-            { labels : name+'_opening'}
-            { labels : name+'_closing'}
+            { labels : 'b'}
+            { labels : 'a'}
+            { labels : 'e'}
+            { labels : 'c'}
+            { labels : 'd'}
         ]
         put_events_to_system(events)
         m = set_transitions(DES.add_module(name), [
-            [0, name+'_opening', 1]
-            [1, name+'_opening', 1]
-            [1, name+'_open', 2]
-            [2, name+'_open', 2]
-            [2, name+'_closing', 3]
-            [3, name+'_closing' , 3]
-            [3, name+'_closed', 0]
-            [0, name+'_closed', 0]
-            [1, name+'_stoped', 4]
-            [3, name+'_stoped', 4]
-            [4, name+'_stoped', 4]
-            [4, name+'_opening', 1]
-            [4, name+'_closing', 3]
+            [0, 'c', 1]
+            [1, 'c', 1]
+            [1, 'b', 2]
+            [2, 'b', 2]
+            [2, 'd', 3]
+            [3, 'd' , 3]
+            [3, 'a', 0]
+            [0, 'a', 0]
+            [1, 'e', 4]
+            [3, 'e', 4]
+            [4, 'e', 4]
+            [4, 'c', 1]
+            [4, 'd', 3]
         ])
         m
+
+    # make_valve_automaton = (name) ->
+    #     events = [
+    #         { labels : name+'_open'}
+    #         { labels : name+'_closed'}
+    #         { labels : name+'_stoped'}
+    #         { labels : name+'_opening'}
+    #         { labels : name+'_closing'}
+    #     ]
+    #     put_events_to_system(events)
+    #     m = set_transitions(DES.add_module(name), [
+    #         [0, name+'_opening', 1]
+    #         [1, name+'_opening', 1]
+    #         [1, name+'_open', 2]
+    #         [2, name+'_open', 2]
+    #         [2, name+'_closing', 3]
+    #         [3, name+'_closing' , 3]
+    #         [3, name+'_closed', 0]
+    #         [0, name+'_closed', 0]
+    #         [1, name+'_stoped', 4]
+    #         [3, name+'_stoped', 4]
+    #         [4, name+'_stoped', 4]
+    #         [4, name+'_opening', 1]
+    #         [4, name+'_closing', 3]
+    #     ])
+    #     m
 
 
     # DI/DO, sensor, relay, motor, etc.
@@ -542,7 +569,7 @@ set_transitions = (m, transitions) ->
     # make_compleate_valve('V2')
     # # # 3 Gate valves
     # make_compleate_valve('V3')
-    make_compleate_valve('V4')
+    # make_compleate_valve('V4')
     # make_compleate_valve('V5')
     # # Screw conveyer
     # make_2states_automaton('M2')
@@ -555,11 +582,25 @@ set_transitions = (m, transitions) ->
     # make_2states_automaton('LT2', true)
     
     # make_2states_automaton('LT3', true) ####
-    make_2states_automaton_faulty('LT3', true) #####
+    # make_2states_automaton_faulty('LT3', true) #####
 
-    make_2states_automaton('LT4', true)
+    # make_2states_automaton('LT4', true)
     # Air pump  1
     # make_2states_automaton('P1', true)
+    # 
+    make_test_automaton = (name) ->
+        events = [
+            { labels : name+'e'  , observable: true }
+            { labels : name+'o'  , observable: true }
+        ]
+        put_events_to_system(events)
+        m = set_transitions(DES.add_module(name), [
+
+            [0, name+'e', 1]
+            [1, name+'o', 0]
+        ])
+        m
+    make_test_automaton('')
 
     # Control cycle 1. Dust bucket emptiness
     # set_transitions(DES.add_module('Control1'), [
