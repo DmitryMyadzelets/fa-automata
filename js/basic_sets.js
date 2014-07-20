@@ -1,6 +1,6 @@
 // JSLint options:
 /*jslint bitwise: true*/
-/*global Uint16Array*/
+/*global Uint16Array, Uint32Array*/
 
 // This module implements:
 // Abstract Set - Has common methods and properties for other sets.
@@ -22,6 +22,8 @@ this.jA = this.jA || {};
     "use strict";
 
     //-----------------------------------------------------------------------------
+    // Helper functions
+
     // Creates Uint16Array array with new length, copies data from source array.
     var resizeUint16Array = function (arr, len) {
         var ret = arr;
@@ -41,6 +43,20 @@ this.jA = this.jA || {};
     var setUint16ArrayBit = function (arr, i) { arr[i >> 4] |= 1 << (i & 0xF); };
     var clrUint16ArrayBit = function (arr, i) { arr[i >> 4] &= ~(1 << (i & 0xF)); };
 
+
+    // Creates Uint32Array array with new length, copies data from source array.
+    var resizeUint32Array = function (arr, len) {
+        var ret = arr;
+        if (len > arr.length) {
+            ret = new Uint32Array(len);
+            ret.set(arr);
+            arr = null;
+        } else if (len < arr.length) {
+            ret = new Uint32Array(arr.subarray(0, len));
+            arr = null;
+        }
+        return ret;
+    };
 
 
     //-----------------------------------------------------------------------------
