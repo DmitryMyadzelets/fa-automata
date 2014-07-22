@@ -2,11 +2,10 @@
 /*jslint bitwise: true*/
 /*global Uint16Array, Uint32Array*/
 
-// This module implements:
-// Abstract Set - Has common methods and properties for other sets.
-// Set of binary elements - Set of binary elements stored in Uint16Array.
+// This module implements properties based on typed arrays. 
+// Abstract methods - Has common methods and properties for other sets.
 // 
-// 'binary_set()' creates a set of binary elements. The set has methods:
+// 'binary()' creates a binary property. It has methods:
 //  .add(n, default) - adds 'n' elements with 'default' value.
 //  .set(index, value) - sets the value of the element with given index.
 //  .get(index) - returns a value of the element with given index.
@@ -60,23 +59,23 @@ this.jA = this.jA || {};
 
 
     //-----------------------------------------------------------------------------
-    // Abstract Set methods and properties
+    // Abstract methods and properties
     // 
 
-    // This object containes methods for a child object of the basic set.
-    // Use o = Object.create(abstract_set_methods) to make a child object 
+    // This object containes methods for derivative (children) objects.
+    // Use o = Object.create(abstract_methods) to make a child object 
     // with these methods in prototype.
-    // The use abstract_set_properties(o) to create correspondent properties of the 
+    // The use abstract_properties(o) to create correspondent properties of the 
     // object 'o'.
     // 
-    var abstract_set_methods = {
+    var abstract_methods = {
 
         add : function (elements, func) {
             elements = this.adjust_increment(elements);
-            var i = this.cardinality;
-            this.cardinality += elements;
+            var i = this.length;
+            this.length += elements;
             if (func) {
-                while (i < this.cardinality) {
+                while (i < this.length) {
                     func(i);
                     i += 1;
                 }
@@ -86,13 +85,13 @@ this.jA = this.jA || {};
 
 
         set : function (index, func) {
-            if (index >= 0 && index < this.cardinality && func) { func(index); }
+            if (index >= 0 && index < this.length && func) { func(index); }
             return this;
         },
 
 
         get : function (index, func) {
-            if (index >= 0 && index < this.cardinality && func) { func(index); }
+            if (index >= 0 && index < this.length && func) { func(index); }
             return this;
         },
 
@@ -100,7 +99,7 @@ this.jA = this.jA || {};
         // Check and change 'elements' if it is of a wrong size
         adjust_increment : function (elements) {
             elements = elements || 1;
-            var len = this.cardinality + elements;
+            var len = this.length + elements;
             if (len < 0) { elements -= len; }
             return elements;
         }
@@ -108,9 +107,9 @@ this.jA = this.jA || {};
 
 
 
-    var abstract_set_properties = function (o) {
+    var abstract_properties = function (o) {
         o = o || {};
-        o.cardinality = 0;
+        o.length = 0;
         return o;
     };
 
@@ -124,17 +123,18 @@ this.jA = this.jA || {};
 
 
     // This object contains methods for a child object of the binary set.
-    var binary_set_methods = Object.create(abstract_set_methods);
+    var binary_methods = Object.create(abstract_methods);
 
 
 
     // Changes size of the array for the given number of binary elements
-    binary_set_methods.resizeArray = function (cardinality) {
-        var length = 1 + (cardinality >> 4);
+    binary_methods.resizeArray = function (elements) {
+        var length = 1 + (elements >> 4);
         if (length !== this.array.length) {
             this.array = resizeUint16Array(this.array, length);
         }
     };
+
 
 
     // Overrides the 'add' method of the basic set in order to store binary values 
@@ -142,14 +142,14 @@ this.jA = this.jA || {};
     // 'elements' [optional] - number of elements to add \ remove (if negative).
     // 'value' [optional] - value for new elements.
     // Returns the object itself.
-    binary_set_methods.add = function (elements, value) {
+    binary_methods.add = function (elements, value) {
         var self = this;
 
         // Check and change 'elements' if it is of a wrong size
-        elements = abstract_set_methods.adjust_increment.call(this, elements);
+        elements = abstract_methods.adjust_increment.call(this, elements);
 
         // Adjust array size for new elements
-        this.resizeArray(this.cardinality + elements);
+        this.resizeArray(this.length + elements);
 
         // Call basic method for add
         // Note: we may skip setting value if the default value is not defined. 
@@ -157,16 +157,16 @@ this.jA = this.jA || {};
         var forEach = value === undefined ? null : function (index) {
             self.set(index, value);
         };
-        abstract_set_methods.add.call(this, elements, forEach);
+        abstract_methods.add.call(this, elements, forEach);
         return this;
     };
 
 
 
     // Sets binary value for an element with the given index
-    binary_set_methods.set = function (index, value) {
+    binary_methods.set = function (index, value) {
         var self = this;
-        abstract_set_methods.set.call(this, index, function () {
+        abstract_methods.set.call(this, index, function () {
             if (value) {
                 setUint16ArrayBit(self.array, index);
             } else {
@@ -179,10 +179,10 @@ this.jA = this.jA || {};
 
 
     // Gets binary value of the elemnt with the given index
-    binary_set_methods.get = function (index) {
+    binary_methods.get = function (index) {
         var self = this;
         var value = null;
-        abstract_set_methods.get.call(this, index, function () {
+        abstract_methods.get.call(this, index, function () {
             value = getUint16ArrayBit(self.array, index);
         });
         return value;
@@ -190,8 +190,8 @@ this.jA = this.jA || {};
 
 
 
-    // Creates properties of the binary set object
-    var binary_set_properties = function (o) {
+    // Creates properties of the binary object
+    var binary_properties = function (o) {
         o = o || {};
         o.array = new Uint16Array(1);
         return o;
@@ -200,10 +200,10 @@ this.jA = this.jA || {};
 
 
     // Returns new binary set object
-    var binary_set = function () {
-        var o = Object.create(binary_set_methods);
-        abstract_set_properties(o);
-        binary_set_properties(o);
+    var binary = function () {
+        var o = Object.create(binary_methods);
+        abstract_properties(o);
+        binary_properties(o);
         return o;
     };
 
@@ -213,7 +213,7 @@ this.jA = this.jA || {};
     // 
     // Public methods:
     // 
-    module.binary_set = binary_set;
+    module.binary = binary;
 
 
 }(this.jA));
