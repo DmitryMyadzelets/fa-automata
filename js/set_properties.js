@@ -33,22 +33,22 @@ this.jA = this.jA || {};
         func.cardinality = function () { return cardinality; };
 
 
-        func.add = function (elements) {
+        // Adds 'n' elements to the set, i.e. adds 'n' elements to the array
+        // of each of its property.
+        func.add = function (n) {
             var key;
             for (key in arrays) {
                 if (arrays.hasOwnProperty(key)) {
-                    arrays[key].add(elements);
+                    arrays[key].add(n);
                 }
             }
-
-            // Set cardinality as the first array length
+            // Change cardinality as equal to the first array length
             for (key in arrays) {
                 if (arrays.hasOwnProperty(key)) {
                     cardinality = arrays[key].length;
                     break;
                 }
             }
-
             return this;
         };
 

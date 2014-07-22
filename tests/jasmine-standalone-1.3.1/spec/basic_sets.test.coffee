@@ -49,6 +49,4 @@ describe "A general set object", ->
 
         jA.event.add(20)
 
-        console.log jA.event(0)
-
         expect(jA.event(0).observable).toBe(false)
