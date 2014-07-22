@@ -1,5 +1,5 @@
 
-describe "Binary property based on typed array", ->
+describe "Properties based on typed array", ->
     it "Module 'jA' is defined", ->
         expect(jA).toBeDefined()
 
@@ -41,3 +41,14 @@ describe "Binary property based on typed array", ->
             expect(A.length).toBe(6)
             expect(A.get(5)).toBe(true)
             expect(A.get(4)).toBe(false)
+
+
+describe "A general set object", ->
+
+    it "Can acces to its binary property", ->
+
+        jA.event.add(20)
+
+        console.log jA.event(0)
+
+        expect(jA.event(0).observable).toBe(false)
