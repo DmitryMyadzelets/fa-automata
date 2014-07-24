@@ -45,7 +45,7 @@ describe "Properties based on typed array", ->
 
 describe "A general set object", ->
 
-    it "Can acces to its binary property", ->
+    it "Can access to its binary property", ->
 
         jA.event.add(20)
 

@@ -55,9 +55,8 @@
   });
 
   describe("A general set object", function() {
-    return it("Can acces to its binary property", function() {
+    return it("Can access to its binary property", function() {
       jA.event.add(20);
-      console.log(jA.event(0));
       return expect(jA.event(0).observable).toBe(false);
     });
   });

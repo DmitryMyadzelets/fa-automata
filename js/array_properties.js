@@ -12,7 +12,7 @@
 //  
 
 
-// Global variable (module) for access to the methods
+// The global variable (module) to access to the methods
 this.jA = this.jA || {};
 
 
@@ -116,7 +116,7 @@ this.jA = this.jA || {};
 
 
     //-----------------------------------------------------------------------------
-    // Binary Set methods and properties.
+    // Binary array methods and properties.
     // Binary values (bits) are stored in the Uint16Array.
     // 
 
@@ -178,7 +178,7 @@ this.jA = this.jA || {};
 
 
 
-    // Gets binary value of the elemnt with the given index
+    // Gets binary value of the element with the given index
     binary_methods.get = function (index) {
         var self = this;
         var value = null;
@@ -210,10 +210,80 @@ this.jA = this.jA || {};
 
 
     //-----------------------------------------------------------------------------
+    // Object array methods and properties.
+    // 
+
+
+
+    var objects_methods = Object.create(abstract_methods);
+
+
+
+    objects_methods.add = function (elements, value) {
+        var self = this;
+
+        // Check and change 'elements' if it is of a wrong size
+        elements = abstract_methods.adjust_increment.call(this, elements);
+
+        // Call basic method for add
+        // Note: we may skip setting value if the default value is not defined. 
+        // This will make the creation faster.
+        var forEach = value === undefined ? null : function (index) {
+            self.set(index, value);
+        };
+        abstract_methods.add.call(this, elements, forEach);
+        return this;
+    };
+
+
+
+    // Sets value for an element with the given index
+    objects_methods.set = function (index, value) {
+        var self = this;
+        abstract_methods.set.call(this, index, function () {
+            self.array[index] = value;
+        });
+        return this;
+    };
+
+
+
+    // Gets value of the element with the given index
+    objects_methods.get = function (index) {
+        var self = this;
+        var value = null;
+        abstract_methods.get.call(this, index, function () {
+            value = self.array[index];
+        });
+        return value;
+    };
+
+
+
+    // Creates properties of the object
+    var objects_properties = function (o) {
+        o = o || {};
+        o.array = [];
+        return o;
+    };
+
+
+
+    // Returns new property of array of objects
+    var objects = function () {
+        var o = Object.create(objects_methods);
+        abstract_properties(o);
+        objects_properties(o);
+        return o;
+    };
+
+
+    //-----------------------------------------------------------------------------
     // 
     // Public methods:
     // 
     module.binary = binary;
+    module.objects = objects;
 
 
 }(this.jA));

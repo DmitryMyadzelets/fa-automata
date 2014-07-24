@@ -1,5 +1,5 @@
 
-// Global variable (module) for access to the methods
+// The global variable (module) to access to the methods
 this.jA = this.jA || {};
 
 
@@ -33,8 +33,8 @@ this.jA = this.jA || {};
         func.cardinality = function () { return cardinality; };
 
 
-        // Adds 'n' elements to the set, i.e. adds 'n' elements to the array
-        // of each of its property.
+        // Adds 'n' elements to the set, i.e. adds 'n' elements to 
+        // the properties' arrays
         func.add = function (n) {
             var key;
             for (key in arrays) {
@@ -42,7 +42,7 @@ this.jA = this.jA || {};
                     arrays[key].add(n);
                 }
             }
-            // Change cardinality as equal to the first array length
+            // Make cardinality value equal to the first array's length
             for (key in arrays) {
                 if (arrays.hasOwnProperty(key)) {
                     cardinality = arrays[key].length;
