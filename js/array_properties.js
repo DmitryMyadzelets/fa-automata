@@ -226,11 +226,13 @@ this.jA = this.jA || {};
         elements = abstract_methods.adjust_increment.call(this, elements);
 
         // Delete elements in case of negative increment
-        if (elements < 0) { this.array.splice(this.length + elements); }
+        if (elements < 0) {
+            this.array.splice(this.length + elements);
+        } else {
+            this.array.length += elements;
+        }
 
         // Call basic method for add
-        // Note: we may skip setting value if the default value is not defined. 
-        // This will make the creation faster.
         var forEach = value === undefined ? null : function (index) {
             self.set(index, value);
         };
