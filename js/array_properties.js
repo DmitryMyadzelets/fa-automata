@@ -225,6 +225,14 @@ this.jA = this.jA || {};
         // Check and change 'elements' if it is of a wrong size
         elements = abstract_methods.adjust_increment.call(this, elements);
 
+        // Delete elements in case of negative increment
+        if (elements < 0) { 
+            while (elements) {
+                this.array.pop();
+                elements += 1;
+            }
+        }
+
         // Call basic method for add
         // Note: we may skip setting value if the default value is not defined. 
         // This will make the creation faster.
