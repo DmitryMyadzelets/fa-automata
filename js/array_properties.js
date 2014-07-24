@@ -226,7 +226,7 @@ this.jA = this.jA || {};
         elements = abstract_methods.adjust_increment.call(this, elements);
 
         // Delete elements in case of negative increment
-        if (elements < 0) { 
+        if (elements < 0) {
             while (elements) {
                 this.array.pop();
                 elements += 1;
