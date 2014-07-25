@@ -4,7 +4,7 @@
     it("Module 'jA' is defined", function() {
       return expect(jA).toBeDefined();
     });
-    return describe("Binary property", function() {
+    describe("Binary property", function() {
       var A, B;
 
       A = jA.binary();
@@ -50,6 +50,44 @@
         expect(A.length).toBe(6);
         expect(A.get(5)).toBe(true);
         return expect(A.get(4)).toBe(false);
+      });
+    });
+    return describe("Objects property", function() {
+      var A, B;
+
+      A = jA.objects();
+      B = jA.objects();
+      it("Add 5 undefined elements to 'A'", function() {
+        A.add(5);
+        expect(A.length).toBe(5);
+        expect(A.get(4)).toBe(void 0);
+        return expect(A.get(5)).toBe(void 0);
+      });
+      it("Add an object as 3 elements to 'A'. It's the same object, not 3 diffeent ones!", function() {
+        var u, v;
+
+        A.add(3, {
+          name: "test"
+        });
+        expect(A.length).toBe(8);
+        u = A.get(6);
+        v = A.get(7);
+        expect(u.name).toBe('test');
+        expect(v.name).toBe('test');
+        u.name = 'hello';
+        expect(v.name).toBe('hello');
+        A.set(7, {
+          prop: 123
+        });
+        expect(A.get(7).prop).toBe(123);
+        expect(A.get(7).name).toBe(void 0);
+        expect(A.get(6).name).toBe('hello');
+        A.set(9, {});
+        return expect(A.length).toBe(8);
+      });
+      return it("Deletes elements while adding negative number of elements", function() {
+        A.add(-1);
+        return expect(A.length).toBe(7);
       });
     });
   });

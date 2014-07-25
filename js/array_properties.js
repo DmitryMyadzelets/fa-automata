@@ -181,7 +181,7 @@ this.jA = this.jA || {};
     // Gets binary value of the element with the given index
     binary_methods.get = function (index) {
         var self = this;
-        var value = null;
+        var value;
         abstract_methods.get.call(this, index, function () {
             value = getUint16ArrayBit(self.array, index);
         });
@@ -256,7 +256,7 @@ this.jA = this.jA || {};
     // Gets value of the element with the given index
     objects_methods.get = function (index) {
         var self = this;
-        var value = null;
+        var value;
         abstract_methods.get.call(this, index, function () {
             value = self.array[index];
         });

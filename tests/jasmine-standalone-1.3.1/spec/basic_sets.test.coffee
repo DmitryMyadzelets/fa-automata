@@ -43,6 +43,40 @@ describe "Properties based on typed array", ->
             expect(A.get(4)).toBe(false)
 
 
+    describe "Objects property", ->
+
+        A = jA.objects()
+        B = jA.objects()
+
+        it "Add 5 undefined elements to 'A'", ->
+            A.add(5)
+            expect(A.length).toBe(5)
+            expect(A.get(4)).toBe(undefined)
+            expect(A.get(5)).toBe(undefined)
+
+        it "Add an object as 3 elements to 'A'. It's the same object, not 3 diffeent ones!", ->
+            A.add(3, { name: "test"} )
+            expect(A.length).toBe(8)
+            u = A.get(6)
+            v = A.get(7)
+            expect(u.name).toBe('test')
+            expect(v.name).toBe('test')
+            u.name = 'hello'
+            expect(v.name).toBe('hello')
+
+            A.set(7, { prop : 123 })
+            expect(A.get(7).prop).toBe(123)
+            expect(A.get(7).name).toBe(undefined)
+            expect(A.get(6).name).toBe('hello')
+
+            A.set(9, {})
+            expect(A.length).toBe(8)
+
+        it "Deletes elements while adding negative number of elements", ->
+            A.add(-1)
+            expect(A.length).toBe(7)
+
+
 describe "A general set object", ->
 
     it "Can access to its binary property", ->
