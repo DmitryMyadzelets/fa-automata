@@ -12,7 +12,11 @@ this.jA = this.jA || {};
 
         var cardinality = 0;
         var arrays = array_properties;
-        var o = {};
+        var o = {
+        };
+
+        var current_index = -1;
+        var set = {}; // container for 'write' methods
 
 
         var func = function (index, func) {
@@ -26,7 +30,6 @@ this.jA = this.jA || {};
                 if (typeof func === 'function') { func(o); }
                 return o;
             }
-            return null;
         };
 
 
@@ -53,26 +56,36 @@ this.jA = this.jA || {};
         };
 
 
+
+        var k;
+
+        var array_set = function (key) {
+            return function (value) {
+                arrays[key].set(current_index, value);
+                return set;
+            };
+        };
+
+        for (k in arrays) {
+            if (arrays.hasOwnProperty(k)) {
+                set[k] = array_set(k);
+            }
+        }
+
+
+        func.set = function (index) {
+            current_index = index;
+            return set;
+        };
+
+
+
         return func;
     };
 
 
 
-    var event = indexed_property({
-        // name : module.objects(),
-        observable : module.binary()
-    });
-
-
-    event.add(10);
-
-
-    event(9, function (o) {
-        console.log(o);
-    });
-
-
-    module.event = event;
+    module.indexed_property = indexed_property;
 
 
 

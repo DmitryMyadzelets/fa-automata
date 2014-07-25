@@ -79,8 +79,23 @@ describe "Properties based on typed array", ->
 
 describe "A general set object", ->
 
-    it "Can access to its binary property", ->
+    it "Can create a complex indexed property with binary and object subproperties", ->
+        event = jA.indexed_property({
+            observable : jA.binary(),
+            name : jA.objects()
+        })
+        event.add(2)
 
-        jA.event.add(20)
+        event.set(0)
+            .name('test')
+            .observable(true)
 
-        expect(jA.event(0).observable).toBe(false)
+        event.set(1)
+            .name('hello')
+
+        e = event(0)
+        expect(e.observable).toBe(true)
+        expect(e.name).toBe('test')
+        e = event(1)
+        expect(e.observable).toBe(false)
+        expect(e.name).toBe('hello')

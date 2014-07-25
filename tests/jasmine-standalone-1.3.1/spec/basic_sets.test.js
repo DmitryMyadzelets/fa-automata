@@ -93,9 +93,22 @@
   });
 
   describe("A general set object", function() {
-    return it("Can access to its binary property", function() {
-      jA.event.add(20);
-      return expect(jA.event(0).observable).toBe(false);
+    return it("Can create a complex indexed property with binary and object subproperties", function() {
+      var e, event;
+
+      event = jA.indexed_property({
+        observable: jA.binary(),
+        name: jA.objects()
+      });
+      event.add(2);
+      event.set(0).name('test').observable(true);
+      event.set(1).name('hello');
+      e = event(0);
+      expect(e.observable).toBe(true);
+      expect(e.name).toBe('test');
+      e = event(1);
+      expect(e.observable).toBe(false);
+      return expect(e.name).toBe('hello');
     });
   });
 

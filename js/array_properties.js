@@ -151,8 +151,8 @@ this.jA = this.jA || {};
         // Adjust array size for new elements
         this.resizeArray(this.length + elements);
 
-        // Call basic method for add
-        // Note: we may skip setting value if the default value is not defined. 
+        // Call abstract 'add' method
+        // We skip setting value if the default value is undefined. 
         // This will make the creation faster.
         var forEach = value === undefined ? null : function (index) {
             self.set(index, value);
@@ -232,7 +232,7 @@ this.jA = this.jA || {};
             this.array.length += elements;
         }
 
-        // Call basic method for add
+        // Call abstract 'add' method
         var forEach = value === undefined ? null : function (index) {
             self.set(index, value);
         };
@@ -281,6 +281,7 @@ this.jA = this.jA || {};
         objects_properties(o);
         return o;
     };
+    
 
 
     //-----------------------------------------------------------------------------
