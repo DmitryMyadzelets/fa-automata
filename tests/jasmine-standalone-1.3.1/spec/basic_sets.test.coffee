@@ -5,8 +5,8 @@ describe "Properties based on typed array", ->
 
     describe "Binary property", ->
 
-        A = jA.binary()
-        B = jA.binary()
+        A = jA.uniproperties.binary()
+        B = jA.uniproperties.binary()
 
         it "Create two binary properties 'A' and 'B'", ->
             expect(A).toBeDefined()
@@ -45,8 +45,8 @@ describe "Properties based on typed array", ->
 
     describe "Objects property", ->
 
-        A = jA.objects()
-        B = jA.objects()
+        A = jA.uniproperties.objects()
+        B = jA.uniproperties.objects()
 
         it "Add 5 undefined elements to 'A'", ->
             A.add(5)
@@ -79,7 +79,7 @@ describe "Properties based on typed array", ->
 
     describe "Indexes property", ->
 
-        A = jA.indexes()
+        A = jA.uniproperties.indexes()
 
         it "Add 5 elements to 'A' when no value is given. The elements are equal to 0", ->
             A.add(5)
@@ -106,8 +106,8 @@ describe "An indexed complex property", ->
 
     it "Can create a complex indexed property with binary and object subproperties", ->
         event = jA.indexed_property({
-            observable : jA.binary(),
-            name : jA.objects()
+            observable : 'binary',
+            name : 'objects'
         })
         event.add(2)
 
@@ -129,18 +129,18 @@ describe "An indexed complex property", ->
     
     it "Two indexed properties do not correlate", ->
         A = jA.indexed_property({
-            name : jA.objects()
+            name : 'objects'
             })
 
         B = jA.indexed_property({
-            surname : jA.objects()
+            surname : 'objects'
             })
 
 
         A.add()
         B.add(2)
 
-        A.set(0).name('Ann')
+        A.set(0).name('Anna')
         B.set(0).surname('Ng')
         B.set(1).surname('Ivanov')
 
@@ -149,7 +149,7 @@ describe "An indexed complex property", ->
 
         a = A(0)
         b = B(0)
-        expect(a.name).toBe('Ann')
+        expect(a.name).toBe('Anna')
         expect(b.name).toBe(undefined)
         expect(b.surname).toBe('Ng')
         b = B(1)

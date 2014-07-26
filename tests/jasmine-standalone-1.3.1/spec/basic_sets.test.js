@@ -7,8 +7,8 @@
     describe("Binary property", function() {
       var A, B;
 
-      A = jA.binary();
-      B = jA.binary();
+      A = jA.uniproperties.binary();
+      B = jA.uniproperties.binary();
       it("Create two binary properties 'A' and 'B'", function() {
         expect(A).toBeDefined();
         return expect(B).toBeDefined();
@@ -55,8 +55,8 @@
     describe("Objects property", function() {
       var A, B;
 
-      A = jA.objects();
-      B = jA.objects();
+      A = jA.uniproperties.objects();
+      B = jA.uniproperties.objects();
       it("Add 5 undefined elements to 'A'", function() {
         A.add(5);
         expect(A.length).toBe(5);
@@ -93,7 +93,7 @@
     return describe("Indexes property", function() {
       var A;
 
-      A = jA.indexes();
+      A = jA.uniproperties.indexes();
       it("Add 5 elements to 'A' when no value is given. The elements are equal to 0", function() {
         A.add(5);
         expect(A.length).toBe(5);
@@ -121,8 +121,8 @@
       var e, event;
 
       event = jA.indexed_property({
-        observable: jA.binary(),
-        name: jA.objects()
+        observable: 'binary',
+        name: 'objects'
       });
       event.add(2);
       event.set(0).name('test').observable(true);
@@ -138,21 +138,21 @@
       var A, B, a, b;
 
       A = jA.indexed_property({
-        name: jA.objects()
+        name: 'objects'
       });
       B = jA.indexed_property({
-        surname: jA.objects()
+        surname: 'objects'
       });
       A.add();
       B.add(2);
-      A.set(0).name('Ann');
+      A.set(0).name('Anna');
       B.set(0).surname('Ng');
       B.set(1).surname('Ivanov');
       expect(A.cardinality()).toBe(1);
       expect(B.cardinality()).toBe(2);
       a = A(0);
       b = B(0);
-      expect(a.name).toBe('Ann');
+      expect(a.name).toBe('Anna');
       expect(b.name).toBe(void 0);
       expect(b.surname).toBe('Ng');
       b = B(1);

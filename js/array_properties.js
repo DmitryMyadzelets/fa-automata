@@ -385,11 +385,13 @@ this.jA = this.jA || {};
 
     //-----------------------------------------------------------------------------
     // 
-    // Public methods:
+    // Public:
     // 
-    module.binary = binary;
-    module.indexes = indexes;
-    module.objects = objects;
+    module.uniproperties = {
+        binary : binary,
+        indexes : indexes,
+        objects : objects
+    };
 
 
 }(this.jA));

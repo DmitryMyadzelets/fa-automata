@@ -41,13 +41,28 @@ this.jA = this.jA || {};
 
 
 
-    var indexed_property = function (array_properties) {
+    var indexed_property = function (properties) {
 
-        var arrays = array_properties;
+        var arrays = {};
         var cardinality = 0;
         var current_index = 0;
         var o = {}; // object to return with 'get' methods
         var set_methods = {}; // container for 'write' methods
+
+
+        (function () {
+            var key;
+            var func;
+            for (key in properties) {
+                if (properties.hasOwnProperty(key)) {
+                    func = module.uniproperties[properties[key]];
+                    if (typeof func === 'function') {
+                        arrays[key] = func();
+                    }
+                }
+            }
+        }());
+
 
 
         var func = function (index, func) {
