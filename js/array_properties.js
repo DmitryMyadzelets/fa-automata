@@ -10,6 +10,9 @@
 //  .set(index, value) - sets the value of the element with given index.
 //  .get(index) - returns a value of the element with given index.
 //  
+//  'indexes()' creates a property with array of Uint32. 
+//  It has the same methods as the 'binary()'.
+//  
 //  'objects()' creates a property with array of objects. 
 //  It has the same methods as the 'binary()'.
 
