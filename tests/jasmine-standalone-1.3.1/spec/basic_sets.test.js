@@ -52,7 +52,7 @@
         return expect(A.get(4)).toBe(false);
       });
     });
-    return describe("Objects property", function() {
+    describe("Objects property", function() {
       var A, B;
 
       A = jA.objects();
@@ -90,9 +90,33 @@
         return expect(A.length).toBe(7);
       });
     });
+    return describe("Indexes property", function() {
+      var A;
+
+      A = jA.indexes();
+      it("Add 5 elements to 'A' when no value is given. The elements are equal to 0", function() {
+        A.add(5);
+        expect(A.length).toBe(5);
+        expect(A.get(0)).toBe(0);
+        return expect(A.get(5)).toBe(void 0);
+      });
+      it("Add 1 element to 'A' when value is '123'. Sets value of index=0 as '456'", function() {
+        A.add(1, 123);
+        A.set(1, 456);
+        expect(A.get(5)).toBe(123);
+        return expect(A.get(1)).toBe(456);
+      });
+      return it("Deletes elements while adding negative number of elements, while old values are correct", function() {
+        A.add(-2);
+        expect(A.length).toBe(4);
+        expect(A.get(1)).toBe(456);
+        A.add(100);
+        return expect(A.get(1)).toBe(456);
+      });
+    });
   });
 
-  describe("A general set object", function() {
+  describe("An indexed complex property", function() {
     it("Can create a complex indexed property with binary and object subproperties", function() {
       var e, event;
 

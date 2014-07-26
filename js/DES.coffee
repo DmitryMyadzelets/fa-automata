@@ -17,7 +17,7 @@ X_CONFIG = {
     # y               : 'integer'
     labels          : 'object'
     marked          : 'boolean'
-    faulty          : 'boolean'sdf
+    faulty          : 'boolean'
 }
 
 # Transitions

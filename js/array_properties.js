@@ -133,8 +133,8 @@ this.jA = this.jA || {};
 
 
     // Changes size of the array for the given number of binary elements
-    binary_methods.resizeArray = function (elements) {
-        var length = 1 + (elements >> 4);
+    binary_methods.resizeArray = function (length) {
+        length = 1 + (length >> 4);
         if (length !== this.array.length) {
             this.array = resizeUint16Array(this.array, length);
         }
@@ -216,7 +216,99 @@ this.jA = this.jA || {};
 
     //-----------------------------------------------------------------------------
     //
-    // Object array methods and properties.
+    // Indexes array methods and properties
+    //
+    //
+
+
+
+    var indexes_methods = Object.create(abstract_methods);
+
+
+    indexes_methods.INCREMENT = 10; // size of increment
+
+
+    // Changes size of the array for the given number of elements
+    indexes_methods.resizeArray = function (length) {
+        // Length is 'n' times of INCREMENT, where n := [1..N)
+        length = this.INCREMENT + this.INCREMENT * ((length - 1) / this.INCREMENT | 0);
+        if (length !== this.array.length) {
+            this.array = resizeUint32Array(this.array, length);
+        }
+    };
+
+
+
+    // Overrides the 'add' method of the abstract set in order to store values .
+    // 'elements' [optional] - number of elements to add \ remove (if negative).
+    // 'value' [optional] - value for new elements.
+    // Returns the object itself.
+    indexes_methods.add = function (elements, value) {
+        var self = this;
+
+        // Check and change 'elements' if it is of a wrong size
+        elements = abstract_methods.adjust_increment.call(this, elements);
+
+        // Adjust array size for new elements
+        this.resizeArray(this.length + elements);
+
+        // Call abstract 'add' method
+        // We skip setting value if the default value is undefined. 
+        // This will make the creation faster.
+        var forEach = value === undefined ? null : function (index) {
+            self.set(index, value);
+        };
+        abstract_methods.add.call(this, elements, forEach);
+        return this;
+    };
+
+
+
+    // Sets value for an element with the given index
+    indexes_methods.set = function (index, value) {
+        var self = this;
+        abstract_methods.set.call(this, index, function () {
+            self.array[index] = value;
+        });
+        return this;
+    };
+
+
+
+    // Gets value of the element with the given index
+    indexes_methods.get = function (index) {
+        var self = this;
+        var value;
+        abstract_methods.get.call(this, index, function () {
+            value = self.array[index];
+        });
+        return value;
+    };
+
+
+
+    // Creates properties of the object
+    var indexes_properties = function (o) {
+        o = o || {};
+        o.array = new Uint32Array(indexes_methods.INCREMENT);
+        return o;
+    };
+
+
+
+    // Returns new indexes object
+    var indexes = function () {
+        var o = Object.create(indexes_methods);
+        abstract_properties(o);
+        indexes_properties(o);
+        return o;
+    };
+
+
+
+    //-----------------------------------------------------------------------------
+    //
+    // Object array methods and properties
     //
     //
 
@@ -296,6 +388,7 @@ this.jA = this.jA || {};
     // Public methods:
     // 
     module.binary = binary;
+    module.indexes = indexes;
     module.objects = objects;
 
 
