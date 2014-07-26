@@ -1,3 +1,39 @@
+//
+// This module implements a complex property based on arrays of the same size.
+// Call 'indexed_property' function to create this property.
+// The property can contain arrays of 3 types: binary, objects and indexes (uint32).
+// 
+// How to create the property:
+// o = indexed_property({
+//      name : 'objects', 
+//      index : 'indexes', 
+//      marked : 'binary'
+// })
+// 
+// How to add new elements:
+// o.add() - adds 1 element
+// o.add(3) - adds 3 elements
+// o.add(-1) - removes 1 element
+// 
+// How to write values:
+// o.set(0).name('Alex')
+// o.set(0).index(123)
+// o.set(1).marked(true)
+// or in chain:
+// o.set(2).name('Bob').index(567)
+// 
+// How to read values:
+// o(0).name // 'Alex'
+// o(1).marked // true
+// v = o(2)
+// v.name // 'Bob'
+// v.index // 567
+// v.marked // false
+// 
+// How many elements in it:
+// o.cardinality()
+
+
 
 // The global variable (module) to access to the methods
 this.jA = this.jA || {};
@@ -91,7 +127,7 @@ this.jA = this.jA || {};
         };
 
 
-        // Create methods for object 'o' to write values to arrays
+        // Creates methods for object 'o' to write values to arrays
         (function (o) {
             var key;
             var array_set = function (key) {

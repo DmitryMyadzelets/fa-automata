@@ -2,7 +2,7 @@
 /*jslint bitwise: true*/
 /*global Uint16Array, Uint32Array*/
 
-// This module implements properties based on typed arrays. 
+// This module implements properties based on typed arrays.
 // Abstract methods - Has common methods and properties for other sets.
 // 
 // 'binary()' creates a binary property. It has methods:
