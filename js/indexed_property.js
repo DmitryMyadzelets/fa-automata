@@ -43,12 +43,10 @@ this.jA = this.jA || {};
 
     var indexed_property = function (array_properties) {
 
-        var cardinality = 0;
         var arrays = array_properties;
-        var o = {
-        };
-
-        var current_index = -1;
+        var cardinality = 0;
+        var current_index = 0;
+        var o = {}; // object to return with 'get' methods
         var set_methods = {}; // container for 'write' methods
 
 

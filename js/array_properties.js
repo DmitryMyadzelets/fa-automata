@@ -61,8 +61,10 @@ this.jA = this.jA || {};
 
 
     //-----------------------------------------------------------------------------
+    //
     // Abstract methods and properties
-    // 
+    //
+    //  
 
     // This object containes methods for derivative (children) objects.
     // Use o = Object.create(abstract_methods) to make a child object 
@@ -118,6 +120,7 @@ this.jA = this.jA || {};
 
 
     //-----------------------------------------------------------------------------
+    //
     // Binary array methods and properties.
     // Binary values (bits) are stored in the Uint16Array.
     // 
@@ -212,8 +215,10 @@ this.jA = this.jA || {};
 
 
     //-----------------------------------------------------------------------------
+    //
     // Object array methods and properties.
-    // 
+    //
+    //
 
 
 
