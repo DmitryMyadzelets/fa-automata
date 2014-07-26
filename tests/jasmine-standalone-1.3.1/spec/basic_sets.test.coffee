@@ -86,6 +86,7 @@ describe "A general set object", ->
         })
         event.add(2)
 
+
         event.set(0)
             .name('test')
             .observable(true)
@@ -99,3 +100,33 @@ describe "A general set object", ->
         e = event(1)
         expect(e.observable).toBe(false)
         expect(e.name).toBe('hello')
+
+    
+    it "Two indexed properties do not correlate", ->
+        A = jA.indexed_property({
+            name : jA.objects()
+            })
+
+        B = jA.indexed_property({
+            surname : jA.objects()
+            })
+
+
+        A.add()
+        B.add(2)
+
+        A.set(0).name('Ann')
+        B.set(0).surname('Ng')
+        B.set(1).surname('Ivanov')
+
+        expect(A.cardinality()).toBe(1)
+        expect(B.cardinality()).toBe(2)
+
+        a = A(0)
+        b = B(0)
+        expect(a.name).toBe('Ann')
+        expect(b.name).toBe(undefined)
+        expect(b.surname).toBe('Ng')
+        b = B(1)
+        expect(b.surname).toBe('Ivanov')
+

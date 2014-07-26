@@ -10,6 +10,8 @@
 //  .set(index, value) - sets the value of the element with given index.
 //  .get(index) - returns a value of the element with given index.
 //  
+//  'objects()' creates a property with array of objects. 
+//  It has the same methods as the 'binary()'.
 
 
 // The global variable (module) to access to the methods
@@ -281,7 +283,7 @@ this.jA = this.jA || {};
         objects_properties(o);
         return o;
     };
-    
+
 
 
     //-----------------------------------------------------------------------------

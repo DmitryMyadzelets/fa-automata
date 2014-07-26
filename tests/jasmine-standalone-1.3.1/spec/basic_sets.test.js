@@ -93,7 +93,7 @@
   });
 
   describe("A general set object", function() {
-    return it("Can create a complex indexed property with binary and object subproperties", function() {
+    it("Can create a complex indexed property with binary and object subproperties", function() {
       var e, event;
 
       event = jA.indexed_property({
@@ -109,6 +109,30 @@
       e = event(1);
       expect(e.observable).toBe(false);
       return expect(e.name).toBe('hello');
+    });
+    return it("Two indexed properties do not correlate", function() {
+      var A, B, a, b;
+
+      A = jA.indexed_property({
+        name: jA.objects()
+      });
+      B = jA.indexed_property({
+        surname: jA.objects()
+      });
+      A.add();
+      B.add(2);
+      A.set(0).name('Ann');
+      B.set(0).surname('Ng');
+      B.set(1).surname('Ivanov');
+      expect(A.cardinality()).toBe(1);
+      expect(B.cardinality()).toBe(2);
+      a = A(0);
+      b = B(0);
+      expect(a.name).toBe('Ann');
+      expect(b.name).toBe(void 0);
+      expect(b.surname).toBe('Ng');
+      b = B(1);
+      return expect(b.surname).toBe('Ivanov');
     });
   });
 
