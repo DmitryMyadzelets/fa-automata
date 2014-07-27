@@ -197,8 +197,8 @@
       return expect(n).toBe(2);
     });
     return it("Method Depth-first search works", function() {
-      return T.dfs(0, function(t) {
-        return console.log(t);
+      return T.dfs(0, function(t, index) {
+        return console.log(index, t);
       });
     });
   });

@@ -195,6 +195,6 @@ describe "Transitions", ->
 
     it "Method Depth-first search works", ->
 
-        T.dfs(0, (t) ->
-            console.log t
+        T.dfs(0, (t, index) ->
+            console.log index, t
             )
