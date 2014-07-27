@@ -9,6 +9,7 @@
 //  .add(n, default) - adds 'n' elements with 'default' value.
 //  .set(index, value) - sets the value of the element with given index.
 //  .get(index) - returns a value of the element with given index.
+// Look [http://jsperf.com/binary-arrays] for a performance test
 //  
 //  'indexes()' creates a property with array of Uint32. 
 //  It has the same methods as the 'binary()'.
@@ -54,10 +55,10 @@ this.jA = this.jA || {};
         if (len > arr.length) {
             ret = new Uint32Array(len);
             ret.set(arr);
-            arr = null;
+            // arr = null;
         } else if (len < arr.length) {
             ret = new Uint32Array(arr.subarray(0, len));
-            arr = null;
+            // arr = null;
         }
         return ret;
     };
@@ -395,6 +396,9 @@ this.jA = this.jA || {};
         indexes : indexes,
         objects : objects
     };
+
+    // Shortcut to create binary arrays
+    module.binary = binary;
 
 
 }(this.jA));

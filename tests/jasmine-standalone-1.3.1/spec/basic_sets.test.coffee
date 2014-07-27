@@ -128,6 +128,7 @@ describe "An indexed complex property", ->
 
     
     it "Two indexed properties do not correlate", ->
+
         A = jA.indexed_property({
             name : 'objects'
             })
@@ -155,3 +156,45 @@ describe "An indexed complex property", ->
         b = B(1)
         expect(b.surname).toBe('Ivanov')
 
+
+
+describe "Transitions", ->
+
+    T = jA.transitions()
+
+    it "Adds 3 transitions", ->
+
+        expect(T.add(3).cardinality()).toBe(3)
+        T.set(0).q(0).e(0).p(1)
+        T.set(1).q(1).e(1).p(0)
+        T.set(2).q(1).e(0).p(1)
+        t = T(1)
+        expect(t.q).toBe(1)
+        expect(t.e).toBe(1)
+        expect(t.p).toBe(0)
+        t = T(2)
+        expect(t.q).toBe(1)
+        expect(t.e).toBe(0)
+        expect(t.p).toBe(1)
+
+    it "Method 'out' enumerates outgoing transitions", ->
+
+        q = 0
+        n = 0
+        T.out(q, (index) -> 
+            n++
+            )
+        expect(n).toBe(1)
+
+        q = 1
+        n = 0
+        T.out(q, (index) -> 
+            n++
+            )
+        expect(n).toBe(2)
+
+    it "Method Depth-first search works", ->
+
+        T.dfs(0, (t) ->
+            console.log t
+            )

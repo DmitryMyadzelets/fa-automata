@@ -160,4 +160,47 @@
     });
   });
 
+  describe("Transitions", function() {
+    var T;
+
+    T = jA.transitions();
+    it("Adds 3 transitions", function() {
+      var t;
+
+      expect(T.add(3).cardinality()).toBe(3);
+      T.set(0).q(0).e(0).p(1);
+      T.set(1).q(1).e(1).p(0);
+      T.set(2).q(1).e(0).p(1);
+      t = T(1);
+      expect(t.q).toBe(1);
+      expect(t.e).toBe(1);
+      expect(t.p).toBe(0);
+      t = T(2);
+      expect(t.q).toBe(1);
+      expect(t.e).toBe(0);
+      return expect(t.p).toBe(1);
+    });
+    it("Method 'out' enumerates outgoing transitions", function() {
+      var n, q;
+
+      q = 0;
+      n = 0;
+      T.out(q, function(index) {
+        return n++;
+      });
+      expect(n).toBe(1);
+      q = 1;
+      n = 0;
+      T.out(q, function(index) {
+        return n++;
+      });
+      return expect(n).toBe(2);
+    });
+    return it("Method Depth-first search works", function() {
+      return T.dfs(0, function(t) {
+        return console.log(t);
+      });
+    });
+  });
+
 }).call(this);
