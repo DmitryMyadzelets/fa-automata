@@ -1,0 +1,10 @@
+{
+    "settings" : 
+    {
+        "Combine: FileList" : "E:/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/files.txt",
+        "Combine: InPath" : "E:/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/",
+        "Combine: OutPath" : "E:/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/compressed/",
+        "Combine: MasterName": "master.js",
+        "Combine: MinifyName": "master.min.js"
+    }
+}

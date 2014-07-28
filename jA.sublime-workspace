@@ -1,0 +1,1240 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"func",
+				"function"
+			],
+			[
+				"ind",
+				"indexed_property"
+			],
+			[
+				"ob",
+				"observable"
+			],
+			[
+				"o",
+				"object"
+			],
+			[
+				"in",
+				"indexed"
+			],
+			[
+				"obj",
+				"objects"
+			],
+			[
+				"to",
+				"toBe"
+			],
+			[
+				"de",
+				"describe"
+			],
+			[
+				"basic_set",
+				"basic_set_methods"
+			],
+			[
+				"binary",
+				"binary_set_methods"
+			],
+			[
+				"has",
+				"hasOwnProperty()"
+			],
+			[
+				"pro",
+				"prototype"
+			],
+			[
+				"me",
+				"method	Form"
+			],
+			[
+				"wri",
+				"writeln()       Document"
+			],
+			[
+				"obs",
+				"observable"
+			],
+			[
+				"make",
+				"make_F_module"
+			],
+			[
+				"get",
+				"get_common_events"
+			],
+			[
+				"crea",
+				"create_module"
+			],
+			[
+				"comp",
+				"complement"
+			],
+			[
+				"ma",
+				"marked"
+			],
+			[
+				"LT",
+				"LT1"
+			],
+			[
+				"fau",
+				"faulty"
+			],
+			[
+				"faul",
+				"faulty"
+			],
+			[
+				"mo",
+				"modules"
+			],
+			[
+				"obse",
+				"observable"
+			],
+			[
+				"pu",
+				"push"
+			],
+			[
+				"lo",
+				"log	log"
+			],
+			[
+				"for",
+				"force"
+			],
+			[
+				"le",
+				"length-1"
+			],
+			[
+				"en",
+				"events"
+			],
+			[
+				"con",
+				"continue"
+			],
+			[
+				"inde",
+				"index1"
+			],
+			[
+				"co",
+				"common"
+			],
+			[
+				"ope",
+				"opening"
+			],
+			[
+				"cls",
+				"close_hi"
+			],
+			[
+				"open",
+				"opening"
+			],
+			[
+				"get_",
+				"get_events_by_labels"
+			],
+			[
+				"la",
+				"labels"
+			],
+			[
+				"clos",
+				"close_hi"
+			],
+			[
+				"clo",
+				"close_hi"
+			],
+			[
+				"cl",
+				"close_lo"
+			],
+			[
+				"lig",
+				"light_of"
+			],
+			[
+				"li",
+				"light_on"
+			],
+			[
+				"re",
+				"results"
+			],
+			[
+				"pa",
+				"padding"
+			],
+			[
+				"at",
+				"attr"
+			],
+			[
+				"nor",
+				"node_radius"
+			],
+			[
+				"p",
+				"parent"
+			],
+			[
+				"sel",
+				"select"
+			],
+			[
+				"lab",
+				"label"
+			],
+			[
+				"lin",
+				"links"
+			],
+			[
+				"dra",
+				"dragstart"
+			],
+			[
+				"node",
+				"node_radius"
+			],
+			[
+				"no",
+				"node_radius"
+			],
+			[
+				"nod",
+				"node_radius"
+			],
+			[
+				"M1",
+				"m1_2_3"
+			],
+			[
+				"m1",
+				"m1_2_3"
+			],
+			[
+				"m",
+				"m1_2"
+			],
+			[
+				"sho",
+				"show_dfs"
+			],
+			[
+				"shoe",
+				"show_modules"
+			],
+			[
+				"do",
+				"do_hi"
+			],
+			[
+				"padd",
+				"padding-bottom"
+			],
+			[
+				"i",
+				"italic"
+			],
+			[
+				"fo",
+				"font-style"
+			],
+			[
+				"fon",
+				"font"
+			],
+			[
+				"item",
+				"itemprop	HTML5"
+			],
+			[
+				"sta",
+				"start"
+			],
+			[
+				"clea",
+				"clear_map"
+			],
+			[
+				"fa",
+				"faulty"
+			],
+			[
+				"proce",
+				"process_state"
+			],
+			[
+				"visi",
+				"visited"
+			],
+			[
+				"cn",
+				"cnt_new_states"
+			],
+			[
+				"vis",
+				"visited"
+			],
+			[
+				"trans",
+				"transitions"
+			],
+			[
+				"show_",
+				"show_dfs"
+			],
+			[
+				"mar",
+				"margin-left"
+			],
+			[
+				"valid",
+				"valid_name"
+			],
+			[
+				"is",
+				"isset()"
+			],
+			[
+				"incl",
+				"include"
+			],
+			[
+				"array",
+				"array_merge"
+			],
+			[
+				"array_ke",
+				"array_keys()"
+			],
+			[
+				"array_p",
+				"array_push"
+			],
+			[
+				"u",
+				"ul	Tag"
+			],
+			[
+				"fsee",
+				"fseek()"
+			],
+			[
+				"fp",
+				"fputcsv"
+			],
+			[
+				"strto",
+				"strtotime"
+			],
+			[
+				"da",
+				"days_left"
+			],
+			[
+				"yo",
+				"your_date"
+			],
+			[
+				"show_t",
+				"show_modules_transitions"
+			],
+			[
+				"show",
+				"show_states"
+			],
+			[
+				"be",
+				"before"
+			],
+			[
+				"max",
+				"max_state"
+			],
+			[
+				"nu",
+				"num_items"
+			],
+			[
+				"ni",
+				"num_items"
+			],
+			[
+				"Oj",
+				"object"
+			],
+			[
+				"bit",
+				"bitArray"
+			],
+			[
+				"len",
+				"length"
+			],
+			[
+				"U",
+				"Uint32Array"
+			],
+			[
+				"Un",
+				"Uint16Array"
+			],
+			[
+				"ta",
+				"target"
+			],
+			[
+				"mou",
+				"modules_id"
+			],
+			[
+				"cla",
+				"class"
+			],
+			[
+				"va",
+				"value"
+			],
+			[
+				"mod",
+				"modules"
+			],
+			[
+				"sele",
+				"selectAll"
+			],
+			[
+				"oj",
+				"object"
+			],
+			[
+				"set",
+				"set_transitions"
+			],
+			[
+				"ge",
+				"get_event_by_label"
+			],
+			[
+				"err",
+				"errorHandler"
+			],
+			[
+				"on",
+				"onload"
+			],
+			[
+				"cre",
+				"create_module"
+			],
+			[
+				"tran",
+				"transitions"
+			],
+			[
+				"tra",
+				"transitions"
+			],
+			[
+				"so",
+				"sort"
+			],
+			[
+				"ret",
+				"return"
+			],
+			[
+				"t",
+				"transitions"
+			],
+			[
+				"add",
+				"addTransition"
+			],
+			[
+				"conf",
+				"Configuration"
+			],
+			[
+				"create",
+				"create_general_set"
+			],
+			[
+				"l",
+				"length"
+			],
+			[
+				"resi",
+				"resizeUint32Array"
+			],
+			[
+				"addU",
+				"addUint16ArrayValue"
+			],
+			[
+				"CON",
+				"controllable"
+			],
+			[
+				"BY",
+				"BINARY_SUBSET"
+			],
+			[
+				"BI",
+				"BINARY_SUBSET"
+			],
+			[
+				"add_bi",
+				"add_binary_methods"
+			],
+			[
+				"add_",
+				"add_binary_methods"
+			],
+			[
+				"create_",
+				"create_integer_keys"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "js/forward_algorithm.coffee",
+			"settings":
+			{
+				"buffer_size": 12008,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "js/DES.coffee",
+			"settings":
+			{
+				"buffer_size": 30241,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "js/transitions.js",
+			"settings":
+			{
+				"buffer_size": 2981,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "js/indexed_property.js",
+			"settings":
+			{
+				"buffer_size": 3807,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "js/array_properties.js",
+			"settings":
+			{
+				"buffer_size": 11073,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
+			"settings":
+			{
+				"buffer_size": 5267,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 52.0,
+		"selected_items":
+		[
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: re",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: inst",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Disable Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: di",
+				"Package Control: Disable Package"
+			],
+			[
+				"Package Control: in ",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: en",
+				"Package Control: Enable Package"
+			],
+			[
+				"Package Control: de",
+				"Package Control: Disable Package"
+			],
+			[
+				"Package Control: e",
+				"Package Control: Enable Package"
+			],
+			[
+				"Package Control: d",
+				"Package Control: Disable Package"
+			],
+			[
+				"Package Control: rem",
+				"Package Control: Remove Package"
+			],
+			[
+				"",
+				"Build: Build"
+			],
+			[
+				"Package Control: i",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: li",
+				"Package Control: List Packages"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"dis",
+				"Package Control: Discover Packages"
+			]
+		],
+		"width": 400.0
+	},
+	"console":
+	{
+		"height": 132.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/SpecRunner.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/des.js",
+		"/E/#DmitryMyadzelets/#Projects/vCardParser/VCardParser.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/demo/index.html",
+		"/E/#DmitryMyadzelets/#Projects/vCardParser/Test/TestData.js",
+		"/E/#DmitryMyadzelets/#Projects/vCardParser/Test/VCardParserTest.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/demo/contacts.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/demo/sample.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/contacts.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/vcard.js",
+		"/E/Documents and Settings/Dmitry/Desktop/JS - good parts/program.js",
+		"/E/Documents and Settings/Dmitry/Desktop/JS - good parts/program.html",
+		"/E/Documents and Settings/Dmitry/Desktop/test.html",
+		"/E/#DmitryMyadzelets/#Projects/vCard-site/js/main.js",
+		"/E/#DmitryMyadzelets/#Projects/vCard-site/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/sizeof.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/array_properties.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/spec/editor.test.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/automata2.js",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-build",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-settings",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/index2.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/DES.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/forward_algorithm.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/tesis.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/forward_algorithm.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/benchmark_sync.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/benchmark_sync.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ModulesCoupling.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/ModulesCoupling.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ModulesCoupling.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/main.css",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/main.css",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/main.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/faxy.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/tesis.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/article.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/draw.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/draw.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/main2.coffee",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/User/Preferences.sublime-settings",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/reviews.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/automata2.coffee",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CoffeeScript/CoffeeScript.sublime-build",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/iscrizione.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/iscrizione_form.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/2.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/2.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/iscrizione_form.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/compressed/2.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata2.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/blog.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata2.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/graph.test.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/DES.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/compressed/DES.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/compressed/bfs.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/main.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/ModulesCoupling.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/ModulesCoupling.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/des.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/SpecRunner.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/bfs.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/draw.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/tests.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/autogenerated.colt",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/editor.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/btc.md",
+		"/E/Documents and Settings/Dmitry/Desktop/TextToSpeech.md",
+		"/E/Documents and Settings/Dmitry/Desktop/PhD/Tools/FAED - Finite Automta EDitor/faed/js/faed.js",
+		"/E/Documents and Settings/Dmitry/Desktop/PhD/Tools/FAED - Finite Automta EDitor/faed/js/fa.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/erasmus.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Erazmus.ru/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Erazmus.ru/main.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/compressed/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/compressed/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/HTML Compressor/README.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/HTML Compressor/HTML Compressor.sublime-build",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/HTML Compress and Replace/HTML Compress and Replace.sublime-build",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/YUI Compressor/README.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/Package Control/Package Control.sublime-settings",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/YUI Compressor/YUI Compressor.sublime-build",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/graph.test.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/readme.mdown",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/readme.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/CoffeeScript/CoffeeScript.sublime-build",
+		"/E/Documents and Settings/Dmitry/Desktop/apc.c",
+		"/E/Documents and Settings/Dmitry/Desktop/Nosadillo - Design/Association.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/main.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/nfa.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Erazmus.ru/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/.gitignore",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/faxy.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/draw.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/editor.test.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Sublime Text/Data/Packages/MarkdownEditing/README.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Sublime Text/Data/Packages/Package Control/Package Control.sublime-settings",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/README.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/lib/jstorage.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/textarea.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/undo.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/textarea.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/faxy.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/editor.test.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/dfa.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/js/main.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/js/main.coffee",
+		"/E/usr/vhosts-on.txt",
+		"/E/Apache/conf/extra/httpd-vhosts.conf",
+		"/E/Apache/conf/httpd.conf",
+		"/E/php/php.ini",
+		"/E/usr/vhosts-off.txt",
+		"/E/usr/start-webserver.bat"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"visit",
+			"match",
+			"regexps",
+			"bitArray",
+			"value",
+			"array_properties",
+			".binary",
+			"=",
+			"module.uniproperties.",
+			"module.",
+			"objects",
+			"binary_properties",
+			"binary_methods",
+			"objects_methods",
+			"key",
+			"get_values",
+			"copy_values2object",
+			"binary",
+			"object_methods",
+			"binary_methods",
+			"binary",
+			"module",
+			"sets",
+			"cardinality",
+			"binary_set",
+			"binary_set_properties",
+			"binary_set_methods",
+			"abstract_set_properties",
+			"abstract_set_methods",
+			"case",
+			"scope",
+			"basic_set_properties",
+			"basic_set_methods",
+			"resizeArray",
+			"binary_set",
+			"basic_set",
+			"basic_set_methods",
+			"itself",
+			"_open",
+			"_closing",
+			"_opening",
+			"_stoped",
+			"_open",
+			"_closed",
+			"name+",
+			"'a'",
+			"'A'",
+			"'a'",
+			"a",
+			"name",
+			"A_",
+			"LT1",
+			"A_LT1",
+			"m1",
+			"M",
+			"inter",
+			"N",
+			"n",
+			"N",
+			"intersection",
+			"i",
+			"interse",
+			"1",
+			"observable",
+			".",
+			"'v1so'",
+			"'v1sc'",
+			"'v1'",
+			"'name'",
+			"sc",
+			"name+'",
+			"'_",
+			"1]",
+			"a_",
+			"s3",
+			"v1_",
+			"s1",
+			"s2",
+			"s1",
+			"v1",
+			"v1_",
+			"s1",
+			"s1_",
+			"s1",
+			"v1_",
+			" '",
+			"'",
+			", '",
+			": '",
+			"index2",
+			"index1",
+			"s1",
+			"s_",
+			"do_",
+			"r_",
+			"do",
+			"r_",
+			"'1",
+			", '",
+			": '",
+			"do_",
+			"}",
+			"{ labels : ",
+			"get_event_by_labels",
+			"1",
+			"close_",
+			"open_",
+			"close_hi",
+			"close",
+			"open_",
+			"close_",
+			"v_mc",
+			"clos",
+			"v_mo",
+			"op_",
+			"op",
+			"v_",
+			"op_",
+			"cl",
+			"v_",
+			": '",
+			"result",
+			"s",
+			"do",
+			"r",
+			"r_",
+			"lo",
+			"2"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"properties",
+			",",
+			"à",
+			"ù",
+			"è",
+			"labels",
+			".transitions",
+			"Uint16Array",
+			"sort",
+			"nix",
+			"tix",
+			"g.edges.v.length",
+			"g.nodes.v.length",
+			"'",
+			"draw.automata",
+			"automaton",
+			"automata",
+			"draw.automaton",
+			"vec.",
+			"console.log(",
+			"console.log",
+			"print = console.log\nprint = console.log\nconsole.log",
+			"edges.curved",
+			"digraph",
+			".create",
+			"for_arrays_of",
+			", ",
+			"}",
+			"{",
+			"",
+			"\"y\"",
+			"\"x\"",
+			"},{y:",
+			"}},",
+			"{{x:",
+			"},{y:",
+			"{x:",
+			"\",\"",
+			"",
+			"#",
+			"",
+			"-",
+			"editor",
+			"canvas",
+			"edit.dy",
+			"edit.dx",
+			"unpack",
+			"pack",
+			"Edges",
+			"g.",
+			"",
+			"#",
+			""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "js/forward_algorithm.coffee",
+					"settings":
+					{
+						"buffer_size": 12008,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2238,
+								2238
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "js/DES.coffee",
+					"settings":
+					{
+						"buffer_size": 30241,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8680,
+								8680
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "js/transitions.js",
+					"settings":
+					{
+						"buffer_size": 2981,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2778,
+								2778
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1323.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "js/indexed_property.js",
+					"settings":
+					{
+						"buffer_size": 3807,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "js/array_properties.js",
+					"settings":
+					{
+						"buffer_size": 11073,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6234,
+								6234
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2885.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
+					"settings":
+					{
+						"buffer_size": 5267,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5252,
+								5252
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 32.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 83.0
+	},
+	"replace":
+	{
+		"height": 62.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}
