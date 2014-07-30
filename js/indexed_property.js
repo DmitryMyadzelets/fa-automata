@@ -21,6 +21,7 @@
 // o.set(1).marked(true)
 // or in chain:
 // o.set(2).name('Bob').index(567)
+// o.add().set().name('Bob') // sets property of the last added element
 // 
 // How to read values:
 // o(0).name // 'Alex'
@@ -33,10 +34,6 @@
 // How many elements in it:
 // o.cardinality()
 
-
-
-// The global variable (module) to access to the methods
-this.jA = this.jA || {};
 
 
 (function (module) {
@@ -116,13 +113,17 @@ this.jA = this.jA || {};
         // Adds 'n' elements to the set
         func.add = function (n) {
             cardinality = add(arrays, n) || 0;
+            // set current
+            current_index = cardinality - 1;
             return this;
         };
 
 
         // Implements 'set(index)' prefix method for other methods
         func.set = function (index) {
-            current_index = index;
+            if (index !== undefined) {
+                current_index = index;
+            }
             return set_methods;
         };
 
