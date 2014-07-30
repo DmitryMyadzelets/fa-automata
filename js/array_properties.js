@@ -18,6 +18,7 @@
 //  It has the same methods as the 'binary()'.
 
 
+
 // The global variable (module) to access to the methods
 this.jA = this.jA || {};
 

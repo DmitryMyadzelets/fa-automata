@@ -197,9 +197,91 @@
       return expect(n).toBe(2);
     });
     return it("Method Depth-first search works", function() {
-      return T.dfs(0, function(t, index) {
-        return console.log(index, t);
+      var i, objects;
+
+      objects = [
+        {
+          q: 0,
+          e: 0,
+          p: 1
+        }, {
+          q: 1,
+          e: 0,
+          p: 1
+        }, {
+          q: 1,
+          e: 1,
+          p: 0
+        }
+      ];
+      i = 0;
+      jA.dfs(T, 0, function(t, index) {
+        var o;
+
+        o = objects[i++];
+        expect(t.q).toBe(o.q);
+        expect(t.e).toBe(o.e);
+        expect(t.p).toBe(o.p);
+        return false;
       });
+      return expect(i).toBe(3);
+    });
+  });
+
+  describe("Conversions", function() {
+    var automaton, str;
+
+    automaton = {
+      transitions: [
+        {
+          event: '0',
+          from: '0',
+          to: '1'
+        }, {
+          event: '1',
+          from: '1',
+          to: '0'
+        }, {
+          event: '0',
+          from: '1',
+          to: '1'
+        }
+      ]
+    };
+    str = '{"transitions":[{"event":"0","from":"0","to":"1"},{"event":"1","from":"1","to":"0"},{"event":"0","from":"1","to":"1"}]}';
+    it("JSON.stringify and JSON.parse methods work", function() {
+      expect(JSON).toBeDefined();
+      expect(str.localeCompare(JSON.stringify(automaton))).toBe(0);
+      return expect(JSON.stringify(JSON.parse(str)).localeCompare(JSON.stringify(automaton))).toBe(0);
+    });
+    return it("Converts JSON to transitions", function() {
+      var T, i, objects;
+
+      T = jA.convert.object2transitions(automaton);
+      expect(T).toBeDefined();
+      objects = [
+        {
+          q: 0,
+          e: 0,
+          p: 1
+        }, {
+          q: 1,
+          e: 0,
+          p: 1
+        }, {
+          q: 1,
+          e: 1,
+          p: 0
+        }
+      ];
+      i = 0;
+      jA.dfs(T, 0, function(t, index) {
+        var o;
+
+        o = objects[i++];
+        return false;
+      });
+      return expect(i).toBe(3);
     });
   });
 

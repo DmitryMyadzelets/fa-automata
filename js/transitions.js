@@ -33,29 +33,9 @@
 
 
 
-
-
-
-// The global variable (module) to access to the methods
-this.jA = this.jA || {};
-
-
 (function (module) {
 
     "use strict";
-
-
-    // For each edge outgoing from the node 'q' invokes 'func' with the edge object
-    var out = function (o, q, func) {
-        if (typeof func === 'function') {
-            var i = o.cardinality();
-            var t;
-            while (i--) {
-                t = o(i); // transition object
-                if (t.q === q) { func(t, i); }
-            }
-        }
-    };
 
 
 
@@ -71,29 +51,6 @@ this.jA = this.jA || {};
 
 
 
-    // Depth-first search over transitions
-    var dfs = function (o, start, func) {
-        if (typeof func === 'function') {
-            // Maximal index of ingoing nodes (property 'p') to make array 
-            // of a correspondent size
-            var max_p = max(o, 'p');
-            var visited = module.binary().add(max_p + 1).set(start, true);
-
-            var edge = function (t, index) {
-                // Invoke callback function, and interrupt search if it returns 'true'
-                if (func(t, index)) { return; }
-                if (!visited.get(t.p)) {
-                    visited.set(t.p, true);
-                    out(o, t.p, edge);
-                }
-            };
-
-            out(o, start, edge);
-        }
-    };
-
-
-
     // Creates and returns a 'Transitions' object
     var transitions = function () {
         var o = module.indexed_property({
@@ -105,13 +62,7 @@ this.jA = this.jA || {};
 
 
         o.out = function (q, func) {
-            return out(o, q, func);
-        };
-
-
-
-        o.dfs = function (start, func) {
-            return dfs(o, start, func);
+            return module.out(o, q, func);
         };
 
 
@@ -127,6 +78,43 @@ this.jA = this.jA || {};
     //
 
     module.transitions = transitions;
+
+
+    // For each edge outgoing from the node 'q' invokes 'func' with the edge object
+    module.out = function (o, q, func) {
+        if (typeof func === 'function') {
+            var i = o.cardinality();
+            var t;
+            while (i--) {
+                t = o(i); // transition object
+                if (t.q === q) { func(t, i); }
+            }
+        }
+    };
+
+
+
+    // Depth-first search over transitions
+    module.dfs = function (transitions, start, func) {
+        if (typeof func === 'function') {
+            // Maximal index of ingoing nodes (property 'p') to make array 
+            // of a correspondent size
+            var max_p = max(transitions, 'p');
+            var visited = module.binary().add(max_p + 1).set(start, true);
+
+            var edge = function (t, index) {
+                // Invoke callback function, and interrupt search if it returns 'true'
+                if (func(t, index)) { return; }
+                if (!visited.get(t.p)) {
+                    visited.set(t.p, true);
+                    module.out(transitions, t.p, edge);
+                }
+            };
+
+            module.out(transitions, start, edge);
+        }
+    };
+
 
 
 }(this.jA));

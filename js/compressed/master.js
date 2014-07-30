@@ -18,6 +18,7 @@
 //  It has the same methods as the 'binary()'.
 
 
+
 // The global variable (module) to access to the methods
 this.jA = this.jA || {};
 
@@ -595,9 +596,6 @@ this.jA = this.jA || {};
 //    t.q // we can read values
 //    T.set(index).q(8) // we can write values
 //  })
-
-
-
 
 
 

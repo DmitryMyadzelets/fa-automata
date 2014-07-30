@@ -125,7 +125,6 @@ describe "An indexed complex property", ->
         e = event(1)
         expect(e.observable).toBe(false)
         expect(e.name).toBe('hello')
-
     
     it "Two indexed properties do not correlate", ->
 
@@ -136,7 +135,6 @@ describe "An indexed complex property", ->
         B = jA.indexed_property({
             surname : 'objects'
             })
-
 
         A.add()
         B.add(2)
@@ -155,7 +153,6 @@ describe "An indexed complex property", ->
         expect(b.surname).toBe('Ng')
         b = B(1)
         expect(b.surname).toBe('Ivanov')
-
 
 
 describe "Transitions", ->
@@ -195,6 +192,73 @@ describe "Transitions", ->
 
     it "Method Depth-first search works", ->
 
-        T.dfs(0, (t, index) ->
-            console.log index, t
+        objects = [
+            {q : 0, e : 0, p : 1},
+            {q : 1, e : 0, p : 1},
+            {q : 1, e : 1, p : 0}
+        ]
+        i = 0
+
+        jA.dfs(T, 0, (t, index) ->
+            o = objects[i++]
+            # console.log index, t, o
+            expect(t.q).toBe(o.q)
+            expect(t.e).toBe(o.e)
+            expect(t.p).toBe(o.p)
+            false
             )
+        expect(i).toBe(3)
+
+
+describe "Conversions", ->
+
+    automaton = {
+        transitions : [
+            {
+                event : '0'
+                from : '0'
+                to : '1'
+            },
+            {
+                event : '1'
+                from : '1'
+                to : '0'
+            },
+            {
+                event : '0'
+                from : '1'
+                to : '1'
+            }
+        ]
+    }
+
+    str = '{"transitions":[{"event":"0","from":"0","to":"1"},{"event":"1","from":"1","to":"0"},{"event":"0","from":"1","to":"1"}]}'
+
+
+    it "JSON.stringify and JSON.parse methods work", ->
+        expect(JSON).toBeDefined()
+        expect(str.localeCompare(JSON.stringify(automaton))).toBe(0)
+        expect(JSON.stringify(JSON.parse(str)).localeCompare(JSON.stringify(automaton))).toBe(0)
+
+
+    it "Converts JSON to transitions", ->
+
+        T = jA.convert.object2transitions(automaton)
+        expect(T).toBeDefined()
+
+        objects = [
+            {q : 0, e : 0, p : 1},
+            {q : 1, e : 0, p : 1},
+            {q : 1, e : 1, p : 0}
+        ]
+        i = 0
+
+        jA.dfs(T, 0, (t, index) ->
+            o = objects[i++]
+            # console.log index, t, o
+            false
+            )
+        expect(i).toBe(3)
+
+        # jA.convert.transitions2JSON()
+
