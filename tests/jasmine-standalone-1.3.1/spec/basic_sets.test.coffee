@@ -260,5 +260,4 @@ describe "Conversions", ->
             )
         expect(i).toBe(3)
 
-        # jA.convert.transitions2JSON()
 

@@ -17,6 +17,9 @@
     }
 
 
+    // Returns transitions extracted from the given literal object 'o'
+    // Object has to have properties as in the framework:
+    // https://github.com/hyperandroid/Automata
     convert.object2transitions = function (o) {
         var T = module.transitions();
         // Check for array property of transitions
