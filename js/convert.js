@@ -18,6 +18,7 @@
 
 
     // Returns transitions extracted from the given literal object 'o'
+    // Literal Ojbect -> Transitions
     // Object has to have properties as in the framework:
     // https://github.com/hyperandroid/Automata
     convert.object2transitions = function (o) {

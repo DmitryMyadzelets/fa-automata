@@ -38,6 +38,14 @@
     "use strict";
 
 
+    // Template for creation of transitions
+    var transition_template = {
+        q : 'indexes', // Outgoing node (state) index
+        e : 'indexes', // Edge (event) index
+        p : 'indexes', // Ingoing node (state) index
+    };
+
+
 
     // Returns maximal value of the 'o[key]' array property
     var max = function (o, key) {
@@ -53,11 +61,7 @@
 
     // Creates and returns a 'Transitions' object
     var transitions = function () {
-        var o = module.indexed_property({
-            q : 'indexes', // Outgoing node (state) index
-            e : 'indexes', // Edge (event) index
-            p : 'indexes', // Ingoing node (state) index
-        });
+        var o = module.indexed_property(transition_template);
 
 
 
