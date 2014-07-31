@@ -121,7 +121,7 @@
 
         // Implements 'set(index)' prefix method for other methods
         func.set = function (index) {
-            if (index !== undefined) {
+            if (typeof index === 'number') {
                 current_index = index;
             }
             return set_methods;
