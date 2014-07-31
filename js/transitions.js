@@ -63,12 +63,9 @@
     var transitions = function () {
         var o = module.indexed_property(transition_template);
 
-
-
         o.out = function (q, func) {
             return module.out(o, q, func);
         };
-
 
         return o;
     };
