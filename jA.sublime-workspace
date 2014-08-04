@@ -4,6 +4,22 @@
 		"selected_items":
 		[
 			[
+				"to",
+				"toBe"
+			],
+			[
+				"lo",
+				"log	log"
+			],
+			[
+				"str",
+				"stringify"
+			],
+			[
+				"transi",
+				"transitions_methods"
+			],
+			[
 				"func",
 				"function"
 			],
@@ -26,10 +42,6 @@
 			[
 				"obj",
 				"objects"
-			],
-			[
-				"to",
-				"toBe"
 			],
 			[
 				"de",
@@ -106,10 +118,6 @@
 			[
 				"pu",
 				"push"
-			],
-			[
-				"lo",
-				"log	log"
 			],
 			[
 				"for",
@@ -506,14 +514,6 @@
 			[
 				"add_bi",
 				"add_binary_methods"
-			],
-			[
-				"add_",
-				"add_binary_methods"
-			],
-			[
-				"create_",
-				"create_integer_keys"
 			]
 		]
 	},
@@ -536,10 +536,18 @@
 			}
 		},
 		{
+			"file": "js/convert.js",
+			"settings":
+			{
+				"buffer_size": 1335,
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "js/transitions.js",
 			"settings":
 			{
-				"buffer_size": 2981,
+				"buffer_size": 2949,
 				"line_ending": "Windows"
 			}
 		},
@@ -547,7 +555,7 @@
 			"file": "js/indexed_property.js",
 			"settings":
 			{
-				"buffer_size": 3809,
+				"buffer_size": 3932,
 				"line_ending": "Windows"
 			}
 		},
@@ -563,12 +571,12 @@
 			"file": "tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
 			"settings":
 			{
-				"buffer_size": 5312,
+				"buffer_size": 6845,
 				"line_ending": "Windows"
 			}
 		}
 	],
-	"build_system": "Packages/CoffeeScript/CoffeeScript.sublime-build",
+	"build_system": "",
 	"command_palette":
 	{
 		"height": 152.0,
@@ -660,8 +668,8 @@
 	},
 	"file_history":
 	[
-		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/jA.sublime-project",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/SpecRunner.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/jA.sublime-project",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/compressed/master.min.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/compressed/master.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/des.js",
@@ -805,6 +813,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"requireOwnProperties",
+			"o,",
+			"o",
 			"visit",
 			"match",
 			"regexps",
@@ -929,10 +940,7 @@
 			"result",
 			"s",
 			"do",
-			"r",
-			"r_",
-			"lo",
-			"2"
+			"r"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1003,7 +1011,7 @@
 	"groups":
 	[
 		{
-			"selected": 5,
+			"selected": 3,
 			"sheets":
 			[
 				{
@@ -1018,8 +1026,8 @@
 						"selection":
 						[
 							[
-								2238,
-								2238
+								2320,
+								2320
 							]
 						],
 						"settings":
@@ -1029,7 +1037,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1252.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1046,8 +1054,8 @@
 						"selection":
 						[
 							[
-								91,
-								91
+								27962,
+								27939
 							]
 						],
 						"settings":
@@ -1057,32 +1065,30 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 9563.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "js/transitions.js",
+					"file": "js/convert.js",
 					"settings":
 					{
-						"buffer_size": 2981,
+						"buffer_size": 1335,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								524,
-								524
+								1155,
+								1155
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1092,18 +1098,18 @@
 				},
 				{
 					"buffer": 3,
-					"file": "js/indexed_property.js",
+					"file": "js/transitions.js",
 					"settings":
 					{
-						"buffer_size": 3809,
+						"buffer_size": 2949,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								465,
-								465
+								1064,
+								1064
 							]
 						],
 						"settings":
@@ -1113,13 +1119,41 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 341.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 4,
+					"file": "js/indexed_property.js",
+					"settings":
+					{
+						"buffer_size": 3932,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1872,
+								1872
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1165.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"file": "js/array_properties.js",
 					"settings":
 					{
@@ -1141,25 +1175,25 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2966.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
 					"settings":
 					{
-						"buffer_size": 5312,
+						"buffer_size": 6845,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4473,
-								4473
+								6844,
+								6844
 							]
 						],
 						"settings":
@@ -1169,7 +1203,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2112.0,
+						"translation.y": 2267.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
