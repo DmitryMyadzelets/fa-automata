@@ -150,17 +150,17 @@ this.jA.ui = {};
         .size([width, height])
         .nodes(graph.nodes)
         .links(graph.links)
-        .on('tick', tick)
-        .start();
+        .on('tick', tick);
 
 
-    var node, link;
+    var node = svg.selectAll("svg.g.circle");
+    var link = svg.selectAll("svg.path");
 
     var update = function () {
 
-        // Links (edges) of the graph
+        force.start();
 
-        link = svg.selectAll(".path").data(force.links());
+        link = link.data(graph.links);
 
         link.enter().append('path')
             .attr('class', 'link') // CSS class style
@@ -169,9 +169,7 @@ this.jA.ui = {};
         link.exit().remove();
 
 
-        // Nodes of the graph
-
-        node = svg.selectAll(".g").data(force.nodes());
+        node = node.data(graph.nodes);
 
         node.enter()
             .append("g")
