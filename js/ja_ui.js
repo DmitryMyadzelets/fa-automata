@@ -167,9 +167,7 @@ this.jA.ui = {};
 
         // Returns SVG string for a node
         var on_node_tick = function (d) {
-            return "translate(" +
-                ((d.x * 10 | 0) / 10) + "," +
-                ((d.y * 10 | 0) / 10) + ")";
+            return "translate(" + d.x + "," + d.y + ")";
         };
 
         // Returns SVG string for an edge
@@ -180,11 +178,7 @@ this.jA.ui = {};
             v2[1] = d.target.y;
             // d.cv = [0, 0] if not d.cv?
             makeEdge.stright(v1, v2, norm, d.cv);
-            return 'M' +
-                ((v1[0] * 10 | 0) / 10) + ',' +
-                ((v1[1] * 10 | 0) / 10) + 'L' +
-                ((v2[0] * 10 | 0) / 10) + ',' +
-                ((v2[1] * 10 | 0) / 10);
+            return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];
         };
 
         return function () {
