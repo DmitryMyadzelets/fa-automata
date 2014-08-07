@@ -149,79 +149,84 @@ this.jA.ui = {};
         // .linkStrength((d)-> if d.loop? then 0 else 1)
         .size([width, height])
         .nodes(graph.nodes)
-        .links(graph.links)
-        .on('tick', tick);
-
+        .links(graph.links);
 
     var node = svg.selectAll("svg.g.circle");
     var link = svg.selectAll("svg.path");
 
+    // 
+    // 
+    // The function which is called during animation of the graph
+    // Is called on each tick during graph animation
+    // 
+    // 
+    var tick = (function () {
+        var v1 = [0, 0];
+        var v2 = [0, 0];
+        var norm = [0, 0];
+
+        // Returns SVG string for a node
+        var on_node_tick = function (d) {
+            return "translate(" +
+                ((d.x * 10 | 0) / 10) + "," +
+                ((d.y * 10 | 0) / 10) + ")";
+        };
+
+        // Returns SVG string for an edge
+        var on_link_tick = function (d) {
+            v1[0] = d.source.x;
+            v1[1] = d.source.y;
+            v2[0] = d.target.x;
+            v2[1] = d.target.y;
+            // d.cv = [0, 0] if not d.cv?
+            makeEdge.stright(v1, v2, norm, d.cv);
+            return 'M' +
+                ((v1[0] * 10 | 0) / 10) + ',' +
+                ((v1[1] * 10 | 0) / 10) + 'L' +
+                ((v2[0] * 10 | 0) / 10) + ',' +
+                ((v2[1] * 10 | 0) / 10);
+        };
+
+        return function () {
+            node.attr("transform", on_node_tick);
+            link.attr('d', on_link_tick);
+        };
+    }());
+
+    force.on('tick', tick);
+
+
+    // Call this function to update SVG representation of the graph object
     var update = function () {
-
-        force.start();
-
         link = link.data(graph.links);
-
+        link.exit().remove();
         link.enter().append('path')
             .attr('class', 'link') // CSS class style
             .attr("marker-end", "url(#marker-arrow)");
 
-        link.exit().remove();
-
-
         node = node.data(graph.nodes);
-
+        node.exit().remove();
         node.enter()
             .append("g")
             .append('circle')
             .attr('r', node_radius)
-            .attr('class', 'node'); // CSS class style
-
-        node.exit().remove();
-
+            .attr('class', 'node') // CSS class style
+            .on('mousedown', function (d) { console.log('mousedown', d); })
+            .on('mouseup', function (d) { console.log('mouseup', d); })
+            .on('mouseover', function (d) { console.log('mouseover', d); })
+            .on('mouseout', function (d) { console.log('mouseout', d); });
+        force.start();
     };
 
     update();
 
 
-    // 
-    // 
-    // The function which is called during animation of the graph
-    // 
-    // 
+    svg.on('mousedown', function () {
+        var xy = d3.mouse(this);
+        // graph.nodes.push({x : xy[0], y : xy[1]});
+        // update();
+    });
 
-    // Callback function for tick event
-    var on_node_tick = function (d) {
-        return "translate(" +
-            ((d.x * 10 | 0) / 10) + "," +
-            ((d.y * 10 | 0) / 10) + ")";
-    };
-
-    // Make SVG string for a link curve
-    var v1 = [0, 0];
-    var v2 = [0, 0];
-    var norm = [0, 0];
-
-    var on_link_tick = function (d) {
-        v1[0] = d.source.x;
-        v1[1] = d.source.y;
-        v2[0] = d.target.x;
-        v2[1] = d.target.y;
-        // d.cv = [0, 0] if not d.cv?
-        makeEdge.stright(v1, v2, norm, d.cv);
-        return 'M' +
-            ((v1[0] * 10 | 0) / 10) + ',' +
-            ((v1[1] * 10 | 0) / 10) + 'L' +
-            ((v2[0] * 10 | 0) / 10) + ',' +
-            ((v2[1] * 10 | 0) / 10);
-    };
-
-
-    // Is called on each tick during graph animation
-    function tick() {
-        node.attr("transform", on_node_tick);
-        link.attr('d', on_link_tick);
-    }
 
 
     // 
