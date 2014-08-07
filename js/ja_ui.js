@@ -196,6 +196,56 @@ this.jA.ui = {};
     force.on('tick', tick);
 
 
+
+    // State machine for process user input
+    var process_event = (function () {
+        var state; // Reference to a current state
+        var node; // Current node
+        // States are represented as functions
+        var states = {
+            init : function (event, object) {
+                switch (event) {
+                case 'node.mousedown':
+                    node = object;
+                    console.log(node);
+                    state = this.going_from_node;
+                    break;
+                }
+            },
+            going_from_node : function (event, object) {
+                switch (event) {
+                case 'node.mouseout':
+                    state = this.init;
+                    break;
+                }
+            }
+        };
+
+        // Add 'name' property to the state functions for debugging
+        var key;
+        for (key in states) {
+            if (states.hasOwnProperty(key)) {
+                states[key]._name = key;
+            }
+        }
+
+        state = states.init;
+        var old_state;
+
+        return function () {
+            if (typeof state === 'function') {
+                old_state = state;
+                var ret = state.apply(states, arguments);
+                if (old_state !== state) {
+                    console.log(old_state._name + ' -> ' + state._name);
+                }
+                return ret;
+            }
+        };
+    }());
+
+
+
     // Call this function to update SVG representation of the graph object
     var update = function () {
         link = link.data(graph.links);
@@ -211,10 +261,10 @@ this.jA.ui = {};
             .append('circle')
             .attr('r', node_radius)
             .attr('class', 'node') // CSS class style
-            .on('mousedown', function (d) { console.log('mousedown', d); })
-            .on('mouseup', function (d) { console.log('mouseup', d); })
-            .on('mouseover', function (d) { console.log('mouseover', d); })
-            .on('mouseout', function (d) { console.log('mouseout', d); });
+            .on('mousedown', function (d) { process_event('node.mousedown', d); })
+            .on('mouseup', function (d) { process_event('node.mouseup', d); })
+            .on('mouseover', function (d) { process_event('node.mouseover', d); })
+            .on('mouseout', function (d) { process_event('node.mouseout', d); });
         force.start();
     };
 
