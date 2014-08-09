@@ -128,6 +128,7 @@ this.jA.ui = {};
         .attr('height', '100%');
 
 
+
     // Arrow marker
     svg.append("svg:defs").append("svg:marker")
             .attr('id', 'marker-arrow')
@@ -196,25 +197,41 @@ this.jA.ui = {};
     force.on('tick', tick);
 
 
+    var update;
 
     // State machine for process user input
     var process_event = (function () {
         var state; // Reference to a current state
-        var node; // Current node
+        var current_node; // Current node
         // States are represented as functions
         var states = {
             init : function (event, object) {
                 switch (event) {
                 case 'node.mousedown':
-                    node = object;
-                    console.log(node);
+                    current_node = object;
                     state = this.going_from_node;
+                    break;
+                case 'doc.mousedown':
+                    state = this.create_new_node;
                     break;
                 }
             },
-            going_from_node : function (event, object) {
+            going_from_node : function (event) {
                 switch (event) {
                 case 'node.mouseout':
+                    state = this.init;
+                    break;
+                }
+            },
+            create_new_node : function (event, object) {
+                switch (event) {
+                case 'doc.mouseup':
+                    var xy = object;
+                    graph.nodes.push({x : xy[0], y : xy[1]});
+                    update();
+                    state = this.init;
+                    break;
+                default:
                     state = this.init;
                     break;
                 }
@@ -247,7 +264,7 @@ this.jA.ui = {};
 
 
     // Call this function to update SVG representation of the graph object
-    var update = function () {
+    update = function () {
         link = link.data(graph.links);
         link.exit().remove();
         link.enter().append('path')
@@ -272,9 +289,11 @@ this.jA.ui = {};
 
 
     svg.on('mousedown', function () {
-        var xy = d3.mouse(this);
-        // graph.nodes.push({x : xy[0], y : xy[1]});
-        // update();
+        process_event('doc.mousedown', d3.mouse(this));
+    });
+
+    svg.on('mouseup', function () {
+        process_event('doc.mouseup', d3.mouse(this));
     });
 
 
