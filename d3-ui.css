@@ -35,8 +35,16 @@ body {
 circle.node {
   fill: dodgerblue;
   stroke: #333;
-  stroke-width: 1.5px;
+  stroke-width: 0.09em;
   fill-opacity: 0.5;
+  box-shadow: 0 0 0 5px red;
+}
+
+circle.selected {
+  fill: none;
+  stroke: black;
+  stroke-width: 0.05em;
+  stroke-dasharray: 0.5em,0.3em;
 }
 
 .marked {
@@ -47,7 +55,7 @@ circle.node {
 
 path.link {
   stroke: #333;
-  stroke-width: 1.5px;
+  stroke-width: 0.09em;
   /*fill: none;*/
 }
 

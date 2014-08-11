@@ -38,6 +38,9 @@ this.jA.ui = {};
         'links' : []
     };
 
+    // Selected nodes and edges. Both are objects
+    var selected = [];
+
     graph.nodes.push({});
     graph.nodes.push({});
     graph.nodes.push({});
@@ -152,8 +155,9 @@ this.jA.ui = {};
         .nodes(graph.nodes)
         .links(graph.links);
 
-    var node = svg.selectAll("svg.g.circle");
+    var node = svg.selectAll("svg.g");
     var link = svg.selectAll("svg.path");
+    var selected_node = node;
 
     // 
     // 
@@ -203,6 +207,7 @@ this.jA.ui = {};
     var process_event = (function () {
         var state; // Reference to a current state
         var current_node; // Current node
+        var xy_down; // mousedown position
         // States are represented as functions
         var states = {
             init : function (event, object) {
@@ -212,13 +217,19 @@ this.jA.ui = {};
                     state = this.going_from_node;
                     break;
                 case 'doc.mousedown':
+                    xy_down = object;
                     state = this.create_new_node;
                     break;
                 }
             },
-            going_from_node : function (event) {
+            going_from_node : function (event, object) {
                 switch (event) {
                 case 'node.mouseout':
+                    state = this.init;
+                    break;
+                case 'node.mouseup':
+                    selected.push(object);
+                    update();
                     state = this.init;
                     break;
                 }
@@ -226,9 +237,17 @@ this.jA.ui = {};
             create_new_node : function (event, object) {
                 switch (event) {
                 case 'doc.mouseup':
+                    // Check the distance from 'mousedown' point.
+                    // Create new node if the distance is less then a treshold.
                     var xy = object;
-                    graph.nodes.push({x : xy[0], y : xy[1]});
-                    update();
+                    var len = vec.length(vec.subtract(xy_down, xy, [0, 0]));
+                    if (len < node_radius >> 1) {
+                        var o = {x : xy[0], y : xy[1]};
+                        graph.nodes.push(o);
+                        selected.length = 0;
+                        selected.push(o);
+                        update();
+                    }
                     state = this.init;
                     break;
                 default:
@@ -271,17 +290,31 @@ this.jA.ui = {};
             .attr('class', 'link') // CSS class style
             .attr("marker-end", "url(#marker-arrow)");
 
+
         node = node.data(graph.nodes);
+        selected_node = selected_node.data(selected);
+
+        // node.filter(function (d, index) {
+        //     console.log(index, selected.indexOf(d) < 0);
+        // });
+
         node.exit().remove();
-        node.enter()
-            .append("g")
+        var g = node.enter()
+            .append("g");
+
+        g.filter(function (d) { return selected.indexOf(d) >= 0; })
             .append('circle')
+            .attr('r', node_radius * 1.2)
+            .attr('class', 'selected'); // CSS class style
+
+        g.append('circle')
             .attr('r', node_radius)
             .attr('class', 'node') // CSS class style
             .on('mousedown', function (d) { process_event('node.mousedown', d); })
             .on('mouseup', function (d) { process_event('node.mouseup', d); })
             .on('mouseover', function (d) { process_event('node.mouseover', d); })
             .on('mouseout', function (d) { process_event('node.mouseout', d); });
+
         force.start();
     };
 
@@ -295,7 +328,6 @@ this.jA.ui = {};
     svg.on('mouseup', function () {
         process_event('doc.mouseup', d3.mouse(this));
     });
-
 
 
     // 
