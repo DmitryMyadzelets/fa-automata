@@ -25,7 +25,7 @@ this.jA.ui = {};
     var node_radius = 16;
 
     var link_distance = 100;
-    var link_charge = link_distance * -20; // How strong the nodes push each other away
+    var link_charge = link_distance * -30; // How strong the nodes push each other away
     var link_charge_distance = link_distance * 5; // Maximal distance where charge works
     var link_gravity = 0.05;
     var friction = 0.7; // [0..1]
@@ -131,7 +131,6 @@ this.jA.ui = {};
         .attr('height', '100%');
 
 
-
     // Arrow marker
     svg.append("svg:defs").append("svg:marker")
             .attr('id', 'marker-arrow')
@@ -155,9 +154,8 @@ this.jA.ui = {};
         .nodes(graph.nodes)
         .links(graph.links);
 
-    var node = svg.selectAll("svg.g");
-    var link = svg.selectAll("svg.path");
-    var selected_node = node;
+    var node = svg.selectAll('g.state');
+    var link = svg.selectAll('g.transition');
 
     // 
     // 
@@ -194,7 +192,7 @@ this.jA.ui = {};
 
         return function () {
             node.attr("transform", on_node_tick);
-            link.attr('d', on_link_tick);
+            link.select('path').attr('d', on_link_tick);
         };
     }());
 
@@ -206,31 +204,36 @@ this.jA.ui = {};
     // State machine for process user input
     var process_event = (function () {
         var state; // Reference to a current state
-        var current_node; // Current node
+        // var current_node; // Current node
         var xy_down; // mousedown position
         // States are represented as functions
         var states = {
             init : function (event, object) {
                 switch (event) {
                 case 'node.mousedown':
-                    current_node = object;
-                    state = this.going_from_node;
+                    // current_node = object;
+                    state = states.going_from_node;
                     break;
                 case 'doc.mousedown':
                     xy_down = object;
-                    state = this.create_new_node;
+                    state = states.create_new_node;
                     break;
                 }
             },
             going_from_node : function (event, object) {
                 switch (event) {
                 case 'node.mouseout':
-                    state = this.init;
+                    state = states.init;
                     break;
                 case 'node.mouseup':
-                    selected.push(object);
+                    var ix = selected.indexOf(object);
+                    if (ix < 0) {
+                        selected.push(object);
+                    } else {
+                        selected.splice(ix, 1);
+                    }
                     update();
-                    state = this.init;
+                    state = states.init;
                     break;
                 }
             },
@@ -248,10 +251,10 @@ this.jA.ui = {};
                         selected.push(o);
                         update();
                     }
-                    state = this.init;
+                    state = states.init;
                     break;
                 default:
-                    state = this.init;
+                    state = states.init;
                     break;
                 }
             }
@@ -271,7 +274,7 @@ this.jA.ui = {};
         return function () {
             if (typeof state === 'function') {
                 old_state = state;
-                var ret = state.apply(states, arguments);
+                var ret = state.apply(this, arguments);
                 if (old_state !== state) {
                     console.log(old_state._name + ' -> ' + state._name);
                 }
@@ -284,36 +287,59 @@ this.jA.ui = {};
 
     // Call this function to update SVG representation of the graph object
     update = function () {
+        // link = svg.selectAll('g.transition').data(graph.links);
         link = link.data(graph.links);
         link.exit().remove();
-        link.enter().append('path')
+        link.enter().append('g')
+            .attr('class', 'transition')
+            .append('path')
             .attr('class', 'link') // CSS class style
             .attr("marker-end", "url(#marker-arrow)");
 
 
-        node = node.data(graph.nodes);
-        selected_node = selected_node.data(selected);
+        // Update view of selected nodes
+        (function () {
+            var root = svg.selectAll('g.state');
+            var child = root.select('circle.selected');
+            root.each(function (d, i) {
+                console.log(this.parentNode);
+                if (selected.indexOf(d) < 0) {
+                    if (child[0][i]) {
+                        child.filter(function (d, ix) { return i === ix; }).remove();
+                    }
+                } else {
+                    if (!child[0][i]) {
+                        root.filter(function (d, ix) { return i === ix; })
+                            .append('circle')
+                            .attr('r', node_radius * 1.2)
+                            .attr('class', 'selected'); // CSS class style
+                    }
+                }
+            });
+        }());
 
-        // node.filter(function (d, index) {
-        //     console.log(index, selected.indexOf(d) < 0);
-        // });
+
+        // node = node.data(graph.nodes);
+        node = svg.selectAll('g.state').data(graph.nodes);
 
         node.exit().remove();
         var g = node.enter()
-            .append("g");
+            .append('g')
+            .attr('class', 'state');
 
-        g.filter(function (d) { return selected.indexOf(d) >= 0; })
-            .append('circle')
-            .attr('r', node_radius * 1.2)
-            .attr('class', 'selected'); // CSS class style
+        // g.filter(function (d) { return selected.indexOf(d) >= 0; })
+        //     .append('circle')
+        //     .attr('r', node_radius * 1.2)
+        //     .attr('class', 'selected'); // CSS class style
 
         g.append('circle')
             .attr('r', node_radius)
             .attr('class', 'node') // CSS class style
-            .on('mousedown', function (d) { process_event('node.mousedown', d); })
+            .on('mousedown', function (d) { process_event.call(this, 'node.mousedown', d); })
             .on('mouseup', function (d) { process_event('node.mouseup', d); })
             .on('mouseover', function (d) { process_event('node.mouseover', d); })
             .on('mouseout', function (d) { process_event('node.mouseout', d); });
+
 
         force.start();
     };
