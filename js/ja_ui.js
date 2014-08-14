@@ -169,7 +169,7 @@ this.jA.ui = {};
                 rc = svg.append('rect').attr({
                     x : x0,
                     y : y0,
-                    class : 'selection'
+                    'class' : 'selection'
                 });
             },
             move : function (xy) {
