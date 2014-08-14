@@ -37,14 +37,17 @@ circle.node {
   stroke: #333;
   stroke-width: 0.09em;
   fill-opacity: 0.5;
-  box-shadow: 0 0 0 5px red;
 }
 
-circle.selected {
+.selection {
   fill: none;
   stroke: black;
-  stroke-width: 0.05em;
+  stroke-width: 1px;
   stroke-dasharray: 0.5em,0.3em;
+}
+
+rect.selection {
+    shape-rendering : crispEdges;
 }
 
 .marked {

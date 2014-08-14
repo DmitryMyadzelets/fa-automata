@@ -157,6 +157,41 @@ this.jA.ui = {};
     var node = svg.selectAll('g.state');
     var link = svg.selectAll('g.transition');
 
+
+    // Object and methods to draw a selection rectange
+    var selection = (function () {
+        var x0, y0, x, y, w, h;
+        var rc;
+        return {
+            show : function (xy) {
+                x0 = xy[0];
+                y0 = xy[1];
+                rc = svg.append('rect').attr({
+                    x : x0,
+                    y : y0,
+                    class : 'selection'
+                });
+            },
+            move : function (xy) {
+                x = x0;
+                y = y0;
+                w = xy[0] - x;
+                h = xy[1] - y;
+                if (w < 0) { w = -w; x = xy[0]; }
+                if (h < 0) { h = -h; y = xy[1]; }
+                rc.attr({
+                    x : x,
+                    y : y,
+                    width : w,
+                    height : h
+                });
+            },
+            hide : function () {
+                rc.remove();
+            }
+        };
+    }());
+
     // 
     // 
     // The function which is called during animation of the graph
@@ -201,7 +236,12 @@ this.jA.ui = {};
 
     var update;
 
-    // State machine for process user input
+    //=============================================================================
+    //
+    // State machine to process user input
+    //
+    //=============================================================================
+
     var process_event = (function () {
         var state; // Reference to a current state
         // var current_node; // Current node
@@ -239,28 +279,40 @@ this.jA.ui = {};
             },
             create_new_node : function (event, object) {
                 switch (event) {
-                case 'doc.mouseup':
-                    // Check the distance from 'mousedown' point.
-                    // Create new node if the distance is less then a treshold.
-                    var xy = object;
-                    var len = vec.length(vec.subtract(xy_down, xy, [0, 0]));
-                    if (len < node_radius >> 1) {
-                        var o = {x : xy[0], y : xy[1]};
-                        graph.nodes.push(o);
-                        selected.length = 0;
-                        selected.push(o);
-                        update();
+                case 'doc.mousemove':
+                    // object contains coordinates [x, y]
+                    var len = vec.length(vec.subtract(xy_down, object, [0, 0]));
+                    if (len > node_radius >> 1) {
+                        selection.show(xy_down);
+                        state = states.selection;
                     }
+                    break;
+                case 'doc.mouseup':
+                    var o = {x : object[0], y : object[1]};
+                    graph.nodes.push(o);
+                    selected.length = 0;
+                    selected.push(o);
+                    update();
                     state = states.init;
                     break;
                 default:
+                    state = states.init;
+                }
+            },
+            selection : function (event, object) {
+                switch (event) {
+                case 'doc.mousemove':
+                    selection.move(object);
+                    break;
+                case 'doc.mouseup':
+                    selection.hide();
                     state = states.init;
                     break;
                 }
             }
         };
 
-        // Add 'name' property to the state functions for debugging
+        // Add 'name' property to the state functions to trace transitions
         var key;
         for (key in states) {
             if (states.hasOwnProperty(key)) {
@@ -276,6 +328,7 @@ this.jA.ui = {};
                 old_state = state;
                 var ret = state.apply(this, arguments);
                 if (old_state !== state) {
+                    // Trace the transition
                     console.log(old_state._name + ' -> ' + state._name);
                 }
                 return ret;
@@ -300,7 +353,7 @@ this.jA.ui = {};
         // Update view of selected nodes
         (function () {
             var root = svg.selectAll('g.state');
-            var child = root.select('circle.selected');
+            var child = root.select('circle.selection');
             root.each(function (d, i) {
                 console.log(this.parentNode);
                 if (selected.indexOf(d) < 0) {
@@ -312,7 +365,7 @@ this.jA.ui = {};
                         root.filter(function (d, ix) { return i === ix; })
                             .append('circle')
                             .attr('r', node_radius * 1.2)
-                            .attr('class', 'selected'); // CSS class style
+                            .attr('class', 'selection'); // CSS class style
                     }
                 }
             });
@@ -327,10 +380,6 @@ this.jA.ui = {};
             .append('g')
             .attr('class', 'state');
 
-        // g.filter(function (d) { return selected.indexOf(d) >= 0; })
-        //     .append('circle')
-        //     .attr('r', node_radius * 1.2)
-        //     .attr('class', 'selected'); // CSS class style
 
         g.append('circle')
             .attr('r', node_radius)
@@ -355,6 +404,9 @@ this.jA.ui = {};
         process_event('doc.mouseup', d3.mouse(this));
     });
 
+    svg.on('mousemove', function () {
+        process_event('doc.mousemove', d3.mouse(this));
+    });
 
     // 
     // Public
