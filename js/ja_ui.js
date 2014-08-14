@@ -25,7 +25,7 @@ this.jA.ui = {};
     var node_radius = 16;
 
     var link_distance = 100;
-    var link_charge = link_distance * -20; // How strong the nodes push each other away
+    var link_charge = link_distance * -30; // How strong the nodes push each other away
     var link_charge_distance = link_distance * 5; // Maximal distance where charge works
     var link_gravity = 0.05;
     var friction = 0.7; // [0..1]
@@ -37,6 +37,9 @@ this.jA.ui = {};
         'nodes' : [],
         'links' : []
     };
+
+    // Selected nodes and edges. Both are objects
+    var selected = [];
 
     graph.nodes.push({});
     graph.nodes.push({});
@@ -128,7 +131,6 @@ this.jA.ui = {};
         .attr('height', '100%');
 
 
-
     // Arrow marker
     svg.append("svg:defs").append("svg:marker")
             .attr('id', 'marker-arrow')
@@ -152,8 +154,43 @@ this.jA.ui = {};
         .nodes(graph.nodes)
         .links(graph.links);
 
-    var node = svg.selectAll("svg.g.circle");
-    var link = svg.selectAll("svg.path");
+    var node = svg.selectAll('g.state');
+    var link = svg.selectAll('g.transition');
+
+
+    // Object and methods to draw a selection rectange
+    var selection = (function () {
+        var x0, y0, x, y, w, h;
+        var rc;
+        return {
+            show : function (xy) {
+                x0 = xy[0];
+                y0 = xy[1];
+                rc = svg.append('rect').attr({
+                    x : x0,
+                    y : y0,
+                    class : 'selection'
+                });
+            },
+            move : function (xy) {
+                x = x0;
+                y = y0;
+                w = xy[0] - x;
+                h = xy[1] - y;
+                if (w < 0) { w = -w; x = xy[0]; }
+                if (h < 0) { h = -h; y = xy[1]; }
+                rc.attr({
+                    x : x,
+                    y : y,
+                    width : w,
+                    height : h
+                });
+            },
+            hide : function () {
+                rc.remove();
+            }
+        };
+    }());
 
     // 
     // 
@@ -184,7 +221,7 @@ this.jA.ui = {};
 
         return function () {
             node.attr("transform", on_node_tick);
-            link.attr('d', on_link_tick);
+            link.select('path').attr('d', on_link_tick);
         };
     }());
 
@@ -193,46 +230,83 @@ this.jA.ui = {};
 
     var update;
 
-    // State machine for process user input
+    //=============================================================================
+    //
+    // State machine to process user input
+    //
+    //=============================================================================
+
     var process_event = (function () {
         var state; // Reference to a current state
-        var current_node; // Current node
+        // var current_node; // Current node
+        var xy_down; // mousedown position
         // States are represented as functions
         var states = {
             init : function (event, object) {
                 switch (event) {
                 case 'node.mousedown':
-                    current_node = object;
-                    state = this.going_from_node;
+                    // current_node = object;
+                    state = states.going_from_node;
                     break;
                 case 'doc.mousedown':
-                    state = this.create_new_node;
+                    xy_down = object;
+                    state = states.create_new_node;
                     break;
                 }
             },
-            going_from_node : function (event) {
+            going_from_node : function (event, object) {
                 switch (event) {
                 case 'node.mouseout':
-                    state = this.init;
+                    state = states.init;
+                    break;
+                case 'node.mouseup':
+                    var ix = selected.indexOf(object);
+                    if (ix < 0) {
+                        selected.push(object);
+                    } else {
+                        selected.splice(ix, 1);
+                    }
+                    update();
+                    state = states.init;
                     break;
                 }
             },
             create_new_node : function (event, object) {
                 switch (event) {
+                case 'doc.mousemove':
+                    // object contains coordinates [x, y]
+                    var len = vec.length(vec.subtract(xy_down, object, [0, 0]));
+                    if (len > node_radius >> 1) {
+                        selection.show(xy_down);
+                        state = states.selection;
+                    }
+                    break;
                 case 'doc.mouseup':
-                    var xy = object;
-                    graph.nodes.push({x : xy[0], y : xy[1]});
+                    var o = {x : object[0], y : object[1]};
+                    graph.nodes.push(o);
+                    selected.length = 0;
+                    selected.push(o);
                     update();
-                    state = this.init;
+                    state = states.init;
                     break;
                 default:
-                    state = this.init;
+                    state = states.init;
+                }
+            },
+            selection : function (event, object) {
+                switch (event) {
+                case 'doc.mousemove':
+                    selection.move(object);
+                    break;
+                case 'doc.mouseup':
+                    selection.hide();
+                    state = states.init;
                     break;
                 }
             }
         };
 
-        // Add 'name' property to the state functions for debugging
+        // Add 'name' property to the state functions to trace transitions
         var key;
         for (key in states) {
             if (states.hasOwnProperty(key)) {
@@ -246,8 +320,9 @@ this.jA.ui = {};
         return function () {
             if (typeof state === 'function') {
                 old_state = state;
-                var ret = state.apply(states, arguments);
+                var ret = state.apply(this, arguments);
                 if (old_state !== state) {
+                    // Trace the transition
                     console.log(old_state._name + ' -> ' + state._name);
                 }
                 return ret;
@@ -259,23 +334,56 @@ this.jA.ui = {};
 
     // Call this function to update SVG representation of the graph object
     update = function () {
+        // link = svg.selectAll('g.transition').data(graph.links);
         link = link.data(graph.links);
         link.exit().remove();
-        link.enter().append('path')
+        link.enter().append('g')
+            .attr('class', 'transition')
+            .append('path')
             .attr('class', 'link') // CSS class style
             .attr("marker-end", "url(#marker-arrow)");
 
-        node = node.data(graph.nodes);
+
+        // Update view of selected nodes
+        (function () {
+            var root = svg.selectAll('g.state');
+            var child = root.select('circle.selection');
+            root.each(function (d, i) {
+                console.log(this.parentNode);
+                if (selected.indexOf(d) < 0) {
+                    if (child[0][i]) {
+                        child.filter(function (d, ix) { return i === ix; }).remove();
+                    }
+                } else {
+                    if (!child[0][i]) {
+                        root.filter(function (d, ix) { return i === ix; })
+                            .append('circle')
+                            .attr('r', node_radius * 1.2)
+                            .attr('class', 'selection'); // CSS class style
+                    }
+                }
+            });
+        }());
+
+
+        // node = node.data(graph.nodes);
+        node = svg.selectAll('g.state').data(graph.nodes);
+
         node.exit().remove();
-        node.enter()
-            .append("g")
-            .append('circle')
+        var g = node.enter()
+            .append('g')
+            .attr('class', 'state');
+
+
+        g.append('circle')
             .attr('r', node_radius)
             .attr('class', 'node') // CSS class style
-            .on('mousedown', function (d) { process_event('node.mousedown', d); })
+            .on('mousedown', function (d) { process_event.call(this, 'node.mousedown', d); })
             .on('mouseup', function (d) { process_event('node.mouseup', d); })
             .on('mouseover', function (d) { process_event('node.mouseover', d); })
             .on('mouseout', function (d) { process_event('node.mouseout', d); });
+
+
         force.start();
     };
 
@@ -290,7 +398,9 @@ this.jA.ui = {};
         process_event('doc.mouseup', d3.mouse(this));
     });
 
-
+    svg.on('mousemove', function () {
+        process_event('doc.mousemove', d3.mouse(this));
+    });
 
     // 
     // Public
