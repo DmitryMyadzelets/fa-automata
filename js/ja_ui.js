@@ -25,10 +25,10 @@ this.jA.ui = {};
     var node_radius = 16;
 
     var link_distance = 100;
-    var link_charge = link_distance * -30; // How strong the nodes push each other away
+    var link_charge = link_distance * -300; // How strong the nodes push each other away
     var link_charge_distance = link_distance * 5; // Maximal distance where charge works
-    var link_gravity = 0.05;
-    var friction = 0.7; // [0..1]
+    var link_gravity = 0.5;
+    var friction = 0.2; // [0..1] [high..low]
 
     var svg_container_id = 'svg_container';
 
@@ -157,40 +157,83 @@ this.jA.ui = {};
     var node = svg.selectAll('g.state');
     var link = svg.selectAll('g.transition');
 
+    var update;
 
-    // Object and methods to draw a selection rectange
-    var selection = (function () {
+
+    // Returns coordinates [topleft, bottomright] of selection rectangle.
+    // Methods of this function: show, update and hide the selection rectange.
+    var selection_rect = (function () {
         var x0, y0, x, y, w, h;
-        var rc;
-        return {
-            show : function (xy) {
-                x0 = xy[0];
-                y0 = xy[1];
-                rc = svg.append('rect').attr({
-                    x : x0,
-                    y : y0,
-                    'class' : 'selection'
-                });
-            },
-            move : function (xy) {
-                x = x0;
-                y = y0;
-                w = xy[0] - x;
-                h = xy[1] - y;
-                if (w < 0) { w = -w; x = xy[0]; }
-                if (h < 0) { h = -h; y = xy[1]; }
-                rc.attr({
-                    x : x,
-                    y : y,
-                    width : w,
-                    height : h
-                });
-            },
-            hide : function () {
-                rc.remove();
-            }
+        var svg_rc;
+        var rc = {};
+
+        // Default method of this object
+        var fnc = function () {
+            var ret = [x0, y0, x, y];
+            if (x0 > x) { ret[0] = x; ret[2] = x0; }
+            if (y0 > y) { ret[1] = y; ret[3] = y0; }
+            return ret;
         };
+
+        fnc.show = function (continer, xy) {
+            x0 = xy[0];
+            y0 = xy[1];
+            svg_rc = continer.append('rect').attr({
+                x : x0,
+                y : y0,
+                'class' : 'selection'
+            });
+        };
+
+        fnc.update = function (xy) {
+            x = xy[0];
+            y = xy[1];
+            w = x - x0;
+            h = y - y0;
+            rc.x = x0;
+            rc.y = y0;
+            if (w < 0) { w = -w; rc.x = x; }
+            if (h < 0) { h = -h; rc.y = y; }
+            rc.width = w;
+            rc.height = h;
+            svg_rc.attr(rc);
+        };
+
+        fnc.hide = function () {
+            svg_rc.remove();
+        };
+
+        return fnc;
     }());
+
+
+
+    var show_selected_nodes = function () {
+        var rc = selection_rect();
+        var index;
+        node.each(function (d) {
+            index = selected.indexOf(d);
+            // Check if center of the node is in the selection rectange
+            if (d.x > rc[0] && d.x < rc[2] && d.y > rc[1] && d.y < rc[3]) {
+                if (index < 0) {
+                    selected.push(d);
+                    d3.select(this)
+                        .append('circle')
+                        .attr('r', node_radius * 1.2)
+                        .attr('class', 'selection');
+                    // update();
+                }
+            } else {
+                if (index >= 0) {
+                    selected.splice(index, 1);
+                    d3.select(this).select('circle.selection').remove();
+                }
+            }
+        });
+    };
+
+    //TODO: make separete functions to un\select a node, unselect all nodes
+
 
     // 
     // 
@@ -227,8 +270,6 @@ this.jA.ui = {};
 
     force.on('tick', tick);
 
-
-    var update;
 
     //=============================================================================
     //
@@ -277,15 +318,15 @@ this.jA.ui = {};
                     // object contains coordinates [x, y]
                     var len = vec.length(vec.subtract(xy_down, object, [0, 0]));
                     if (len > node_radius >> 1) {
-                        selection.show(xy_down);
+                        selection_rect.show(svg, xy_down);
                         state = states.selection;
                     }
                     break;
                 case 'doc.mouseup':
                     var o = {x : object[0], y : object[1]};
-                    graph.nodes.push(o);
-                    selected.length = 0;
-                    selected.push(o);
+                    // graph.nodes.push(o);
+                    // selected.length = 0;
+                    // selected.push(o);
                     update();
                     state = states.init;
                     break;
@@ -296,15 +337,17 @@ this.jA.ui = {};
             selection : function (event, object) {
                 switch (event) {
                 case 'doc.mousemove':
-                    selection.move(object);
+                    selection_rect.update(object);
+                    show_selected_nodes();
                     break;
                 case 'doc.mouseup':
-                    selection.hide();
+                    selection_rect.hide();
                     state = states.init;
                     break;
                 }
             }
         };
+
 
         // Add 'name' property to the state functions to trace transitions
         var key;
@@ -349,7 +392,6 @@ this.jA.ui = {};
             var root = svg.selectAll('g.state');
             var child = root.select('circle.selection');
             root.each(function (d, i) {
-                console.log(this.parentNode);
                 if (selected.indexOf(d) < 0) {
                     if (child[0][i]) {
                         child.filter(function (d, ix) { return i === ix; }).remove();
@@ -363,7 +405,7 @@ this.jA.ui = {};
                     }
                 }
             });
-        }());
+        });
 
 
         // node = node.data(graph.nodes);
