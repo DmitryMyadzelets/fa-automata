@@ -440,11 +440,17 @@ this.jA.ui = {};
 
 
     svg.on('mousedown', function () {
-        process_event('doc.mousedown', d3.mouse(this));
+        // Left mouse button only
+        if (d3.event.button === 0) {
+            process_event('doc.mousedown', d3.mouse(this));
+        }
     });
 
     svg.on('mouseup', function () {
-        process_event('doc.mouseup', d3.mouse(this));
+        // Left mouse button only
+        if (d3.event.button === 0) {
+            process_event('doc.mouseup', d3.mouse(this));
+        }
     });
 
     svg.on('mousemove', function () {
