@@ -208,6 +208,42 @@ this.jA.ui = {};
 
 
 
+    var select_node = function (node) {
+        if (this && node) {
+            selected.push(node);
+            d3.select(this)
+                .append('circle')
+                .attr('r', node_radius * 1.2)
+                .attr('class', 'selection');
+        }
+    };
+
+
+
+    var unselect_node = function (index) {
+        if (this && index >= 0) {
+            selected.splice(index, 1);
+            d3.select(this).select('circle.selection').remove();
+        }
+    };
+
+
+
+    var select_only_node = function (a_node) {
+        var index;
+        var that;
+        node.each(function (d) {
+            index = selected.indexOf(d);
+            if (index >= 0) {
+                unselect_node.call(this, index);
+            }
+            if (d === a_node) { that = this; }
+        });
+        select_node.call(that, a_node);
+    };
+
+
+
     var show_selected_nodes = function () {
         var rc = selection_rect();
         var index;
@@ -216,23 +252,16 @@ this.jA.ui = {};
             // Check if center of the node is in the selection rectange
             if (d.x > rc[0] && d.x < rc[2] && d.y > rc[1] && d.y < rc[3]) {
                 if (index < 0) {
-                    selected.push(d);
-                    d3.select(this)
-                        .append('circle')
-                        .attr('r', node_radius * 1.2)
-                        .attr('class', 'selection');
-                    // update();
+                    select_node.call(this, d);
                 }
             } else {
                 if (index >= 0) {
-                    selected.splice(index, 1);
-                    d3.select(this).select('circle.selection').remove();
+                    unselect_node.call(this, index);
                 }
             }
         });
     };
 
-    //TODO: make separete functions to un\select a node, unselect all nodes
 
 
     // 
@@ -324,10 +353,9 @@ this.jA.ui = {};
                     break;
                 case 'doc.mouseup':
                     var o = {x : object[0], y : object[1]};
-                    // graph.nodes.push(o);
-                    // selected.length = 0;
-                    // selected.push(o);
+                    graph.nodes.push(o);
                     update();
+                    select_only_node(o);
                     state = states.init;
                     break;
                 default:
@@ -385,27 +413,6 @@ this.jA.ui = {};
             .append('path')
             .attr('class', 'link') // CSS class style
             .attr("marker-end", "url(#marker-arrow)");
-
-
-        // Update view of selected nodes
-        (function () {
-            var root = svg.selectAll('g.state');
-            var child = root.select('circle.selection');
-            root.each(function (d, i) {
-                if (selected.indexOf(d) < 0) {
-                    if (child[0][i]) {
-                        child.filter(function (d, ix) { return i === ix; }).remove();
-                    }
-                } else {
-                    if (!child[0][i]) {
-                        root.filter(function (d, ix) { return i === ix; })
-                            .append('circle')
-                            .attr('r', node_radius * 1.2)
-                            .attr('class', 'selection'); // CSS class style
-                    }
-                }
-            });
-        });
 
 
         // node = node.data(graph.nodes);
