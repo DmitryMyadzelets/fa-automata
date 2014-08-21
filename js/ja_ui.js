@@ -38,8 +38,6 @@ this.jA.ui = {};
         'links' : []
     };
 
-    // Selected nodes and edges. Both are objects
-    var selected = [];
 
     graph.nodes.push({});
     graph.nodes.push({});
@@ -160,14 +158,14 @@ this.jA.ui = {};
     var update;
 
 
-    // Returns coordinates [topleft, bottomright] of selection rectangle.
-    // Methods of this function: show, update and hide the selection rectange.
-    var selection_rect = (function () {
+    // Creates and returns an object wich implements a selection rectangle
+    function selection_rectangle() {
         var x0, y0, x, y, w, h;
-        var svg_rc;
         var rc = {};
+        var svg_rc; // Reference to a SVG rectangle
 
-        // Default method of this object
+        // Returns coordinates [topleft, bottomright] of selection rectangle.
+        // Methods of this function: show, update and hide the selection rectange.
         var fnc = function () {
             var ret = [x0, y0, x, y];
             if (x0 > x) { ret[0] = x; ret[2] = x0; }
@@ -175,16 +173,18 @@ this.jA.ui = {};
             return ret;
         };
 
-        fnc.show = function (continer, xy) {
+        // Shows a selection rectange (use CSS ot tune its look)
+        fnc.show = function (container, xy) {
             x0 = xy[0];
             y0 = xy[1];
-            svg_rc = continer.append('rect').attr({
+            svg_rc = container.append('rect').attr({
                 x : x0,
                 y : y0,
                 'class' : 'selection'
             });
         };
 
+        // Updates position of the rectangle depending of current mouse position
         fnc.update = function (xy) {
             x = xy[0];
             y = xy[1];
@@ -199,68 +199,79 @@ this.jA.ui = {};
             svg_rc.attr(rc);
         };
 
+        // Removes selection rectangle
         fnc.hide = function () {
             svg_rc.remove();
         };
 
         return fnc;
-    }());
+    }
 
 
 
-    var select_node = function (node) {
-        if (this && node) {
-            selected.push(node);
-            d3.select(this)
-                .append('circle')
-                .attr('r', node_radius * 1.2)
-                .attr('class', 'selection');
-        }
-    };
+    // Creates a container for the 'selection' graphical behaviour
+    function Selection() {
+        // Selected nodes and edges. Both are objects
+        var selected = [];
+        var self = this;
 
+        this.rectangle = selection_rectangle();
 
-
-    var unselect_node = function (index) {
-        if (this && index >= 0) {
-            selected.splice(index, 1);
-            d3.select(this).select('circle.selection').remove();
-        }
-    };
-
-
-
-    var select_only_node = function (a_node) {
-        var index;
-        var that;
-        node.each(function (d) {
-            index = selected.indexOf(d);
-            if (index >= 0) {
-                unselect_node.call(this, index);
+        // Appends a selection circle to the given graph node
+        this.select_node = function (node) {
+            if (this && node) {
+                selected.push(node);
+                d3.select(this)
+                    .append('circle')
+                    .attr('r', node_radius * 1.2)
+                    .attr('class', 'selection');
             }
-            if (d === a_node) { that = this; }
-        });
-        select_node.call(that, a_node);
-    };
+        };
 
 
+        this.unselect_node = function (index) {
+            if (this && index >= 0) {
+                selected.splice(index, 1);
+                d3.select(this).select('circle.selection').remove();
+            }
+        };
 
-    var show_selected_nodes = function () {
-        var rc = selection_rect();
-        var index;
-        node.each(function (d) {
-            index = selected.indexOf(d);
-            // Check if center of the node is in the selection rectange
-            if (d.x > rc[0] && d.x < rc[2] && d.y > rc[1] && d.y < rc[3]) {
-                if (index < 0) {
-                    select_node.call(this, d);
-                }
-            } else {
+
+        this.select_only_node = function (a_node) {
+            var index;
+            var that;
+            node.each(function (d) {
+                index = selected.indexOf(d);
                 if (index >= 0) {
-                    unselect_node.call(this, index);
+                    self.unselect_node.call(this, index);
                 }
-            }
-        });
-    };
+                if (d === a_node) { that = this; }
+            });
+            self.select_node.call(that, a_node);
+        };
+
+
+        // Updates graphical appearance of selected nodes
+        this.update = function () {
+            var r = self.rectangle();
+            var index;
+            node.each(function (d) {
+                index = selected.indexOf(d);
+                // Check if center of the node is in the selection rectange
+                if (d.x > r[0] && d.x < r[2] && d.y > r[1] && d.y < r[3]) {
+                    if (index < 0) {
+                        self.select_node.call(this, d);
+                    }
+                } else {
+                    if (index >= 0) {
+                        self.unselect_node.call(this, index);
+                    }
+                }
+            });
+        };
+    }
+
+    var selection = new Selection();
 
 
 
@@ -324,19 +335,19 @@ this.jA.ui = {};
                     break;
                 }
             },
-            going_from_node : function (event, object) {
+            going_from_node : function (event) {
                 switch (event) {
                 case 'node.mouseout':
                     state = states.init;
                     break;
                 case 'node.mouseup':
-                    var ix = selected.indexOf(object);
-                    if (ix < 0) {
-                        selected.push(object);
-                    } else {
-                        selected.splice(ix, 1);
-                    }
-                    update();
+                    // var ix = selected.indexOf(object);
+                    // if (ix < 0) {
+                    //     selected.push(object);
+                    // } else {
+                    //     selected.splice(ix, 1);
+                    // }
+                    // update();
                     state = states.init;
                     break;
                 }
@@ -347,7 +358,7 @@ this.jA.ui = {};
                     // object contains coordinates [x, y]
                     var len = vec.length(vec.subtract(xy_down, object, [0, 0]));
                     if (len > node_radius >> 1) {
-                        selection_rect.show(svg, xy_down);
+                        selection.rectangle.show(svg, xy_down);
                         state = states.selection;
                     }
                     break;
@@ -355,7 +366,7 @@ this.jA.ui = {};
                     var o = {x : object[0], y : object[1]};
                     graph.nodes.push(o);
                     update();
-                    select_only_node(o);
+                    selection.select_only_node(o);
                     state = states.init;
                     break;
                 default:
@@ -365,11 +376,11 @@ this.jA.ui = {};
             selection : function (event, object) {
                 switch (event) {
                 case 'doc.mousemove':
-                    selection_rect.update(object);
-                    show_selected_nodes();
+                    selection.rectangle.update(object);
+                    selection.update();
                     break;
                 case 'doc.mouseup':
-                    selection_rect.hide();
+                    selection.rectangle.hide();
                     state = states.init;
                     break;
                 }
