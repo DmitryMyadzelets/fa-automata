@@ -448,6 +448,7 @@ this.jA.ui = {};
 
         this.select_only_node = function (d) {
             selected_nodes.length = 0;
+            selected_links.length = 0;
             view.unselect_all.call(this);
             self.select_node(d);
         };
@@ -586,7 +587,7 @@ this.jA.ui = {};
             preselect_link : function () {
                 mouse = d3.mouse(this);
                 var len;
-                // console.log(controller.event);
+                console.log(controller.event);
                 switch (controller.event) {
                 case 'link.mouseover':
                 case 'link.mousemove':
@@ -604,6 +605,7 @@ this.jA.ui = {};
                         if (!d3.event.ctrlKey) {
                             selection.select_only_node(null);
                         }
+                        console.log(link);
                         selection.select_link(link);
                     }
                     break;
