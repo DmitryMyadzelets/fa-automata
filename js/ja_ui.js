@@ -352,7 +352,6 @@ this.jA.ui = {};
             self.node.each(function () {
                 self.unselect_node.call(this);
             });
-            console.log(self.link);
             self.link.selectAll('.selection').classed('selection', false);
         };
 
@@ -602,6 +601,9 @@ this.jA.ui = {};
                 case 'doc.mousedown':
                     len = vec.length(vec.subtract(xy, mouse, [0, 0]));
                     if (len < 7) {
+                        if (!d3.event.ctrlKey) {
+                            selection.select_only_node(null);
+                        }
                         selection.select_link(link);
                     }
                     break;
@@ -624,7 +626,6 @@ this.jA.ui = {};
         var old_state;
 
         return function () {
-            console.log(d3.event);
             if (typeof state === 'function') {
                 old_state = state;
                 var ret = state.apply(this, arguments);
