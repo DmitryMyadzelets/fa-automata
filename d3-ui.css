@@ -61,6 +61,10 @@ path.link {
   /*fill: none;*/
 }
 
+path.link:hover {
+  stroke: black;
+}
+
 path.selection {
   stroke-width: 0.09em;
 }
