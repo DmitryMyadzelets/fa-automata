@@ -16,9 +16,6 @@ this.jA.ui = {};
 
     "use strict";
 
-    var controller = {}; // Predefiniton of 'Controller' of MVC
-
-
     //=============================================================================
     // 'Model' part of MVC
 
@@ -34,6 +31,60 @@ this.jA.ui = {};
     graph.nodes.push({});
 
     graph.links.push({source : 0, target : 1});
+
+
+
+    //=============================================================================
+    // 'Controller' part of MVC, used by a 'View'
+
+    var controller = {};
+
+    // Controller events for invokation by View
+
+    controller.on_node_mousedown = function () {
+        if (d3.event.button === 0) {
+            controller.event = 'node.mousedown';
+            controller.process_event.apply(this, arguments);
+        }
+    };
+
+    controller.on_node_mouseup = function () {
+        if (d3.event.button === 0) {
+            controller.event = 'node.mouseup';
+            controller.process_event.apply(this, arguments);
+        }
+    };
+
+    controller.on_node_mouseover = function () {
+        controller.event = 'node.mouseover';
+        controller.process_event.apply(this, arguments);
+    };
+
+    controller.on_node_mouseout = function () {
+        controller.event = 'node.mouseout';
+        controller.process_event.apply(this, arguments);
+    };
+
+    controller.on_doc_mousedown = function () {
+        if (d3.event.button === 0) {
+            controller.event = 'doc.mousedown';
+            controller.process_event.apply(this, arguments);
+        }
+    };
+
+    controller.on_doc_mouseup = function () {
+        controller.event = 'doc.mouseup';
+        controller.process_event.apply(this, arguments);
+    };
+
+    controller.on_doc_mousemove = function () {
+        controller.event = 'doc.mousemove';
+        controller.process_event.apply(this, arguments);
+    };
+
+    controller.on_link_mouseover = function () {
+        console.log(this, arguments);
+    };
 
 
 
@@ -118,27 +169,6 @@ this.jA.ui = {};
         // this.link;   // Array of SVG links representing edges
 
 
-        var on_mousedown = function () {
-            // Left mouse button only
-            if (d3.event.button === 0) {
-                controller.process_event('doc.mousedown', d3.mouse(this));
-            }
-        };
-
-
-        var on_mouseup = function () {
-            // Left mouse button only
-            if (d3.event.button === 0) {
-                controller.process_event('doc.mouseup', d3.mouse(this));
-            }
-        };
-
-
-        var on_mousemove = function () {
-            controller.process_event('doc.mousemove', d3.mouse(this));
-        };
-
-
         //
         // Methods to calculate loop, stright and curved lines for links
         // 
@@ -220,9 +250,9 @@ this.jA.ui = {};
             self.node = svg.selectAll('g.state');
             self.link = svg.selectAll('g.transition');
 
-            svg.on('mousedown', on_mousedown);
-            svg.on('mouseup', on_mouseup);
-            svg.on('mousemove', on_mousemove);
+            svg.on('mousedown', controller.on_doc_mousedown);
+            svg.on('mouseup', controller.on_doc_mouseup);
+            svg.on('mousemove', controller.on_doc_mousemove);
 
             // 
             // 
@@ -298,6 +328,12 @@ this.jA.ui = {};
         };
 
 
+        this.unselect_all = function () {
+            self.node.each(function () {
+                self.unselect_node.call(this);
+            });
+        };
+
 
         // Call this function to update SVG representation of the graph object
         this.update = function () {
@@ -308,7 +344,8 @@ this.jA.ui = {};
                 .attr('class', 'transition')
                 .append('path')
                 .attr('class', 'link') // CSS class style
-                .attr("marker-end", "url(#marker-arrow)");
+                .attr('marker-end', 'url(#marker-arrow)')
+                .on('mouseover', controller.on_link_mouseover);
 
 
             // node = node.data(graph.nodes);
@@ -323,10 +360,10 @@ this.jA.ui = {};
             g.append('circle')
                 .attr('r', node_radius)
                 .attr('class', 'node') // CSS class style
-                .on('mousedown', function (d) { controller.process_event('node.mousedown', d); })
-                .on('mouseup', function (d) { controller.process_event('node.mouseup', d); })
-                .on('mouseover', function (d) { controller.process_event('node.mouseover', d); })
-                .on('mouseout', function (d) { controller.process_event('node.mouseout', d); });
+                .on('mousedown', controller.on_node_mousedown)
+                .on('mouseup', controller.on_node_mouseup)
+                .on('mouseover', controller.on_node_mouseover)
+                .on('mouseout', controller.on_node_mouseout);
 
 
             force.start();
@@ -337,6 +374,7 @@ this.jA.ui = {};
         this.can_start_selection = function (length) {
             return length > node_radius >> 1;
         };
+
 
 
     }; // View
@@ -355,51 +393,57 @@ this.jA.ui = {};
 
         this.rectangle = view.selection_rectangle();
 
-        // Appends a selection circle to the given graph node
-        this.select_node = function (node) {
-            if (this && node) {
-                selected.push(node);
-                view.select_node.call(this);
-            }
-        };
-
-
-        this.unselect_node = function (index) {
-            if (this && index >= 0) {
-                selected.splice(index, 1);
-                view.unselect_node.call(this);
-            }
-        };
-
-
-        this.select_only_node = function (a_node) {
-            var index;
-            var that;
-            view.node.each(function (d) { // TODO: view.node should be hidden in View
-                index = selected.indexOf(d);
-                if (index >= 0) {
-                    self.unselect_node.call(this, index);
-                }
-                if (d === a_node) { that = this; }
+        function node_by_data(data) {
+            var o = null;
+            view.node.each(function (d) {
+                if (d === data) { o = this; }
             });
-            self.select_node.call(that, a_node);
+            return o;
+        }
+
+
+        this.not_selected = function (d) {
+            return selected.indexOf(d) < 0;
+        };
+
+
+        // Appends a selection circle to the given graph node
+        this.select_node = function (d) {
+            var o = node_by_data(d);
+            if (o && self.not_selected(d)) {
+                selected.push(d);
+                view.select_node.call(o);
+            }
+        };
+
+
+        this.unselect_node = function (d) {
+            selected.splice(selected.indexOf(d), 1);
+            view.unselect_node.call(node_by_data(d));
+        };
+
+
+        this.select_only_node = function (d) {
+            selected.length = 0;
+            view.unselect_all.call(this);
+            self.select_node(d);
         };
 
 
         // Updates graphical appearance of selected nodes
         this.update = function () {
             var r = self.rectangle();
-            var index;
+            var not_selected;
             view.node.each(function (d) { // TODO: view.node should be hidden in View
-                index = selected.indexOf(d);
+                not_selected = self.not_selected(d);
                 // Check if center of the node is in the selection rectange
                 if (d.x > r[0] && d.x < r[2] && d.y > r[1] && d.y < r[3]) {
-                    if (index < 0) {
-                        self.select_node.call(this, d);
+                    if (not_selected) {
+                        self.select_node(d);
                     }
                 } else {
-                    if (index >= 0) {
-                        self.unselect_node.call(this, index);
+                    if (!d3.event.ctrlKey && !not_selected) {
+                        self.unselect_node(d);
                     }
                 }
             });
@@ -426,62 +470,68 @@ this.jA.ui = {};
         // var current_node; // Current node
         var xy_down; // mousedown position
         // States are represented as functions
+        var mouse;
         var states = {
-            init : function (event, object) {
-                switch (event) {
+            init : function () {
+                switch (controller.event) {
                 case 'node.mousedown':
-                    // current_node = object;
                     state = states.going_from_node;
                     break;
                 case 'doc.mousedown':
-                    xy_down = object;
+                    xy_down = d3.mouse(this);
                     state = states.create_new_node;
                     break;
                 }
             },
-            going_from_node : function (event, object) {
-                switch (event) {
+            going_from_node : function (d) {
+                switch (controller.event) {
                 case 'node.mouseout':
                     state = states.init;
                     break;
                 case 'node.mouseup':
-                    selection.select_only_node(object);
-                    // var ix = selected.indexOf(object);
-                    // if (ix < 0) {
-                    //     selected.push(object);
-                    // } else {
-                    //     selected.splice(ix, 1);
-                    // }
-                    // update();
+                    if (d3.event.ctrlKey) {
+                        if (selection.not_selected(d)) {
+                            selection.select_node(d);
+                        } else {
+                            selection.unselect_node(d);
+                        }
+                    } else {
+                        selection.select_only_node(d);
+                    }
                     state = states.init;
                     break;
                 }
             },
-            create_new_node : function (event, xy) {
-                switch (event) {
+            create_new_node : function () {
+                mouse = d3.mouse(this);
+                switch (controller.event) {
                 case 'doc.mousemove':
-                    // xy contains coordinates [x, y]
-                    var len = vec.length(vec.subtract(xy_down, xy, [0, 0]));
+                    var len = vec.length(vec.subtract(xy_down, mouse, [0, 0]));
                     if (view.can_start_selection(len)) {
                         selection.rectangle.show(xy_down);
                         state = states.selection;
                     }
                     break;
                 case 'doc.mouseup':
-                    var o = {x : xy[0], y : xy[1]};
+                    var o = {x : mouse[0], y : mouse[1]};
                     graph.nodes.push(o);
                     view.update();
-                    selection.select_only_node(o);
+                    if (d3.event.ctrlKey) {
+                        selection.select_node(o);
+                    } else {
+                        selection.select_only_node(o);
+                    }
                     state = states.init;
                     break;
                 default:
                     state = states.init;
                 }
             },
-            selection : function (event, xy) {
-                switch (event) {
+            selection : function () {
+                mouse = d3.mouse(this);
+                switch (controller.event) {
                 case 'doc.mousemove':
-                    selection.rectangle.update(xy);
+                    selection.rectangle.update(mouse);
                     selection.update();
                     break;
                 case 'doc.mouseup':

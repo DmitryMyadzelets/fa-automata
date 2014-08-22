@@ -42,7 +42,6 @@ circle.node {
 .selection {
   fill: none;
   stroke: black;
-  stroke-width: 1px;
   stroke-dasharray: 0.5em,0.3em;
 }
 
@@ -60,6 +59,10 @@ path.link {
   stroke: #333;
   stroke-width: 0.09em;
   /*fill: none;*/
+}
+
+path.selection {
+  stroke-width: 0.09em;
 }
 
 .node text {
