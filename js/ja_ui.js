@@ -537,6 +537,7 @@ this.jA.ui = {};
                         selection.select_only_node(null);
                     }
                     selection.select_link(this);
+                    d3.event.stopPropagation();
                     break;
                 case 'doc.dblclick':
                     mouse = d3.mouse(this);
