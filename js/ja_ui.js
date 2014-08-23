@@ -31,6 +31,7 @@ this.jA.ui = {};
     graph.nodes.push({});
 
     graph.links.push({source : 0, target : 1});
+    graph.links.push({source : 2, target : 1});
 
 
 
@@ -87,16 +88,20 @@ this.jA.ui = {};
         controller.process_event.apply(this, arguments);
     };
 
-    controller.on_link_mouseover = function () {
-        controller.event = 'link.mouseover';
+    // controller.on_link_mouseover = function () {
+    //     controller.event = 'link.mouseover';
+    //     controller.process_event.apply(this, arguments);
+    // };
+
+    // controller.on_link_mousemove = function () {
+    //     controller.event = 'link.mousemove';
+    //     controller.process_event.apply(this, arguments);
+    // };
+
+    controller.on_link_mousedown = function () {
+        controller.event = 'link.mousedown';
         controller.process_event.apply(this, arguments);
     };
-
-    controller.on_link_mousemove = function () {
-        controller.event = 'link.mousemove';
-        controller.process_event.apply(this, arguments);
-    };
-
 
 
     //=============================================================================
@@ -201,6 +206,7 @@ this.jA.ui = {};
         };
 
 
+
         var tick = (function () {
             var v1 = [0, 0];
             var v2 = [0, 0];
@@ -224,9 +230,10 @@ this.jA.ui = {};
 
             return function () {
                 self.node.attr("transform", on_node_tick);
-                self.link.select('path').attr('d', on_link_tick);
+                self.link.selectAll('path').attr('d', on_link_tick);
             };
         }());
+
 
 
         this.init = function () {
@@ -235,6 +242,8 @@ this.jA.ui = {};
                 .append('svg')
                 .attr('width', '100%')
                 .attr('height', '100%');
+
+            self.svg = svg;
 
             // Arrow marker
             svg.append("svg:defs").append("svg:marker")
@@ -266,15 +275,54 @@ this.jA.ui = {};
             svg.on('mousemove', controller.on_doc_mousemove);
             svg.on('dblclick', controller.on_doc_dblclick);
 
-            // 
-            // 
             // The function which is called during animation of the graph
             // Is called on each tick during graph animation
-            // 
-            // 
-
             force.on('tick', tick);
         };
+
+
+
+        // Call this function to update SVG representation of the graph object
+        this.update = function () {
+            var g;
+            // link = svg.selectAll('g.transition').data(graph.links);
+            self.link = self.link.data(graph.links);
+            self.link.exit().remove();
+            g = self.link.enter().append('g')
+                .attr('class', 'transition');
+
+            g.append('path')
+                .attr('class', 'link') // CSS class style
+                .attr('marker-end', 'url(#marker-arrow)');
+
+            g.append('path')
+                .attr('class', 'dummylink')
+                // .on('mouseover', controller.on_link_mouseover)
+                // .on('mousemove', controller.on_link_mousemove);
+                .on('mousedown', controller.on_link_mousedown);
+
+
+            // node = node.data(graph.nodes);
+            self.node = svg.selectAll('g.state').data(graph.nodes);
+
+            self.node.exit().remove();
+            g = self.node.enter()
+                .append('g')
+                .attr('class', 'state');
+
+
+            g.append('circle')
+                .attr('r', node_radius)
+                .attr('class', 'node') // CSS class style
+                .on('mousedown', controller.on_node_mousedown)
+                .on('mouseup', controller.on_node_mouseup)
+                .on('mouseover', controller.on_node_mouseover)
+                .on('mouseout', controller.on_node_mouseout);
+
+
+            force.start();
+        };
+
 
 
         // Creates and returns an object wich implements a selection rectangle
@@ -340,11 +388,11 @@ this.jA.ui = {};
         };
 
         this.select_link = function (link) {
-            link.classed('selection', true);
+            d3.select(link).classed('selection', true);
         };
 
-        this.unselect_link = function () {
-            d3.select(this).select('.selection').classed('selection', false);
+        this.unselect_link = function (link) {
+            d3.select(link).classed('selection', false);
         };
 
 
@@ -353,42 +401,6 @@ this.jA.ui = {};
                 self.unselect_node.call(this);
             });
             self.link.selectAll('.selection').classed('selection', false);
-        };
-
-
-        // Call this function to update SVG representation of the graph object
-        this.update = function () {
-            // link = svg.selectAll('g.transition').data(graph.links);
-            self.link = self.link.data(graph.links);
-            self.link.exit().remove();
-            self.link.enter().append('g')
-                .attr('class', 'transition')
-                .append('path')
-                .attr('class', 'link') // CSS class style
-                .attr('marker-end', 'url(#marker-arrow)')
-                .on('mouseover', controller.on_link_mouseover)
-                .on('mousemove', controller.on_link_mousemove);
-
-
-            // node = node.data(graph.nodes);
-            self.node = svg.selectAll('g.state').data(graph.nodes);
-
-            self.node.exit().remove();
-            var g = self.node.enter()
-                .append('g')
-                .attr('class', 'state');
-
-
-            g.append('circle')
-                .attr('r', node_radius)
-                .attr('class', 'node') // CSS class style
-                .on('mousedown', controller.on_node_mousedown)
-                .on('mouseup', controller.on_node_mouseup)
-                .on('mouseover', controller.on_node_mouseover)
-                .on('mouseout', controller.on_node_mouseout);
-
-
-            force.start();
         };
 
 
@@ -473,18 +485,19 @@ this.jA.ui = {};
             });
         };
 
-        this.select_link = function (link) {
-            var o = d3.select(link);
-            if (o.length > 0) {
-                var d = o[0][0].__data__;
-                if (selected_links.indexOf(d) < 0) {
-                    selected_links.push(d);
-                    view.select_link(o);
-                } else {
-                    selected_links.splice(selected_links.indexOf(d), 1);
-                    o.classed('selection', false);
-                }
-            }
+        this.select_link = function (svg_element) {
+            // 'svg_element' is a <path.dummilink>
+            // Get <path.link> object and check its data
+            d3.select(svg_element.parentNode).selectAll('.link')
+                .each(function (d) {
+                    if (selected_links.indexOf(d) < 0) {
+                        selected_links.push(d);
+                        view.select_link(this);
+                    } else {
+                        selected_links.splice(selected_links.indexOf(d), 1);
+                        view.unselect_link(this);
+                    }
+                });
         };
     }
 
@@ -505,7 +518,6 @@ this.jA.ui = {};
 
     controller.process_event = (function () {
         var state; // Reference to a current state
-        var link; // Current link
         var xy; // mousedown position
         // States are represented as functions
         var mouse;
@@ -513,16 +525,18 @@ this.jA.ui = {};
             init : function () {
                 switch (controller.event) {
                 case 'node.mousedown':
-                    state = states.going_from_node;
+                    state = states.select_or_exit;
                     break;
                 case 'doc.mousedown':
                     xy = d3.mouse(this);
                     state = states.wait_for_selection;
                     break;
-                case 'link.mouseover':
+                case 'link.mousedown':
                     xy = d3.mouse(this);
-                    link = this;
-                    state = states.preselect_link;
+                    if (!d3.event.ctrlKey) {
+                        selection.select_only_node(null);
+                    }
+                    selection.select_link(this);
                     break;
                 case 'doc.dblclick':
                     mouse = d3.mouse(this);
@@ -534,11 +548,10 @@ this.jA.ui = {};
                     } else {
                         selection.select_only_node(o);
                     }
-                    state = states.init;
                     break;
                 }
             },
-            going_from_node : function (d) {
+            select_or_exit : function (d) {
                 switch (controller.event) {
                 case 'node.mouseout':
                     state = states.init;
@@ -567,6 +580,10 @@ this.jA.ui = {};
                         state = states.selection;
                     }
                     break;
+                case 'doc.mouseup':
+                    selection.select_only_node(null);
+                    state = states.init;
+                    break;
                 default:
                     state = states.init;
                 }
@@ -581,35 +598,6 @@ this.jA.ui = {};
                 case 'doc.mouseup':
                     selection.rectangle.hide();
                     state = states.init;
-                    break;
-                }
-            },
-            preselect_link : function () {
-                mouse = d3.mouse(this);
-                var len;
-                console.log(controller.event);
-                switch (controller.event) {
-                case 'link.mouseover':
-                case 'link.mousemove':
-                    xy = mouse;
-                    break;
-                case 'doc.mousemove':
-                    len = vec.length(vec.subtract(xy, mouse, [0, 0]));
-                    if (len > 7) {
-                        state = states.init;
-                    }
-                    break;
-                case 'doc.mousedown':
-                    len = vec.length(vec.subtract(xy, mouse, [0, 0]));
-                    if (len < 7) {
-                        if (!d3.event.ctrlKey) {
-                            selection.select_only_node(null);
-                        }
-                        console.log(link);
-                        selection.select_link(link);
-                    }
-                    break;
-                case 'doc.mouseup':
                     break;
                 }
             }

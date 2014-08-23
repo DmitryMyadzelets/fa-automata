@@ -34,14 +34,20 @@ body {
 /* SVG */
 circle.node {
   fill: dodgerblue;
-  stroke: #333;
+  stroke: #555;
   stroke-width: 0.09em;
   fill-opacity: 0.5;
 }
 
+circle.node:hover {
+  /*stroke: blue;*/
+}
+
+
 .selection {
   fill: none;
   stroke: black;
+  /*stroke-dasharray: 0.5em,0.3em;*/
   stroke-dasharray: 0.5em,0.3em;
 }
 
@@ -55,19 +61,20 @@ rect.selection {
   stroke-width: 0.8px;
 }
 
+/* Edge of graph */
+
 path.link {
   stroke: #333;
   stroke-width: 0.09em;
-  /*fill: none;*/
 }
 
-path.link:hover {
-  stroke: black;
+path.dummylink {
+  stroke: yellow;
+  stroke-width: 0.5em;
+  stroke-opacity: 0;
+  /*cursor: pointer;*/
 }
 
-path.selection {
-  stroke-width: 0.09em;
-}
 
 .node text {
   font: 10px sans-serif;
