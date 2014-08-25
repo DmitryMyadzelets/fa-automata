@@ -159,7 +159,7 @@ this.jA.ui = {};
         // Methods to calculate loop, stright and curved lines for links
         // 
 
-        var makeEdge = {
+        var make_edge = {
             v : [0, 0],
             r : node_radius,
 
@@ -172,6 +172,13 @@ this.jA.ui = {};
                 // Middle of the vector
                 // cv[0] = (v1[0] + v2[0])/2
                 // cv[1] = (v1[1] + v2[1])/2
+            },
+
+            drag : function (v1, v2) {
+                vec.subtract(v2, v1, this.v);    // v = v2 - v1
+                vec.normalize(this.v, this.v);   // v = normalized v
+                vec.scale(this.v, this.r, this.v); // v = v * r
+                vec.add(v1, this.v, v1);         // v1 = v1 + v
             }
         };
 
@@ -194,13 +201,14 @@ this.jA.ui = {};
                 v2[0] = d.target.x;
                 v2[1] = d.target.y;
                 // d.cv = [0, 0] if not d.cv?
-                makeEdge.stright(v1, v2, norm);
+                make_edge.stright(v1, v2, norm);
                 return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];
             };
 
             return function () {
                 self.node.attr("transform", on_node_tick);
                 self.link.selectAll('path').attr('d', on_link_tick);
+                self.drag_link.update();
             };
         }());
 
@@ -315,6 +323,7 @@ this.jA.ui = {};
             svg.on('mouseup', on_doc_mouseup);
             svg.on('mousemove', on_doc_mousemove);
             svg.on('dblclick', on_doc_dblclick);
+            svg.on('dragstart', function () { d3.event.preventDefault(); });
 
             // The function which is called during animation of the graph
             // Is called on each tick during graph animation
@@ -468,20 +477,33 @@ this.jA.ui = {};
         };
 
 
+        // This object implements a drag link when user creates new graph edge
         this.drag_link = (function () {
             var v1 = [0, 0];
-            var norm = [0, 0];
+            var v2 = [0, 0];
+            var ref_d; // Reference to a node data object
+            var ref_link; // Reference to a link svg element
+            var shown = false;
             return {
-                show : function (d, v2) {
-                    console.log(v2);
-                    v1[0] = d.x;
-                    v1[1] = d.y;
-                    makeEdge.stright(v1, v2, norm);
-                    var g = add_link(svg)
-                        .select('path.link')
-                        .attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
-                    console.log('show_drag_link', g);
-                    // console.log(v1, v2);
+                show : function (d) {
+                    ref_d = d;
+                    ref_link = add_link(svg).select('path.link');
+                    shown = true;
+                },
+                to : function (xy) {
+                    vec.copy(xy, v2);
+                    this.update();
+                },
+                update : function () {
+                    if (!shown) { return; }
+                    v1[0] = ref_d.x;
+                    v1[1] = ref_d.y;
+                    make_edge.drag(v1, v2);
+                    ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
+                },
+                hide : function () {
+                    ref_link.remove();
+                    shown = false;
                 }
             };
 
@@ -634,8 +656,8 @@ this.jA.ui = {};
             select_or_exit : function (d) {
                 switch (controller.event) {
                 case 'node.mouseout':
-                    view.drag_link.show(from_node, d3.mouse(this));
-                    state = states.init;
+                    view.drag_link.show(from_node);
+                    state = states.drag_link;
                     break;
                 case 'node.mouseup':
                     if (d3.event.ctrlKey) {
@@ -647,6 +669,17 @@ this.jA.ui = {};
                     } else {
                         selection.select_only_node(d);
                     }
+                    state = states.init;
+                    break;
+                }
+            },
+            drag_link : function () {
+                switch (controller.event) {
+                case 'doc.mousemove':
+                    view.drag_link.to(d3.mouse(this));
+                    break;
+                case 'doc.mouseup':
+                    view.drag_link.hide();
                     state = states.init;
                     break;
                 }
