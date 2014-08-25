@@ -135,6 +135,8 @@ this.jA.ui = {};
             v : [0, 0],
             r : node_radius,
 
+            // Calculates vectors of edge from given vectors 'v1' to 'v2'
+            // Substracts radius of nodes 'r' from both vectors
             stright : function (v1, v2, norm) {
                 vec.subtract(v2, v1, this.v);    // v = v2 - v1
                 vec.normalize(this.v, norm);     // norm = normalized v
@@ -145,12 +147,17 @@ this.jA.ui = {};
                 // cv[0] = (v1[0] + v2[0])/2
                 // cv[1] = (v1[1] + v2[1])/2
             },
-
-            drag : function (v1, v2) {
+            // Calculates vectors of a dragged edge
+            // Substracts radius of nodes 'r' from the first vector
+            // Substracts radius of nodes 'r' from the last vector if to_node is true
+            drag : function (v1, v2, to_node) {
                 vec.subtract(v2, v1, this.v);    // v = v2 - v1
                 vec.normalize(this.v, this.v);   // v = normalized v
                 vec.scale(this.v, this.r, this.v); // v = v * r
                 vec.add(v1, this.v, v1);         // v1 = v1 + v
+                if (to_node) {
+                    vec.subtract(v2, this.v, v2); // if subtract # v2 = v2 - v
+                }
             }
         };
 
@@ -453,24 +460,37 @@ this.jA.ui = {};
         this.drag_link = (function () {
             var v1 = [0, 0];
             var v2 = [0, 0];
-            var ref_d; // Reference to a node data object
+            var from_d, to_d; // References to node data objects
             var ref_link; // Reference to a link svg element
             var shown = false;
+            var to_node = false;
             return {
                 show : function (d) {
-                    ref_d = d;
+                    from_d = d;
                     ref_link = add_link(svg).select('path.link');
                     shown = true;
                 },
-                to : function (xy) {
+                to_point : function (xy) {
                     vec.copy(xy, v2);
+                    to_node = false;
+                    this.update();
+                },
+                to_node : function (d) {
+                    to_d = d;
+                    to_node = true;
                     this.update();
                 },
                 update : function () {
                     if (!shown) { return; }
-                    v1[0] = ref_d.x;
-                    v1[1] = ref_d.y;
-                    make_edge.drag(v1, v2);
+                    v1[0] = from_d.x;
+                    v1[1] = from_d.y;
+                    if (to_node) {
+                        v2[0] = to_d.x;
+                        v2[1] = to_d.y;
+                        make_edge.drag(v1, v2, true);
+                    } else {
+                        make_edge.drag(v1, v2);
+                    }
                     ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
                 },
                 hide : function () {
@@ -645,16 +665,32 @@ this.jA.ui = {};
                     break;
                 }
             },
-            drag_link : function () {
+            drag_link : function (d) {
                 switch (controller.event) {
                 case 'doc.mousemove':
-                    view.drag_link.to(d3.mouse(this));
+                    view.drag_link.to_point(d3.mouse(this));
+                    break;
+                case 'node.mouseover':
+                    view.drag_link.to_node(d);
+                    state = states.drop_link_or_exit;
                     break;
                 case 'doc.mouseup':
                     view.drag_link.hide();
                     state = states.init;
                     break;
                 }
+            },
+            drop_link_or_exit : function () {
+                switch (controller.event) {
+                case 'node.mouseup':
+                    view.drag_link.hide();
+                    state = states.init;
+                    break;
+                case 'node.mouseout':
+                    state = states.drag_link;
+                    break;
+                }
+
             },
             wait_for_selection : function () {
                 switch (controller.event) {
