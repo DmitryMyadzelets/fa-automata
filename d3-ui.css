@@ -48,7 +48,7 @@ circle.node:hover {
   fill: none;
   stroke: black;
   /*stroke-dasharray: 0.5em,0.3em;*/
-  stroke-dasharray: 0.5em,0.3em;
+  stroke-dasharray: 0.6em,0.2em;
 }
 
 rect.selection {
@@ -68,10 +68,10 @@ path.link {
   stroke-width: 0.09em;
 }
 
-path.dummylink {
+path.catchlink {
   stroke: yellow;
-  stroke-width: 0.5em;
-  stroke-opacity: 0;
+  stroke-width: 0.8em;
+  stroke-opacity: 0.0;
   /*cursor: pointer;*/
 }
 

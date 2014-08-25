@@ -7,6 +7,10 @@
 // an automata graph.
 // 
 
+// Look at some examples:
+// http://bl.ocks.org/MoritzStefaner/1377729
+// http://bl.ocks.org/rkirsling/5001347
+// http://bl.ocks.org/benzguo/4370043
 
 // The global variable (module) to access to the methods
 this.jA = this.jA || {};
@@ -42,30 +46,6 @@ this.jA.ui = {};
 
     // Controller events for invokation by View
 
-    controller.on_node_mousedown = function () {
-        if (d3.event.button === 0) {
-            controller.event = 'node.mousedown';
-            controller.process_event.apply(this, arguments);
-        }
-    };
-
-    controller.on_node_mouseup = function () {
-        if (d3.event.button === 0) {
-            controller.event = 'node.mouseup';
-            controller.process_event.apply(this, arguments);
-        }
-    };
-
-    controller.on_node_mouseover = function () {
-        controller.event = 'node.mouseover';
-        controller.process_event.apply(this, arguments);
-    };
-
-    controller.on_node_mouseout = function () {
-        controller.event = 'node.mouseout';
-        controller.process_event.apply(this, arguments);
-    };
-
     controller.on_doc_mousedown = function () {
         if (d3.event.button === 0) {
             controller.event = 'doc.mousedown';
@@ -87,16 +67,6 @@ this.jA.ui = {};
         controller.event = 'doc.dblclick';
         controller.process_event.apply(this, arguments);
     };
-
-    // controller.on_link_mouseover = function () {
-    //     controller.event = 'link.mouseover';
-    //     controller.process_event.apply(this, arguments);
-    // };
-
-    // controller.on_link_mousemove = function () {
-    //     controller.event = 'link.mousemove';
-    //     controller.process_event.apply(this, arguments);
-    // };
 
     controller.on_link_mousedown = function () {
         controller.event = 'link.mousedown';
@@ -224,7 +194,7 @@ this.jA.ui = {};
                 v2[0] = d.target.x;
                 v2[1] = d.target.y;
                 // d.cv = [0, 0] if not d.cv?
-                makeEdge.stright(v1, v2, norm, d.cv);
+                makeEdge.stright(v1, v2, norm);
                 return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];
             };
 
@@ -236,12 +206,83 @@ this.jA.ui = {};
 
 
 
+        // Node's user input
+
+        function on_node_mousedown() {
+            // Prevent the event passing to parent elements
+            d3.event.stopPropagation();
+            // Process left button only
+            if (d3.event.button !== 0) { return; }
+            controller.set_event('node.mousedown').apply(this, arguments);
+        }
+
+
+        function on_node_mouseup() {
+            // Process left button only
+            if (d3.event.button !== 0) { return; }
+            controller.set_event('node.mouseup').apply(this, arguments);
+        }
+
+
+        function on_node_mouseover() {
+            controller.set_event('node.mouseover').apply(this, arguments);
+        }
+
+
+        function on_node_mouseout() {
+            controller.set_event('node.mouseout').apply(this, arguments);
+        }
+
+        function on_node_dblclick() { d3.event.stopPropagation(); }
+
+
+
+        // Link's user input
+
+
+        function on_link_dblclick() { d3.event.stopPropagation(); }
+
+
+        function on_link_mousedown() {
+            // Prevent the event passing to parent elements
+            d3.event.stopPropagation();
+            controller.set_event('link.mousedown').apply(this, arguments);
+        }
+
+
+
+        // Document's user input
+
+
+        function on_doc_mousedown() {
+            // Process left button only
+            if (d3.event.button !== 0) { return; }
+            controller.set_event('doc.mousedown').apply(this, arguments);
+        }
+
+        function on_doc_mouseup() {
+            controller.set_event('doc.mouseup').apply(this, arguments);
+        }
+
+        function on_doc_mousemove() {
+            controller.set_event('doc.mousemove').apply(this, arguments);
+        }
+
+        function on_doc_dblclick() {
+            controller.set_event('doc.dblclick').apply(this, arguments);
+        }
+
+
+
+
         this.init = function () {
             // Create SVG element and make it the size of container
             svg = d3.select('#' + svg_container_id)
                 .append('svg')
                 .attr('width', '100%')
-                .attr('height', '100%');
+                .attr('height', '100%')
+                // Disable browser popup menu
+                .on('contextmenu', function () { d3.event.preventDefault(); });
 
             self.svg = svg;
 
@@ -270,10 +311,10 @@ this.jA.ui = {};
             self.node = svg.selectAll('g.state');
             self.link = svg.selectAll('g.transition');
 
-            svg.on('mousedown', controller.on_doc_mousedown);
-            svg.on('mouseup', controller.on_doc_mouseup);
-            svg.on('mousemove', controller.on_doc_mousemove);
-            svg.on('dblclick', controller.on_doc_dblclick);
+            svg.on('mousedown', on_doc_mousedown);
+            svg.on('mouseup', on_doc_mouseup);
+            svg.on('mousemove', on_doc_mousemove);
+            svg.on('dblclick', on_doc_dblclick);
 
             // The function which is called during animation of the graph
             // Is called on each tick during graph animation
@@ -282,24 +323,35 @@ this.jA.ui = {};
 
 
 
-        // Call this function to update SVG representation of the graph object
-        this.update = function () {
-            var g;
-            // link = svg.selectAll('g.transition').data(graph.links);
-            self.link = self.link.data(graph.links);
-            self.link.exit().remove();
-            g = self.link.enter().append('g')
-                .attr('class', 'transition');
+        // Adds SVG elements representing a graph link/edge
+        // Returns root of the added elements
+        function add_link(selection) {
+            var g = selection.append('g')
+                .attr('class', 'transition')
+                .on('dblclick', on_link_dblclick);
 
             g.append('path')
                 .attr('class', 'link') // CSS class style
                 .attr('marker-end', 'url(#marker-arrow)');
 
             g.append('path')
-                .attr('class', 'dummylink')
+                .attr('class', 'catchlink')
                 // .on('mouseover', controller.on_link_mouseover)
                 // .on('mousemove', controller.on_link_mousemove);
-                .on('mousedown', controller.on_link_mousedown);
+                .on('mousedown', on_link_mousedown);
+
+            return g;
+        }
+
+
+
+        // Call this function to update SVG representation of the graph object
+        this.update = function () {
+            var g;
+            // link = svg.selectAll('g.transition').data(graph.links);
+            self.link = self.link.data(graph.links);
+            self.link.enter().call(add_link);
+            self.link.exit().remove();
 
 
             // node = node.data(graph.nodes);
@@ -308,16 +360,17 @@ this.jA.ui = {};
             self.node.exit().remove();
             g = self.node.enter()
                 .append('g')
-                .attr('class', 'state');
+                .attr('class', 'state')
+                .on('mousedown', on_node_mousedown)
+                .on('mouseup', on_node_mouseup)
+                .on('mouseover', on_node_mouseover)
+                .on('mouseout', on_node_mouseout)
+                .on('dblclick', on_node_dblclick);
 
 
             g.append('circle')
                 .attr('r', node_radius)
-                .attr('class', 'node') // CSS class style
-                .on('mousedown', controller.on_node_mousedown)
-                .on('mouseup', controller.on_node_mouseup)
-                .on('mouseover', controller.on_node_mouseover)
-                .on('mouseout', controller.on_node_mouseout);
+                .attr('class', 'node'); // CSS class style
 
 
             force.start();
@@ -325,7 +378,7 @@ this.jA.ui = {};
 
 
 
-        // Creates and returns an object wich implements a selection rectangle
+        // Creates and returns an object which implements a selection rectangle
         this.selection_rectangle = function () {
             var x0, y0, x, y, w, h;
             var rc = {};
@@ -375,18 +428,23 @@ this.jA.ui = {};
         };
 
 
+        // Shows the node as selected
         this.select_node = function () {
-            d3.select(this)
-                .append('circle')
-                .attr('r', node_radius * 1.2)
-                .attr('class', 'selection');
+            d3.select(this).select('circle').classed('selection', true);
+            // d3.select(this)
+            //     .append('circle')
+            //     .attr('r', node_radius * 1.5)
+            //     .attr('class', 'selection');
         };
 
 
+        // Shows the node as not selected
         this.unselect_node = function () {
-            d3.select(this).select('circle.selection').remove();
+            d3.select(this).select('circle').classed('selection', false);
+            // d3.select(this).select('circle.selection').remove();
         };
 
+        // Shows a link as selected
         this.select_link = function (link) {
             d3.select(link).classed('selection', true);
         };
@@ -408,6 +466,26 @@ this.jA.ui = {};
         this.can_start_selection = function (length) {
             return length > node_radius >> 1;
         };
+
+
+        this.drag_link = (function () {
+            var v1 = [0, 0];
+            var norm = [0, 0];
+            return {
+                show : function (d, v2) {
+                    console.log(v2);
+                    v1[0] = d.x;
+                    v1[1] = d.y;
+                    makeEdge.stright(v1, v2, norm);
+                    var g = add_link(svg)
+                        .select('path.link')
+                        .attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
+                    console.log('show_drag_link', g);
+                    // console.log(v1, v2);
+                }
+            };
+
+        }());
 
 
 
@@ -519,12 +597,14 @@ this.jA.ui = {};
     controller.process_event = (function () {
         var state; // Reference to a current state
         var xy; // mousedown position
+        var from_node;
         // States are represented as functions
         var mouse;
         var states = {
-            init : function () {
+            init : function (d) {
                 switch (controller.event) {
                 case 'node.mousedown':
+                    from_node = d;
                     state = states.select_or_exit;
                     break;
                 case 'doc.mousedown':
@@ -537,7 +617,6 @@ this.jA.ui = {};
                         selection.select_only_node(null);
                     }
                     selection.select_link(this);
-                    d3.event.stopPropagation();
                     break;
                 case 'doc.dblclick':
                     mouse = d3.mouse(this);
@@ -555,6 +634,7 @@ this.jA.ui = {};
             select_or_exit : function (d) {
                 switch (controller.event) {
                 case 'node.mouseout':
+                    view.drag_link.show(from_node, d3.mouse(this));
                     state = states.init;
                     break;
                 case 'node.mouseup':
@@ -628,6 +708,13 @@ this.jA.ui = {};
             }
         };
     }());
+
+
+    // Sets 'event' value of the controller. Returns controller itself for chaining
+    controller.set_event = function (event) {
+        controller.event = event;
+        return controller.process_event;
+    };
 
 
 
