@@ -44,34 +44,6 @@ this.jA.ui = {};
 
     var controller = {};
 
-    // Controller events for invokation by View
-
-    controller.on_doc_mousedown = function () {
-        if (d3.event.button === 0) {
-            controller.event = 'doc.mousedown';
-            controller.process_event.apply(this, arguments);
-        }
-    };
-
-    controller.on_doc_mouseup = function () {
-        controller.event = 'doc.mouseup';
-        controller.process_event.apply(this, arguments);
-    };
-
-    controller.on_doc_mousemove = function () {
-        controller.event = 'doc.mousemove';
-        controller.process_event.apply(this, arguments);
-    };
-
-    controller.on_doc_dblclick = function () {
-        controller.event = 'doc.dblclick';
-        controller.process_event.apply(this, arguments);
-    };
-
-    controller.on_link_mousedown = function () {
-        controller.event = 'link.mousedown';
-        controller.process_event.apply(this, arguments);
-    };
 
 
     //=============================================================================
@@ -627,7 +599,7 @@ this.jA.ui = {};
                 switch (controller.event) {
                 case 'node.mousedown':
                     from_node = d;
-                    state = states.select_or_exit;
+                    state = states.select_or_drag;
                     break;
                 case 'doc.mousedown':
                     xy = d3.mouse(this);
@@ -653,7 +625,7 @@ this.jA.ui = {};
                     break;
                 }
             },
-            select_or_exit : function (d) {
+            select_or_drag : function (d) {
                 switch (controller.event) {
                 case 'node.mouseout':
                     view.drag_link.show(from_node);
