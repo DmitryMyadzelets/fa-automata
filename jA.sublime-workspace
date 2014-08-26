@@ -4,6 +4,106 @@
 		"selected_items":
 		[
 			[
+				"pa",
+				"padding-right"
+			],
+			[
+				"wid",
+				"width"
+			],
+			[
+				"preven",
+				"stopPropagation()	Event"
+			],
+			[
+				"Stop",
+				"stopPropagation()  Event"
+			],
+			[
+				"mou",
+				"mouseup"
+			],
+			[
+				"select_",
+				"select_only_node"
+			],
+			[
+				"sel",
+				"selection"
+			],
+			[
+				"unsele",
+				"unselect_link"
+			],
+			[
+				"mouse",
+				"mouseup"
+			],
+			[
+				"mous",
+				"mouseover"
+			],
+			[
+				"doc",
+				"on_doc_mousemove"
+			],
+			[
+				"on_li",
+				"on_link_mouseover"
+			],
+			[
+				"on_do",
+				"on_doc_mousedown"
+			],
+			[
+				"unselect",
+				"unselect_all"
+			],
+			[
+				"selc",
+				"selected	Option"
+			],
+			[
+				"unselec",
+				"unselect_all"
+			],
+			[
+				"on_mou",
+				"on_doc_mousedown"
+			],
+			[
+				"toEle",
+				"toElement	IE Event"
+			],
+			[
+				"on_mouse",
+				"on_mousedown"
+			],
+			[
+				"index",
+				"indexOf()          Array"
+			],
+			[
+				"selec",
+				"selected"
+			],
+			[
+				"inde",
+				"indexOf()          Array"
+			],
+			[
+				"process",
+				"process_event"
+			],
+			[
+				"Has",
+				"hasOwnProperty()"
+			],
+			[
+				"ma",
+				"marker-end"
+			],
+			[
 				"to",
 				"toBe"
 			],
@@ -92,10 +192,6 @@
 				"complement"
 			],
 			[
-				"ma",
-				"marked"
-			],
-			[
 				"LT",
 				"LT1"
 			],
@@ -134,10 +230,6 @@
 			[
 				"con",
 				"continue"
-			],
-			[
-				"inde",
-				"index1"
 			],
 			[
 				"co",
@@ -188,10 +280,6 @@
 				"results"
 			],
 			[
-				"pa",
-				"padding"
-			],
-			[
 				"at",
 				"attr"
 			],
@@ -202,10 +290,6 @@
 			[
 				"p",
 				"parent"
-			],
-			[
-				"sel",
-				"select"
 			],
 			[
 				"lab",
@@ -412,10 +496,6 @@
 				"target"
 			],
 			[
-				"mou",
-				"modules_id"
-			],
-			[
 				"cla",
 				"class"
 			],
@@ -434,154 +514,64 @@
 			[
 				"oj",
 				"object"
-			],
-			[
-				"set",
-				"set_transitions"
-			],
-			[
-				"ge",
-				"get_event_by_label"
-			],
-			[
-				"err",
-				"errorHandler"
-			],
-			[
-				"on",
-				"onload"
-			],
-			[
-				"cre",
-				"create_module"
-			],
-			[
-				"tran",
-				"transitions"
-			],
-			[
-				"tra",
-				"transitions"
-			],
-			[
-				"so",
-				"sort"
-			],
-			[
-				"ret",
-				"return"
-			],
-			[
-				"t",
-				"transitions"
-			],
-			[
-				"add",
-				"addTransition"
-			],
-			[
-				"conf",
-				"Configuration"
-			],
-			[
-				"create",
-				"create_general_set"
-			],
-			[
-				"l",
-				"length"
-			],
-			[
-				"resi",
-				"resizeUint32Array"
-			],
-			[
-				"addU",
-				"addUint16ArrayValue"
-			],
-			[
-				"CON",
-				"controllable"
-			],
-			[
-				"BY",
-				"BINARY_SUBSET"
-			],
-			[
-				"BI",
-				"BINARY_SUBSET"
-			],
-			[
-				"add_bi",
-				"add_binary_methods"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "js/forward_algorithm.coffee",
+			"file": "d3-ui.html",
 			"settings":
 			{
-				"buffer_size": 12008,
+				"buffer_size": 559,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "js/DES.coffee",
+			"file": "d3-ui.css",
 			"settings":
 			{
-				"buffer_size": 30241,
+				"buffer_size": 1348,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "js/convert.js",
+			"file": "js/ui.coffee",
 			"settings":
 			{
-				"buffer_size": 1335,
+				"buffer_size": 13336,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "js/transitions.js",
+			"file": "js/ja_ui.js",
 			"settings":
 			{
-				"buffer_size": 2949,
+				"buffer_size": 24050,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "js/indexed_property.js",
+			"contents": "Package Control Messages\n========================\n\nSublimeCodeIntel:\n----------------\n\n  SublimeCodeIntel\n  ================\n  [Restart Sublime Text after reading this. In case of trouble, please read the Troubleshooting section in the README]\n  \n  A full-featured code intelligence and smart autocomplete engine for Sublime Text.\n  (Code intelligence plugin ported from Open Komodo Editor to Sublime Text)\n  \n  If you like SublimeCodeIntel, please make a donation: http://sublimecodeintel.github.io/SublimeCodeIntel/donate.html\n  \n  \n  Features:\n  ---------\n  \n  Supports all the languages Komodo Editor supports for Code Intelligence (CIX, CodeIntel2):\n  \n  JavaScript, Mason, XBL, XUL, RHTML, SCSS, Python, HTML, Ruby, Python3, XML, Sass, XSLT, Django, HTML5, Perl, CSS, Twig, Less, Smarty, Node.js, Tcl, TemplateToolkit, PHP.\n  \n  \n  Provides the following features:\n  \n  * Jump to Symbol Definition - Jump to the file and line of the definition of a symbol.\n  * Imports autocomplete - Shows autocomplete with the available modules/symbols in real time.\n  * Function Call tooltips - Displays information in the status bar about the working function.\n  \n  \n  + Shortcuts for jump to definition have changed:\n  \n    For Mac OS X:\n      * Jump to definition = ``Control+Click``\n      * Jump to definition = ``Control+Command+Alt+Up``\n      * Go back = ``Control+Command+Alt+Left``\n      * Manual CodeIntel = ``Control+Shift+space``\n  \n    For Linux:\n      * Jump to definition = ``Super+Click``\n      * Jump to definition = ``Control+Super+Alt+Up``\n      * Go back = ``Control+Super+Alt+Left``\n      * Manual CodeIntel = ``Control+Shift+space``\n  \n    For Windows:\n      * Jump to definition = ``Alt+Click``\n      * Jump to definition = ``Control+Windows+Alt+Up``\n      * Go back = ``Control+Windows+Alt+Left``\n      * Manual CodeIntel = ``Control+Shift+space``\n  \n  \n  For more information:\n  ---------------------\n  Please take the time to read the documentation:\n  \n  * Online - http://sublimecodeintel.github.io/SublimeCodeIntel/\n  \n  \n  IMPORTANT\n  \n  Do NOT edit the default SublimeCodeIntel settings. Your changes will be lost\n  when SublimeCodeIntel is updated. ALWAYS edit the user SublimeCodeIntel settings\n  by selecting \"Preferences->Package Settings->SublimeCodeIntel->Settings - User\".\n  Note that individual settings you include in your user settings will **completely**\n  replace the corresponding default setting, so you must provide that setting in its entirety.\n  \n",
 			"settings":
 			{
-				"buffer_size": 3932,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "js/array_properties.js",
-			"settings":
-			{
-				"buffer_size": 11077,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
-			"settings":
-			{
-				"buffer_size": 6845,
-				"line_ending": "Windows"
+				"buffer_size": 2485,
+				"line_ending": "Windows",
+				"name": "Package Control Messages",
+				"scratch": true
 			}
 		}
 	],
-	"build_system": "",
+	"build_system": "Packages/HTML Compress and Replace/HTML Compress and Replace.sublime-build",
 	"command_palette":
 	{
-		"height": 152.0,
+		"height": 272.0,
 		"selected_items":
 		[
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
 			[
 				"Package Control: d",
 				"Package Control: Disable Package"
@@ -601,10 +591,6 @@
 			[
 				"Package Control: ",
 				"Package Control: Disable Package"
-			],
-			[
-				"Package Control: in",
-				"Package Control: Install Package"
 			],
 			[
 				"Package Control: di",
@@ -655,11 +641,11 @@
 	},
 	"console":
 	{
-		"height": 132.0
+		"height": 167.0
 	},
 	"distraction_free":
 	{
-		"menu_visible": true,
+		"menu_visible": false,
 		"show_minimap": false,
 		"show_open_files": false,
 		"show_tabs": false,
@@ -668,6 +654,19 @@
 	},
 	"file_history":
 	[
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/main.css",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/reviews.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/convert.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/automata.py",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/transitions.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/array_properties.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/indexed_property.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/DES.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/forward_algorithm.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/blog.md",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/SpecRunner.html",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/jA.sublime-project",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/compressed/master.min.js",
@@ -687,16 +686,12 @@
 		"/E/#DmitryMyadzelets/#Projects/vCard-site/js/main.js",
 		"/E/#DmitryMyadzelets/#Projects/vCard-site/index.html",
 		"/E/Documents and Settings/Dmitry/Desktop/sizeof.js",
-		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/array_properties.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/spec/editor.test.coffee",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/automata2.js",
 		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-build",
 		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-settings",
-		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.php",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/index2.html",
-		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/DES.coffee",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.coffee",
-		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/forward_algorithm.coffee",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/tesis.coffee",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/forward_algorithm.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/benchmark_sync.coffee",
@@ -705,9 +700,7 @@
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/ModulesCoupling.html",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ModulesCoupling.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/main.css",
-		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/main.css",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/main.coffee",
-		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/faxy.coffee",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/tesis.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/article.coffee",
@@ -716,7 +709,6 @@
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/main2.coffee",
 		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/User/Preferences.sublime-settings",
 		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
-		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/reviews.html",
 		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.html",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/automata2.coffee",
 		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CoffeeScript/CoffeeScript.sublime-build",
@@ -789,13 +781,7 @@
 		"/E/Documents and Settings/Dmitry/Desktop/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
 		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/faxy.js",
 		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/editor.test.js",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/dfa.coffee",
-		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/index.html",
-		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/js/main.js",
-		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/js/main.coffee",
-		"/E/usr/vhosts-on.txt",
-		"/E/Apache/conf/extra/httpd-vhosts.conf",
-		"/E/Apache/conf/httpd.conf"
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/dfa.coffee"
 	],
 	"find":
 	{
@@ -813,6 +799,51 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"controller.event",
+			"controller.",
+			"function ()",
+			"controller.event",
+			"};",
+			"controller.on",
+			"controller.on_node_mouseup",
+			"node_mousedown",
+			"'node.mousedown'",
+			"controller.on_node_mouseup",
+			".on(",
+			"on(",
+			"going_from_node",
+			"self.link",
+			"this.link",
+			"not_selected_nodes",
+			"selected",
+			"create_new_node",
+			"xy_down",
+			"mousover",
+			"xy",
+			"'this'",
+			"node",
+			"object",
+			"start_selection",
+			"link",
+			"rectangle.",
+			"continer",
+			"rc",
+			"show_selected_nodes",
+			"var ",
+			"selection_rect",
+			"split",
+			"rc",
+			"group",
+			"g",
+			"this",
+			"node",
+			"-",
+			"marker-end",
+			"makeLink",
+			"out",
+			"getLinkCurve",
+			"\"",
+			"source",
 			"requireOwnProperties",
 			"o,",
 			"o",
@@ -895,52 +926,7 @@
 			"s1",
 			"s2",
 			"s1",
-			"v1",
-			"v1_",
-			"s1",
-			"s1_",
-			"s1",
-			"v1_",
-			" '",
-			"'",
-			", '",
-			": '",
-			"index2",
-			"index1",
-			"s1",
-			"s_",
-			"do_",
-			"r_",
-			"do",
-			"r_",
-			"'1",
-			", '",
-			": '",
-			"do_",
-			"}",
-			"{ labels : ",
-			"get_event_by_labels",
-			"1",
-			"close_",
-			"open_",
-			"close_hi",
-			"close",
-			"open_",
-			"close_",
-			"v_mc",
-			"clos",
-			"v_mo",
-			"op_",
-			"op",
-			"v_",
-			"op_",
-			"cl",
-			"v_",
-			": '",
-			"result",
-			"s",
-			"do",
-			"r"
+			"v1"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -948,6 +934,9 @@
 		"regex": false,
 		"replace_history":
 		[
+			"=",
+			"'",
+			";",
 			"properties",
 			",",
 			"à",
@@ -1011,84 +1000,30 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 4,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "js/forward_algorithm.coffee",
+					"file": "d3-ui.html",
 					"settings":
 					{
-						"buffer_size": 12008,
+						"buffer_size": 559,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2320,
-								2320
+								412,
+								412
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"syntax": "Packages/HTML/HTML.tmLanguage",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1252.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "js/DES.coffee",
-					"settings":
-					{
-						"buffer_size": 30241,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								27962,
-								27939
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 9563.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "js/convert.js",
-					"settings":
-					{
-						"buffer_size": 1335,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1155,
-								1155
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1097,103 +1032,47 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "js/transitions.js",
+					"buffer": 1,
+					"file": "d3-ui.css",
 					"settings":
 					{
-						"buffer_size": 2949,
+						"buffer_size": 1348,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1064,
-								1064
+								972,
+								981
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 341.0,
+						"translation.y": 624.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "js/indexed_property.js",
+					"buffer": 2,
+					"file": "js/ui.coffee",
 					"settings":
 					{
-						"buffer_size": 3932,
+						"buffer_size": 13336,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1872,
-								1872
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1165.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "js/array_properties.js",
-					"settings":
-					{
-						"buffer_size": 11077,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								762,
-								762
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2966.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
-					"settings":
-					{
-						"buffer_size": 6845,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6844,
-								6844
+								5327,
+								5327
 							]
 						],
 						"settings":
@@ -1203,7 +1082,165 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2267.0,
+						"translation.y": 3098.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "js/ja_ui.js",
+					"settings":
+					{
+						"buffer_size": 24050,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6471,
+								6471
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3184.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"settings":
+					{
+						"buffer_size": 2485,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								558,
+								558
+							]
+						],
+						"settings":
+						{
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 492.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1244,7 +1281,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 83.0
+		"height": 66.0
 	},
 	"replace":
 	{
@@ -1269,7 +1306,7 @@
 	},
 	"show_minimap": true,
 	"show_open_files": true,
-	"show_tabs": true,
+	"show_tabs": false,
 	"side_bar_visible": false,
 	"side_bar_width": 150.0,
 	"status_bar_visible": true

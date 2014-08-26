@@ -550,11 +550,10 @@ this.jA.ui = {};
         };
 
 
-        this.select_only_node = function (d) {
+        this.unselect_all = function () {
             selected_nodes.length = 0;
             selected_links.length = 0;
             view.unselect_all.call(this);
-            self.select_node(d);
         };
 
 
@@ -577,19 +576,27 @@ this.jA.ui = {};
             });
         };
 
-        this.select_link = function (svg_element) {
-            // 'svg_element' is a <path.dummilink>
-            // Get <path.link> object and check its data
-            d3.select(svg_element.parentNode).selectAll('.link')
-                .each(function (d) {
-                    if (selected_links.indexOf(d) < 0) {
-                        selected_links.push(d);
-                        view.select_link(this);
-                    } else {
-                        selected_links.splice(selected_links.indexOf(d), 1);
-                        view.unselect_link(this);
-                    }
+        this.select_link = function (link) {
+            if (typeof link === 'number') {
+                selected_links.push(link);
+                /*jslint unparam: true*/
+                d3.selectAll('.link').each(function (d, index) {
+                    if (index === link) { view.select_link(this); }
                 });
+                /*jslint unparam: false*/
+            } else {
+                // Get <path.link> object and check its data
+                d3.select(link.parentNode).selectAll('.link')
+                    .each(function (d) {
+                        if (selected_links.indexOf(d) < 0) {
+                            selected_links.push(d);
+                            view.select_link(this);
+                        } else {
+                            selected_links.splice(selected_links.indexOf(d), 1);
+                            view.unselect_link(this);
+                        }
+                    });
+            }
         };
     }
 
@@ -627,9 +634,7 @@ this.jA.ui = {};
                     break;
                 case 'link.mousedown':
                     xy = d3.mouse(this);
-                    if (!d3.event.ctrlKey) {
-                        selection.select_only_node(null);
-                    }
+                    if (!d3.event.ctrlKey) { selection.unselect_all(); }
                     selection.select_link(this);
                     break;
                 case 'doc.dblclick':
@@ -637,11 +642,8 @@ this.jA.ui = {};
                     var o = {x : mouse[0], y : mouse[1]};
                     graph.nodes.push(o);
                     view.update();
-                    if (d3.event.ctrlKey) {
-                        selection.select_node(o);
-                    } else {
-                        selection.select_only_node(o);
-                    }
+                    if (!d3.event.ctrlKey) { selection.unselect_all(); }
+                    selection.select_node(o);
                     break;
                 }
             },
@@ -652,14 +654,11 @@ this.jA.ui = {};
                     state = states.drag_link;
                     break;
                 case 'node.mouseup':
-                    if (d3.event.ctrlKey) {
-                        if (selection.not_selected_node(d)) {
-                            selection.select_node(d);
-                        } else {
-                            selection.unselect_node(d);
-                        }
+                    if (!d3.event.ctrlKey) { selection.unselect_all(); }
+                    if (selection.not_selected_node(d)) {
+                        selection.select_node(d);
                     } else {
-                        selection.select_only_node(d);
+                        selection.unselect_node(d);
                     }
                     state = states.init;
                     break;
@@ -680,17 +679,21 @@ this.jA.ui = {};
                     break;
                 }
             },
-            drop_link_or_exit : function () {
+            drop_link_or_exit : function (d) {
                 switch (controller.event) {
                 case 'node.mouseup':
                     view.drag_link.hide();
+                    var link = {source : from_node.index, target : d.index};
+                    var index = graph.links.push(link) - 1;
+                    view.update();
+                    if (!d3.event.ctrlKey) { selection.unselect_all(); }
+                    selection.select_link(index);
                     state = states.init;
                     break;
                 case 'node.mouseout':
                     state = states.drag_link;
                     break;
                 }
-
             },
             wait_for_selection : function () {
                 switch (controller.event) {
@@ -703,7 +706,7 @@ this.jA.ui = {};
                     }
                     break;
                 case 'doc.mouseup':
-                    selection.select_only_node(null);
+                    if (!d3.event.ctrlKey) { selection.unselect_all(); }
                     state = states.init;
                     break;
                 default:
