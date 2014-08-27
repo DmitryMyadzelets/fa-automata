@@ -195,6 +195,7 @@ this.jA.ui = {};
 
         // Node's user input
 
+
         function on_node_mousedown() {
             // Prevent the event passing to parent elements
             d3.event.stopPropagation();
@@ -418,35 +419,27 @@ this.jA.ui = {};
 
         // Shows the node as selected
         this.select_node = function () {
-            d3.select(this).select('circle').classed('selection', true);
-            // d3.select(this)
-            //     .append('circle')
-            //     .attr('r', node_radius * 1.5)
-            //     .attr('class', 'selection');
+            this.classed('selection', true);
         };
 
 
         // Shows the node as not selected
         this.unselect_node = function () {
-            d3.select(this).select('circle').classed('selection', false);
-            // d3.select(this).select('circle.selection').remove();
+            this.classed('selection', false);
         };
 
         // Shows a link as selected
-        this.select_link = function (link) {
-            d3.select(link).classed('selection', true);
+        this.select_link = function () {
+            this.classed('selection', true);
         };
 
-        this.unselect_link = function (link) {
-            d3.select(link).classed('selection', false);
+        this.unselect_link = function () {
+            this.classed('selection', false);
         };
 
 
         this.unselect_all = function () {
-            self.node.each(function () {
-                self.unselect_node.call(this);
-            });
-            self.link.selectAll('.selection').classed('selection', false);
+            d3.selectAll('.selection').classed('selection', false);
         };
 
 
@@ -520,84 +513,66 @@ this.jA.ui = {};
 
         this.rectangle = view.selection_rectangle();
 
-        function node_by_data(data) {
-            var o = null;
-            view.node.each(function (d) {
-                if (d === data) { o = this; }
-            });
-            return o;
-        }
-
-
-        this.not_selected_node = function (d) {
-            return selected_nodes.indexOf(d) < 0;
-        };
-
 
         // Appends a selection circle to the given graph node
         this.select_node = function (d) {
-            var o = node_by_data(d);
-            if (o && self.not_selected_node(d)) {
+            var node = view.node.filter(function (_d) { return _d === d; });
+            var index = selected_nodes.indexOf(d);
+            if (index < 0) {
                 selected_nodes.push(d);
-                view.select_node.call(o);
+                node.call(view.select_node);
+            } else {
+                selected_nodes.splice(index, 1);
+                node.call(view.unselect_node);
             }
         };
 
 
-        this.unselect_node = function (d) {
-            selected_nodes.splice(selected_nodes.indexOf(d), 1);
-            view.unselect_node.call(node_by_data(d));
+        this.select_link = function (d) {
+            var link = view.link.filter(function (_d) { return _d === d; });
+            var index = selected_links.indexOf(d);
+            if (index < 0) {
+                selected_links.push(d);
+                link.call(view.select_link);
+            } else {
+                selected_links.splice(index, 1);
+                link.call(view.unselect_link);
+            }
         };
 
 
         this.unselect_all = function () {
             selected_nodes.length = 0;
             selected_links.length = 0;
-            view.unselect_all.call(this);
+            view.unselect_all();
         };
 
 
         // Updates graphical appearance of selected_nodes nodes
         this.update = function () {
             var r = self.rectangle();
-            var not_selected;
-            view.node.each(function (d) { // TODO: view.node should be hidden in View
-                not_selected = self.not_selected_node(d);
+            view.node.each(function (d) {
                 // Check if center of the node is in the selection rectange
                 if (d.x > r[0] && d.x < r[2] && d.y > r[1] && d.y < r[3]) {
-                    if (not_selected) {
-                        self.select_node(d);
-                    }
-                } else {
-                    if (!d3.event.ctrlKey && !not_selected) {
-                        self.unselect_node(d);
-                    }
+                    self.select_node(d);
                 }
             });
+            // var not_selected;
+            // view.node.each(function (d) { // TODO: view.node should be hidden in View
+            //     not_selected = self.not_selected_node(d);
+            //     // Check if center of the node is in the selection rectange
+            //     if (d.x > r[0] && d.x < r[2] && d.y > r[1] && d.y < r[3]) {
+            //         if (not_selected) {
+            //             self.select_node(d);
+            //         }
+            //     } else {
+            //         if (!d3.event.ctrlKey && !not_selected) {
+            //             self.unselect_node(d);
+            //         }
+            //     }
+            // });
         };
 
-        this.select_link = function (link) {
-            if (typeof link === 'number') {
-                selected_links.push(link);
-                /*jslint unparam: true*/
-                d3.selectAll('.link').each(function (d, index) {
-                    if (index === link) { view.select_link(this); }
-                });
-                /*jslint unparam: false*/
-            } else {
-                // Get <path.link> object and check its data
-                d3.select(link.parentNode).selectAll('.link')
-                    .each(function (d) {
-                        if (selected_links.indexOf(d) < 0) {
-                            selected_links.push(d);
-                            view.select_link(this);
-                        } else {
-                            selected_links.splice(selected_links.indexOf(d), 1);
-                            view.unselect_link(this);
-                        }
-                    });
-            }
-        };
     }
 
     var selection = new Selection();
@@ -618,14 +593,14 @@ this.jA.ui = {};
     controller.process_event = (function () {
         var state; // Reference to a current state
         var xy; // mousedown position
-        var from_node;
+        var d_source;
         // States are represented as functions
         var mouse;
         var states = {
             init : function (d) {
                 switch (controller.event) {
                 case 'node.mousedown':
-                    from_node = d;
+                    d_source = d;
                     state = states.select_or_drag;
                     break;
                 case 'doc.mousedown':
@@ -635,7 +610,7 @@ this.jA.ui = {};
                 case 'link.mousedown':
                     xy = d3.mouse(this);
                     if (!d3.event.ctrlKey) { selection.unselect_all(); }
-                    selection.select_link(this);
+                    selection.select_link(d);
                     break;
                 case 'doc.dblclick':
                     mouse = d3.mouse(this);
@@ -650,16 +625,12 @@ this.jA.ui = {};
             select_or_drag : function (d) {
                 switch (controller.event) {
                 case 'node.mouseout':
-                    view.drag_link.show(from_node);
+                    view.drag_link.show(d_source);
                     state = states.drag_link;
                     break;
                 case 'node.mouseup':
                     if (!d3.event.ctrlKey) { selection.unselect_all(); }
-                    if (selection.not_selected_node(d)) {
-                        selection.select_node(d);
-                    } else {
-                        selection.unselect_node(d);
-                    }
+                    selection.select_node(d);
                     state = states.init;
                     break;
                 }
@@ -683,11 +654,11 @@ this.jA.ui = {};
                 switch (controller.event) {
                 case 'node.mouseup':
                     view.drag_link.hide();
-                    var link = {source : from_node.index, target : d.index};
-                    var index = graph.links.push(link) - 1;
+                    var o = {source : d_source.index, target : d.index};
+                    graph.links.push(o);
                     view.update();
                     if (!d3.event.ctrlKey) { selection.unselect_all(); }
-                    selection.select_link(index);
+                    selection.select_link(o);
                     state = states.init;
                     break;
                 case 'node.mouseout':
@@ -701,6 +672,7 @@ this.jA.ui = {};
                     mouse = d3.mouse(this);
                     var len = vec.length(vec.subtract(xy, mouse, [0, 0]));
                     if (view.can_start_selection(len)) {
+                        if (!d3.event.ctrlKey) { selection.unselect_all(); }
                         selection.rectangle.show(xy);
                         state = states.selection;
                     }
