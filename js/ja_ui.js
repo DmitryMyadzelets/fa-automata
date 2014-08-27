@@ -573,8 +573,10 @@ this.jA.ui = {};
                     break;
                 case 'doc.dblclick':
                     mouse = d3.mouse(this);
+                    // Create new node
                     var node = {x : mouse[0], y : mouse[1]};
                     graph.nodes.push(node);
+                    // Update view, select the node and link
                     view.update();
                     if (!d3.event.ctrlKey) { view.select.nothing(); }
                     view.select.node(node);
@@ -637,7 +639,7 @@ this.jA.ui = {};
                     });
                     var link;
                     if (exists.length === 0) {
-                        // Create new links if there is no any links for the nodes
+                        // Create new link
                         link = {source : d_source, target : d};
                         graph.links.push(link);
                         view.update();
@@ -702,7 +704,7 @@ this.jA.ui = {};
                 old_state = state;
                 var ret = state.apply(this, arguments);
                 if (old_state !== state) {
-                    // Trace the transition
+                    // Trace current transition
                     console.log('transition:', old_state._name + ' -> ' + state._name);
                 }
                 return ret;
