@@ -442,7 +442,8 @@ this.jA.ui = {};
                     }
                 },
                 link : function (d) {
-                    var link = self.link.filter(function (_d) { return _d === d; });
+                    var link = self.link.select('.link')
+                        .filter(function (_d) { return _d === d; });
                     var index = links.indexOf(d);
                     if (index < 0) {
                         links.push(d);
