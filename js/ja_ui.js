@@ -483,12 +483,6 @@ this.jA.ui = {};
 
 
 
-        // Returns decision if selection should be started
-        this.can_start_selection = function (length) {
-            return length > node_radius >> 1;
-        };
-
-
         // This object implements a drag link when user creates new graph edge
         this.drag_link = (function () {
             var v1 = [0, 0];
@@ -664,12 +658,9 @@ this.jA.ui = {};
                 switch (controller.event) {
                 case 'doc.mousemove':
                     mouse = d3.mouse(this);
-                    var len = vec.length(vec.subtract(xy, mouse, [0, 0]));
-                    if (view.can_start_selection(len)) {
-                        if (!d3.event.ctrlKey) { view.select.nothing(); }
-                        view.select.rectangle.show(xy);
-                        state = states.selection;
-                    }
+                    if (!d3.event.ctrlKey) { view.select.nothing(); }
+                    view.select.rectangle.show(xy);
+                    state = states.selection;
                     break;
                 case 'doc.mouseup':
                     if (!d3.event.ctrlKey) { view.select.nothing(); }
