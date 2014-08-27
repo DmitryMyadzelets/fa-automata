@@ -179,15 +179,20 @@ this.jA.ui = {};
                 v1[1] = d.source.y;
                 v2[0] = d.target.x;
                 v2[1] = d.target.y;
-                // d.cv = [0, 0] if not d.cv?
                 make_edge.stright(v1, v2, norm);
+                // d.cv = [0, 0] if not d.cv?
+                // Keep link points for further use (i.e. link selection)
+                d.x1 = v1[0];
+                d.y1 = v1[1];
+                d.x2 = v2[0];
+                d.y2 = v2[1];
                 return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];
             };
 
             return function () {
                 self.node.attr("transform", on_node_tick);
-                self.link.selectAll('path').attr('d', on_link_tick);
                 self.drag_link.update();
+                self.link.selectAll('path').attr('d', on_link_tick);
             };
         }());
 
@@ -317,17 +322,17 @@ this.jA.ui = {};
         function add_link(selection) {
             var g = selection.append('g')
                 .attr('class', 'transition')
-                .on('dblclick', on_link_dblclick);
+                .on('dblclick', on_link_dblclick)
+                .on('mousedown', on_link_mousedown);
+                // .on('mouseover', controller.on_link_mouseover)
+                // .on('mousemove', controller.on_link_mousemove);
 
             g.append('path')
                 .attr('class', 'link') // CSS class style
                 .attr('marker-end', 'url(#marker-arrow)');
 
             g.append('path')
-                .attr('class', 'catchlink')
-                // .on('mouseover', controller.on_link_mouseover)
-                // .on('mousemove', controller.on_link_mousemove);
-                .on('mousedown', on_link_mousedown);
+                .attr('class', 'catchlink');
 
             return g;
         }
@@ -342,7 +347,6 @@ this.jA.ui = {};
             self.link.enter().call(add_link);
             self.link.exit().remove();
 
-
             // node = node.data(graph.nodes);
             self.node = svg.selectAll('g.state').data(graph.nodes);
 
@@ -356,11 +360,9 @@ this.jA.ui = {};
                 .on('mouseout', on_node_mouseout)
                 .on('dblclick', on_node_dblclick);
 
-
             g.append('circle')
                 .attr('r', node_radius)
                 .attr('class', 'node'); // CSS class style
-
 
             force.start();
         };
@@ -470,8 +472,8 @@ this.jA.ui = {};
                     self.link.each(function (d) {
                         // Check if both start and and points of link 
                         // are in the selection
-                        if (point_in_rectangle(d.source.x, d.source.y, r) &&
-                                point_in_rectangle(d.target.x, d.target.y, r)) {
+                        if (point_in_rectangle(d.x1, d.y1, r) &&
+                                point_in_rectangle(d.x2, d.y2, r)) {
                             self.select.link(d);
                         }
                     });
@@ -577,11 +579,11 @@ this.jA.ui = {};
                     break;
                 case 'doc.dblclick':
                     mouse = d3.mouse(this);
-                    var o = {x : mouse[0], y : mouse[1]};
-                    graph.nodes.push(o);
+                    var node = {x : mouse[0], y : mouse[1]};
+                    graph.nodes.push(node);
                     view.update();
                     if (!d3.event.ctrlKey) { view.select.nothing(); }
-                    view.select.node(o);
+                    view.select.node(node);
                     break;
                 }
             },
@@ -604,12 +606,29 @@ this.jA.ui = {};
                 case 'doc.mousemove':
                     view.drag_link.to_point(d3.mouse(this));
                     break;
+
+                // User have dragged the link to another node
                 case 'node.mouseover':
                     view.drag_link.to_node(d);
                     state = states.drop_link_or_exit;
                     break;
+
+                // Create new node and new link to it
                 case 'doc.mouseup':
                     view.drag_link.hide();
+                    // Create new node
+                    mouse = d3.mouse(this);
+                    var node = {x : mouse[0], y : mouse[1]};
+                    graph.nodes.push(node);
+                    // Create new link
+                    var link = {source : d_source, target : node};
+                    graph.links.push(link);
+                    // Update view, select the node and link
+                    view.update();
+                    if (!d3.event.ctrlKey) { view.select.nothing(); }
+                    view.select.node(node);
+                    view.select.link(link);
+
                     state = states.init;
                     break;
                 }
@@ -618,11 +637,22 @@ this.jA.ui = {};
                 switch (controller.event) {
                 case 'node.mouseup':
                     view.drag_link.hide();
-                    var o = {source : d_source.index, target : d.index};
-                    graph.links.push(o);
-                    view.update();
+                    // Get existing links between selected nodes
+                    var exists = graph.links.filter(function (v) {
+                        return ((v.source === d_source) && (v.target === d));
+                    });
+                    var link;
+                    if (exists.length === 0) {
+                        // Create new links if there is no any links for the nodes
+                        link = {source : d_source, target : d};
+                        graph.links.push(link);
+                        view.update();
+                    } else {
+                        // otherwise select already existing link
+                        link = exists[0];
+                    }
                     if (!d3.event.ctrlKey) { view.select.nothing(); }
-                    view.select.link(o);
+                    view.select.link(link);
                     state = states.init;
                     break;
                 case 'node.mouseout':
@@ -682,7 +712,7 @@ this.jA.ui = {};
                 var ret = state.apply(this, arguments);
                 if (old_state !== state) {
                     // Trace the transition
-                    console.log(old_state._name + ' -> ' + state._name);
+                    console.log('transition:', old_state._name + ' -> ' + state._name);
                 }
                 return ret;
             }
