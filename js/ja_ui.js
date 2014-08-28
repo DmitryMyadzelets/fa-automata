@@ -131,42 +131,57 @@ this.jA.ui = {};
         // Methods to calculate loop, stright and curved lines for links
         // 
 
-        var make_edge = {
-            v : [0, 0],
-            r : node_radius,
+        var make_edge = (function () {
+            var v = [0, 0]; // temporal vector
+            var r = node_radius;
+            var norm = [0, 0];
 
-            // Calculates vectors of edge from given vectors 'v1' to 'v2'
-            // Substracts radius of nodes 'r' from both vectors
-            stright : function (v1, v2, norm) {
-                vec.subtract(v2, v1, this.v);    // v = v2 - v1
-                vec.normalize(this.v, norm);     // norm = normalized v
-                vec.scale(norm, this.r, this.v); // v = norm * r
-                vec.add(v1, this.v, v1);         // v1 = v1 + v
-                vec.subtract(v2, this.v, v2); // if subtract # v2 = v2 - v
-                // Middle of the vector
-                // cv[0] = (v1[0] + v2[0])/2
-                // cv[1] = (v1[1] + v2[1])/2
-            },
-            // Calculates vectors of a dragged edge
-            // Substracts radius of nodes 'r' from the first vector
-            // Substracts radius of nodes 'r' from the last vector if to_node is true
-            drag : function (v1, v2, to_node) {
-                vec.subtract(v2, v1, this.v);    // v = v2 - v1
-                vec.normalize(this.v, this.v);   // v = normalized v
-                vec.scale(this.v, this.r, this.v); // v = v * r
-                vec.add(v1, this.v, v1);         // v1 = v1 + v
-                if (to_node) {
-                    vec.subtract(v2, this.v, v2); // if subtract # v2 = v2 - v
+            return {
+                // Calculates vectors of edge from given vectors 'v1' to 'v2'
+                // Substracts radius of nodes 'r' from both vectors
+                stright : function (v1, v2) {
+                    vec.subtract(v2, v1, v);    // v = v2 - v1
+                    vec.normalize(v, norm);     // norm = normalized v
+                    vec.scale(norm, r, v);      // v = norm * r
+                    vec.add(v1, v, v1);         // v1 = v1 + v
+                    vec.subtract(v2, v, v2);    // v2 = v2 - v
+                    // Middle of the vector
+                    // cv[0] = (v1[0] + v2[0])/2
+                    // cv[1] = (v1[1] + v2[1])/2
+                },
+                // Calculates vectors of a dragged edge
+                // Substracts radius of nodes 'r' from the first vector
+                // Substracts radius of nodes 'r' from the last vector if to_node is true
+                drag : function (v1, v2, to_node) {
+                    vec.subtract(v2, v1, v);    // v = v2 - v1
+                    vec.normalize(v, norm);     // v = normalized v
+                    vec.scale(norm, r, v);      // v = v * r
+                    vec.add(v1, v, v1);         // v1 = v1 + v
+                    if (to_node) {
+                        vec.subtract(v2, v, v2); // if subtract # v2 = v2 - v
+                    }
+                },
+                // Calculates vectors of Bezier curve for curved edge
+                curve : function (v1, v2, cv) {
+                    vec.subtract(v2, v1, v);
+                    vec.normalize(v, norm);
+                    cv[0] = (v1[0] + v2[0]) * 0.5 + norm[1] * r * 2;
+                    cv[1] = (v1[1] + v2[1]) * 0.5 - norm[0] * r * 2;
+                    vec.copy(cv, v);
+                    this.stright(v1, v);
+                    vec.copy(cv, v);
+                    this.stright(v2, v);
                 }
-            }
-        };
+            };
+
+        }());
 
 
 
         var tick = (function () {
             var v1 = [0, 0];
             var v2 = [0, 0];
-            var norm = [0, 0];
+            var cv = [0, 0];
 
             // Returns SVG string for a node
             var on_node_tick = function (d) {
@@ -179,14 +194,25 @@ this.jA.ui = {};
                 v1[1] = d.source.y;
                 v2[0] = d.target.x;
                 v2[1] = d.target.y;
-                make_edge.stright(v1, v2, norm);
+                switch (d.type) {
+                case 1:
+                    make_edge.curve(v1, v2, cv);
+                    break;
+                default:
+                    make_edge.stright(v1, v2);
+                }
                 // d.cv = [0, 0] if not d.cv?
                 // Keep link points for further use (i.e. link selection)
                 d.x1 = v1[0];
                 d.y1 = v1[1];
                 d.x2 = v2[0];
                 d.y2 = v2[1];
-                return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];
+                switch (d.type) {
+                case 1:
+                    return 'M' + v1[0] + ',' + v1[1] + 'Q' + cv[0] + ',' + cv[1] + ',' + v2[0] + ',' + v2[1];
+                default:
+                    return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];
+                }
             };
 
             return function () {
@@ -317,6 +343,25 @@ this.jA.ui = {};
 
 
 
+
+        // Returns true if link 'a' is a counter link 'b'
+        function is_counter_link(d) {
+            return (this.target === d.source) && (this.source === d.target);
+        }
+
+
+
+        // Set type of the link (0-stright, 1-curved, 2-loop)
+        function set_link_type(d) {
+            if (graph.links.filter(is_counter_link, d).length > 0) {
+                d.type = 1;
+            } else {
+                d.type = 0;
+            }
+        }
+
+
+
         // Adds SVG elements representing a graph link/edge
         // Returns root of the added elements
         function add_link(selection) {
@@ -346,6 +391,9 @@ this.jA.ui = {};
             self.link = self.link.data(graph.links);
             self.link.enter().call(add_link);
             self.link.exit().remove();
+
+            // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
+            self.link.each(set_link_type);
 
             // node = node.data(graph.nodes);
             self.node = svg.selectAll('g.state').data(graph.nodes);

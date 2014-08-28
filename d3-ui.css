@@ -64,11 +64,13 @@ rect.selection {
 /* Edge of graph */
 
 path.link {
+  fill: none;
   stroke: #333;
   stroke-width: 0.09em;
 }
 
 path.catchlink {
+  fill: none;
   stroke: yellow;
   stroke-width: 0.8em;
   stroke-opacity: 0.0;
