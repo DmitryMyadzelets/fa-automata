@@ -57,7 +57,7 @@ this.jA.ui = {};
         length : function (v) { return Math.sqrt(v[0] * v[0] + v[1] * v[1]); },
 
         normalize : function (v, out) {
-            var len = vec.length(v);
+            var len = this.length(v);
             len = 1 / len;
             out[0] = v[0] * len;
             out[1] = v[1] * len;
@@ -136,6 +136,25 @@ this.jA.ui = {};
             var r = node_radius;
             var norm = [0, 0];
 
+            // Constants for calculating a loop
+            var K = (function () {
+                var ANGLE_FROM = Math.PI / 3;
+                var ANGLE_TO = Math.PI / 12;
+                return {
+                    DX1 : r * Math.cos(ANGLE_FROM),
+                    DY1 : r * Math.sin(ANGLE_FROM),
+                    DX2 : r * 4 * Math.cos(ANGLE_FROM),
+                    DY2 : r * 4 * Math.sin(ANGLE_FROM),
+                    DX3 : r * 4 * Math.cos(ANGLE_TO),
+                    DY3 : r * 4 * Math.sin(ANGLE_TO),
+                    DX4 : r * Math.cos(ANGLE_TO),
+                    DY4 : r * Math.sin(ANGLE_TO),
+                    NX : Math.cos(ANGLE_FROM - Math.PI / 24),
+                    NY : Math.sin(ANGLE_FROM - Math.PI / 24)
+                };
+            }());
+
+
             return {
                 // Calculates vectors of edge from given vectors 'v1' to 'v2'
                 // Substracts radius of nodes 'r' from both vectors
@@ -171,6 +190,22 @@ this.jA.ui = {};
                     this.stright(v1, v);
                     vec.copy(cv, v);
                     this.stright(v2, v);
+                },
+                loop : function (v1, v2, cv1, cv2) {
+                    // Some Bazier calc (http://www.moshplant.com/direct-or/bezier/math.html)
+                    vec.copy(v1, v);
+                    // Coordinates of the Bazier curve (60 degrees angle)
+                    v1[0] = v[0] + K.DX1;
+                    v1[1] = v[1] - K.DY1;
+                    //
+                    cv1[0] = v[0] + K.DX2;
+                    cv1[1] = v[1] - K.DY2;
+                    //
+                    cv2[0] = v[0] + K.DX3; // 15 degrees
+                    cv2[1] = v[1] - K.DY3;
+                    //
+                    v2[0] = v[0] + K.DX4;
+                    v2[1] = v[1] - K.DY4;
                 }
             };
 
@@ -178,18 +213,13 @@ this.jA.ui = {};
 
 
 
-        var tick = (function () {
+        // Returns SVG string for an edge
+        var get_link_path = (function () {
             var v1 = [0, 0];
             var v2 = [0, 0];
             var cv = [0, 0];
-
-            // Returns SVG string for a node
-            var on_node_tick = function (d) {
-                return "translate(" + d.x + "," + d.y + ")";
-            };
-
-            // Returns SVG string for an edge
-            var on_link_tick = function (d) {
+            var cv2 = [0, 0];
+            return function (d) {
                 v1[0] = d.source.x;
                 v1[1] = d.source.y;
                 v2[0] = d.target.x;
@@ -198,10 +228,12 @@ this.jA.ui = {};
                 case 1:
                     make_edge.curve(v1, v2, cv);
                     break;
+                case 2:
+                    make_edge.loop(v1, v2, cv, cv2);
+                    break;
                 default:
                     make_edge.stright(v1, v2);
                 }
-                // d.cv = [0, 0] if not d.cv?
                 // Keep link points for further use (i.e. link selection)
                 d.x1 = v1[0];
                 d.y1 = v1[1];
@@ -210,15 +242,27 @@ this.jA.ui = {};
                 switch (d.type) {
                 case 1:
                     return 'M' + v1[0] + ',' + v1[1] + 'Q' + cv[0] + ',' + cv[1] + ',' + v2[0] + ',' + v2[1];
+                case 2:
+                    return 'M' + v1[0] + ',' + v1[1] + 'C' + cv[0] + ',' + cv[1] + ',' + cv2[0] + ',' + cv2[1] + ',' + v2[0] + ',' + v2[1];
                 default:
                     return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];
                 }
+            };
+        }());
+
+
+
+        var tick = (function () {
+
+            // Returns SVG string for a node
+            var on_node_tick = function (d) {
+                return "translate(" + d.x + "," + d.y + ")";
             };
 
             return function () {
                 self.node.attr("transform", on_node_tick);
                 self.drag_link.update();
-                self.link.selectAll('path').attr('d', on_link_tick);
+                self.link.selectAll('path').attr('d', get_link_path);
             };
         }());
 
@@ -354,7 +398,9 @@ this.jA.ui = {};
 
         // Set type of the link (0-stright, 1-curved, 2-loop)
         function set_link_type(d) {
-            if (graph.links.filter(is_counter_link, d).length > 0) {
+            if (d.source === d.target) {
+                d.type = 2;
+            } else if (graph.links.filter(is_counter_link, d).length > 0) {
                 d.type = 1;
             } else {
                 d.type = 0;
@@ -536,13 +582,13 @@ this.jA.ui = {};
         this.drag_link = (function () {
             var v1 = [0, 0];
             var v2 = [0, 0];
-            var from_d, to_d; // References to node data objects
+            var d = {}; // Data object for a link
             var ref_link; // Reference to a link svg element
             var shown = false;
             var to_node = false;
             return {
-                show : function (d) {
-                    from_d = d;
+                show : function (d_node) {
+                    d.source = d_node;
                     ref_link = add_link(svg).select('path.link');
                     shown = true;
                 },
@@ -551,23 +597,23 @@ this.jA.ui = {};
                     to_node = false;
                     this.update();
                 },
-                to_node : function (d) {
-                    to_d = d;
+                to_node : function (d_node) {
+                    d.target = d_node;
                     to_node = true;
                     this.update();
                 },
                 update : function () {
                     if (!shown) { return; }
-                    v1[0] = from_d.x;
-                    v1[1] = from_d.y;
+                    v1[0] = d.source.x;
+                    v1[1] = d.source.y;
                     if (to_node) {
-                        v2[0] = to_d.x;
-                        v2[1] = to_d.y;
-                        make_edge.drag(v1, v2, true);
+                        set_link_type(d);
+                        ref_link.attr('d', get_link_path(d));
                     } else {
                         make_edge.drag(v1, v2);
+                        // TODO: can we move it to 'get_link_path'?
+                        ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
                     }
-                    ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
                 },
                 hide : function () {
                     ref_link.remove();
