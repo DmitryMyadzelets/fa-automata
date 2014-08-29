@@ -108,11 +108,11 @@ this.jA.ui = {};
         var height = 500;
         var node_radius = 16;
 
-        var link_distance = 100;
-        var link_charge = link_distance * -300; // How strong the nodes push each other away
-        var link_charge_distance = link_distance * 5; // Maximal distance where charge works
-        var link_gravity = 0.5;
-        var friction = 0.2; // [0..1] [high..low]
+        var link_distance = 150;
+        var link_charge = -800; // How strong the nodes push each other away
+        var link_charge_distance = link_distance * 3; // Maximal distance where charge works
+        // var link_gravity = 0.5;
+        // var friction = 0.2; // [0..1] [high..low]
 
         var svg_container_id = 'svg_container';
 
@@ -318,9 +318,10 @@ this.jA.ui = {};
 
             force = d3.layout.force()
                 .charge(link_charge)
+                .linkDistance(link_distance)
                 .chargeDistance(link_charge_distance)
-                .gravity(link_gravity)
-                .friction(friction) // range [0,1], 1 is frictioneless
+                // .gravity(link_gravity)
+                // .friction(friction) // range [0,1], 1 is frictioneless
                 // .linkDistance((d)-> if d.loop? then 0 else link_distance)
                 // .linkStrength((d)-> if d.loop? then 0 else 1)
                 .size([width, height])
