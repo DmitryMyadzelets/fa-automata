@@ -122,6 +122,7 @@ this.jA.ui = {};
         var self = this;
 
         var svg;    // Reference to SVG element
+        var container;
         var force;  // d3.js force object
         // this.node;   // Array of SVG nodes representing states
         // this.link;   // Array of SVG links representing edges
@@ -335,6 +336,32 @@ this.jA.ui = {};
             controller.set_event('doc.dblclick').apply(this, arguments);
         }
 
+        function zoomed() {
+            container.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
+        }
+
+        function dragstarted() {
+            console.log('dragstarted', d3.event);
+            d3.event.sourceEvent.stopPropagation();
+        }
+
+        function dragged() {
+            console.log(d3.event.sourceEvent);
+            // d3.event.sourceEvent.stopPropagation();
+            console.log('dragged');
+        }
+
+
+        // Taken from http://bl.ocks.org/mbostock/6123708
+        var zoom = d3.behavior.zoom()
+            .scaleExtent([-5, 5])
+            .on('zoom', zoomed);
+
+
+        var drag = d3.behavior.drag()
+            // .origin(function (d) { return d; })
+            .on("dragstart", dragstarted)
+            .on("drag", dragged);
 
 
 
@@ -372,8 +399,14 @@ this.jA.ui = {};
                 .nodes(graph.nodes)
                 .links(graph.links);
 
-            self.node = svg.selectAll('g.state');
-            self.link = svg.selectAll('g.transition');
+            container = svg.append('g');
+
+            svg.call(zoom).call(drag);
+            // Disable zooming in on dblclick
+            svg.on("dblclick.zoom", null);
+
+            self.node = container.selectAll('g.state');
+            self.link = container.selectAll('g.transition');
 
             svg.on('mousedown', on_doc_mousedown);
             svg.on('mouseup', on_doc_mouseup);
@@ -443,7 +476,7 @@ this.jA.ui = {};
             self.link.each(set_link_type);
 
             // node = node.data(graph.nodes);
-            self.node = svg.selectAll('g.state').data(graph.nodes);
+            self.node = self.node.data(graph.nodes);
 
             self.node.exit().remove();
             g = self.node.enter()
@@ -589,7 +622,7 @@ this.jA.ui = {};
             return {
                 show : function (d_node) {
                     d.source = d_node;
-                    ref_link = add_link(svg).select('path.link');
+                    ref_link = add_link(container).select('path.link');
                     shown = true;
                 },
                 to_point : function (xy) {
