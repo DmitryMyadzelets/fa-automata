@@ -315,6 +315,28 @@ this.jA.ui = {};
 
 
 
+
+        this.pan = (function () {
+            var delta = [0, 0];
+            var xy;
+            var fnc = function (delta_xy) {
+                if (typeof delta_xy === 'Array' && xy.length === 2) {
+                    container.attr('transform', 'translate(' + delta[0] + ',' + delta[0] + ')');
+                } else {
+                    xy = d3.mouse(svg);
+                    return xy;
+                }
+            };
+
+            fnc.to_mouse = function () {
+                xy = d3.mouse(svg);
+                fnc(xy);
+            };
+
+            return fnc;
+        }());
+
+
         // Document's user input
 
 
@@ -335,34 +357,6 @@ this.jA.ui = {};
         function on_doc_dblclick() {
             controller.set_event('doc.dblclick').apply(this, arguments);
         }
-
-        function zoomed() {
-            container.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
-        }
-
-        function dragstarted() {
-            console.log('dragstarted', d3.event);
-            d3.event.sourceEvent.stopPropagation();
-        }
-
-        function dragged() {
-            console.log(d3.event.sourceEvent);
-            // d3.event.sourceEvent.stopPropagation();
-            console.log('dragged');
-        }
-
-
-        // Taken from http://bl.ocks.org/mbostock/6123708
-        var zoom = d3.behavior.zoom()
-            .scaleExtent([-5, 5])
-            .on('zoom', zoomed);
-
-
-        var drag = d3.behavior.drag()
-            // .origin(function (d) { return d; })
-            .on("dragstart", dragstarted)
-            .on("drag", dragged);
-
 
 
         this.init = function () {
@@ -401,10 +395,6 @@ this.jA.ui = {};
 
             container = svg.append('g');
 
-            svg.call(zoom).call(drag);
-            // Disable zooming in on dblclick
-            svg.on("dblclick.zoom", null);
-
             self.node = container.selectAll('g.state');
             self.link = container.selectAll('g.transition');
 
@@ -413,6 +403,10 @@ this.jA.ui = {};
             svg.on('mousemove', on_doc_mousemove);
             svg.on('dblclick', on_doc_dblclick);
             svg.on('dragstart', function () { d3.event.preventDefault(); });
+            // d3.select('body')
+            //     .on('keydown', function () {
+            //     console.log(d3.event.shiftKey);
+            // });
 
             // The function which is called during animation of the graph
             // Is called on each tick during graph animation
@@ -545,7 +539,6 @@ this.jA.ui = {};
 
             return fnc;
         };
-
 
 
         // This object contains methods to select nodes and links of the graph
@@ -692,6 +685,7 @@ this.jA.ui = {};
                     break;
                 case 'doc.mousedown':
                     xy = d3.mouse(this);
+                    if (d3.event.shiftKey) { state = states.move_graph; break; }
                     state = states.wait_for_selection;
                     break;
                 case 'link.mousedown':
@@ -700,6 +694,7 @@ this.jA.ui = {};
                     view.select.link(d);
                     break;
                 case 'doc.dblclick':
+                    console.log(this);
                     mouse = d3.mouse(this);
                     // Create new node
                     var node = {x : mouse[0], y : mouse[1]};
@@ -809,6 +804,16 @@ this.jA.ui = {};
                 case 'doc.mouseup':
                     view.select.rectangle.hide();
                     view.select.by_rectangle();
+                    state = states.init;
+                    break;
+                }
+            },
+            move_graph : function () {
+                switch (controller.event) {
+                case 'doc.mousemove':
+                    view.pan.to_mouse();
+                    break;
+                case 'doc.mouseup':
                     state = states.init;
                     break;
                 }

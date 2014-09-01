@@ -28,7 +28,7 @@
 
 var width = 960,
     height = 500,
-    shiftKey;
+    ctrlKey;
 
 var svg = d3.select("body")
     .attr("tabindex", 1)
@@ -65,6 +65,8 @@ d3.json("graph.json", function(error, graph) {
       .attr("x2", function(d) { return d.target.x; })
       .attr("y2", function(d) { return d.target.y; });
 
+  var zoom_translate;
+
   var brush = container.append("g")
       .datum(function() { return {selected: false, previouslySelected: false}; })
       .attr("class", "brush")
@@ -72,7 +74,11 @@ d3.json("graph.json", function(error, graph) {
         .x(d3.scale.identity().domain([0, width]))
         .y(d3.scale.identity().domain([0, height]))
         .on("brushstart", function(d) {
-          node.each(function(d) { d.previouslySelected = shiftKey && d.selected; });
+
+          // zoom_translate = zoom.translate();
+          // zoom.on('zoom', null);
+
+          node.each(function(d) { d.previouslySelected = ctrlKey && d.selected; });
         })
         .on("brush", function() {
           var extent = d3.event.target.extent();
@@ -85,7 +91,12 @@ d3.json("graph.json", function(error, graph) {
         .on("brushend", function() {
           d3.event.target.clear();
           d3.select(this).call(d3.event.target);
-        }));
+
+          zoom.translate(zoom_translate)
+            .on('zoom', zoomed);
+
+        })
+        );
 
   var node = container.append("g")
       .attr("class", "node")
@@ -95,11 +106,16 @@ d3.json("graph.json", function(error, graph) {
       .attr("r", 4)
       .attr("cx", function(d) { return d.x; })
       .attr("cy", function(d) { return d.y; })
-      .on("mousedown", function(d) {
-        if (shiftKey) d3.select(this).classed("selected", d.selected = !d.selected);
-        else node.classed("selected", function(p) { return p.selected = d === p; });
-      });
+      .on("mousedown", on_mousedown);
+
+
+  function on_mousedown(d) {
+    if (ctrlKey) d3.select(this).classed("selected", d.selected = !d.selected);
+    else node.classed("selected", function(p) { return p.selected = d === p; });
+  }
+
 });
+
 
 function zoomed() {
     container.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
@@ -107,7 +123,7 @@ function zoomed() {
 
 
 function keyflip() {
-  shiftKey = d3.event.shiftKey || d3.event.metaKey;
+  ctrlKey = d3.event.ctrlKey;
 }
 
 </script>
