@@ -315,22 +315,27 @@ this.jA.ui = {};
 
 
 
-
         this.pan = (function () {
-            var delta = [0, 0];
-            var xy;
-            var fnc = function (delta_xy) {
-                if (typeof delta_xy === 'Array' && xy.length === 2) {
-                    container.attr('transform', 'translate(' + delta[0] + ',' + delta[0] + ')');
-                } else {
-                    xy = d3.mouse(svg);
-                    return xy;
-                }
+            var a_xy = [0, 0]; // Absolute coordinates
+            var d_xy = [0, 0]; // Delta coordinates
+            var p_xy = [0, 0]; // Previous coordinates
+            var fnc = function () {
+                return [d3.event.pageX - a_xy[0], d3.event.pageY - a_xy[1]];
+            };
+
+            fnc.start = function () {
+                p_xy[0] = d3.event.pageX;
+                p_xy[1] = d3.event.pageY;
             };
 
             fnc.to_mouse = function () {
-                xy = d3.mouse(svg);
-                fnc(xy);
+                d_xy[0] = d3.event.pageX - p_xy[0];
+                d_xy[1] = d3.event.pageY - p_xy[1];
+                p_xy[0] = d3.event.pageX;
+                p_xy[1] = d3.event.pageY;
+                a_xy[0] += d_xy[0];
+                a_xy[1] += d_xy[1];
+                container.attr('transform', 'translate(' + a_xy[0] + ',' + a_xy[1] + ')');
             };
 
             return fnc;
@@ -685,7 +690,11 @@ this.jA.ui = {};
                     break;
                 case 'doc.mousedown':
                     xy = d3.mouse(this);
-                    if (d3.event.shiftKey) { state = states.move_graph; break; }
+                    if (d3.event.shiftKey) {
+                        view.pan.start();
+                        state = states.move_graph;
+                        break;
+                    }
                     state = states.wait_for_selection;
                     break;
                 case 'link.mousedown':
@@ -694,8 +703,7 @@ this.jA.ui = {};
                     view.select.link(d);
                     break;
                 case 'doc.dblclick':
-                    console.log(this);
-                    mouse = d3.mouse(this);
+                    mouse = view.pan();
                     // Create new node
                     var node = {x : mouse[0], y : mouse[1]};
                     graph.nodes.push(node);
@@ -723,7 +731,7 @@ this.jA.ui = {};
             drag_link : function (d) {
                 switch (controller.event) {
                 case 'doc.mousemove':
-                    view.drag_link.to_point(d3.mouse(this));
+                    view.drag_link.to_point(view.pan());
                     break;
 
                 // User have dragged the link to another node
@@ -736,7 +744,8 @@ this.jA.ui = {};
                 case 'doc.mouseup':
                     view.drag_link.hide();
                     // Create new node
-                    mouse = d3.mouse(this);
+                    mouse = view.pan();
+                    console.log(mouse);
                     var node = {x : mouse[0], y : mouse[1]};
                     graph.nodes.push(node);
                     // Create new link
