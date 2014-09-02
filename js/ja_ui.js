@@ -390,6 +390,7 @@ this.jA.ui = {};
                 .nodes(graph.nodes)
                 .links(graph.links);
 
+            self.force = force;
 
             // The function which is called during animation of the graph
             // Is called on each tick during graph animation
@@ -743,6 +744,7 @@ this.jA.ui = {};
                     }
                     break;
                 case 'node.mouseout':
+                    if (d3.event.shiftKey) { break; }
                     view.drag_link.show(d_source);
                     state = states.drag_link;
                     break;
@@ -816,6 +818,11 @@ this.jA.ui = {};
             drag_node : function () {
                 switch (controller.event) {
                 case 'doc.mousemove':
+                    if (!d3.event.shiftKey) {
+                        d_source.fixed = false;
+                        state = states.init;
+                        break;
+                    }
                     // How far we move the node
                     mouse = view.pan.mouse();
                     xy[0] = mouse[0] - xy[0];
@@ -828,8 +835,10 @@ this.jA.ui = {};
                     xy[1] = mouse[1];
                     // Fix it while moving
                     d_source.fixed = true;
-                    view.update();
+                    view.force.resume();
+                    // view.update();
                     break;
+                case 'doc.mouseup':
                 case 'node.mouseup':
                     d_source.fixed = false;
                     state = states.init;
@@ -868,6 +877,7 @@ this.jA.ui = {};
             move_graph : function () {
                 switch (controller.event) {
                 case 'doc.mousemove':
+                    if (!d3.event.shiftKey) { state = states.init; }
                     view.pan.to_mouse();
                     break;
                 case 'doc.mouseup':
