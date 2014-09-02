@@ -75,7 +75,7 @@ d3.json("graph.json", function(error, graph) {
         .y(d3.scale.identity().domain([0, height]))
         .on("brushstart", function(d) {
 
-          // zoom_translate = zoom.translate();
+          zoom_translate = zoom.translate();
           // zoom.on('zoom', null);
 
           node.each(function(d) { d.previouslySelected = ctrlKey && d.selected; });
@@ -92,11 +92,14 @@ d3.json("graph.json", function(error, graph) {
           d3.event.target.clear();
           d3.select(this).call(d3.event.target);
 
-          zoom.translate(zoom_translate)
-            .on('zoom', zoomed);
+          zoom.translate(zoom_translate);
+          // zoom.on('zoom', zoomed);
 
         })
         );
+
+  d3.behavior.drag()
+    .on('dragstart', function() {d3.event.sourceEvent.stopPropagation();});
 
   var node = container.append("g")
       .attr("class", "node")

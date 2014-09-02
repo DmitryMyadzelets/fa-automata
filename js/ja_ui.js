@@ -251,17 +251,20 @@ this.jA.ui = {};
             };
         }());
 
+        function get_node_translate(d) {
+            d.x = d.x || Math.floor(Math.random() * width);
+            d.y = d.y || Math.floor(Math.random() * height);
+            return "translate(" + d.x + "," + d.y + ")";
+        }
+
 
 
         var tick = (function () {
 
             // Returns SVG string for a node
-            var on_node_tick = function (d) {
-                return "translate(" + d.x + "," + d.y + ")";
-            };
 
             return function () {
-                self.node.attr("transform", on_node_tick);
+                self.node.attr("transform", get_node_translate);
                 self.drag_link.update();
                 self.link.selectAll('path').attr('d', get_link_path);
             };
@@ -315,33 +318,6 @@ this.jA.ui = {};
 
 
 
-        this.pan = (function () {
-            var a_xy = [0, 0]; // Absolute coordinates
-            var d_xy = [0, 0]; // Delta coordinates
-            var p_xy = [0, 0]; // Previous coordinates
-            var fnc = function () {
-                return [d3.event.pageX - a_xy[0], d3.event.pageY - a_xy[1]];
-            };
-
-            fnc.start = function () {
-                p_xy[0] = d3.event.pageX;
-                p_xy[1] = d3.event.pageY;
-            };
-
-            fnc.to_mouse = function () {
-                d_xy[0] = d3.event.pageX - p_xy[0];
-                d_xy[1] = d3.event.pageY - p_xy[1];
-                p_xy[0] = d3.event.pageX;
-                p_xy[1] = d3.event.pageY;
-                a_xy[0] += d_xy[0];
-                a_xy[1] += d_xy[1];
-                container.attr('transform', 'translate(' + a_xy[0] + ',' + a_xy[1] + ')');
-            };
-
-            return fnc;
-        }());
-
-
         // Document's user input
 
 
@@ -376,7 +352,7 @@ this.jA.ui = {};
             self.svg = svg;
 
             // Arrow marker
-            svg.append("svg:defs").append("svg:marker")
+            svg.append('svg:defs').append('svg:marker')
                     .attr('id', 'marker-arrow')
                     .attr('orient', 'auto')
                     .attr('markerWidth', 6)
@@ -385,6 +361,26 @@ this.jA.ui = {};
                     .attr('refY', 3)
                 .append('svg:path')
                     .attr('d', 'M0,0 L6,3 L0,6');
+
+            svg.on('mousedown', on_doc_mousedown);
+            svg.on('mouseup', on_doc_mouseup);
+            svg.on('mousemove', on_doc_mousemove);
+            svg.on('dblclick', on_doc_dblclick);
+            svg.on('dragstart', function () { d3.event.preventDefault(); });
+            // d3.select('body')
+            //     .on('keydown', function () {
+            //     console.log(d3.event.shiftKey);
+            // });
+
+            // var rect = svg.append('rect')
+            //     .style('pointer-events', 'all')
+            //     .attr('width', 500)
+            //     .attr('height', 500)
+            //     .style('fill', 'lightgray');
+
+            container = svg.append('g');
+            self.node = container.selectAll('g.state');
+            self.link = container.selectAll('g.transition');
 
             force = d3.layout.force()
                 .charge(link_charge)
@@ -398,26 +394,44 @@ this.jA.ui = {};
                 .nodes(graph.nodes)
                 .links(graph.links);
 
-            container = svg.append('g');
-
-            self.node = container.selectAll('g.state');
-            self.link = container.selectAll('g.transition');
-
-            svg.on('mousedown', on_doc_mousedown);
-            svg.on('mouseup', on_doc_mouseup);
-            svg.on('mousemove', on_doc_mousemove);
-            svg.on('dblclick', on_doc_dblclick);
-            svg.on('dragstart', function () { d3.event.preventDefault(); });
-            // d3.select('body')
-            //     .on('keydown', function () {
-            //     console.log(d3.event.shiftKey);
-            // });
 
             // The function which is called during animation of the graph
             // Is called on each tick during graph animation
             force.on('tick', tick);
         };
 
+
+
+        // This object implements panoramic behaviour
+        this.pan = (function () {
+            var a_xy = [0, 0]; // Absolute coordinates
+            var d_xy = [0, 0]; // Delta coordinates
+            var p_xy = [0, 0]; // Previous coordinates
+            var fnc = function () {
+                return [a_xy[0], a_xy[1]];
+            };
+
+            fnc.start = function () {
+                p_xy[0] = d3.event.pageX;
+                p_xy[1] = d3.event.pageY;
+            };
+
+            fnc.mouse = function () {
+                return [d3.event.pageX - a_xy[0], d3.event.pageY - a_xy[1]];
+            };
+
+            fnc.to_mouse = function () {
+                d_xy[0] = d3.event.pageX - p_xy[0];
+                d_xy[1] = d3.event.pageY - p_xy[1];
+                p_xy[0] = d3.event.pageX;
+                p_xy[1] = d3.event.pageY;
+                a_xy[0] += d_xy[0];
+                a_xy[1] += d_xy[1];
+                container.attr('transform', 'translate(' + a_xy[0] + ',' + a_xy[1] + ')');
+            };
+
+            return fnc;
+        }());
 
 
 
@@ -466,14 +480,6 @@ this.jA.ui = {};
         // Call this function to update SVG representation of the graph object
         this.update = function () {
             var g;
-            // link = svg.selectAll('g.transition').data(graph.links);
-            self.link = self.link.data(graph.links);
-            self.link.enter().call(add_link);
-            self.link.exit().remove();
-
-            // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
-            self.link.each(set_link_type);
-
             // node = node.data(graph.nodes);
             self.node = self.node.data(graph.nodes);
 
@@ -485,11 +491,20 @@ this.jA.ui = {};
                 .on('mouseup', on_node_mouseup)
                 .on('mouseover', on_node_mouseover)
                 .on('mouseout', on_node_mouseout)
-                .on('dblclick', on_node_dblclick);
+                .on('dblclick', on_node_dblclick)
+                .attr('transform', get_node_translate);
 
             g.append('circle')
                 .attr('r', node_radius)
                 .attr('class', 'node'); // CSS class style
+
+            // link = svg.selectAll('g.transition').data(graph.links);
+            self.link = self.link.data(graph.links);
+            self.link.enter().call(add_link);
+            self.link.exit().remove();
+
+            // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
+            self.link.each(set_link_type);
 
             force.start();
         };
@@ -589,6 +604,12 @@ this.jA.ui = {};
                 // Updates graphical appearance of selected_nodes nodes
                 by_rectangle : function () {
                     var r = this.rectangle();
+                    // Correct coordinates according to the current panoram
+                    var p = self.pan();
+                    r[0] -=  p[0];
+                    r[2] -=  p[0];
+                    r[1] -=  p[1];
+                    r[3] -=  p[1];
                     self.node.each(function (d) {
                         // Check if center of the node is in the selection rectange
                         if (point_in_rectangle(d.x, d.y, r)) {
@@ -703,7 +724,7 @@ this.jA.ui = {};
                     view.select.link(d);
                     break;
                 case 'doc.dblclick':
-                    mouse = view.pan();
+                    mouse = view.pan.mouse();
                     // Create new node
                     var node = {x : mouse[0], y : mouse[1]};
                     graph.nodes.push(node);
@@ -731,7 +752,7 @@ this.jA.ui = {};
             drag_link : function (d) {
                 switch (controller.event) {
                 case 'doc.mousemove':
-                    view.drag_link.to_point(view.pan());
+                    view.drag_link.to_point(view.pan.mouse());
                     break;
 
                 // User have dragged the link to another node
@@ -744,8 +765,7 @@ this.jA.ui = {};
                 case 'doc.mouseup':
                     view.drag_link.hide();
                     // Create new node
-                    mouse = view.pan();
-                    console.log(mouse);
+                    mouse = view.pan.mouse();
                     var node = {x : mouse[0], y : mouse[1]};
                     graph.nodes.push(node);
                     // Create new link
