@@ -367,10 +367,6 @@ this.jA.ui = {};
             svg.on('mousemove', on_doc_mousemove);
             svg.on('dblclick', on_doc_dblclick);
             svg.on('dragstart', function () { d3.event.preventDefault(); });
-            // d3.select('body')
-            //     .on('keydown', function () {
-            //     console.log(d3.event.shiftKey);
-            // });
 
             // var rect = svg.append('rect')
             //     .style('pointer-events', 'all')
@@ -489,6 +485,7 @@ this.jA.ui = {};
                 .attr('class', 'state')
                 .on('mousedown', on_node_mousedown)
                 .on('mouseup', on_node_mouseup)
+                // .on('mousemove', on_node_mousemove)
                 .on('mouseover', on_node_mouseover)
                 .on('mouseout', on_node_mouseout)
                 .on('dblclick', on_node_dblclick)
@@ -737,6 +734,14 @@ this.jA.ui = {};
             },
             select_or_drag : function (d) {
                 switch (controller.event) {
+                case 'doc.mousemove':
+                    if (d3.event.shiftKey) {
+                        xy = view.pan.mouse();
+                        view.select.nothing();
+                        view.select.node(d_source);
+                        state = states.drag_node;
+                    }
+                    break;
                 case 'node.mouseout':
                     view.drag_link.show(d_source);
                     state = states.drag_link;
@@ -805,6 +810,29 @@ this.jA.ui = {};
                     break;
                 case 'node.mouseout':
                     state = states.drag_link;
+                    break;
+                }
+            },
+            drag_node : function () {
+                switch (controller.event) {
+                case 'doc.mousemove':
+                    // How far we move the node
+                    mouse = view.pan.mouse();
+                    xy[0] = mouse[0] - xy[0];
+                    xy[1] = mouse[1] - xy[1];
+                    d_source.x += xy[0];
+                    d_source.y += xy[1];
+                    d_source.px = d_source.x;
+                    d_source.py = d_source.y;
+                    xy[0] = mouse[0];
+                    xy[1] = mouse[1];
+                    // Fix it while moving
+                    d_source.fixed = true;
+                    view.update();
+                    break;
+                case 'node.mouseup':
+                    d_source.fixed = false;
+                    state = states.init;
                     break;
                 }
             },
