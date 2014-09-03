@@ -43,7 +43,7 @@ circle.node:hover {
   /*stroke: blue;*/
 }
 
-
+.selected,
 .selection {
   fill: none;
   stroke: black;

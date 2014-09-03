@@ -8,6 +8,7 @@
 // 
 
 // Look at some examples:
+// http://bl.ocks.org/mbostock/4600693
 // http://bl.ocks.org/MoritzStefaner/1377729
 // http://bl.ocks.org/rkirsling/5001347
 // http://bl.ocks.org/benzguo/4370043
@@ -575,29 +576,33 @@ this.jA.ui = {};
                     var node = self.node.filter(function (_d) { return _d === d; });
                     var index = nodes.indexOf(d);
                     if (index < 0) {
+                        d.selected = true;
                         nodes.push(d);
-                        node.classed('selection', true);
                     } else {
+                        d.selected = false;
                         nodes.splice(index, 1);
-                        node.classed('selection', false);
                     }
+                    node.classed('selected', d.selected);
                 },
                 link : function (d) {
                     var link = self.link.select('.link')
                         .filter(function (_d) { return _d === d; });
                     var index = links.indexOf(d);
                     if (index < 0) {
+                        d.selected = true;
                         links.push(d);
-                        link.classed('selection', true);
                     } else {
+                        d.selected = false;
                         links.splice(index, 1);
-                        link.classed('selection', false);
                     }
+                    link.classed('selected', d.selected);
                 },
                 nothing : function () {
                     nodes.length = 0;
                     links.length = 0;
-                    d3.selectAll('.selection').classed('selection', false);
+                    d3.selectAll('.selected')
+                        .classed('selected', false)
+                        .each(function (d) { d.selected = false; });
                 },
                 // Updates graphical appearance of selected_nodes nodes
                 by_rectangle : function () {
@@ -698,6 +703,7 @@ this.jA.ui = {};
         var state; // Reference to a current state
         var xy; // mousedown position
         var d_source;
+        var nodes;
         // States are represented as functions
         var mouse;
         var states = {
@@ -738,8 +744,11 @@ this.jA.ui = {};
                 case 'doc.mousemove':
                     if (d3.event.shiftKey) {
                         xy = view.pan.mouse();
-                        view.select.nothing();
-                        view.select.node(d_source);
+                        if (!d_source.selected) {
+                            view.select.node(d_source);
+                        }
+                        nodes = d3.selectAll('.state.selected');
+                        nodes.each(function (d) { d.fixed = true; });
                         state = states.drag_node;
                     }
                     break;
@@ -819,7 +828,7 @@ this.jA.ui = {};
                 switch (controller.event) {
                 case 'doc.mousemove':
                     if (!d3.event.shiftKey) {
-                        d_source.fixed = false;
+                        nodes.each(function (d) { d.fixed = false; });
                         state = states.init;
                         break;
                     }
@@ -827,20 +836,21 @@ this.jA.ui = {};
                     mouse = view.pan.mouse();
                     xy[0] = mouse[0] - xy[0];
                     xy[1] = mouse[1] - xy[1];
-                    d_source.x += xy[0];
-                    d_source.y += xy[1];
-                    d_source.px = d_source.x;
-                    d_source.py = d_source.y;
+                    nodes.each(function (d) {
+                        d.x += xy[0];
+                        d.y += xy[1];
+                        d.px = d.x;
+                        d.py = d.y;
+                    });
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
                     // Fix it while moving
-                    d_source.fixed = true;
                     view.force.resume();
                     // view.update();
                     break;
                 case 'doc.mouseup':
                 case 'node.mouseup':
-                    d_source.fixed = false;
+                    nodes.each(function (d) { d.fixed = false; });
                     state = states.init;
                     break;
                 }
