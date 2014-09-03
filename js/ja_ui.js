@@ -708,6 +708,18 @@ this.jA.ui = {};
         var mouse;
         var states = {
             init : function (d) {
+                // What if get rid of 'node.' and 'doc.' prefixes?
+                // What if use different automata for document, nodes etc?
+                // switch (d3.event.type) {
+                // case 'mousemove':
+                //     // process it first since it is most frequent
+                //     break;
+                // case 'mousedown':
+                //     var target = d3.event.target || d3.event.srcElement;
+                //     var v = target.__data__;
+                //     console.log(target, v);
+                //     break;
+                // }
                 switch (controller.event) {
                 case 'node.mousedown':
                     d_source = d;
