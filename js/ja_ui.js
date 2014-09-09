@@ -12,6 +12,7 @@
 // http://bl.ocks.org/MoritzStefaner/1377729
 // http://bl.ocks.org/rkirsling/5001347
 // http://bl.ocks.org/benzguo/4370043
+// http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
 
 // The global variable (module) to access to the methods
 this.jA = this.jA || {};
