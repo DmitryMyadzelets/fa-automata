@@ -100,17 +100,6 @@ View.prototype.graph = function (graph) {
 
 
 
-// View.prototype.update = function () {
-//     console.log(this);
-//     this.node = this.node.data(this._graph);
-//     this.node.exit().remove();
-//     this.node.enter().append('g')
-//         .attr('transform', get_node_transformation)
-//         .append('circle')
-//         .attr('r', 16);
-// };
-
-
 ed.view = function (container, graph) {
     return new View(container, graph);
 };
