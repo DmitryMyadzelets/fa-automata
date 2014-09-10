@@ -2,6 +2,7 @@
 /*global jA*/
 
 console.log('test');
+
 var view = jA.editor.view();
 view.graph({
     nodes : [{}, {}],
