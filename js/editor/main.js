@@ -1,7 +1,3 @@
-!function () {
-
-var ed = { version: "1.0.0" };
-
 
 // JSLint options:
 /*global d3, ed*/
@@ -123,8 +119,3 @@ ed.view = function (container, graph) {
 };
 
 
-
-this.jA = this.jA || {};
-this.jA.editor = ed;
-
-}(window);

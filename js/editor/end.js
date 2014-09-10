@@ -1,3 +1,5 @@
-	this.jA = this.jA || {};
-	this.jA.editor = ed;
-}();
+
+this.jA = this.jA || {};
+this.jA.editor = ed;
+
+}(window);

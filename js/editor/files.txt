@@ -1,2 +1,3 @@
 start.js
+main.js
 end.js
