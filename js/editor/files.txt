@@ -2,4 +2,5 @@ start.js
 vector.js
 elements.js
 view.js
+controller.js
 end.js

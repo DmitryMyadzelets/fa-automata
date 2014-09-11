@@ -8,9 +8,11 @@ body {
 
 
 div {
-  /*position: absolute;*/
+  position: relative;
+  float: left;
   border:solid 1px orange;
-  margin: 1em;
+  margin: 1px;
+  padding: 1px;
   /*overflow: hidden;
   bottom: 0;
   right: 0;
