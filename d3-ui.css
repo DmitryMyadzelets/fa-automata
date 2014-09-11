@@ -7,14 +7,15 @@ body {
 }
 
 
-#svg_container {
-  position: absolute;
-  /*border:solid 1px orange;*/
-  /*overflow: hidden;*/
+div {
+  /*position: absolute;*/
+  border:solid 1px orange;
+  margin: 1em;
+  /*overflow: hidden;
   bottom: 0;
   right: 0;
   left: 0;
-  top: 0;
+  top: 0;*/
 }
 
 
@@ -32,6 +33,14 @@ body {
 }
 
 /* SVG */
+g.nodes circle {
+  fill: dodgerblue;
+  stroke: #555;
+  stroke-width: 0.09em;
+  fill-opacity: 0.5;
+}
+
+
 circle.node {
   fill: dodgerblue;
   stroke: #555;
@@ -63,13 +72,13 @@ rect.selection {
 
 /* Edge of graph */
 
-path.link {
+g.links path.link {
   fill: none;
   stroke: #333;
   stroke-width: 0.09em;
 }
 
-path.catchlink {
+g.links path.catchlink {
   fill: none;
   stroke: yellow;
   stroke-width: 0.8em;

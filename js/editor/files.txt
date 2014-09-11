@@ -1,3 +1,5 @@
 start.js
-main.js
+vector.js
+elements.js
+view.js
 end.js

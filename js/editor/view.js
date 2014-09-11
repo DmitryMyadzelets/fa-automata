@@ -1,6 +1,7 @@
 
 // JSLint options:
-/*global d3, ed*/
+/*global d3, ed, elements*/
+"use strict";
 
 
 
@@ -13,14 +14,16 @@ function get_empty_graph() {
 }
 
 
-
+// Updates SVG structure according to the graph structure
 function update() {
     this.node = this.node.data(this._graph.nodes);
+    this.node.enter().call(elements.add_node);
     this.node.exit().remove();
-    this.node.enter().append('g')
-        .attr('transform', get_node_transformation)
-        .append('circle')
-        .attr('r', 16);
+
+    this.link = this.link.data(this._graph.edges);
+    this.link.enter().call(elements.add_link);
+    this.link.exit().remove();
+
     this.force.start();
 }
 
@@ -31,14 +34,6 @@ function set_graph(graph) {
     this._graph = graph || get_empty_graph();
     this.force.nodes(this._graph.nodes).links(this._graph.edges);
     update.call(this);
-}
-
-
-
-function get_node_transformation(d) {
-    d.x = d.x || 0;
-    d.y = d.y || 0;
-    return "translate(" + d.x + "," + d.y + ")";
 }
 
 
@@ -78,11 +73,14 @@ function View(aContainer, aGraph) {
         .chargeDistance(450)
         .size([width, height])
         .on('tick', function () {
-            self.node.attr('transform', get_node_transformation);
+            self.node.attr('transform', elements.get_node_transformation);
+            // TODO: you calculate paths both for link and catchlinks which
+            // have the same coordinates. Better just copy it.
+            self.link.selectAll('path').attr('d', elements.get_link_transformation);
         });
 
     this.node = svg.append('g').attr('class', 'nodes').selectAll('g');
-    this.edge = svg.append('g').attr('class', 'edges').selectAll('g');
+    this.link = svg.append('g').attr('class', 'links').selectAll('g');
 
     // Attach graph
     set_graph.call(this, aGraph);
