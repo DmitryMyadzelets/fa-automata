@@ -14,6 +14,7 @@ function get_empty_graph() {
 }
 
 
+
 // Updates SVG structure according to the graph structure
 function update() {
     this.node = this.node.data(this._graph.nodes);

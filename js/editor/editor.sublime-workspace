@@ -1,0 +1,2007 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"add_svg_",
+				"add_svg_node"
+			],
+			[
+				"sr",
+				"srcElement         Event"
+			],
+			[
+				"mouse",
+				"mousedown"
+			],
+			[
+				"tran",
+				"transform"
+			],
+			[
+				"mousedow",
+				"onmousedown"
+			],
+			[
+				"dra",
+				"drag"
+			],
+			[
+				"eve",
+				"event             Window"
+			],
+			[
+				"mou",
+				"mousedown"
+			],
+			[
+				"drag",
+				"dragstart"
+			],
+			[
+				"mous",
+				"mousedown"
+			],
+			[
+				"stop",
+				"stopPropagation()  Event"
+			],
+			[
+				"dragsta",
+				"dragstarted"
+			],
+			[
+				"zoom",
+				"zoomed"
+			],
+			[
+				"upda",
+				"update_link_points"
+			],
+			[
+				"unsele",
+				"unselect_all"
+			],
+			[
+				"e",
+				"links  (variable)"
+			],
+			[
+				"pa",
+				"padding-right"
+			],
+			[
+				"wid",
+				"width"
+			],
+			[
+				"preven",
+				"stopPropagation()	Event"
+			],
+			[
+				"Stop",
+				"stopPropagation()  Event"
+			],
+			[
+				"select_",
+				"select_only_node"
+			],
+			[
+				"sel",
+				"selection"
+			],
+			[
+				"doc",
+				"on_doc_mousemove"
+			],
+			[
+				"on_li",
+				"on_link_mouseover"
+			],
+			[
+				"on_do",
+				"on_doc_mousedown"
+			],
+			[
+				"unselect",
+				"unselect_all"
+			],
+			[
+				"selc",
+				"selected	Option"
+			],
+			[
+				"unselec",
+				"unselect_all"
+			],
+			[
+				"on_mou",
+				"on_doc_mousedown"
+			],
+			[
+				"toEle",
+				"toElement	IE Event"
+			],
+			[
+				"on_mouse",
+				"on_mousedown"
+			],
+			[
+				"index",
+				"indexOf()          Array"
+			],
+			[
+				"selec",
+				"selected"
+			],
+			[
+				"inde",
+				"indexOf()          Array"
+			],
+			[
+				"process",
+				"process_event"
+			],
+			[
+				"Has",
+				"hasOwnProperty()"
+			],
+			[
+				"ma",
+				"marker-end"
+			],
+			[
+				"to",
+				"toBe"
+			],
+			[
+				"lo",
+				"log	log"
+			],
+			[
+				"str",
+				"stringify"
+			],
+			[
+				"transi",
+				"transitions_methods"
+			],
+			[
+				"func",
+				"function"
+			],
+			[
+				"ind",
+				"indexed_property"
+			],
+			[
+				"ob",
+				"observable"
+			],
+			[
+				"o",
+				"object"
+			],
+			[
+				"in",
+				"indexed"
+			],
+			[
+				"obj",
+				"objects"
+			],
+			[
+				"de",
+				"describe"
+			],
+			[
+				"basic_set",
+				"basic_set_methods"
+			],
+			[
+				"binary",
+				"binary_set_methods"
+			],
+			[
+				"has",
+				"hasOwnProperty()"
+			],
+			[
+				"pro",
+				"prototype"
+			],
+			[
+				"me",
+				"method	Form"
+			],
+			[
+				"wri",
+				"writeln()       Document"
+			],
+			[
+				"obs",
+				"observable"
+			],
+			[
+				"make",
+				"make_F_module"
+			],
+			[
+				"get",
+				"get_common_events"
+			],
+			[
+				"crea",
+				"create_module"
+			],
+			[
+				"comp",
+				"complement"
+			],
+			[
+				"LT",
+				"LT1"
+			],
+			[
+				"fau",
+				"faulty"
+			],
+			[
+				"faul",
+				"faulty"
+			],
+			[
+				"mo",
+				"modules"
+			],
+			[
+				"obse",
+				"observable"
+			],
+			[
+				"pu",
+				"push"
+			],
+			[
+				"for",
+				"force"
+			],
+			[
+				"le",
+				"length-1"
+			],
+			[
+				"en",
+				"events"
+			],
+			[
+				"con",
+				"continue"
+			],
+			[
+				"co",
+				"common"
+			],
+			[
+				"ope",
+				"opening"
+			],
+			[
+				"cls",
+				"close_hi"
+			],
+			[
+				"open",
+				"opening"
+			],
+			[
+				"get_",
+				"get_events_by_labels"
+			],
+			[
+				"la",
+				"labels"
+			],
+			[
+				"clos",
+				"close_hi"
+			],
+			[
+				"clo",
+				"close_hi"
+			],
+			[
+				"cl",
+				"close_lo"
+			],
+			[
+				"lig",
+				"light_of"
+			],
+			[
+				"li",
+				"light_on"
+			],
+			[
+				"re",
+				"results"
+			],
+			[
+				"at",
+				"attr"
+			],
+			[
+				"nor",
+				"node_radius"
+			],
+			[
+				"p",
+				"parent"
+			],
+			[
+				"lab",
+				"label"
+			],
+			[
+				"lin",
+				"links"
+			],
+			[
+				"node",
+				"node_radius"
+			],
+			[
+				"no",
+				"node_radius"
+			],
+			[
+				"nod",
+				"node_radius"
+			],
+			[
+				"M1",
+				"m1_2_3"
+			],
+			[
+				"m1",
+				"m1_2_3"
+			],
+			[
+				"m",
+				"m1_2"
+			],
+			[
+				"sho",
+				"show_dfs"
+			],
+			[
+				"shoe",
+				"show_modules"
+			],
+			[
+				"do",
+				"do_hi"
+			],
+			[
+				"padd",
+				"padding-bottom"
+			],
+			[
+				"i",
+				"italic"
+			],
+			[
+				"fo",
+				"font-style"
+			],
+			[
+				"fon",
+				"font"
+			],
+			[
+				"item",
+				"itemprop	HTML5"
+			],
+			[
+				"sta",
+				"start"
+			],
+			[
+				"clea",
+				"clear_map"
+			],
+			[
+				"fa",
+				"faulty"
+			],
+			[
+				"proce",
+				"process_state"
+			],
+			[
+				"visi",
+				"visited"
+			],
+			[
+				"cn",
+				"cnt_new_states"
+			],
+			[
+				"vis",
+				"visited"
+			],
+			[
+				"trans",
+				"transitions"
+			],
+			[
+				"show_",
+				"show_dfs"
+			],
+			[
+				"mar",
+				"margin-left"
+			],
+			[
+				"valid",
+				"valid_name"
+			],
+			[
+				"is",
+				"isset()"
+			],
+			[
+				"incl",
+				"include"
+			],
+			[
+				"array",
+				"array_merge"
+			],
+			[
+				"array_ke",
+				"array_keys()"
+			],
+			[
+				"array_p",
+				"array_push"
+			],
+			[
+				"u",
+				"ul	Tag"
+			],
+			[
+				"fsee",
+				"fseek()"
+			],
+			[
+				"fp",
+				"fputcsv"
+			],
+			[
+				"strto",
+				"strtotime"
+			],
+			[
+				"da",
+				"days_left"
+			],
+			[
+				"yo",
+				"your_date"
+			],
+			[
+				"show_t",
+				"show_modules_transitions"
+			],
+			[
+				"show",
+				"show_states"
+			],
+			[
+				"be",
+				"before"
+			],
+			[
+				"max",
+				"max_state"
+			],
+			[
+				"nu",
+				"num_items"
+			],
+			[
+				"ni",
+				"num_items"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "editor.js",
+			"settings":
+			{
+				"buffer_size": 8792,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "files.txt",
+			"settings":
+			{
+				"buffer_size": 45,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "end.js",
+			"settings":
+			{
+				"buffer_size": 58,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "\n// JSLint options:\n/*global vec */\n\"use strict\";\n\nvar elements = {};\n\n\n//\n// Methods to calculate loop, stright and curved lines for links\n// \nelements.make_edge = (function () {\n    var v = [0, 0]; // temporal vector\n    // var r = node_radius;\n    var r = 16;\n    var norm = [0, 0];\n\n    // Constants for calculating a loop\n    var K = (function () {\n        var ANGLE_FROM = Math.PI / 3;\n        var ANGLE_TO = Math.PI / 12;\n        return {\n            DX1 : r * Math.cos(ANGLE_FROM),\n            DY1 : r * Math.sin(ANGLE_FROM),\n            DX2 : r * 4 * Math.cos(ANGLE_FROM),\n            DY2 : r * 4 * Math.sin(ANGLE_FROM),\n            DX3 : r * 4 * Math.cos(ANGLE_TO),\n            DY3 : r * 4 * Math.sin(ANGLE_TO),\n            DX4 : r * Math.cos(ANGLE_TO),\n            DY4 : r * Math.sin(ANGLE_TO),\n            NX : Math.cos(ANGLE_FROM - Math.PI / 24),\n            NY : Math.sin(ANGLE_FROM - Math.PI / 24)\n        };\n    }());\n\n\n    return {\n        // Calculates vectors of edge from given vectors 'v1' to 'v2'\n        // Substracts radius of nodes 'r' from both vectors\n        stright : function (v1, v2) {\n            vec.subtract(v2, v1, v);    // v = v2 - v1\n            vec.normalize(v, norm);     // norm = normalized v\n            vec.scale(norm, r, v);      // v = norm * r\n            vec.add(v1, v, v1);         // v1 = v1 + v\n            vec.subtract(v2, v, v2);    // v2 = v2 - v\n            // Middle of the vector\n            // cv[0] = (v1[0] + v2[0])/2\n            // cv[1] = (v1[1] + v2[1])/2\n        },\n        // Calculates vectors of a dragged edge\n        // Substracts radius of nodes 'r' from the first vector\n        // Substracts radius of nodes 'r' from the last vector if to_node is true\n        drag : function (v1, v2, to_node) {\n            vec.subtract(v2, v1, v);    // v = v2 - v1\n            vec.normalize(v, norm);     // v = normalized v\n            vec.scale(norm, r, v);      // v = v * r\n            vec.add(v1, v, v1);         // v1 = v1 + v\n            if (to_node) {\n                vec.subtract(v2, v, v2); // if subtract # v2 = v2 - v\n            }\n        },\n        // Calculates vectors of Bezier curve for curved edge\n        curve : function (v1, v2, cv) {\n            vec.subtract(v2, v1, v);\n            vec.normalize(v, norm);\n            cv[0] = (v1[0] + v2[0]) * 0.5 + norm[1] * r * 2;\n            cv[1] = (v1[1] + v2[1]) * 0.5 - norm[0] * r * 2;\n            vec.copy(cv, v);\n            this.stright(v1, v);\n            vec.copy(cv, v);\n            this.stright(v2, v);\n        },\n        loop : function (v1, v2, cv1, cv2) {\n            // Some Bazier calc (http://www.moshplant.com/direct-or/bezier/math.html)\n            vec.copy(v1, v);\n            // Coordinates of the Bazier curve (60 degrees angle)\n            v1[0] = v[0] + K.DX1;\n            v1[1] = v[1] - K.DY1;\n            //\n            cv1[0] = v[0] + K.DX2;\n            cv1[1] = v[1] - K.DY2;\n            //\n            cv2[0] = v[0] + K.DX3; // 15 degrees\n            cv2[1] = v[1] - K.DY3;\n            //\n            v2[0] = v[0] + K.DX4;\n            v2[1] = v[1] - K.DY4;\n        }\n    };\n\n}());\n\n\n\n// Returns SVG string for graph edge\nelements.get_link_transformation = (function () {\n    var v1 = [0, 0];\n    var v2 = [0, 0];\n    var cv = [0, 0];\n    var cv2 = [0, 0];\n    return function (d) {\n        v1[0] = d.source.x;\n        v1[1] = d.source.y;\n        v2[0] = d.target.x;\n        v2[1] = d.target.y;\n        switch (d.type) {\n        case 1:\n            elements.make_edge.curve(v1, v2, cv);\n            break;\n        case 2:\n            elements.make_edge.loop(v1, v2, cv, cv2);\n            break;\n        default:\n            elements.make_edge.stright(v1, v2);\n        }\n        // Keep link points for further use (i.e. link selection)\n        d.x1 = v1[0];\n        d.y1 = v1[1];\n        d.x2 = v2[0];\n        d.y2 = v2[1];\n        switch (d.type) {\n        case 1:\n            return 'M' + v1[0] + ',' + v1[1] + 'Q' + cv[0] + ',' + cv[1] + ',' + v2[0] + ',' + v2[1];\n        case 2:\n            return 'M' + v1[0] + ',' + v1[1] + 'C' + cv[0] + ',' + cv[1] + ',' + cv2[0] + ',' + cv2[1] + ',' + v2[0] + ',' + v2[1];\n        default:\n            return 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1];\n        }\n    };\n}());\n\n\n\nelements.get_node_transformation = function (d) {\n    d.x = d.x || 0;\n    d.y = d.y || 0;\n    return \"translate(\" + d.x + \",\" + d.y + \")\";\n};\n\n\n\nelements.add_node = function (selection) {\n    selection.append('g')\n        .attr('transform', this.get_node_transformation)\n        .append('circle')\n        .attr('r', 16);\n};\n\n\n\n// Adds SVG elements representing a graph link/edge\n// Returns root of the added elements\nelements.add_link = function (selection) {\n    var g = selection.append('g');\n        // .on('dblclick', on_link_dblclick)\n        // .on('mousedown', on_link_mousedown);\n        // .on('mouseover', controller.on_link_mouseover)\n        // .on('mousemove', controller.on_link_mousemove);\n\n    g.append('path')\n        .attr('class', 'link') // CSS class style\n        .attr('marker-end', 'url(#marker-arrow)');\n\n    g.append('path')\n        .attr('class', 'catchlink');\n\n    return g;\n};\n\n\n",
+			"file": "elements.js",
+			"file_size": 5399,
+			"file_write_time": 130549101415156250,
+			"settings":
+			{
+				"buffer_size": 5188,
+				"line_ending": "Windows",
+				"name": "elements.js"
+			}
+		},
+		{
+			"file": "view.js",
+			"settings":
+			{
+				"buffer_size": 2546,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.php",
+			"settings":
+			{
+				"buffer_size": 12946,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/test.js",
+			"settings":
+			{
+				"buffer_size": 396,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "Packages/HTML Compress and Replace/HTML Compress and Replace.sublime-build",
+	"command_palette":
+	{
+		"height": 272.0,
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"Package Control: en",
+				"Package Control: Enable Package"
+			],
+			[
+				"Package Control: li",
+				"Package Control: List Packages"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: d",
+				"Package Control: Disable Package"
+			],
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: re",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: inst",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: di",
+				"Package Control: Disable Package"
+			],
+			[
+				"Package Control: in ",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: de",
+				"Package Control: Disable Package"
+			],
+			[
+				"Package Control: e",
+				"Package Control: Enable Package"
+			],
+			[
+				"Package Control: rem",
+				"Package Control: Remove Package"
+			],
+			[
+				"",
+				"Build: Build"
+			],
+			[
+				"Package Control: i",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"dis",
+				"Package Control: Discover Packages"
+			]
+		],
+		"width": 536.0
+	},
+	"console":
+	{
+		"height": 167.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": false,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/vector.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/d3-ui.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/start.js",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinify/CombineAndMinfiy.py",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinify/Main.sublime-menu",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinify/Default (Windows).sublime-keymap",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinify/CombineAndMinfiy.sublime-settings",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinify/readme.txt",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinfiy/CombineAndMinfiy.sublime-settings",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinfiy/readme.txt",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/User/CombineAndMinfiy.sublime-settings",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/editor.sublime-project",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/files.txt",
+		"/E/#DmitryMyadzelets/#Projects/2014 - translit.ru/README.md",
+		"/E/#DmitryMyadzelets/#Projects/2014 - translit.ru/translit.ru.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/Sticky Force Layout.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/graph.json",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/brush.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/Drag_and_Zoom.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/dots.tsv",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/lib/d3.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/reviews.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/main.css",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/convert.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/automata.py",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/transitions.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/spec/basic_sets.test.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/array_properties.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/indexed_property.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/DES.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/forward_algorithm.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/blog.md",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/SpecRunner.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/jA.sublime-project",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/compressed/master.min.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/compressed/master.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/des.js",
+		"/E/#DmitryMyadzelets/#Projects/vCardParser/VCardParser.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/demo/index.html",
+		"/E/#DmitryMyadzelets/#Projects/vCardParser/Test/TestData.js",
+		"/E/#DmitryMyadzelets/#Projects/vCardParser/Test/VCardParserTest.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/demo/contacts.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/demo/sample.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/contacts.js",
+		"/E/#DmitryMyadzelets/#Projects/vcard.js/vcard.js",
+		"/E/Documents and Settings/Dmitry/Desktop/JS - good parts/program.js",
+		"/E/Documents and Settings/Dmitry/Desktop/JS - good parts/program.html",
+		"/E/Documents and Settings/Dmitry/Desktop/test.html",
+		"/E/#DmitryMyadzelets/#Projects/vCard-site/js/main.js",
+		"/E/#DmitryMyadzelets/#Projects/vCard-site/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/sizeof.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/tests/jasmine-standalone-1.3.1/spec/editor.test.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/automata2.js",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-build",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-settings",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/index2.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/tesis.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/forward_algorithm.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/benchmark_sync.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/benchmark_sync.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ModulesCoupling.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/ModulesCoupling.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ModulesCoupling.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/main.css",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/main.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/faxy.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/tesis.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/article.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/draw.coffee",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/draw.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/main2.coffee",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/User/Preferences.sublime-settings",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/automata2.coffee",
+		"/E/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CoffeeScript/CoffeeScript.sublime-build",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/iscrizione.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/iscrizione_form.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/2.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/2.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/iscrizione_form.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/compressed/2.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata2.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/blog.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata2.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/graph.test.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/DES.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/compressed/DES.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/compressed/bfs.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/main.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/ModulesCoupling.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/ModulesCoupling.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/des.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/SpecRunner.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/bfs.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/draw.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/tests.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/autogenerated.colt",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/editor.coffee",
+		"/E/Documents and Settings/Dmitry/Desktop/btc.md",
+		"/E/Documents and Settings/Dmitry/Desktop/TextToSpeech.md",
+		"/E/Documents and Settings/Dmitry/Desktop/PhD/Tools/FAED - Finite Automta EDitor/faed/js/faed.js",
+		"/E/Documents and Settings/Dmitry/Desktop/PhD/Tools/FAED - Finite Automta EDitor/faed/js/fa.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/erasmus.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Erazmus.ru/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Erazmus.ru/main.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/compressed/main.css",
+		"/E/Documents and Settings/Dmitry/Desktop/Association/www.porticodelleparole.it/compressed/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/HTML Compressor/README.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/HTML Compressor/HTML Compressor.sublime-build",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/HTML Compress and Replace/HTML Compress and Replace.sublime-build",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/YUI Compressor/README.md",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/Package Control/Package Control.sublime-settings",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/YUI Compressor/YUI Compressor.sublime-build",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/graph.test.js",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/readme.mdown",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/index.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/readme.html",
+		"/E/Documents and Settings/Dmitry/Desktop/Programs/Sublime Text/Data/Packages/CoffeeScript/CoffeeScript.sublime-build"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"edge",
+			"this.graph",
+			"select",
+			"selection",
+			"'selection'",
+			"pan",
+			"pan()",
+			"get_node_translate",
+			"transform",
+			"get_node_translate",
+			"NODE",
+			"pointer",
+			"rect",
+			"container",
+			"pan_vector",
+			"enable_drag",
+			"shiftKey",
+			"\"",
+			"function on",
+			".on(",
+			"new_link",
+			"exist",
+			"drop_link_or_exit",
+			"drag_link",
+			"d.",
+			"selection.unselect_all()",
+			"unselect_all",
+			"update",
+			"select_onl",
+			"typeof",
+			"Func",
+			"svg_element",
+			"controller.event",
+			"controller.",
+			"function ()",
+			"controller.event",
+			"};",
+			"controller.on",
+			"controller.on_node_mouseup",
+			"node_mousedown",
+			"'node.mousedown'",
+			"controller.on_node_mouseup",
+			".on(",
+			"on(",
+			"going_from_node",
+			"self.link",
+			"this.link",
+			"not_selected_nodes",
+			"selected",
+			"create_new_node",
+			"xy_down",
+			"mousover",
+			"xy",
+			"'this'",
+			"node",
+			"object",
+			"start_selection",
+			"link",
+			"rectangle.",
+			"continer",
+			"rc",
+			"show_selected_nodes",
+			"var ",
+			"selection_rect",
+			"split",
+			"rc",
+			"group",
+			"g",
+			"this",
+			"node",
+			"-",
+			"marker-end",
+			"makeLink",
+			"out",
+			"getLinkCurve",
+			"\"",
+			"source",
+			"requireOwnProperties",
+			"o,",
+			"o",
+			"visit",
+			"match",
+			"regexps",
+			"bitArray",
+			"value",
+			"array_properties",
+			".binary",
+			"=",
+			"module.uniproperties.",
+			"module.",
+			"objects",
+			"binary_properties",
+			"binary_methods",
+			"objects_methods",
+			"key",
+			"get_values",
+			"copy_values2object",
+			"binary",
+			"object_methods",
+			"binary_methods",
+			"binary",
+			"module",
+			"sets",
+			"cardinality",
+			"binary_set",
+			"binary_set_properties",
+			"binary_set_methods",
+			"abstract_set_properties",
+			"abstract_set_methods",
+			"case",
+			"scope",
+			"basic_set_properties",
+			"basic_set_methods",
+			"resizeArray",
+			"binary_set",
+			"basic_set",
+			"basic_set_methods",
+			"itself",
+			"_open",
+			"_closing",
+			"_opening",
+			"_stoped",
+			"_open",
+			"_closed",
+			"name+",
+			"'a'",
+			"'A'",
+			"'a'"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"=",
+			"'",
+			";",
+			"properties",
+			",",
+			"à",
+			"ù",
+			"è",
+			"labels",
+			".transitions",
+			"Uint16Array",
+			"sort",
+			"nix",
+			"tix",
+			"g.edges.v.length",
+			"g.nodes.v.length",
+			"'",
+			"draw.automata",
+			"automaton",
+			"automata",
+			"draw.automaton",
+			"vec.",
+			"console.log(",
+			"console.log",
+			"print = console.log\nprint = console.log\nconsole.log",
+			"edges.curved",
+			"digraph",
+			".create",
+			"for_arrays_of",
+			", ",
+			"}",
+			"{",
+			"",
+			"\"y\"",
+			"\"x\"",
+			"},{y:",
+			"}},",
+			"{{x:",
+			"},{y:",
+			"{x:",
+			"\",\"",
+			"",
+			"#",
+			"",
+			"-",
+			"editor",
+			"canvas",
+			"edit.dy",
+			"edit.dx",
+			"unpack",
+			"pack",
+			"Edges",
+			"g.",
+			"",
+			"#",
+			""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 5,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "editor.js",
+					"settings":
+					{
+						"buffer_size": 8792,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "files.txt",
+					"settings":
+					{
+						"buffer_size": 45,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								18,
+								18
+							]
+						],
+						"settings":
+						{
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "end.js",
+					"settings":
+					{
+						"buffer_size": 58,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								47,
+								47
+							]
+						],
+						"settings":
+						{
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "elements.js",
+					"settings":
+					{
+						"buffer_size": 5188,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5007,
+								5007
+							]
+						],
+						"settings":
+						{
+							"auto_name": "elements.js",
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1333.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "view.js",
+					"settings":
+					{
+						"buffer_size": 2546,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								489,
+								489
+							]
+						],
+						"settings":
+						{
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.php",
+					"settings":
+					{
+						"buffer_size": 12946,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8763,
+								8763
+							]
+						],
+						"settings":
+						{
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3861.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/test.js",
+					"settings":
+					{
+						"buffer_size": 396,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								396,
+								396
+							]
+						],
+						"settings":
+						{
+							"codeintel": true,
+							"codeintel_config":
+							{
+								"JavaScript":
+								{
+									"codeintel_max_recursive_dir_depth": 2.0,
+									"codeintel_scan_files_in_project": false,
+									"javascriptExtraPaths":
+									[
+									]
+								},
+								"PHP":
+								{
+									"codeintel_max_recursive_dir_depth": 5.0,
+									"codeintel_scan_files_in_project": false,
+									"phpExtraPaths":
+									[
+									]
+								},
+								"Python":
+								{
+									"env":
+									{
+									}
+								}
+							},
+							"codeintel_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_live": true,
+							"codeintel_live_enabled_languages":
+							[
+								"JavaScript",
+								"Mason",
+								"XBL",
+								"XUL",
+								"RHTML",
+								"SCSS",
+								"Python",
+								"HTML",
+								"Ruby",
+								"Python3",
+								"XML",
+								"Sass",
+								"XSLT",
+								"Django",
+								"HTML5",
+								"Perl",
+								"CSS",
+								"Twig",
+								"Less",
+								"Smarty",
+								"Node.js",
+								"Tcl",
+								"TemplateToolkit",
+								"PHP"
+							],
+							"codeintel_max_recursive_dir_depth": 10.0,
+							"codeintel_scan_exclude_dir":
+							{
+								"JavaScript":
+								[
+									"/build/",
+									"/min/"
+								]
+							},
+							"codeintel_scan_files_in_project": true,
+							"codeintel_selected_catalogs":
+							[
+								"PyWin32",
+								"jQuery",
+								"Rails"
+							],
+							"codeintel_snippets": true,
+							"codeintel_syntax_map":
+							{
+								"Python Django": "Python"
+							},
+							"codeintel_tooltips": "popup",
+							"sublime_auto_complete": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 32.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 182.0
+	},
+	"replace":
+	{
+		"height": 62.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}

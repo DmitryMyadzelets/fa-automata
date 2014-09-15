@@ -152,7 +152,6 @@ elements.add_node = function (selection) {
 // Returns root of the added elements
 elements.add_link = function (selection) {
     var g = selection.append('g');
-        // .attr('class', 'transition')
         // .on('dblclick', on_link_dblclick)
         // .on('mousedown', on_link_mousedown);
         // .on('mouseover', controller.on_link_mouseover)

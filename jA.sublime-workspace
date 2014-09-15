@@ -4,8 +4,40 @@
 		"selected_items":
 		[
 			[
+				"padd",
+				"padding"
+			],
+			[
+				"sr",
+				"srcElement         Event"
+			],
+			[
 				"mouse",
 				"mousedown"
+			],
+			[
+				"tran",
+				"transform"
+			],
+			[
+				"mousedow",
+				"onmousedown"
+			],
+			[
+				"dra",
+				"drag"
+			],
+			[
+				"eve",
+				"event             Window"
+			],
+			[
+				"mou",
+				"mousedown"
+			],
+			[
+				"drag",
+				"dragstart"
 			],
 			[
 				"mous",
@@ -50,10 +82,6 @@
 			[
 				"Stop",
 				"stopPropagation()  Event"
-			],
-			[
-				"mou",
-				"mouseup"
 			],
 			[
 				"select_",
@@ -320,10 +348,6 @@
 				"links"
 			],
 			[
-				"dra",
-				"dragstart"
-			],
-			[
 				"node",
 				"node_radius"
 			],
@@ -358,10 +382,6 @@
 			[
 				"do",
 				"do_hi"
-			],
-			[
-				"padd",
-				"padding-bottom"
 			],
 			[
 				"i",
@@ -494,39 +514,11 @@
 			[
 				"Oj",
 				"object"
-			],
-			[
-				"bit",
-				"bitArray"
-			],
-			[
-				"len",
-				"length"
-			],
-			[
-				"U",
-				"Uint32Array"
-			],
-			[
-				"Un",
-				"Uint16Array"
-			],
-			[
-				"ta",
-				"target"
 			]
 		]
 	},
 	"buffers":
 	[
-		{
-			"file": "d3-ui.html",
-			"settings":
-			{
-				"buffer_size": 559,
-				"line_ending": "Windows"
-			}
-		},
 		{
 			"file": "js/ui.coffee",
 			"settings":
@@ -536,27 +528,11 @@
 			}
 		},
 		{
-			"file": "d3-ui.css",
-			"settings":
-			{
-				"buffer_size": 1375,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "js/ja_ui.js",
 			"settings":
 			{
-				"buffer_size": 28588,
+				"buffer_size": 32652,
 				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "lib/d3.js",
-			"settings":
-			{
-				"buffer_size": 325414,
-				"line_ending": "Unix"
 			}
 		}
 	],
@@ -652,8 +628,22 @@
 	},
 	"file_history":
 	[
-		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/reviews.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/d3-ui.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/d3-ui.css",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/test.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/tests.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/main.js",
+		"/E/Documents and Settings/Dmitry/Desktop/google_5000000.txt",
+		"/E/#DmitryMyadzelets/#Projects/2014 - translit.ru/README.md",
+		"/E/#DmitryMyadzelets/#Projects/2014 - translit.ru/translit.ru.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/index.php",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/Sticky Force Layout.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/graph.json",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/brush.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/Drag_and_Zoom.html",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/dots.tsv",
+		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/lib/d3.js",
+		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/reviews.html",
 		"/E/#DmitryMyadzelets/#Projects/2013 - Association/www.porticodelleparole.it/main.css",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/ui.js",
 		"/E/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/convert.js",
@@ -765,21 +755,7 @@
 		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/automata.js",
 		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/nfa.coffee",
 		"/E/Documents and Settings/Dmitry/Desktop/Erazmus.ru/index.html",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/.gitignore",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/faxy.coffee",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/draw.js",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/editor.test.coffee",
-		"/E/Documents and Settings/Dmitry/Desktop/Sublime Text/Data/Packages/MarkdownEditing/README.md",
-		"/E/Documents and Settings/Dmitry/Desktop/Sublime Text/Data/Packages/Package Control/Package Control.sublime-settings",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/README.md",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/lib/jstorage.js",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/textarea.coffee",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/undo.coffee",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/textarea.js",
-		"/E/Documents and Settings/Dmitry/Desktop/Sublime Text/Data/Packages/Default/Preferences.sublime-settings",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/faxy.js",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/tests/jasmine-standalone-1.3.1/spec/editor.test.js",
-		"/E/Documents and Settings/Dmitry/Desktop/Circles/js/dfa.coffee"
+		"/E/Documents and Settings/Dmitry/Desktop/Circles/.gitignore"
 	],
 	"find":
 	{
@@ -797,6 +773,24 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"tick",
+			"update_svg_size",
+			"resize",
+			"select",
+			"selection",
+			"'selection'",
+			"pan",
+			"pan()",
+			"get_node_translate",
+			"transform",
+			"get_node_translate",
+			"NODE",
+			"pointer",
+			"rect",
+			"container",
+			"pan_vector",
+			"enable_drag",
+			"shiftKey",
 			"\"",
 			"function on",
 			".on(",
@@ -906,25 +900,7 @@
 			"_closed",
 			"name+",
 			"'a'",
-			"'A'",
-			"'a'",
-			"a",
-			"name",
-			"A_",
-			"LT1",
-			"A_LT1",
-			"m1",
-			"M",
-			"inter",
-			"N",
-			"n",
-			"N",
-			"intersection",
-			"i",
-			"interse",
-			"1",
-			"observable",
-			"."
+			"'A'"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -998,39 +974,11 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "d3-ui.html",
-					"settings":
-					{
-						"buffer_size": 559,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								500,
-								500
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
 					"file": "js/ui.coffee",
 					"settings":
 					{
@@ -1041,8 +989,8 @@
 						"selection":
 						[
 							[
-								5327,
-								5327
+								6403,
+								6403
 							]
 						],
 						"settings":
@@ -1052,149 +1000,17 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2850.0,
+						"translation.y": 3588.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "d3-ui.css",
-					"settings":
-					{
-						"buffer_size": 1375,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"codeintel": true,
-							"codeintel_config":
-							{
-								"JavaScript":
-								{
-									"codeintel_max_recursive_dir_depth": 2.0,
-									"codeintel_scan_files_in_project": false,
-									"javascriptExtraPaths":
-									[
-									]
-								},
-								"PHP":
-								{
-									"codeintel_max_recursive_dir_depth": 5.0,
-									"codeintel_scan_files_in_project": false,
-									"phpExtraPaths":
-									[
-									]
-								},
-								"Python":
-								{
-									"env":
-									{
-									}
-								}
-							},
-							"codeintel_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_live": true,
-							"codeintel_live_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_max_recursive_dir_depth": 10.0,
-							"codeintel_scan_exclude_dir":
-							{
-								"JavaScript":
-								[
-									"/build/",
-									"/min/"
-								]
-							},
-							"codeintel_scan_files_in_project": true,
-							"codeintel_selected_catalogs":
-							[
-								"PyWin32",
-								"jQuery",
-								"Rails"
-							],
-							"codeintel_snippets": true,
-							"codeintel_syntax_map":
-							{
-								"Python Django": "Python"
-							},
-							"codeintel_tooltips": "popup",
-							"sublime_auto_complete": true,
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
+					"buffer": 1,
 					"file": "js/ja_ui.js",
 					"settings":
 					{
-						"buffer_size": 28588,
+						"buffer_size": 32652,
 						"regions":
 						{
 							"bookmarks":
@@ -1204,8 +1020,16 @@
 								"regions":
 								[
 									[
-										12728,
-										12728
+										25868,
+										25868
+									],
+									[
+										28933,
+										28933
+									],
+									[
+										29461,
+										29461
 									]
 								],
 								"scope": "bookmarks"
@@ -1214,8 +1038,8 @@
 						"selection":
 						[
 							[
-								11085,
-								11085
+								923,
+								923
 							]
 						],
 						"settings":
@@ -1329,139 +1153,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 5330.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "lib/d3.js",
-					"settings":
-					{
-						"buffer_size": 325414,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								16793,
-								16793
-							]
-						],
-						"settings":
-						{
-							"codeintel": true,
-							"codeintel_config":
-							{
-								"JavaScript":
-								{
-									"codeintel_max_recursive_dir_depth": 2.0,
-									"codeintel_scan_files_in_project": false,
-									"javascriptExtraPaths":
-									[
-									]
-								},
-								"PHP":
-								{
-									"codeintel_max_recursive_dir_depth": 5.0,
-									"codeintel_scan_files_in_project": false,
-									"phpExtraPaths":
-									[
-									]
-								},
-								"Python":
-								{
-									"env":
-									{
-									}
-								}
-							},
-							"codeintel_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_live": true,
-							"codeintel_live_enabled_languages":
-							[
-								"JavaScript",
-								"Mason",
-								"XBL",
-								"XUL",
-								"RHTML",
-								"SCSS",
-								"Python",
-								"HTML",
-								"Ruby",
-								"Python3",
-								"XML",
-								"Sass",
-								"XSLT",
-								"Django",
-								"HTML5",
-								"Perl",
-								"CSS",
-								"Twig",
-								"Less",
-								"Smarty",
-								"Node.js",
-								"Tcl",
-								"TemplateToolkit",
-								"PHP"
-							],
-							"codeintel_max_recursive_dir_depth": 10.0,
-							"codeintel_scan_exclude_dir":
-							{
-								"JavaScript":
-								[
-									"/build/",
-									"/min/"
-								]
-							},
-							"codeintel_scan_files_in_project": true,
-							"codeintel_selected_catalogs":
-							[
-								"PyWin32",
-								"jQuery",
-								"Rails"
-							],
-							"codeintel_snippets": true,
-							"codeintel_syntax_map":
-							{
-								"Python Django": "Python"
-							},
-							"codeintel_tooltips": "popup",
-							"sublime_auto_complete": true,
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 10967.0,
+						"translation.y": 567.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
