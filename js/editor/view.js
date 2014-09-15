@@ -35,36 +35,6 @@ function set_link_type(d) {
 
 
 
-// Updates SVG structure according to the graph structure
-function update() {
-    this.node = this.node.data(this._graph.nodes);
-    this.node.enter().call(elements.add_node);
-    this.node.exit().remove();
-
-    this.link = this.link.data(this._graph.edges);
-    this.link.enter().call(elements.add_link);
-    this.link.exit().remove();
-
-    var self = this;
-    // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
-    this.link.each(function () {
-        set_link_type.apply(self, arguments);
-    });
-
-    this.force.start();
-}
-
-
-
-function set_graph(graph) {
-    this._graph = null;
-    this._graph = graph || get_empty_graph();
-    this.force.nodes(this._graph.nodes).links(this._graph.edges);
-    update.call(this);
-}
-
-
-
 function View(aContainer, aGraph) {
     var self = this;
 
@@ -120,17 +90,43 @@ function View(aContainer, aGraph) {
     this.link = svg.append('g').attr('class', 'links').selectAll('g');
 
     // Attach graph
-    set_graph.call(this, aGraph);
+    this.graph(aGraph);
 }
 
 
 
-// Returns a graph attached to the view, and attches new graph if given
+// Returns a graph attached to the view.
+// If new graph is given, attches it to the view.
 View.prototype.graph = function (graph) {
     if (arguments.length > 0) {
-        set_graph.call(this, graph);
+        this._graph = null;
+        this._graph = graph || get_empty_graph();
+        this.force.nodes(this._graph.nodes).links(this._graph.edges);
+        this.update(this._graph);
     }
     return this._graph;
+};
+
+
+
+// Updates SVG structure according to the graph structure
+View.prototype.update = function (graph) {
+    this.node = this.node.data(graph.nodes);
+    this.node.enter().call(elements.add_node);
+
+    this.node.exit().remove();
+
+    this.link = this.link.data(graph.edges);
+    this.link.enter().call(elements.add_link);
+    this.link.exit().remove();
+
+    var self = this;
+    // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
+    this.link.each(function () {
+        set_link_type.apply(self, arguments);
+    });
+
+    this.force.start();
 };
 
 

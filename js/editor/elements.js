@@ -1,6 +1,6 @@
 
 // JSLint options:
-/*global vec */
+/*global vec, View*/
 "use strict";
 
 var elements = {};
@@ -139,11 +139,22 @@ elements.get_node_transformation = function (d) {
 
 
 
+var on_node_event = function () {
+    View.prototype.controller.element('node').call(this, arguments);
+};
+
+
+
 elements.add_node = function (selection) {
     selection.append('g')
         .attr('transform', this.get_node_transformation)
         .append('circle')
-        .attr('r', 16);
+        .attr('r', 16)
+        .on('mousedown', on_node_event)
+        .on('mouseup', on_node_event)
+        .on('mouseover', on_node_event)
+        .on('mouseout', on_node_event)
+        .on('dblclick', on_node_event);
 };
 
 
