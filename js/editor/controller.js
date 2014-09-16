@@ -11,7 +11,6 @@ var controller = View.prototype.controller;
 controller.source = null;
 
 
-
 controller.process_event = (function () {
 
     // var self = this;    // Here 'this' should refer to an instance of View
