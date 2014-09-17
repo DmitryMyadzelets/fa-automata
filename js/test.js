@@ -25,39 +25,3 @@ view3.graph({
 });
 
 
-
-function C() {
-
-    var self = this;
-
-    this.a = ++C.cnt;
-
-    function foo() { console.log('foo', self); }
-
-    this.prop = function () {
-        console.log('prop', this);
-        this.prop2();
-        foo();
-    };
-
-    this.foo2 = function () {
-        console.log('foo2', this);
-    };
-
-    this.prop2();
-}
-
-C.cnt = 0;
-
-C.prototype.prop2 = function () {
-    console.log('prop2', this);
-    this.foo2();
-};
-
-
-
-var c = new C();
-var d = new C();
-
-c.prop();
-d.prop();

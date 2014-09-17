@@ -1,6 +1,6 @@
 
 // JSLint options:
-/*global vec */
+/*global vec, View */
 "use strict";
 
 var elements = {};
@@ -139,11 +139,16 @@ elements.get_node_transformation = function (d) {
 
 
 
-elements.add_node = function (selection) {
+elements.add_node = function (selection, handler) {
     selection.append('g')
         .attr('transform', this.get_node_transformation)
         .append('circle')
-        .attr('r', 16);
+        .attr('r', 16)
+        .on('mousedown', handler)
+        .on('mouseup', handler)
+        .on('mouseover', handler)
+        .on('mouseout', handler)
+        .on('dblclick', handler);
 };
 
 

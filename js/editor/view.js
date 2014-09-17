@@ -51,15 +51,16 @@ function View(aContainer, aGraph) {
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
-    this.on_event = function () {
-        if (true) {
-            View.prototype.controller.process_event.call(self, arguments);
-        }
-    };
+    function node_handler() {
+        self.controller.context(self, 'node').process_event(this, arguments);
+    }
 
-    svg.on('mousemove', this.on_event)
-        .on('mouseout', this.on_event)
-        .on('mouseover', this.on_event);
+    this.node_handler = function () { return node_handler; };
+
+
+    // svg.on('mousemove', this.on_event)
+    //     .on('mouseout', this.on_event)
+    //     .on('mouseover', this.on_event);
 
     svg = svg.append('g');
 
@@ -108,11 +109,17 @@ View.prototype.graph = function (graph) {
 };
 
 
+// View.prototype.on_node_event = function () {
+//     console.log(this, arguments);
+//     // View.prototype.controller.element('node').call(this, arguments);
+// };
+
+
 
 // Updates SVG structure according to the graph structure
 View.prototype.update = function (graph) {
     this.node = this.node.data(graph.nodes);
-    this.node.enter().call(elements.add_node);
+    this.node.enter().call(elements.add_node, this.node_handler());
 
     this.node.exit().remove();
 
@@ -127,12 +134,6 @@ View.prototype.update = function (graph) {
     });
 
     this.force.start();
-};
-
-
-
-ed.view = function (container, graph) {
-    return new View(container, graph);
 };
 
 

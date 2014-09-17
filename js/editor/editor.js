@@ -54,7 +54,7 @@ var vec = {
 
 
 // JSLint options:
-/*global vec, View*/
+/*global vec, View */
 "use strict";
 
 var elements = {};
@@ -193,22 +193,16 @@ elements.get_node_transformation = function (d) {
 
 
 
-var on_node_event = function () {
-    View.prototype.controller.element('node').call(this, arguments);
-};
-
-
-
-elements.add_node = function (selection) {
+elements.add_node = function (selection, handler) {
     selection.append('g')
         .attr('transform', this.get_node_transformation)
         .append('circle')
         .attr('r', 16)
-        .on('mousedown', on_node_event)
-        .on('mouseup', on_node_event)
-        .on('mouseover', on_node_event)
-        .on('mouseout', on_node_event)
-        .on('dblclick', on_node_event);
+        .on('mousedown', handler)
+        .on('mouseup', handler)
+        .on('mouseover', handler)
+        .on('mouseout', handler)
+        .on('dblclick', handler);
 };
 
 
@@ -286,15 +280,16 @@ function View(aContainer, aGraph) {
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
-    this.on_event = function () {
-        if (true) {
-            View.prototype.controller.process_event.call(self, arguments);
-        }
-    };
+    function node_handler() {
+        self.controller.context(self, 'node').process_event(this, arguments);
+    }
 
-    svg.on('mousemove', this.on_event)
-        .on('mouseout', this.on_event)
-        .on('mouseover', this.on_event);
+    this.node_handler = function () { return node_handler; };
+
+
+    // svg.on('mousemove', this.on_event)
+    //     .on('mouseout', this.on_event)
+    //     .on('mouseover', this.on_event);
 
     svg = svg.append('g');
 
@@ -343,11 +338,17 @@ View.prototype.graph = function (graph) {
 };
 
 
+// View.prototype.on_node_event = function () {
+//     console.log(this, arguments);
+//     // View.prototype.controller.element('node').call(this, arguments);
+// };
+
+
 
 // Updates SVG structure according to the graph structure
 View.prototype.update = function (graph) {
     this.node = this.node.data(graph.nodes);
-    this.node.enter().call(elements.add_node);
+    this.node.enter().call(elements.add_node, this.node_handler());
 
     this.node.exit().remove();
 
@@ -366,33 +367,24 @@ View.prototype.update = function (graph) {
 
 
 
-ed.view = function (container, graph) {
-    return new View(container, graph);
-};
-
-
-
 // JSLint options:
 /*global d3, View*/
 "use strict";
 
 
-View.prototype.controller = {};
-var controller = View.prototype.controller;
+View.prototype.controller = (function () {
 
+    var view;           // a view where current event occur
+    var source;         // a SVG element where current event occur
+    var type;           // type of event (copy of d3.type)
 
-controller.source = null;
-
-
-controller.process_event = (function () {
-
-    // var self = this;    // Here 'this' should refer to an instance of View
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
-    var old_source;
 
     var states = {
         init : function () {
+            console.log(source, type);
+
             // if (controller.source !== old_source) {
             //     old_source = controller.source;
             // }
@@ -402,29 +394,44 @@ controller.process_event = (function () {
 
     state = states.init;
 
-    return function () {
-        old_state = state;
-        // Set default event source in case it is not set by 'set_event' method
-        controller.source = controller.source || d3.event.target.nodeName;
-        state.apply(this, arguments);
-        d3.event.stopPropagation();
-        // Clear the source of event to prevent false process next time
-        controller.source = null;
-        // If there wes a transition from state to state
-        if (old_state !== state) {
-            // Trace current transition
-            console.log('transition:', old_state._name + ' -> ' + state._name);
+    return {
+        process_event : function () {
+            if (!view) { return; }
+
+            // Set default event source in case it is not set by 'set_event' method
+            source = source || d3.event.target.nodeName;
+            type = d3.event.type;
+
+            old_state = state;
+            state.apply(this, arguments);
+
+            // Clear the context to prevent false process next time
+            view = null;
+            source = null;
+
+            d3.event.stopPropagation();
+            // If there wes a transition from state to state
+            if (old_state !== state) {
+                // Trace current transition
+                console.log('transition:', old_state._name + ' -> ' + state._name);
+            }
+        },
+
+        // Sets context in which an event occurs
+        // Returns controller object for subsequent invocation
+        context : function (a_view, a_element) {
+            view = a_view;
+            source = a_element;
+            return this;
         }
     };
+
 }());
 
 
 
-// Sets source of event for the controller.
-// Returns controller.process_event function for subsequent invocation
-controller.element = function (element) {
-    controller.source = element;
-    return controller.process_event;
+ed.view = function (container, graph) {
+    return new View(container, graph);
 };
 
 
