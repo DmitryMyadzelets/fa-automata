@@ -230,7 +230,46 @@ elements.add_link = function (selection, handler) {
 
 
 // JSLint options:
-/*global d3, ed, elements*/
+/*global d3*/
+"use strict";
+
+
+// Return object which implements panoramic behaviour for given container
+function pan(container) {
+    var a_xy = [0, 0]; // Absolute coordinates
+    var d_xy = [0, 0]; // Delta coordinates
+    var p_xy = [0, 0]; // Previous coordinates
+    var fnc = function () {
+        return [a_xy[0], a_xy[1]];
+    };
+
+    fnc.start = function () {
+        p_xy[0] = d3.event.pageX;
+        p_xy[1] = d3.event.pageY;
+    };
+
+    fnc.mouse = function () {
+        // return [mouse[0] - a_xy[0], mouse[1] - a_xy[1]];
+        return d3.mouse(container[0][0]);
+    };
+
+    fnc.to_mouse = function () {
+        d_xy[0] = d3.event.pageX - p_xy[0];
+        d_xy[1] = d3.event.pageY - p_xy[1];
+        p_xy[0] = d3.event.pageX;
+        p_xy[1] = d3.event.pageY;
+        a_xy[0] += d_xy[0];
+        a_xy[1] += d_xy[1];
+        container.attr('transform', 'translate(' + a_xy[0] + ',' + a_xy[1] + ')');
+    };
+
+    return fnc;
+}
+
+
+
+// JSLint options:
+/*global d3, ed, elements, pan*/
 "use strict";
 
 
@@ -264,41 +303,6 @@ function set_link_type(d) {
 }
 
 
-// Return object which implements panoramic behaviour for given container
-function pan(container) {
-    var a_xy = [0, 0]; // Absolute coordinates
-    var d_xy = [0, 0]; // Delta coordinates
-    var p_xy = [0, 0]; // Previous coordinates
-    var mouse;
-    var fnc = function () {
-        return [a_xy[0], a_xy[1]];
-    };
-
-    fnc.start = function () {
-        p_xy[0] = d3.event.pageX;
-        p_xy[1] = d3.event.pageY;
-    };
-
-    fnc.mouse = function () {
-        mouse = d3.mouse(container[0][0]);
-        // return [d3.event.pageX - a_xy[0], d3.event.pageY - a_xy[1]];
-        return [mouse[0] - a_xy[0], mouse[1] - a_xy[1]];
-    };
-
-    fnc.to_mouse = function () {
-        d_xy[0] = d3.event.pageX - p_xy[0];
-        d_xy[1] = d3.event.pageY - p_xy[1];
-        p_xy[0] = d3.event.pageX;
-        p_xy[1] = d3.event.pageY;
-        a_xy[0] += d_xy[0];
-        a_xy[1] += d_xy[1];
-        container.attr('transform', 'translate(' + a_xy[0] + ',' + a_xy[1] + ')');
-    };
-
-    return fnc;
-}
-
-
 
 function View(aContainer, aGraph) {
     var self = this;
@@ -317,6 +321,17 @@ function View(aContainer, aGraph) {
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
     this.pan = pan(svg);
+
+    // Returns View.prototype.selection_rectangle object with context of 
+    // current SVG object
+    this.selection_rectangle = function () {
+        return View.prototype.selection_rectangle.context(svg);
+    };
+
+    // Returns View.prototype.select object with context of current object
+    this.select = function () {
+        return View.prototype.select.context(self, svg);
+    };
 
     // Handles nodes events
     this.node_handler = function () {
@@ -339,6 +354,7 @@ function View(aContainer, aGraph) {
     svg.on('mousedown', plane_handler)
         .on('mouseup', plane_handler)
         .on('mousemove', plane_handler)
+        .on('mouseout', plane_handler)
         .on('dblclick', plane_handler)
         .on('dragstart', function () { d3.event.preventDefault(); });
 
@@ -416,6 +432,147 @@ View.prototype.update = function () {
 
 // JSLint options:
 /*global d3, View*/
+
+
+// Creates and returns an object which implements a selection rectangle
+View.prototype.selection_rectangle = (function () {
+    var x0, y0, x, y, w, h;
+    var rc = {};
+    var svg_rc; // Reference to a SVG rectangle
+    var svg;
+
+    // Returns coordinates [topleft, bottomright] of selection rectangle.
+    // Methods of this function: show, update and hide the selection rectange.
+    var fnc = function () {
+        var ret = [x0, y0, x, y];
+        if (x0 > x) { ret[0] = x; ret[2] = x0; }
+        if (y0 > y) { ret[1] = y; ret[3] = y0; }
+        return ret;
+    };
+
+    // Shows a selection rectange (use CSS ot tune its look)
+    fnc.show = function (xy) {
+        x0 = xy[0];
+        y0 = xy[1];
+        svg_rc = svg.append('rect').attr({
+            x : x0,
+            y : y0,
+            'class' : 'selection'
+        });
+    };
+
+    // Updates position of the rectangle depending of current mouse position
+    fnc.update = function (xy) {
+        x = xy[0];
+        y = xy[1];
+        w = x - x0;
+        h = y - y0;
+        rc.x = x0;
+        rc.y = y0;
+        if (w < 0) { w = -w; rc.x = x; }
+        if (h < 0) { h = -h; rc.y = y; }
+        rc.width = w;
+        rc.height = h;
+        svg_rc.attr(rc);
+    };
+
+    // Removes selection rectangle
+    fnc.hide = function () {
+        svg_rc.remove();
+    };
+
+    fnc.context = function (a_svg) {
+        svg = a_svg;
+        return this;
+    };
+
+    return fnc;
+}());
+
+
+
+// This object contains methods to select nodes and links of the graph
+View.prototype.select = (function () {
+    var nodes = [];
+    var links = [];
+
+    function point_in_rectangle(x, y, r) {
+        return x > r[0] && x < r[2] && y > r[1] && y < r[3];
+    }
+
+    var view;
+    var svg;
+
+    return {
+        context : function (a_view, a_svg) {
+            view = a_view;
+            svg = a_svg;
+            return this;
+        },
+        // Changes look of the graph node as selected
+        node : function (d) {
+            var node = view.node.filter(function (_d) { return _d === d; });
+            var index = nodes.indexOf(d);
+            if (index < 0) {
+                d.selected = true;
+                nodes.push(d);
+            } else {
+                d.selected = false;
+                nodes.splice(index, 1);
+            }
+            node.classed('selected', d.selected);
+        },
+        link : function (d) {
+            var link = view.link.select('.link')
+                .filter(function (_d) { return _d === d; });
+            var index = links.indexOf(d);
+            if (index < 0) {
+                d.selected = true;
+                links.push(d);
+            } else {
+                d.selected = false;
+                links.splice(index, 1);
+            }
+            link.classed('selected', d.selected);
+        },
+        nothing : function () {
+            nodes.length = 0;
+            links.length = 0;
+            svg = svg || d3;
+            svg.selectAll('.selected')
+                .classed('selected', false)
+                .each(function (d) { d.selected = false; });
+        },
+        // Updates graphical appearance of selected_nodes nodes
+        by_rectangle : function (r) {
+            // Correct coordinates according to the current panoram
+            var p = view.pan();
+            r[0] -=  p[0];
+            r[2] -=  p[0];
+            r[1] -=  p[1];
+            r[3] -=  p[1];
+            view.node.each(function (d) {
+                // Check if center of the node is in the selection rectange
+                if (point_in_rectangle(d.x, d.y, r)) {
+                    view.select().node(d);
+                }
+            });
+            view.link.each(function (d) {
+                // Check if both start and and points of link 
+                // are in the selection
+                if (point_in_rectangle(d.x1, d.y1, r) &&
+                        point_in_rectangle(d.x2, d.y2, r)) {
+                    view.select().link(d);
+                }
+            });
+        }
+    };
+}());
+
+
+
+// JSLint options:
+/*global d3, View*/
 "use strict";
 
 
@@ -426,6 +583,7 @@ View.prototype.controller = (function () {
     var type;           // type of event (copy of d3.type)
 
     var mouse;          // mouse position
+    var select_rect;    // selection rectangle
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -440,24 +598,77 @@ View.prototype.controller = (function () {
                 case 'dblclick':
                     mouse = view.pan.mouse();
                     // Create new node
-                    var node = {x : mouse[0], y : mouse[1]};
+                    var node = {x : mouse[0], y : mouse[1] };
                     view.graph().nodes.push(node);
                     view.update();
-                    // if (!d3.event.ctrlKey) { view.select.nothing(); }
-                    // view.select.node(node);
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    view.select().node(node);
+                    break;
+                case 'mousedown':
+                    if (d3.event.shiftKey) {
+                        view.pan.start();
+                        state = states.move_graph;
+                        break;
+                    }
+                    mouse = d3.mouse(this);
+                    state = states.wait_for_selection;
                     break;
                 }
                 break;
             }
-
-            // if (controller.source !== old_source) {
-            //     old_source = controller.source;
-            // }
-            // console.log(d3.event.type, controller.source);
         },
+        wait_for_selection : function () {
+            switch (type) {
+            case 'mousemove':
+                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                select_rect = view.selection_rectangle();
+                select_rect.show(mouse);
+                mouse = d3.mouse(this);
+                state = states.selection;
+                break;
+            case 'mouseup':
+                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                state = states.init;
+                break;
+            default:
+                state = states.init;
+            }
+        },
+        selection : function () {
+            console.log(type);
+            switch (type) {
+            case 'mousemove':
+                select_rect.update(d3.mouse(this));
+                break;
+            case 'mouseup':
+                view.select().by_rectangle(select_rect());
+                select_rect.hide();
+                state = states.init;
+                break;
+            }
+        },
+        move_graph : function () {
+            switch (type) {
+            case 'mousemove':
+                if (!d3.event.shiftKey) { state = states.init; }
+                view.pan.to_mouse();
+                break;
+            default:
+                state = states.init;
+            }
+        }
     };
 
     state = states.init;
+
+    // Add 'name' property to the state functions to trace transitions
+    var key;
+    for (key in states) {
+        if (states.hasOwnProperty(key)) {
+            states[key]._name = key;
+        }
+    }
+
 
     return {
         event : function () {

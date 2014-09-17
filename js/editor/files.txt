@@ -1,6 +1,8 @@
 start.js
 vector.js
 elements.js
+pan.js
 view.js
+select.js
 controller.js
 end.js

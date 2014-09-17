@@ -11,6 +11,7 @@ View.prototype.controller = (function () {
     var type;           // type of event (copy of d3.type)
 
     var mouse;          // mouse position
+    var select_rect;    // selection rectangle
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -25,24 +26,77 @@ View.prototype.controller = (function () {
                 case 'dblclick':
                     mouse = view.pan.mouse();
                     // Create new node
-                    var node = {x : mouse[0], y : mouse[1]};
+                    var node = {x : mouse[0], y : mouse[1] };
                     view.graph().nodes.push(node);
                     view.update();
-                    // if (!d3.event.ctrlKey) { view.select.nothing(); }
-                    // view.select.node(node);
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    view.select().node(node);
+                    break;
+                case 'mousedown':
+                    if (d3.event.shiftKey) {
+                        view.pan.start();
+                        state = states.move_graph;
+                        break;
+                    }
+                    mouse = d3.mouse(this);
+                    state = states.wait_for_selection;
                     break;
                 }
                 break;
             }
-
-            // if (controller.source !== old_source) {
-            //     old_source = controller.source;
-            // }
-            // console.log(d3.event.type, controller.source);
         },
+        wait_for_selection : function () {
+            switch (type) {
+            case 'mousemove':
+                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                select_rect = view.selection_rectangle();
+                select_rect.show(mouse);
+                mouse = d3.mouse(this);
+                state = states.selection;
+                break;
+            case 'mouseup':
+                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                state = states.init;
+                break;
+            default:
+                state = states.init;
+            }
+        },
+        selection : function () {
+            console.log(type);
+            switch (type) {
+            case 'mousemove':
+                select_rect.update(d3.mouse(this));
+                break;
+            case 'mouseup':
+                view.select().by_rectangle(select_rect());
+                select_rect.hide();
+                state = states.init;
+                break;
+            }
+        },
+        move_graph : function () {
+            switch (type) {
+            case 'mousemove':
+                if (!d3.event.shiftKey) { state = states.init; }
+                view.pan.to_mouse();
+                break;
+            default:
+                state = states.init;
+            }
+        }
     };
 
     state = states.init;
+
+    // Add 'name' property to the state functions to trace transitions
+    var key;
+    for (key in states) {
+        if (states.hasOwnProperty(key)) {
+            states[key]._name = key;
+        }
+    }
+
 
     return {
         event : function () {

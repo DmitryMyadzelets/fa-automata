@@ -1,6 +1,6 @@
 
 // JSLint options:
-/*global d3, ed, elements*/
+/*global d3, ed, elements, pan*/
 "use strict";
 
 
@@ -34,41 +34,6 @@ function set_link_type(d) {
 }
 
 
-// Return object which implements panoramic behaviour for given container
-function pan(container) {
-    var a_xy = [0, 0]; // Absolute coordinates
-    var d_xy = [0, 0]; // Delta coordinates
-    var p_xy = [0, 0]; // Previous coordinates
-    var mouse;
-    var fnc = function () {
-        return [a_xy[0], a_xy[1]];
-    };
-
-    fnc.start = function () {
-        p_xy[0] = d3.event.pageX;
-        p_xy[1] = d3.event.pageY;
-    };
-
-    fnc.mouse = function () {
-        mouse = d3.mouse(container[0][0]);
-        // return [d3.event.pageX - a_xy[0], d3.event.pageY - a_xy[1]];
-        return [mouse[0] - a_xy[0], mouse[1] - a_xy[1]];
-    };
-
-    fnc.to_mouse = function () {
-        d_xy[0] = d3.event.pageX - p_xy[0];
-        d_xy[1] = d3.event.pageY - p_xy[1];
-        p_xy[0] = d3.event.pageX;
-        p_xy[1] = d3.event.pageY;
-        a_xy[0] += d_xy[0];
-        a_xy[1] += d_xy[1];
-        container.attr('transform', 'translate(' + a_xy[0] + ',' + a_xy[1] + ')');
-    };
-
-    return fnc;
-}
-
-
 
 function View(aContainer, aGraph) {
     var self = this;
@@ -87,6 +52,17 @@ function View(aContainer, aGraph) {
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
     this.pan = pan(svg);
+
+    // Returns View.prototype.selection_rectangle object with context of 
+    // current SVG object
+    this.selection_rectangle = function () {
+        return View.prototype.selection_rectangle.context(svg);
+    };
+
+    // Returns View.prototype.select object with context of current object
+    this.select = function () {
+        return View.prototype.select.context(self, svg);
+    };
 
     // Handles nodes events
     this.node_handler = function () {
@@ -109,6 +85,7 @@ function View(aContainer, aGraph) {
     svg.on('mousedown', plane_handler)
         .on('mouseup', plane_handler)
         .on('mousemove', plane_handler)
+        .on('mouseout', plane_handler)
         .on('dblclick', plane_handler)
         .on('dragstart', function () { d3.event.preventDefault(); });
 
