@@ -155,12 +155,13 @@ elements.add_node = function (selection, handler) {
 
 // Adds SVG elements representing a graph link/edge
 // Returns root of the added elements
-elements.add_link = function (selection) {
-    var g = selection.append('g');
-        // .on('dblclick', on_link_dblclick)
-        // .on('mousedown', on_link_mousedown);
-        // .on('mouseover', controller.on_link_mouseover)
-        // .on('mousemove', controller.on_link_mousemove);
+elements.add_link = function (selection, handler) {
+    var g = selection.append('g')
+        .on('mousedown', handler)
+        .on('mouseup', handler)
+        .on('mouseover', handler)
+        .on('dblclick', handler);
+        // .on('mousemove', handler);
 
     g.append('path')
         .attr('class', 'link') // CSS class style

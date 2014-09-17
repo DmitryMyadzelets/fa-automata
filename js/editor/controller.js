@@ -10,12 +10,30 @@ View.prototype.controller = (function () {
     var source;         // a SVG element where current event occur
     var type;           // type of event (copy of d3.type)
 
+    var mouse;          // mouse position
+
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
 
     var states = {
         init : function () {
-            console.log(source, type);
+            switch (source) {
+            case 'plane':
+                switch (type) {
+                case 'mousemove':
+                    break;
+                case 'dblclick':
+                    mouse = view.pan.mouse();
+                    // Create new node
+                    var node = {x : mouse[0], y : mouse[1]};
+                    view.graph().nodes.push(node);
+                    view.update();
+                    // if (!d3.event.ctrlKey) { view.select.nothing(); }
+                    // view.select.node(node);
+                    break;
+                }
+                break;
+            }
 
             // if (controller.source !== old_source) {
             //     old_source = controller.source;
@@ -27,7 +45,7 @@ View.prototype.controller = (function () {
     state = states.init;
 
     return {
-        process_event : function () {
+        event : function () {
             if (!view) { return; }
 
             // Set default event source in case it is not set by 'set_event' method

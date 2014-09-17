@@ -209,12 +209,13 @@ elements.add_node = function (selection, handler) {
 
 // Adds SVG elements representing a graph link/edge
 // Returns root of the added elements
-elements.add_link = function (selection) {
-    var g = selection.append('g');
-        // .on('dblclick', on_link_dblclick)
-        // .on('mousedown', on_link_mousedown);
-        // .on('mouseover', controller.on_link_mouseover)
-        // .on('mousemove', controller.on_link_mousemove);
+elements.add_link = function (selection, handler) {
+    var g = selection.append('g')
+        .on('mousedown', handler)
+        .on('mouseup', handler)
+        .on('mouseover', handler)
+        .on('dblclick', handler);
+        // .on('mousemove', handler);
 
     g.append('path')
         .attr('class', 'link') // CSS class style
@@ -263,6 +264,41 @@ function set_link_type(d) {
 }
 
 
+// Return object which implements panoramic behaviour for given container
+function pan(container) {
+    var a_xy = [0, 0]; // Absolute coordinates
+    var d_xy = [0, 0]; // Delta coordinates
+    var p_xy = [0, 0]; // Previous coordinates
+    var mouse;
+    var fnc = function () {
+        return [a_xy[0], a_xy[1]];
+    };
+
+    fnc.start = function () {
+        p_xy[0] = d3.event.pageX;
+        p_xy[1] = d3.event.pageY;
+    };
+
+    fnc.mouse = function () {
+        mouse = d3.mouse(container[0][0]);
+        // return [d3.event.pageX - a_xy[0], d3.event.pageY - a_xy[1]];
+        return [mouse[0] - a_xy[0], mouse[1] - a_xy[1]];
+    };
+
+    fnc.to_mouse = function () {
+        d_xy[0] = d3.event.pageX - p_xy[0];
+        d_xy[1] = d3.event.pageY - p_xy[1];
+        p_xy[0] = d3.event.pageX;
+        p_xy[1] = d3.event.pageY;
+        a_xy[0] += d_xy[0];
+        a_xy[1] += d_xy[1];
+        container.attr('transform', 'translate(' + a_xy[0] + ',' + a_xy[1] + ')');
+    };
+
+    return fnc;
+}
+
+
 
 function View(aContainer, aGraph) {
     var self = this;
@@ -280,16 +316,31 @@ function View(aContainer, aGraph) {
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
-    function node_handler() {
-        self.controller.context(self, 'node').process_event(this, arguments);
+    this.pan = pan(svg);
+
+    // Handles nodes events
+    this.node_handler = function () {
+        self.controller.context(self, 'node').event.call(this, arguments);
+    };
+
+
+    // Handles edge events
+    this.edge_handler = function () {
+        self.controller.context(self, 'edge').event.call(this, arguments);
+    };
+
+
+    // Handles plane (out of other elements) events
+    function plane_handler() {
+        self.controller.context(self, 'plane').event.call(this, arguments);
     }
 
-    this.node_handler = function () { return node_handler; };
 
-
-    // svg.on('mousemove', this.on_event)
-    //     .on('mouseout', this.on_event)
-    //     .on('mouseover', this.on_event);
+    svg.on('mousedown', plane_handler)
+        .on('mouseup', plane_handler)
+        .on('mousemove', plane_handler)
+        .on('dblclick', plane_handler)
+        .on('dragstart', function () { d3.event.preventDefault(); });
 
     svg = svg.append('g');
 
@@ -332,28 +383,23 @@ View.prototype.graph = function (graph) {
         this._graph = null;
         this._graph = graph || get_empty_graph();
         this.force.nodes(this._graph.nodes).links(this._graph.edges);
-        this.update(this._graph);
+        this.update();
     }
     return this._graph;
 };
 
 
-// View.prototype.on_node_event = function () {
-//     console.log(this, arguments);
-//     // View.prototype.controller.element('node').call(this, arguments);
-// };
-
-
 
 // Updates SVG structure according to the graph structure
-View.prototype.update = function (graph) {
+View.prototype.update = function () {
+    var graph = this._graph;
     this.node = this.node.data(graph.nodes);
-    this.node.enter().call(elements.add_node, this.node_handler());
+    this.node.enter().call(elements.add_node, this.node_handler);
 
     this.node.exit().remove();
 
     this.link = this.link.data(graph.edges);
-    this.link.enter().call(elements.add_link);
+    this.link.enter().call(elements.add_link, this.edge_handler);
     this.link.exit().remove();
 
     var self = this;
@@ -364,6 +410,7 @@ View.prototype.update = function (graph) {
 
     this.force.start();
 };
+
 
 
 
@@ -378,12 +425,30 @@ View.prototype.controller = (function () {
     var source;         // a SVG element where current event occur
     var type;           // type of event (copy of d3.type)
 
+    var mouse;          // mouse position
+
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
 
     var states = {
         init : function () {
-            console.log(source, type);
+            switch (source) {
+            case 'plane':
+                switch (type) {
+                case 'mousemove':
+                    break;
+                case 'dblclick':
+                    mouse = view.pan.mouse();
+                    // Create new node
+                    var node = {x : mouse[0], y : mouse[1]};
+                    view.graph().nodes.push(node);
+                    view.update();
+                    // if (!d3.event.ctrlKey) { view.select.nothing(); }
+                    // view.select.node(node);
+                    break;
+                }
+                break;
+            }
 
             // if (controller.source !== old_source) {
             //     old_source = controller.source;
@@ -395,7 +460,7 @@ View.prototype.controller = (function () {
     state = states.init;
 
     return {
-        process_event : function () {
+        event : function () {
             if (!view) { return; }
 
             // Set default event source in case it is not set by 'set_event' method
