@@ -320,8 +320,6 @@ function View(aContainer, aGraph) {
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
-    this.pan = pan(svg);
-
     // Returns View.prototype.selection_rectangle object with context of 
     // current SVG object
     this.selection_rectangle = function () {
@@ -354,7 +352,7 @@ function View(aContainer, aGraph) {
     svg.on('mousedown', plane_handler)
         .on('mouseup', plane_handler)
         .on('mousemove', plane_handler)
-        .on('mouseout', plane_handler)
+        // .on('mouseout', plane_handler)
         .on('dblclick', plane_handler)
         .on('dragstart', function () { d3.event.preventDefault(); });
 
@@ -385,6 +383,8 @@ function View(aContainer, aGraph) {
 
     this.node = svg.append('g').attr('class', 'nodes').selectAll('g');
     this.link = svg.append('g').attr('class', 'links').selectAll('g');
+
+    this.pan = pan(svg);
 
     // Attach graph
     this.graph(aGraph);
