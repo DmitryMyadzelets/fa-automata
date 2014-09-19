@@ -12,12 +12,13 @@ View.prototype.controller = (function () {
 
     var mouse;          // mouse position
     var select_rect;    // selection rectangle
+    var d_source;       // referrence to a data of svg element
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
 
     var states = {
-        init : function () {
+        init : function (d) {
             switch (source) {
             case 'plane':
                 switch (type) {
@@ -40,6 +41,48 @@ View.prototype.controller = (function () {
                     }
                     mouse = d3.mouse(this);
                     state = states.wait_for_selection;
+                    break;
+                }
+                break;
+            case 'node':
+                switch (type) {
+                case 'mousedown':
+                    console.log(this, arguments, d);
+                    d_source = d;
+                    state = states.select_or_drag;
+                    break;
+                }
+                break;
+            }
+        },
+        select_or_drag : function () {
+            switch (source) {
+            case 'plane':
+                switch (type) {
+                case 'mousemove':
+                    if (d3.event.shiftKey) {
+                        mouse = view.pan.mouse();
+                        if (!d_source.selected) {
+                            view.select().node(d_source);
+                        }
+                        // nodes = d3.selectAll('.state.selected');
+                        // nodes.each(function (d) { d.fixed = true; });
+                        // state = states.drag_node;
+                    }
+                    break;
+                }
+                break;
+            case 'node':
+                switch (type) {
+                case 'mouseout':
+                    if (d3.event.shiftKey) { break; }
+                    // view.drag_link.show(d_source);
+                    state = states.drag_link;
+                    break;
+                case 'mouseup':
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    view.select().node(d_source);
+                    state = states.init;
                     break;
                 }
                 break;
@@ -81,8 +124,9 @@ View.prototype.controller = (function () {
                 if (!d3.event.shiftKey) { state = states.init; }
                 view.pan.to_mouse();
                 break;
-            default:
+            case 'mouseup':
                 state = states.init;
+                break;
             }
         }
     };

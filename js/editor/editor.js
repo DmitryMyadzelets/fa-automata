@@ -230,6 +230,56 @@ elements.add_link = function (selection, handler) {
 
 
 // JSLint options:
+/*global vec, View*/
+
+
+// This object implements a dragged edge when user creates new graph edge
+var drag_edge = (function () {
+    var v1 = [0, 0];
+    var v2 = [0, 0];
+    var d = {}; // Data object for a link
+    var ref_link; // Reference to a link svg element
+    var shown = false;
+    var to_node = false;
+    return {
+        show : function (d_node) {
+            d.source = d_node;
+            ref_link = add_link(container).select('path.link');
+            shown = true;
+        },
+        to_point : function (xy) {
+            vec.copy(xy, v2);
+            to_node = false;
+            this.update();
+        },
+        to_node : function (d_node) {
+            d.target = d_node;
+            to_node = true;
+            this.update();
+        },
+        update : function () {
+            if (!shown) { return; }
+            v1[0] = d.source.x;
+            v1[1] = d.source.y;
+            if (to_node) {
+                set_link_type(d);
+                ref_link.attr('d', get_link_path(d));
+            } else {
+                make_edge.drag(v1, v2);
+                // TODO: can we move it to 'get_link_path'?
+                ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
+            }
+        },
+        hide : function () {
+            ref_link.remove();
+            shown = false;
+        }
+    };
+}());
+
+
+
+// JSLint options:
 /*global d3*/
 "use strict";
 
@@ -333,19 +383,19 @@ function View(aContainer, aGraph) {
 
     // Handles nodes events
     this.node_handler = function () {
-        self.controller.context(self, 'node').event.call(this, arguments);
+        self.controller.context(self, 'node').event.apply(this, arguments);
     };
 
 
     // Handles edge events
     this.edge_handler = function () {
-        self.controller.context(self, 'edge').event.call(this, arguments);
+        self.controller.context(self, 'edge').event.apply(this, arguments);
     };
 
 
     // Handles plane (out of other elements) events
     function plane_handler() {
-        self.controller.context(self, 'plane').event.call(this, arguments);
+        self.controller.context(self, 'plane').event.apply(this, arguments);
     }
 
 
@@ -584,12 +634,13 @@ View.prototype.controller = (function () {
 
     var mouse;          // mouse position
     var select_rect;    // selection rectangle
+    var d_source;       // referrence to a data of svg element
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
 
     var states = {
-        init : function () {
+        init : function (d) {
             switch (source) {
             case 'plane':
                 switch (type) {
@@ -612,6 +663,48 @@ View.prototype.controller = (function () {
                     }
                     mouse = d3.mouse(this);
                     state = states.wait_for_selection;
+                    break;
+                }
+                break;
+            case 'node':
+                switch (type) {
+                case 'mousedown':
+                    console.log(this, arguments, d);
+                    d_source = d;
+                    state = states.select_or_drag;
+                    break;
+                }
+                break;
+            }
+        },
+        select_or_drag : function () {
+            switch (source) {
+            case 'plane':
+                switch (type) {
+                case 'mousemove':
+                    if (d3.event.shiftKey) {
+                        mouse = view.pan.mouse();
+                        if (!d_source.selected) {
+                            view.select().node(d_source);
+                        }
+                        // nodes = d3.selectAll('.state.selected');
+                        // nodes.each(function (d) { d.fixed = true; });
+                        // state = states.drag_node;
+                    }
+                    break;
+                }
+                break;
+            case 'node':
+                switch (type) {
+                case 'mouseout':
+                    if (d3.event.shiftKey) { break; }
+                    // view.drag_link.show(d_source);
+                    state = states.drag_link;
+                    break;
+                case 'mouseup':
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    view.select().node(d_source);
+                    state = states.init;
                     break;
                 }
                 break;
@@ -653,8 +746,9 @@ View.prototype.controller = (function () {
                 if (!d3.event.shiftKey) { state = states.init; }
                 view.pan.to_mouse();
                 break;
-            default:
+            case 'mouseup':
                 state = states.init;
+                break;
             }
         }
     };

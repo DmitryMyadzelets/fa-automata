@@ -64,19 +64,19 @@ function View(aContainer, aGraph) {
 
     // Handles nodes events
     this.node_handler = function () {
-        self.controller.context(self, 'node').event.call(this, arguments);
+        self.controller.context(self, 'node').event.apply(this, arguments);
     };
 
 
     // Handles edge events
     this.edge_handler = function () {
-        self.controller.context(self, 'edge').event.call(this, arguments);
+        self.controller.context(self, 'edge').event.apply(this, arguments);
     };
 
 
     // Handles plane (out of other elements) events
     function plane_handler() {
-        self.controller.context(self, 'plane').event.call(this, arguments);
+        self.controller.context(self, 'plane').event.apply(this, arguments);
     }
 
 
