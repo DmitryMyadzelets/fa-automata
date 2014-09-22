@@ -139,6 +139,7 @@ elements.get_node_transformation = function (d) {
 
 
 
+// Adds SVG element representing a graph node
 elements.add_node = function (selection, handler) {
     selection.append('g')
         .attr('transform', this.get_node_transformation)

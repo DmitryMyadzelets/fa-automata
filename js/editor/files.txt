@@ -1,9 +1,9 @@
 start.js
 vector.js
 elements.js
-drag_edge.js
 pan.js
 view.js
 select.js
+drag_edge.js
 controller.js
 end.js

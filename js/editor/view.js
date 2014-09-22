@@ -62,6 +62,12 @@ function View(aContainer, aGraph) {
         return View.prototype.select.context(self, svg);
     };
 
+
+    this.drag_edge = function () {
+        return View.prototype.drag_edge.context(self, svg);
+    };
+
+
     // Handles nodes events
     this.node_handler = function () {
         self.controller.context(self, 'node').event.apply(this, arguments);
@@ -110,6 +116,7 @@ function View(aContainer, aGraph) {
             // TODO: you calculate paths both for link and catchlinks which
             // have the same coordinates. Better just copy it.
             self.link.selectAll('path').attr('d', elements.get_link_transformation);
+            self.drag_edge().update();
         });
 
     this.node = svg.append('g').attr('class', 'nodes').selectAll('g');
@@ -157,6 +164,5 @@ View.prototype.update = function () {
 
     this.force.start();
 };
-
 
 

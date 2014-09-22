@@ -193,6 +193,7 @@ elements.get_node_transformation = function (d) {
 
 
 
+// Adds SVG element representing a graph node
 elements.add_node = function (selection, handler) {
     selection.append('g')
         .attr('transform', this.get_node_transformation)
@@ -226,56 +227,6 @@ elements.add_link = function (selection, handler) {
 
     return g;
 };
-
-
-
-// JSLint options:
-/*global vec, View*/
-
-
-// This object implements a dragged edge when user creates new graph edge
-var drag_edge = (function () {
-    var v1 = [0, 0];
-    var v2 = [0, 0];
-    var d = {}; // Data object for a link
-    var ref_link; // Reference to a link svg element
-    var shown = false;
-    var to_node = false;
-    return {
-        show : function (d_node) {
-            d.source = d_node;
-            ref_link = add_link(container).select('path.link');
-            shown = true;
-        },
-        to_point : function (xy) {
-            vec.copy(xy, v2);
-            to_node = false;
-            this.update();
-        },
-        to_node : function (d_node) {
-            d.target = d_node;
-            to_node = true;
-            this.update();
-        },
-        update : function () {
-            if (!shown) { return; }
-            v1[0] = d.source.x;
-            v1[1] = d.source.y;
-            if (to_node) {
-                set_link_type(d);
-                ref_link.attr('d', get_link_path(d));
-            } else {
-                make_edge.drag(v1, v2);
-                // TODO: can we move it to 'get_link_path'?
-                ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
-            }
-        },
-        hide : function () {
-            ref_link.remove();
-            shown = false;
-        }
-    };
-}());
 
 
 
@@ -381,6 +332,12 @@ function View(aContainer, aGraph) {
         return View.prototype.select.context(self, svg);
     };
 
+
+    this.drag_edge = function () {
+        return View.prototype.drag_edge.context(self, svg);
+    };
+
+
     // Handles nodes events
     this.node_handler = function () {
         self.controller.context(self, 'node').event.apply(this, arguments);
@@ -429,6 +386,7 @@ function View(aContainer, aGraph) {
             // TODO: you calculate paths both for link and catchlinks which
             // have the same coordinates. Better just copy it.
             self.link.selectAll('path').attr('d', elements.get_link_transformation);
+            self.drag_edge().update();
         });
 
     this.node = svg.append('g').attr('class', 'nodes').selectAll('g');
@@ -476,7 +434,6 @@ View.prototype.update = function () {
 
     this.force.start();
 };
-
 
 
 
@@ -572,6 +529,9 @@ View.prototype.select = (function () {
             }
             node.classed('selected', d.selected);
         },
+        nodes : function () {
+            return nodes;
+        },
         link : function (d) {
             var link = view.link.select('.link')
                 .filter(function (_d) { return _d === d; });
@@ -621,6 +581,62 @@ View.prototype.select = (function () {
 
 
 
+
+
+// This object implements a dragged edge when user creates new graph edge
+View.prototype.drag_edge = (function () {
+    var v1 = [0, 0];
+    var v2 = [0, 0];
+    var d = {}; // Data object for a link
+    var group; // Reference to the group svg element
+    var edge;  // Reference to the edge svg element
+    var shown = false;
+    var to_node = false;
+    var view;
+    var svg;
+    return {
+        show : function (d_node) {
+            d.source = d_node;
+            group = elements.add_link(svg).classed('links', true);
+            edge = group.select('path');
+            shown = true;
+        },
+        to_point : function (xy) {
+            vec.copy(xy, v2);
+            to_node = false;
+            this.update();
+        },
+        to_node : function (d_node) {
+            d.target = d_node;
+            to_node = true;
+            this.update();
+        },
+        update : function () {
+            if (!shown) { return; }
+            v1[0] = d.source.x;
+            v1[1] = d.source.y;
+            if (to_node) {
+                set_link_type.call(view, d);
+                edge.attr('d', elements.get_link_transformation(d));
+            } else {
+                elements.make_edge.drag(v1, v2);
+                // TODO: can we move it to 'get_link_transormation'?
+                edge.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
+            }
+        },
+        hide : function () {
+            group.remove();
+            shown = false;
+        },
+    	context : function (a_view, a_svg) {
+    		view = a_view;
+	        svg = a_svg;
+	        return this;
+	    }
+    };
+}());
+
+
 // JSLint options:
 /*global d3, View*/
 "use strict";
@@ -635,6 +651,7 @@ View.prototype.controller = (function () {
     var mouse;          // mouse position
     var select_rect;    // selection rectangle
     var d_source;       // referrence to a data of svg element
+    var nodes;          // array of nodes (data)
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -669,7 +686,6 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mousedown':
-                    console.log(this, arguments, d);
                     d_source = d;
                     state = states.select_or_drag;
                     break;
@@ -687,9 +703,9 @@ View.prototype.controller = (function () {
                         if (!d_source.selected) {
                             view.select().node(d_source);
                         }
-                        // nodes = d3.selectAll('.state.selected');
-                        // nodes.each(function (d) { d.fixed = true; });
-                        // state = states.drag_node;
+                        nodes = view.select().nodes();
+                        nodes.forEach(function (d) { d.fixed = true; });
+                        state = states.drag_node;
                     }
                     break;
                 }
@@ -698,12 +714,124 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mouseout':
                     if (d3.event.shiftKey) { break; }
-                    // view.drag_link.show(d_source);
+                    view.drag_edge().show(d_source);
                     state = states.drag_link;
                     break;
                 case 'mouseup':
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().node(d_source);
+                    state = states.init;
+                    break;
+                }
+                break;
+            }
+        },
+        drag_link : function (d) {
+            switch (source) {
+            case 'plane':
+                switch (type) {
+                    case 'mousemove':
+                        view.drag_edge().to_point(view.pan.mouse());
+                        break;
+                    // Create new node and new edge to it
+                    case 'mouseup':
+                        view.drag_edge().hide();
+                        // Create new node
+                        mouse = view.pan.mouse();
+                        var node = {x : mouse[0], y : mouse[1]};
+                        view.graph().nodes.push(node);
+                        // Create new edge
+                        var edge = {source : d_source, target : node};
+                        view.graph().edges.push(edge);
+                        // Update view, select the node and edge
+                        view.update();
+                        if (!d3.event.ctrlKey) { view.select().nothing(); }
+                        view.select().node(node);
+                        view.select().link(edge);
+
+                        state = states.init;
+                        break;
+                }
+                break;
+            case 'node':
+                switch (type) {
+                    // User have dragged the link to another node
+                    case 'mouseover':
+                        view.drag_edge().to_node(d);
+                        state = states.drop_link_or_exit;
+                        break;
+                }
+                break;
+            }
+        },
+        drop_link_or_exit : function (d) {
+            switch (source) {
+            case 'node':
+                switch (type) {
+                case 'mouseup':
+                    view.drag_edge().hide();
+                    // Get existing links between selected nodes
+                    var exists = view.graph().edges.filter(function (v) {
+                        return ((v.source === d_source) && (v.target === d));
+                    });
+                    var edge;
+                    if (exists.length === 0) {
+                        // Create new edge
+                        edge = {source : d_source, target : d};
+                        view.graph().edges.push(edge);
+                        view.update();
+                    } else {
+                        // otherwise select already existing edge
+                        edge = exists[0];
+                    }
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    view.select().link(edge);
+                    state = states.init;
+                    break;
+                case 'mouseout':
+                    state = states.drag_link;
+                    break;
+                }
+                break;
+            }
+        },
+        drag_node : function () {
+            switch (source) {
+            case 'plane':
+                switch (type) {
+                case 'mousemove':
+                    if (!d3.event.shiftKey) {
+                        nodes.forEach(function (d) { d.fixed = false; });
+                        state = states.init;
+                        break;
+                    }
+                    // How far we move the node
+                    var xy = mouse;
+                    mouse = view.pan.mouse();
+                    xy[0] = mouse[0] - xy[0];
+                    xy[1] = mouse[1] - xy[1];
+                    nodes.forEach(function (d) {
+                        d.x += xy[0];
+                        d.y += xy[1];
+                        d.px = d.x;
+                        d.py = d.y;
+                    });
+                    xy[0] = mouse[0];
+                    xy[1] = mouse[1];
+                    // Fix it while moving
+                    view.force.resume();
+                    // view.update();
+                    break;
+                case 'mouseup':
+                    nodes.forEach(function (d) { d.fixed = false; });
+                    state = states.init;
+                    break;
+                }
+                break;
+            case 'node':
+                switch (type) {
+                case 'mouseup':
+                    nodes.forEach(function (d) { d.fixed = false; });
                     state = states.init;
                     break;
                 }
@@ -728,7 +856,6 @@ View.prototype.controller = (function () {
             }
         },
         selection : function () {
-            console.log(type);
             switch (type) {
             case 'mousemove':
                 select_rect.update(d3.mouse(this));

@@ -4,16 +4,20 @@
 		"selected_items":
 		[
 			[
+				"mou",
+				"mouseup"
+			],
+			[
+				"mouse",
+				"mousedown"
+			],
+			[
 				"out",
 				"outPath	Default"
 			],
 			[
 				"fold",
 				"folders()	ST Window"
-			],
-			[
-				"mouse",
-				"mousedown"
 			],
 			[
 				"index",
@@ -30,10 +34,6 @@
 			[
 				"mous",
 				"mouseover"
-			],
-			[
-				"mou",
-				"mousemove"
 			],
 			[
 				"sta",
@@ -528,43 +528,55 @@
 			}
 		},
 		{
-			"file": "controller.js",
+			"file": "files.txt",
 			"settings":
 			{
-				"buffer_size": 1552,
-				"line_ending": "Windows",
-				"name": "controller.js"
-			}
-		},
-		{
-			"file": "/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-build",
-			"settings":
-			{
-				"buffer_size": 834,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "view.js",
-			"settings":
-			{
-				"buffer_size": 3392,
+				"buffer_size": 89,
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "\n// JSLint options:\n/*global vec, elements*/\n\n\n// This object implements a dragged edge when user creates new graph edge\nvar drag_edge = (function () {\n    var v1 = [0, 0];\n    var v2 = [0, 0];\n    var d = {}; // Data object for a link\n    var ref_link; // Reference to a link svg element\n    var shown = false;\n    var to_node = false;\n    return {\n        show : function (d_node) {\n            d.source = d_node;\n            ref_link = elements.add_link(container).select('path.link');\n            shown = true;\n        },\n        to_point : function (xy) {\n            vec.copy(xy, v2);\n            to_node = false;\n            this.update();\n        },\n        to_node : function (d_node) {\n            d.target = d_node;\n            to_node = true;\n            this.update();\n        },\n        update : function () {\n            if (!shown) { return; }\n            v1[0] = d.source.x;\n            v1[1] = d.source.y;\n            if (to_node) {\n                set_link_type(d);\n                ref_link.attr('d', get_link_path(d));\n            } else {\n                elements.make_edge.drag(v1, v2);\n                // TODO: can we move it to 'get_link_path'?\n                ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);\n            }\n        },\n        hide : function () {\n            ref_link.remove();\n            shown = false;\n        }\n    };\n}());\n\n\n",
+			"file": "drag_edge.js",
+			"file_size": 1425,
+			"file_write_time": 130556336628125000,
+			"settings":
+			{
+				"buffer_size": 1397,
+				"line_ending": "Windows",
+				"name": "drag_edge.js"
 			}
 		},
 		{
 			"file": "elements.js",
 			"settings":
 			{
-				"buffer_size": 5188,
+				"buffer_size": 5339,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/test.js",
+			"file": "pan.js",
 			"settings":
 			{
-				"buffer_size": 1111,
+				"buffer_size": 961,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "controller.js",
+			"settings":
+			{
+				"buffer_size": 5714,
+				"line_ending": "Windows",
+				"name": "controller.js"
+			}
+		},
+		{
+			"file": "select.js",
+			"settings":
+			{
+				"buffer_size": 4034,
 				"line_ending": "Windows"
 			}
 		}
@@ -572,9 +584,13 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 58.0,
+		"height": 81.0,
 		"selected_items":
 		[
+			[
+				"Package Control: en",
+				"Package Control: Enable Package"
+			],
 			[
 				"Package Control: li",
 				"Package Control: List Packages"
@@ -614,10 +630,6 @@
 			[
 				"Package Control: in ",
 				"Package Control: Install Package"
-			],
-			[
-				"Package Control: en",
-				"Package Control: Enable Package"
 			],
 			[
 				"Package Control: de",
@@ -661,18 +673,21 @@
 	},
 	"file_history":
 	[
+		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/view.js",
+		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/d3-ui.html",
+		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/test.js",
+		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/d3-ui.css",
+		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-build",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-settings",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/User/Preferences.sublime-settings",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/linter.js",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinify/readme.txt",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/sublime-jslint/README.md",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/sublime-jslint/jslint.py",
-		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-build",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/Default/exec.py",
 		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/editor.sublime-project",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/CombineAndMinify/CombineAndMinfiy.sublime-settings",
 		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/editor.js",
-		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/d3-ui.css",
 		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/files.txt",
 		"/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/editor/main.js",
 		"/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.py",
@@ -785,10 +800,7 @@
 		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/index.html",
 		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/js/main.js",
 		"/E/Documents and Settings/Dmitry/Desktop/Embrion/web/js/main.coffee",
-		"/E/usr/vhosts-on.txt",
-		"/E/Apache/conf/extra/httpd-vhosts.conf",
-		"/E/Apache/conf/httpd.conf",
-		"/E/php/php.ini"
+		"/E/usr/vhosts-on.txt"
 	],
 	"find":
 	{
@@ -806,6 +818,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			".call",
 			"set_link_type",
 			"update",
 			"get_node_translate",
@@ -932,8 +945,7 @@
 			"arr",
 			"G.trans",
 			"len",
-			"DELTA_UINT_ARRAY",
-			"Uint32Array"
+			"DELTA_UINT_ARRAY"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1003,7 +1015,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 5,
 			"sheets":
 			[
 				{
@@ -1018,8 +1030,8 @@
 						"selection":
 						[
 							[
-								31880,
-								31932
+								21139,
+								22812
 							]
 						],
 						"settings":
@@ -1029,25 +1041,134 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 13451.0,
+						"translation.y": 9240.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "controller.js",
+					"file": "files.txt",
 					"settings":
 					{
-						"buffer_size": 1552,
+						"buffer_size": 89,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								338,
-								338
+								31,
+								31
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "drag_edge.js",
+					"settings":
+					{
+						"buffer_size": 1397,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1168,
+								1168
+							]
+						],
+						"settings":
+						{
+							"auto_name": "drag_edge.js",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "elements.js",
+					"settings":
+					{
+						"buffer_size": 5339,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "pan.js",
+					"settings":
+					{
+						"buffer_size": 961,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "controller.js",
+					"settings":
+					{
+						"buffer_size": 5714,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1365,
+								1365
 							]
 						],
 						"settings":
@@ -1058,108 +1179,25 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 72.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "/C/#DmitryMyadzelets/Programs/Sublime Text/Data/Packages/JSLint/JSLint.sublime-build",
+					"buffer": 6,
+					"file": "select.js",
 					"settings":
 					{
-						"buffer_size": 834,
+						"buffer_size": 4034,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								519,
-								519
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "view.js",
-					"settings":
-					{
-						"buffer_size": 3392,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								935,
-								935
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 598.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "elements.js",
-					"settings":
-					{
-						"buffer_size": 5188,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3304,
-								3304
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1315.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/C/#DmitryMyadzelets/#Projects/2013 - FA Automata/js/test.js",
-					"settings":
-					{
-						"buffer_size": 1111,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								421,
-								421
+								1,
+								41
 							]
 						],
 						"settings":
@@ -1207,7 +1245,7 @@
 			1.0
 		]
 	},
-	"menu_visible": true,
+	"menu_visible": false,
 	"output.exec":
 	{
 		"height": 219.0

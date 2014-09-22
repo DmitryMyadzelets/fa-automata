@@ -1,20 +1,22 @@
 
-// JSLint options:
-/*global vec, View*/
 
 
 // This object implements a dragged edge when user creates new graph edge
-var drag_edge = (function () {
+View.prototype.drag_edge = (function () {
     var v1 = [0, 0];
     var v2 = [0, 0];
     var d = {}; // Data object for a link
-    var ref_link; // Reference to a link svg element
+    var group; // Reference to the group svg element
+    var edge;  // Reference to the edge svg element
     var shown = false;
     var to_node = false;
+    var view;
+    var svg;
     return {
         show : function (d_node) {
             d.source = d_node;
-            ref_link = add_link(container).select('path.link');
+            group = elements.add_link(svg).classed('links', true);
+            edge = group.select('path');
             shown = true;
         },
         to_point : function (xy) {
@@ -32,19 +34,23 @@ var drag_edge = (function () {
             v1[0] = d.source.x;
             v1[1] = d.source.y;
             if (to_node) {
-                set_link_type(d);
-                ref_link.attr('d', get_link_path(d));
+                set_link_type.call(view, d);
+                edge.attr('d', elements.get_link_transformation(d));
             } else {
-                make_edge.drag(v1, v2);
-                // TODO: can we move it to 'get_link_path'?
-                ref_link.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
+                elements.make_edge.drag(v1, v2);
+                // TODO: can we move it to 'get_link_transormation'?
+                edge.attr('d', 'M' + v1[0] + ',' + v1[1] + 'L' + v2[0] + ',' + v2[1]);
             }
         },
         hide : function () {
-            ref_link.remove();
+            group.remove();
             shown = false;
-        }
+        },
+    	context : function (a_view, a_svg) {
+    		view = a_view;
+	        svg = a_svg;
+	        return this;
+	    }
     };
 }());
-
 

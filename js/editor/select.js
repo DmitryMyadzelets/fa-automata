@@ -91,6 +91,9 @@ View.prototype.select = (function () {
             }
             node.classed('selected', d.selected);
         },
+        nodes : function () {
+            return nodes;
+        },
         link : function (d) {
             var link = view.link.select('.link')
                 .filter(function (_d) { return _d === d; });
