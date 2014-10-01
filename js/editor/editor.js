@@ -196,6 +196,7 @@ elements.get_link_transformation = (function () {
 }());
 
 
+var b = true;
 
 elements.get_node_transformation = function (d) {
     d.x = d.x || 0;
@@ -208,7 +209,7 @@ elements.get_node_transformation = function (d) {
 // Adds SVG element representing a graph node
 elements.add_node = function (selection, handler) {
     selection.append('g')
-        .attr('transform', this.get_node_transformation)
+        .attr('transform', elements.get_node_transformation)
         .append('circle')
         .attr('r', 16)
         .on('mousedown', handler)
@@ -333,6 +334,8 @@ function View(aContainer, aGraph) {
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
+    var root_group = svg.append('g');
+
     // Returns View.prototype.selection_rectangle object with context of 
     // current SVG object
     this.selection_rectangle = function () {
@@ -341,12 +344,12 @@ function View(aContainer, aGraph) {
 
     // Returns View.prototype.select object with context of current object
     this.select = function () {
-        return View.prototype.select.context(self, svg);
+        return View.prototype.select.context(self, root_group);
     };
 
 
     this.drag_edge = function () {
-        return View.prototype.drag_edge.context(self, svg);
+        return View.prototype.drag_edge.context(self, root_group);
     };
 
 
@@ -375,8 +378,6 @@ function View(aContainer, aGraph) {
         .on('dblclick', plane_handler)
         .on('dragstart', function () { d3.event.preventDefault(); });
 
-    svg = svg.append('g');
-
     // Arrow marker
     svg.append('svg:defs').append('svg:marker')
             .attr('id', 'marker-arrow')
@@ -401,10 +402,10 @@ function View(aContainer, aGraph) {
             self.drag_edge().update();
         });
 
-    this.node = svg.append('g').attr('class', 'nodes').selectAll('g');
-    this.link = svg.append('g').attr('class', 'links').selectAll('g');
+    this.node = root_group.append('g').attr('class', 'nodes').selectAll('g');
+    this.link = root_group.append('g').attr('class', 'links').selectAll('g');
 
-    this.pan = pan(svg);
+    this.pan = pan(root_group);
 
     // Attach graph
     this.graph(aGraph);
@@ -678,7 +679,7 @@ View.prototype.controller = (function () {
                 case 'dblclick':
                     mouse = view.pan.mouse();
                     // Create new node
-                    var node = {x : mouse[0], y : mouse[1] };
+                    var node = { x : mouse[0], y : mouse[1] };
                     view.graph().nodes.push(node);
                     view.update();
                     if (!d3.event.ctrlKey) { view.select().nothing(); }

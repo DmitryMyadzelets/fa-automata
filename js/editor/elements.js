@@ -130,6 +130,7 @@ elements.get_link_transformation = (function () {
 }());
 
 
+var b = true;
 
 elements.get_node_transformation = function (d) {
     d.x = d.x || 0;
@@ -142,7 +143,7 @@ elements.get_node_transformation = function (d) {
 // Adds SVG element representing a graph node
 elements.add_node = function (selection, handler) {
     selection.append('g')
-        .attr('transform', this.get_node_transformation)
+        .attr('transform', elements.get_node_transformation)
         .append('circle')
         .attr('r', 16)
         .on('mousedown', handler)
