@@ -28,7 +28,7 @@ View.prototype.controller = (function () {
                 case 'dblclick':
                     mouse = view.pan.mouse();
                     // Create new node
-                    var node = {x : mouse[0], y : mouse[1] };
+                    var node = { x : mouse[0], y : mouse[1] };
                     view.graph().nodes.push(node);
                     view.update();
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
