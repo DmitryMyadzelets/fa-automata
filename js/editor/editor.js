@@ -199,8 +199,9 @@ elements.get_link_transformation = (function () {
 var b = true;
 
 elements.get_node_transformation = function (d) {
-    d.x = d.x || 0;
-    d.y = d.y || 0;
+    if (d.x === undefined || d.y === undefined) {
+        return "";
+    }
     return "translate(" + d.x + "," + d.y + ")";
 };
 
