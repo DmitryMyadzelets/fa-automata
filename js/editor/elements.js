@@ -12,9 +12,8 @@ var elements = {};
 elements.make_edge = (function () {
     var v = [0, 0]; // temporal vector
     // var r = node_radius;
-    var r = 16;
     var norm = [0, 0];
-
+    var r = 16;
     // Constants for calculating a loop
     var K = (function () {
         var ANGLE_FROM = Math.PI / 3;
@@ -35,13 +34,16 @@ elements.make_edge = (function () {
 
 
     return {
+        r1 : 0, // radiuses
+        r2 : 0,
         // Calculates vectors of edge from given vectors 'v1' to 'v2'
         // Substracts radius of nodes 'r' from both vectors
         stright : function (v1, v2) {
             vec.subtract(v2, v1, v);    // v = v2 - v1
             vec.normalize(v, norm);     // norm = normalized v
-            vec.scale(norm, r, v);      // v = norm * r
+            vec.scale(norm, this.r1, v);     // v = norm * r
             vec.add(v1, v, v1);         // v1 = v1 + v
+            vec.scale(norm, this.r2, v);     // v = norm * r
             vec.subtract(v2, v, v2);    // v2 = v2 - v
             // Middle of the vector
             // cv[0] = (v1[0] + v2[0])/2
@@ -53,7 +55,7 @@ elements.make_edge = (function () {
         drag : function (v1, v2, to_node) {
             vec.subtract(v2, v1, v);    // v = v2 - v1
             vec.normalize(v, norm);     // v = normalized v
-            vec.scale(norm, r, v);      // v = v * r
+            vec.scale(norm, this.r2, v);     // v = v * r
             vec.add(v1, v, v1);         // v1 = v1 + v
             if (to_node) {
                 vec.subtract(v2, v, v2); // if subtract # v2 = v2 - v
@@ -63,8 +65,8 @@ elements.make_edge = (function () {
         curve : function (v1, v2, cv) {
             vec.subtract(v2, v1, v);
             vec.normalize(v, norm);
-            cv[0] = (v1[0] + v2[0]) * 0.5 + norm[1] * r * 2;
-            cv[1] = (v1[1] + v2[1]) * 0.5 - norm[0] * r * 2;
+            cv[0] = (v1[0] + v2[0]) * 0.5 + norm[1] * this.r1 * 2;
+            cv[1] = (v1[1] + v2[1]) * 0.5 - norm[0] * this.r2 * 2;
             vec.copy(cv, v);
             this.stright(v1, v);
             vec.copy(cv, v);
@@ -103,6 +105,8 @@ elements.get_link_transformation = (function () {
         v1[1] = d.source.y;
         v2[0] = d.target.x;
         v2[1] = d.target.y;
+        elements.make_edge.r1 = d.source.r || 16;
+        elements.make_edge.r2 = d.target.r || 16;
         switch (d.type) {
         case 1:
             elements.make_edge.curve(v1, v2, cv);
@@ -139,12 +143,18 @@ elements.get_node_transformation = function (d) {
 
 
 
+function node_radius (d) {
+    return d.r || 16;
+}
+
+
+
 // Adds SVG element representing a graph node
 elements.add_node = function (selection, handler) {
     selection.append('g')
         .attr('transform', elements.get_node_transformation)
         .append('circle')
-        .attr('r', 16)
+        .attr('r', node_radius)
         .on('mousedown', handler)
         .on('mouseup', handler)
         .on('mouseover', handler)
