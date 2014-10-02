@@ -53,6 +53,14 @@ View.prototype.controller = (function () {
                     break;
                 }
                 break;
+            case 'edge':
+                switch (type) {
+                case 'mousedown':
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    view.select().link(d);
+                    break;
+                }
+                break;
             }
         },
         select_or_drag : function () {

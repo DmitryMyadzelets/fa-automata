@@ -86,7 +86,7 @@ g.links path.catchlink {
   fill: none;
   stroke: yellow;
   stroke-width: 0.8em;
-  stroke-opacity: 0.0;
+  stroke-opacity: 0.5;
   /*cursor: pointer;*/
 }
 
