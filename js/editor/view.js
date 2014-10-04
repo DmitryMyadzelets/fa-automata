@@ -116,13 +116,15 @@ function View(aContainer, aGraph) {
             // TODO: you calculate paths both for link and catchlinks which
             // have the same coordinates. Better just copy it.
             self.link.selectAll('path').attr('d', elements.get_link_transformation);
-            self.drag_edge().update();
+            // self.drag_edge().update();
         });
 
     this.node = root_group.append('g').attr('class', 'nodes').selectAll('g');
     this.link = root_group.append('g').attr('class', 'links').selectAll('g');
 
     this.pan = pan(root_group);
+
+    this.svg = svg;
 
     // Attach graph
     this.graph(aGraph);
@@ -152,9 +154,7 @@ View.prototype.update = function () {
 
     this.node.exit().remove();
 
-    this.link = this.link.data(graph.edges);
-    this.link.enter().call(elements.add_link, this.edge_handler);
-    this.link.exit().remove();
+    this.update_edges();
 
     var self = this;
     // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
@@ -166,3 +166,17 @@ View.prototype.update = function () {
 };
 
 
+
+View.prototype.update_edges = function () {
+    this.link = this.link.data(this.graph().edges);
+    this.link.enter().call(elements.add_link, this.edge_handler);
+    this.link.exit().remove();
+}
+
+
+
+View.prototype.edge_by_data = function (d) {
+    obj = null;
+    this.link.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
+    return obj;
+}

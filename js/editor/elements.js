@@ -105,8 +105,8 @@ elements.get_link_transformation = (function () {
         v1[1] = d.source.y;
         v2[0] = d.target.x;
         v2[1] = d.target.y;
-        elements.make_edge.r1 = d.source.r || 16;
-        elements.make_edge.r2 = d.target.r || 16;
+        elements.make_edge.r1 = d.source.r !== undefined ? d.source.r : 16;
+        elements.make_edge.r2 = d.target.r !== undefined ? d.target.r : 16;
         switch (d.type) {
         case 1:
             elements.make_edge.curve(v1, v2, cv);
@@ -171,6 +171,7 @@ elements.add_link = function (selection, handler) {
         .on('mousedown', handler)
         .on('mouseup', handler)
         .on('mouseover', handler)
+        .on('mouseout', handler)
         .on('dblclick', handler);
         // .on('mousemove', handler);
 
