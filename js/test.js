@@ -16,7 +16,8 @@ view1.graph({
 
 view2.graph({
     nodes : [{}, {}, {}],
-    edges : [{source : 0, target : 1}, {source : 0, target : 2}]
+    edges : [{source : 0, target : 1}]
+    // edges : [{source : 0, target : 1}, {source : 0, target : 2}]
 });
 
 view3.graph({

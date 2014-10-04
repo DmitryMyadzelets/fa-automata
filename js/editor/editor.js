@@ -381,6 +381,10 @@ function View(aContainer, aGraph) {
     }
 
 
+    d3.select(window)
+        .on('keydown', plane_handler)
+        .on('keyup', plane_handler);
+
     svg.on('mousedown', plane_handler)
         .on('mouseup', plane_handler)
         .on('mousemove', plane_handler)
@@ -471,6 +475,7 @@ View.prototype.update_edges = function () {
 View.prototype.edge_by_data = function (d) {
     obj = null;
     this.link.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
+    console.log(obj);
     return obj;
 }
 
@@ -568,6 +573,9 @@ View.prototype.select = (function () {
         },
         nodes : function () {
             return nodes;
+        },
+        links : function () {
+            return links;
         },
         link : function (d) {
             var link = view.link.select('.link')
@@ -721,6 +729,28 @@ View.prototype.controller = (function () {
                     mouse = d3.mouse(this);
                     state = states.wait_for_selection;
                     break;
+                case 'keydown':
+                    switch (d3.event.keyCode) {
+                    case 46: // Delete
+                        var selected = view.select().links();
+                        var edges = view.graph().edges;
+                        console.log(edges);
+                        var i = selected.length;
+                        var ix;
+                        while(i-- > 0) {
+                            ix = edges.indexOf(selected[i]);
+                            // console.log(i, ix, edges, selected[i]);
+                            if (ix >= 0) {
+                                edges.splice(ix, 1);
+                            }
+                        }
+                        view.update();
+                        state = states.wait_for_keyup;
+                        break;
+                    // default:
+                    //     console.log('Key', d3.event.keyCode);
+                    }
+                    break;
                 }
                 break;
             case 'node':
@@ -748,6 +778,7 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().link(d);
                     state = states.init;
+                    console.log('edge', d);
                     break;
                 case 'mouseout':
                     mouse = view.pan.mouse();
@@ -760,7 +791,7 @@ View.prototype.controller = (function () {
                     // Save values for next state
                     edge_d = d;
                     set_link_type.call(view, edge_d);
-                    edge_svg = d3.select(this).selectAll('path');
+                    edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     state = states.drag_edge;
                     break;
                 default:
@@ -798,6 +829,7 @@ View.prototype.controller = (function () {
                     edge_d = { source : d_source, target : node_d };
                     view.graph().edges.push(edge_d);
                     view.update_edges();
+                    console.log(view.graph().edges);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     edge_svg.attr('d', elements.get_link_transformation(edge_d));
                     // Then attach edge to this new node
@@ -808,6 +840,7 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().node(d_source);
                     state = states.init;
+                    console.log('node', d_source);
                     break;
                 }
                 break;
@@ -841,6 +874,7 @@ View.prototype.controller = (function () {
                     set_link_type.call(view, edge_d);
                     edge_svg.attr('d', elements.get_link_transformation(edge_d));
                     state = states.drop_edge_or_exit;
+                    console.log(view.graph().edges);
                     break;
                 }
                 break;
@@ -851,23 +885,26 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mouseup':
+                    console.log(view.graph().edges);
                     // Get existing links between selected nodes
-                    var exists = view.graph().edges.filter(function (v) {
-                        return ((v.source === edge_d.source) && (v.target === edge_d.target));
-                    });
-                    if (exists.length > 1) {
-                        // Delete edge
-                        var edges = view.graph().edges;
-                        var i = edges.indexOf(edge_d);
-                        console.log(edge_d);
-                        console.log(edges[i]);
-                        console.log(edges.splice(i, 1)[0]);
-                    }
+                    // var exists = view.graph().edges.filter(function (v) {
+                    //     return ((v.source === edge_d.source) && (v.target === edge_d.target));
+                    // });
+                    // if (exists.length > 1) {
+                    //     // Delete edge
+                    //     console.log(view.graph().edges);
+                    //     var edges = view.graph().edges;
+                    //     var i = edges.indexOf(edge_d);
+                    //     // console.log(edge_d);
+                    //     // console.log(edges[i]);
+                    //     // console.log(edges);
+                    //     console.log(edges.splice(i, 1)[0]);
+                    // }
                     view.update();
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    if (exists.length <= 1) {
-                        view.select().link(edge_d);
-                    }
+                    // if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    // if (exists.length <= 1) {
+                    //     view.select().link(edge_d);
+                    // }
                     state = states.init;
                     break;
                 case 'mouseout':
@@ -1030,6 +1067,11 @@ View.prototype.controller = (function () {
                 state = states.init;
                 break;
             }
+        },
+        wait_for_keyup : function () {
+            if (type === 'keyup') {
+                state = states.init;
+            }
         }
     };
 
@@ -1043,10 +1085,21 @@ View.prototype.controller = (function () {
         }
     }
 
+    var old_view = null;
 
     return {
         event : function () {
             if (!view) { return; }
+
+            // Do not process events if the state is not initial.
+            // It is necessary when user drags elements outside of the current view.
+            if (old_view !== view) {
+                if (state !== states.init) {
+                    return;
+                } else {
+                    old_view = view;
+                }
+            }
 
             // Set default event source in case it is not set by 'set_event' method
             source = source || d3.event.target.nodeName;
@@ -1071,6 +1124,7 @@ View.prototype.controller = (function () {
         // Returns controller object for subsequent invocation
         context : function (a_view, a_element) {
             view = a_view;
+            if (!old_view) { old_view = view; }
             source = a_element;
             return this;
         }

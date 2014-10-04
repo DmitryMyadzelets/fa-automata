@@ -88,6 +88,10 @@ function View(aContainer, aGraph) {
     }
 
 
+    d3.select(window)
+        .on('keydown', plane_handler)
+        .on('keyup', plane_handler);
+
     svg.on('mousedown', plane_handler)
         .on('mouseup', plane_handler)
         .on('mousemove', plane_handler)
@@ -178,5 +182,6 @@ View.prototype.update_edges = function () {
 View.prototype.edge_by_data = function (d) {
     obj = null;
     this.link.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
+    console.log(obj);
     return obj;
 }

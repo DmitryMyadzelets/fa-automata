@@ -94,6 +94,9 @@ View.prototype.select = (function () {
         nodes : function () {
             return nodes;
         },
+        links : function () {
+            return links;
+        },
         link : function (d) {
             var link = view.link.select('.link')
                 .filter(function (_d) { return _d === d; });
