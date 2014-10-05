@@ -88,11 +88,15 @@ function View(aContainer, aGraph) {
     }
 
 
-    d3.select(window)
-        .on('keydown', plane_handler)
-        .on('keyup', plane_handler);
+    // Makes current view focused and request routing of window events (keys) to it
+    function focus() {
+        router.handle(plane_handler);
+    }
+
+
 
     svg.on('mousedown', plane_handler)
+        .on('mouseover', focus)
         .on('mouseup', plane_handler)
         .on('mousemove', plane_handler)
         // .on('mouseout', plane_handler)
@@ -119,7 +123,13 @@ function View(aContainer, aGraph) {
             self.node.attr('transform', elements.get_node_transformation);
             // TODO: you calculate paths both for link and catchlinks which
             // have the same coordinates. Better just copy it.
-            self.link.selectAll('path').attr('d', elements.get_link_transformation);
+            self.link.each(function (d) {
+                var str = elements.get_link_transformation(d);
+                d3.select(this).selectAll('path').attr('d', str);
+            });
+            // var tmp = self.link.selectAll('path');
+            // console.log(tmp);
+            // self.link.selectAll('path').attr('d', elements.get_link_transformation);
             // self.drag_edge().update();
         });
 
@@ -155,7 +165,6 @@ View.prototype.update = function () {
     var graph = this._graph;
     this.node = this.node.data(graph.nodes);
     this.node.enter().call(elements.add_node, this.node_handler);
-
     this.node.exit().remove();
 
     this.update_edges();
@@ -172,9 +181,34 @@ View.prototype.update = function () {
 
 
 View.prototype.update_edges = function () {
-    this.link = this.link.data(this.graph().edges);
-    this.link.enter().call(elements.add_link, this.edge_handler);
-    this.link.exit().remove();
+    // Copy of data array
+    var edges = this.graph().edges.slice(0);
+    // Array of data linked to svg elements
+    var exist = [];
+    this.link.each(function (d) {
+        var i = edges.indexOf(d);
+        if (i < 0) {
+            d3.select(this).remove();
+        } else {
+            exist.push(d);
+            edges.splice(i, 1);
+        }
+    });
+    // Now, 'edges' contains data which are not linked to svg elements
+    var links_group = this.svg.select('g.links');
+    while (edges.length) {
+        links_group.call(elements.add_link, this.edge_handler);
+        exist.push(edges.pop());
+    }
+    this.link = links_group.selectAll('g');
+    var i = 0;
+    this.link.datum(function (d) {
+        return exist[i++];
+    });
+
+    // this.link = this.link.data(this.graph().edges);
+    // this.link.enter().call(elements.add_link, this.edge_handler);
+    // this.link.exit().remove();
 }
 
 
@@ -182,6 +216,5 @@ View.prototype.update_edges = function () {
 View.prototype.edge_by_data = function (d) {
     obj = null;
     this.link.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
-    console.log(obj);
     return obj;
 }

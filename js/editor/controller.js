@@ -51,15 +51,10 @@ View.prototype.controller = (function () {
                     case 46: // Delete
                         var selected = view.select().links();
                         var edges = view.graph().edges;
-                        console.log(edges);
-                        var i = selected.length;
-                        var ix;
-                        while(i-- > 0) {
-                            ix = edges.indexOf(selected[i]);
-                            // console.log(i, ix, edges, selected[i]);
-                            if (ix >= 0) {
-                                edges.splice(ix, 1);
-                            }
+                        while (selected.length) {
+                            var i = edges.indexOf(selected.pop());
+                            if (i < 0) { continue; }
+                            edges.splice(i, 1);
                         }
                         view.update();
                         state = states.wait_for_keyup;
@@ -95,7 +90,6 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().link(d);
                     state = states.init;
-                    console.log('edge', d);
                     break;
                 case 'mouseout':
                     mouse = view.pan.mouse();
@@ -146,7 +140,6 @@ View.prototype.controller = (function () {
                     edge_d = { source : d_source, target : node_d };
                     view.graph().edges.push(edge_d);
                     view.update_edges();
-                    console.log(view.graph().edges);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     edge_svg.attr('d', elements.get_link_transformation(edge_d));
                     // Then attach edge to this new node
@@ -157,7 +150,6 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().node(d_source);
                     state = states.init;
-                    console.log('node', d_source);
                     break;
                 }
                 break;
@@ -191,7 +183,6 @@ View.prototype.controller = (function () {
                     set_link_type.call(view, edge_d);
                     edge_svg.attr('d', elements.get_link_transformation(edge_d));
                     state = states.drop_edge_or_exit;
-                    console.log(view.graph().edges);
                     break;
                 }
                 break;
@@ -202,26 +193,21 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mouseup':
-                    console.log(view.graph().edges);
                     // Get existing links between selected nodes
-                    // var exists = view.graph().edges.filter(function (v) {
-                    //     return ((v.source === edge_d.source) && (v.target === edge_d.target));
-                    // });
-                    // if (exists.length > 1) {
-                    //     // Delete edge
-                    //     console.log(view.graph().edges);
-                    //     var edges = view.graph().edges;
-                    //     var i = edges.indexOf(edge_d);
-                    //     // console.log(edge_d);
-                    //     // console.log(edges[i]);
-                    //     // console.log(edges);
-                    //     console.log(edges.splice(i, 1)[0]);
-                    // }
+                    var exists = view.graph().edges.filter(function (v) {
+                        return ((v.source === edge_d.source) && (v.target === edge_d.target));
+                    });
+                    if (exists.length > 1) {
+                        // Delete edge
+                        var edges = view.graph().edges;
+                        var i = edges.indexOf(edge_d);
+                        edges.splice(i, 1);
+                    }
                     view.update();
-                    // if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    // if (exists.length <= 1) {
-                    //     view.select().link(edge_d);
-                    // }
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    if (exists.length <= 1) {
+                        view.select().link(edge_d);
+                    }
                     state = states.init;
                     break;
                 case 'mouseout':

@@ -1,5 +1,6 @@
 start.js
 vector.js
+router.js
 elements.js
 pan.js
 view.js
