@@ -68,6 +68,7 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mousedown':
+                    console.log(this.__data__);
                     d_source = d;
                     state = states.node_select_or_drag;
                     break;

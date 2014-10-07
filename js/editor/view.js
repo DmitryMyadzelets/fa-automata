@@ -83,7 +83,7 @@ function View(aContainer, aGraph) {
     }
 
 
-    // Makes current view focused and request routing of window events (keys) to it
+    // Makes current view focused and requests routing of window events (keys) to it
     function focus() {
         router.handle(plane_handler);
     }
