@@ -283,11 +283,11 @@ elements.add_edge = function (selection, handler) {
         // .on('mousemove', handler);
 
     g.append('path')
-        .attr('class', 'link') // CSS class style
+        .attr('class', 'edge') // CSS class style
         .attr('marker-end', 'url(#marker-arrow)');
 
     g.append('path')
-        .attr('class', 'catchlink');
+        .attr('class', 'catch');
 
     return g;
 };
@@ -350,7 +350,7 @@ function get_empty_graph() {
 
 
 // Returns true if link 'a' is counter to link 'b'
-function is_counter_link(d) {
+function has_counter_edge(d) {
     return (this.target === d.source) && (this.source === d.target);
 }
 
@@ -360,7 +360,7 @@ function is_counter_link(d) {
 function set_edge_type(d) {
     if (d.source === d.target) {
         d.type = 2;
-    } else if (this._graph.edges.filter(is_counter_link, d).length > 0) {
+    } else if (this._graph.edges.filter(has_counter_edge, d).length > 0) {
         d.type = 1;
     } else {
         d.type = 0;
@@ -644,7 +644,7 @@ View.prototype.select = (function () {
             return edges;
         },
         edge : function (d) {
-            var edge = view.edge.select('.link')
+            var edge = view.edge.select('.edge')
                 .filter(function (_d) { return _d === d; });
             var index = edges.indexOf(d);
             if (index < 0) {

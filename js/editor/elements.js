@@ -176,11 +176,11 @@ elements.add_edge = function (selection, handler) {
         // .on('mousemove', handler);
 
     g.append('path')
-        .attr('class', 'link') // CSS class style
+        .attr('class', 'edge') // CSS class style
         .attr('marker-end', 'url(#marker-arrow)');
 
     g.append('path')
-        .attr('class', 'catchlink');
+        .attr('class', 'catch');
 
     return g;
 };

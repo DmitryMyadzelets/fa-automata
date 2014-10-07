@@ -98,7 +98,7 @@ View.prototype.select = (function () {
             return edges;
         },
         edge : function (d) {
-            var edge = view.edge.select('.link')
+            var edge = view.edge.select('.edge')
                 .filter(function (_d) { return _d === d; });
             var index = edges.indexOf(d);
             if (index < 0) {
