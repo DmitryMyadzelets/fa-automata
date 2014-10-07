@@ -5,6 +5,5 @@ elements.js
 pan.js
 view.js
 select.js
-drag_edge.js
 controller.js
 end.js

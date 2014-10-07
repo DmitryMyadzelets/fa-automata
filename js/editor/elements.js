@@ -95,7 +95,7 @@ elements.make_edge = (function () {
 
 
 // Returns SVG string for graph edge
-elements.get_link_transformation = (function () {
+elements.get_edge_transformation = (function () {
     var v1 = [0, 0];
     var v2 = [0, 0];
     var cv = [0, 0];
@@ -166,7 +166,7 @@ elements.add_node = function (selection, handler) {
 
 // Adds SVG elements representing a graph link/edge
 // Returns root of the added elements
-elements.add_link = function (selection, handler) {
+elements.add_edge = function (selection, handler) {
     var g = selection.append('g')
         .on('mousedown', handler)
         .on('mouseup', handler)

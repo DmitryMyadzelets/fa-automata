@@ -60,10 +60,10 @@ View.prototype.selection_rectangle = (function () {
 
 
 
-// This object contains methods to select nodes and links of the graph
+// This object contains methods to select nodes and edges of the graph
 View.prototype.select = (function () {
     var nodes = [];
-    var links = [];
+    var edges = [];
 
     function point_in_rectangle(x, y, r) {
         return x > r[0] && x < r[2] && y > r[1] && y < r[3];
@@ -94,25 +94,25 @@ View.prototype.select = (function () {
         nodes : function () {
             return nodes;
         },
-        links : function () {
-            return links;
+        edges : function () {
+            return edges;
         },
-        link : function (d) {
-            var link = view.link.select('.link')
+        edge : function (d) {
+            var edge = view.edge.select('.link')
                 .filter(function (_d) { return _d === d; });
-            var index = links.indexOf(d);
+            var index = edges.indexOf(d);
             if (index < 0) {
                 d.selected = true;
-                links.push(d);
+                edges.push(d);
             } else {
                 d.selected = false;
-                links.splice(index, 1);
+                edges.splice(index, 1);
             }
-            link.classed('selected', d.selected);
+            edge.classed('selected', d.selected);
         },
         nothing : function () {
             nodes.length = 0;
-            links.length = 0;
+            edges.length = 0;
             svg = svg || d3;
             svg.selectAll('.selected')
                 .classed('selected', false)
@@ -132,12 +132,12 @@ View.prototype.select = (function () {
                     view.select().node(d);
                 }
             });
-            view.link.each(function (d) {
-                // Check if both start and and points of link 
+            view.edge.each(function (d) {
+                // Check if both start and and points of edge 
                 // are in the selection
                 if (point_in_rectangle(d.x1, d.y1, r) &&
                         point_in_rectangle(d.x2, d.y2, r)) {
-                    view.select().link(d);
+                    view.select().edge(d);
                 }
             });
         }

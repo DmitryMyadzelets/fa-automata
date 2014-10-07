@@ -23,7 +23,7 @@ function is_counter_link(d) {
 
 
 // Set type of the link (0-stright, 1-curved, 2-loop)
-function set_link_type(d) {
+function set_edge_type(d) {
     if (d.source === d.target) {
         d.type = 2;
     } else if (this._graph.edges.filter(is_counter_link, d).length > 0) {
@@ -62,11 +62,6 @@ function View(aContainer, aGraph) {
     // Returns View.prototype.select object with context of current object
     this.select = function () {
         return View.prototype.select.context(self, root_group);
-    };
-
-
-    this.drag_edge = function () {
-        return View.prototype.drag_edge.context(self, root_group);
     };
 
 
@@ -121,20 +116,14 @@ function View(aContainer, aGraph) {
         .size([width, height])
         .on('tick', function () {
             self.node.attr('transform', elements.get_node_transformation);
-            // TODO: you calculate paths both for link and catchlinks which
-            // have the same coordinates. Better just copy it.
-            self.link.each(function (d) {
-                var str = elements.get_link_transformation(d);
+            self.edge.each(function (d) {
+                var str = elements.get_edge_transformation(d);
                 d3.select(this).selectAll('path').attr('d', str);
             });
-            // var tmp = self.link.selectAll('path');
-            // console.log(tmp);
-            // self.link.selectAll('path').attr('d', elements.get_link_transformation);
-            // self.drag_edge().update();
         });
 
     this.node = root_group.append('g').attr('class', 'nodes').selectAll('g');
-    this.link = root_group.append('g').attr('class', 'links').selectAll('g');
+    this.edge = root_group.append('g').attr('class', 'edges').selectAll('g');
 
     this.pan = pan(root_group);
 
@@ -171,8 +160,8 @@ View.prototype.update = function () {
 
     var self = this;
     // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
-    this.link.each(function () {
-        set_link_type.apply(self, arguments);
+    this.edge.each(function () {
+        set_edge_type.apply(self, arguments);
     });
 
     this.force.start();
@@ -181,11 +170,16 @@ View.prototype.update = function () {
 
 
 View.prototype.update_edges = function () {
+    // The below code is equal to:
+    // this.link = this.link.data(this.graph().edges);
+    // this.link.enter().call(elements.add_link, this.edge_handler);
+    // this.link.exit().remove();
+
     // Copy of data array
     var edges = this.graph().edges.slice(0);
     // Array of data linked to svg elements
     var exist = [];
-    this.link.each(function (d) {
+    this.edge.each(function (d) {
         var i = edges.indexOf(d);
         if (i < 0) {
             d3.select(this).remove();
@@ -195,26 +189,24 @@ View.prototype.update_edges = function () {
         }
     });
     // Now, 'edges' contains data which are not linked to svg elements
-    var links_group = this.svg.select('g.links');
+    var edges_group = this.svg.select('g.edges');
     while (edges.length) {
-        links_group.call(elements.add_link, this.edge_handler);
+        edges_group.call(elements.add_edge, this.edge_handler);
         exist.push(edges.pop());
     }
-    this.link = links_group.selectAll('g');
+    this.edge = edges_group.selectAll('g');
     var i = 0;
-    this.link.datum(function (d) {
+    this.edge.datum(function (d) {
         return exist[i++];
     });
-
-    // this.link = this.link.data(this.graph().edges);
-    // this.link.enter().call(elements.add_link, this.edge_handler);
-    // this.link.exit().remove();
 }
 
 
 
 View.prototype.edge_by_data = function (d) {
     obj = null;
-    this.link.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
+    this.edge.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
     return obj;
 }
+
+

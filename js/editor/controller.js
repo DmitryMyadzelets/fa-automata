@@ -49,7 +49,7 @@ View.prototype.controller = (function () {
                 case 'keydown':
                     switch (d3.event.keyCode) {
                     case 46: // Delete
-                        var selected = view.select().links();
+                        var selected = view.select().edges();
                         var edges = view.graph().edges;
                         while (selected.length) {
                             var i = edges.indexOf(selected.pop());
@@ -78,35 +78,6 @@ View.prototype.controller = (function () {
                 case 'mousedown':
                     state = states.edge_select_or_drag;
                     break;
-                }
-                break;
-            }
-        },
-        edge_select_or_drag : function (d) {
-            switch (source) {
-            case 'edge':
-                switch (type) {
-                case 'mouseup':
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    view.select().link(d);
-                    state = states.init;
-                    break;
-                case 'mouseout':
-                    mouse = view.pan.mouse();
-                    // Start dragging the edge
-                    // Firstly, create new node with zero size
-                    node_d = { x : mouse[0], y : mouse[1], r : 1};
-                    // Then attach edge to this new node
-                    view.force.stop();
-                    d.target = node_d;
-                    // Save values for next state
-                    edge_d = d;
-                    set_link_type.call(view, edge_d);
-                    edge_svg = view.edge_by_data(edge_d).selectAll('path');
-                    state = states.drag_edge;
-                    break;
-                default:
-                    state = states.init;
                 }
                 break;
             }
@@ -141,7 +112,7 @@ View.prototype.controller = (function () {
                     view.graph().edges.push(edge_d);
                     view.update_edges();
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
-                    edge_svg.attr('d', elements.get_link_transformation(edge_d));
+                    edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                     // Then attach edge to this new node
                     view.force.stop();
                     state = states.drag_edge;
@@ -155,6 +126,35 @@ View.prototype.controller = (function () {
                 break;
             }
         },
+        edge_select_or_drag : function (d) {
+            switch (source) {
+            case 'edge':
+                switch (type) {
+                case 'mouseup':
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    view.select().edge(d);
+                    state = states.init;
+                    break;
+                case 'mouseout':
+                    mouse = view.pan.mouse();
+                    // Start dragging the edge
+                    // Firstly, create new node with zero size
+                    node_d = { x : mouse[0], y : mouse[1], r : 1};
+                    // Then attach edge to this new node
+                    view.force.stop();
+                    d.target = node_d;
+                    // Save values for next state
+                    edge_d = d;
+                    set_edge_type.call(view, edge_d);
+                    edge_svg = view.edge_by_data(edge_d).selectAll('path');
+                    state = states.drag_edge;
+                    break;
+                default:
+                    state = states.init;
+                }
+                break;
+            }
+        },
         drag_edge : function (d) {
             switch (source) {
             case 'plane':
@@ -163,7 +163,7 @@ View.prototype.controller = (function () {
                     mouse = view.pan.mouse();
                     node_d.x = mouse[0];
                     node_d.y = mouse[1];
-                    edge_svg.attr('d', elements.get_link_transformation(edge_d));
+                    edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                     break;
                 case 'mouseup':
                     delete node_d.r;
@@ -171,7 +171,7 @@ View.prototype.controller = (function () {
                     view.update();
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().node(node_d);
-                    view.select().link(edge_d);
+                    view.select().edge(edge_d);
 
                     state = states.init;
                 }
@@ -180,8 +180,8 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mouseover':
                     edge_d.target = d;
-                    set_link_type.call(view, edge_d);
-                    edge_svg.attr('d', elements.get_link_transformation(edge_d));
+                    set_edge_type.call(view, edge_d);
+                    edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                     state = states.drop_edge_or_exit;
                     break;
                 }
@@ -193,7 +193,7 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mouseup':
-                    // Get existing links between selected nodes
+                    // Get existing edges between selected nodes
                     var exists = view.graph().edges.filter(function (v) {
                         return ((v.source === edge_d.source) && (v.target === edge_d.target));
                     });
@@ -206,83 +206,14 @@ View.prototype.controller = (function () {
                     view.update();
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     if (exists.length <= 1) {
-                        view.select().link(edge_d);
+                        view.select().edge(edge_d);
                     }
                     state = states.init;
                     break;
                 case 'mouseout':
                     edge_d.target = node_d;
-                    set_link_type.call(view, edge_d);
+                    set_edge_type.call(view, edge_d);
                     state = states.drag_edge;
-                    break;
-                }
-                break;
-            }
-        },
-        drag_link : function (d) {
-            switch (source) {
-            case 'plane':
-                switch (type) {
-                case 'mousemove':
-                    view.drag_edge().to_point(view.pan.mouse());
-                    break;
-                // Create new node and new edge to it
-                case 'mouseup':
-                    view.drag_edge().hide();
-                    // Create new node
-                    mouse = view.pan.mouse();
-                    var node = {x : mouse[0], y : mouse[1]};
-                    view.graph().nodes.push(node);
-                    // Create new edge
-                    var edge = {source : d_source, target : node};
-                    view.graph().edges.push(edge);
-                    // Update view, select the node and edge
-                    view.update();
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    view.select().node(node);
-                    view.select().link(edge);
-
-                    state = states.init;
-                    break;
-                }
-                break;
-            case 'node':
-                switch (type) {
-                    // User have dragged the link to another node
-                    case 'mouseover':
-                        view.drag_edge().to_node(d);
-                        state = states.drop_link_or_exit;
-                        break;
-                }
-                break;
-            }
-        },
-        drop_link_or_exit : function (d) {
-            switch (source) {
-            case 'node':
-                switch (type) {
-                case 'mouseup':
-                    view.drag_edge().hide();
-                    // Get existing links between selected nodes
-                    var exists = view.graph().edges.filter(function (v) {
-                        return ((v.source === d_source) && (v.target === d));
-                    });
-                    var edge;
-                    if (exists.length === 0) {
-                        // Create new edge
-                        edge = {source : d_source, target : d};
-                        view.graph().edges.push(edge);
-                        view.update();
-                    } else {
-                        // otherwise select already existing edge
-                        edge = exists[0];
-                    }
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    view.select().link(edge);
-                    state = states.init;
-                    break;
-                case 'mouseout':
-                    state = states.drag_link;
                     break;
                 }
                 break;
