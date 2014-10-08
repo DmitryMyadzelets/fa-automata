@@ -151,11 +151,7 @@ View.prototype.graph = function (graph) {
 
 // Updates SVG structure according to the graph structure
 View.prototype.update = function () {
-    var graph = this._graph;
-    this.node = this.node.data(graph.nodes);
-    this.node.enter().call(elements.add_node, this.node_handler);
-    this.node.exit().remove();
-
+    this.update_nodes();
     this.update_edges();
 
     var self = this;
@@ -169,6 +165,44 @@ View.prototype.update = function () {
 
 
 
+View.prototype.update_nodes = function () {
+    // The below code is equal to:
+    // this.node = this.node.data(this.graph().nodes);
+    // this.node.enter().call(elements.add_node, this.node_handler);
+    // this.node.exit().remove();
+
+    // return;
+
+    // Copy of data array
+    var nodes = this.graph().nodes.slice(0);
+    // Get nodes data linked to svg elements
+    var exist = [];
+    this.node.each(function (d) {
+        var i = nodes.indexOf(d);
+        if (i < 0) {
+            d3.select(this).remove();
+        } else {
+            exist.push(d);
+            nodes.splice(i, 1);
+        }
+    });
+    // Now, 'nodes' contains data which are not linked to svg elements
+    // We create svg elements for that data
+    var nodes_group = this.svg.select('g.nodes');
+    while (nodes.length) {
+        nodes_group.call(elements.add_node, this.node_handler);
+        exist.push(nodes.pop());
+    }
+    // Get all svg elements related to nodes
+    this.node = nodes_group.selectAll('g');
+    // Link datum to each svg element
+    var i = 0;
+    this.node.datum(function (d) {
+        return exist[i++];
+    });
+}
+
+
 View.prototype.update_edges = function () {
     // The below code is equal to:
     // this.link = this.link.data(this.graph().edges);
@@ -177,7 +211,7 @@ View.prototype.update_edges = function () {
 
     // Copy of data array
     var edges = this.graph().edges.slice(0);
-    // Array of data linked to svg elements
+    // Get edges data linked to svg elements
     var exist = [];
     this.edge.each(function (d) {
         var i = edges.indexOf(d);
@@ -189,12 +223,15 @@ View.prototype.update_edges = function () {
         }
     });
     // Now, 'edges' contains data which are not linked to svg elements
+    // We create svg elements for that data
     var edges_group = this.svg.select('g.edges');
     while (edges.length) {
         edges_group.call(elements.add_edge, this.edge_handler);
         exist.push(edges.pop());
     }
+    // Get all svg elements related to edges
     this.edge = edges_group.selectAll('g');
+    // Link datum to each svg element
     var i = 0;
     this.edge.datum(function (d) {
         return exist[i++];

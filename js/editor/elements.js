@@ -137,14 +137,14 @@ elements.get_edge_transformation = (function () {
 var b = true;
 
 elements.get_node_transformation = function (d) {
-    if (d.x === undefined || d.y === undefined) { return ""; }
+    if (!d || d.x === undefined || d.y === undefined) { return ""; }
     return "translate(" + d.x + "," + d.y + ")";
 };
 
 
 
 function node_radius (d) {
-    return d.r || 16;
+    return d ? d.r : 16;
 }
 
 

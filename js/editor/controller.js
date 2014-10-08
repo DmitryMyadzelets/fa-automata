@@ -50,10 +50,28 @@ View.prototype.controller = (function () {
                 case 'keydown':
                     switch (d3.event.keyCode) {
                     case 46: // Delete
-                        var selected = view.select().edges();
+                        var nodes = view.graph().nodes;
                         var edges = view.graph().edges;
-                        while (selected.length) {
-                            var i = edges.indexOf(selected.pop());
+                        selected_nodes = view.select().nodes();
+                        selected_edges = view.select().edges();
+                        // Add edges of selected nodes
+                        var i = edges.length;
+                        var e;
+                        while (i-- > 0) {
+                            e = edges[i];
+                            if (selected_nodes.indexOf(e.source) >= 0 || selected_nodes.indexOf(e.target) >= 0) {
+                                if (selected_edges.indexOf(e) < 0) { selected_edges.push(e); }
+                            }
+                        }
+                        // delete selected nodes
+                        while (selected_nodes.length) {
+                            i = nodes.indexOf(selected_nodes.pop());
+                            if (i < 0) { continue; }
+                            nodes.splice(i, 1);
+                        }
+                        // delete selected edges
+                        while (selected_edges.length) {
+                            i = edges.indexOf(selected_edges.pop());
                             if (i < 0) { continue; }
                             edges.splice(i, 1);
                         }

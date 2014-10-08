@@ -86,7 +86,7 @@ g.edges path.catch {
   fill: none;
   stroke: yellow;
   stroke-width: 0.8em;
-  stroke-opacity: 0.5;
+  stroke-opacity: 0.0;
   /*cursor: pointer;*/
 }
 
