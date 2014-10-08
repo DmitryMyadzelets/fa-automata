@@ -417,7 +417,7 @@ function View(aContainer, aGraph) {
     }
 
 
-    // Makes current view focused and request routing of window events (keys) to it
+    // Makes current view focused and requests routing of window events (keys) to itb
     function focus() {
         router.handle(plane_handler);
     }
@@ -710,6 +710,7 @@ View.prototype.controller = (function () {
     var edge_svg;       // reference to a SVG edge
     var edge_d;         // reference to an edge object
     var node_d;         // reference to a node object
+    var drag_target;    // drag target node of edge [true, false]
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -725,7 +726,7 @@ View.prototype.controller = (function () {
                     mouse = view.pan.mouse();
                     // Create new node
                     var node = { x : mouse[0], y : mouse[1] };
-                    view.graph().nodes.push(node);
+                    view.graph().nodes.push(d);
                     view.update();
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().node(node);
@@ -761,7 +762,6 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mousedown':
-                    console.log(this.__data__);
                     d_source = d;
                     state = states.node_select_or_drag;
                     break;
@@ -770,6 +770,12 @@ View.prototype.controller = (function () {
             case 'edge':
                 switch (type) {
                 case 'mousedown':
+                    // What to drag: head or tail of the edge? What is more close to mouse pointer.
+                    var head = [], tail = [];
+                    mouse = view.pan.mouse();
+                    vec.subtract(mouse, [d.x1, d.y1], tail);
+                    vec.subtract(mouse, [d.x2, d.y2], head);
+                    drag_target = vec.length(head) < vec.length(tail);
                     state = states.edge_select_or_drag;
                     break;
                 }
@@ -800,9 +806,10 @@ View.prototype.controller = (function () {
                     mouse = view.pan.mouse();
                     // Start dragging the edge
                     // Firstly, create new node with zero size
-                    node_d = { x : mouse[0], y : mouse[1], r : 1};
+                    node_d = { x : mouse[0], y : mouse[1], r : 1 };
                     // Create new edge
                     edge_d = { source : d_source, target : node_d };
+                    drag_target = true;
                     view.graph().edges.push(edge_d);
                     view.update_edges();
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
@@ -833,10 +840,14 @@ View.prototype.controller = (function () {
                     mouse = view.pan.mouse();
                     // Start dragging the edge
                     // Firstly, create new node with zero size
-                    node_d = { x : mouse[0], y : mouse[1], r : 1};
+                    node_d = { x : mouse[0], y : mouse[1], r : 1 };
+                    if (drag_target) {
+                        d.target = node_d;
+                    } else {
+                        d.source = node_d;
+                    }
                     // Then attach edge to this new node
                     view.force.stop();
-                    d.target = node_d;
                     // Save values for next state
                     edge_d = d;
                     set_edge_type.call(view, edge_d);
@@ -850,30 +861,30 @@ View.prototype.controller = (function () {
             }
         },
         drag_edge : function (d) {
-            switch (source) {
-            case 'plane':
-                switch (type) {
-                case 'mousemove':
-                    mouse = view.pan.mouse();
-                    node_d.x = mouse[0];
-                    node_d.y = mouse[1];
-                    edge_svg.attr('d', elements.get_edge_transformation(edge_d));
-                    break;
-                case 'mouseup':
-                    delete node_d.r;
-                    view.graph().nodes.push(node_d);
-                    view.update();
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    view.select().node(node_d);
-                    view.select().edge(edge_d);
-
-                    state = states.init;
-                }
+            switch (type) {
+            case 'mousemove':
+                mouse = view.pan.mouse();
+                node_d.x = mouse[0];
+                node_d.y = mouse[1];
+                edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                 break;
-            case 'node':
-                switch (type) {
-                case 'mouseover':
-                    edge_d.target = d;
+            case 'mouseup':
+                delete node_d.r;
+                view.graph().nodes.push(node_d);
+                view.update();
+                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                view.select().node(node_d);
+                view.select().edge(edge_d);
+                state = states.init;
+                break;
+            case 'mouseover':
+                switch (source) {
+                case 'node':
+                    if (drag_target) {
+                        edge_d.target = d;
+                    } else {
+                        edge_d.source = d;
+                    }
                     set_edge_type.call(view, edge_d);
                     edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                     state = states.drop_edge_or_exit;
@@ -905,7 +916,11 @@ View.prototype.controller = (function () {
                     state = states.init;
                     break;
                 case 'mouseout':
-                    edge_d.target = node_d;
+                    if (drag_target) {
+                        edge_d.target = node_d;
+                    } else {
+                        edge_d.source = node_d;
+                    }
                     set_edge_type.call(view, edge_d);
                     state = states.drag_edge;
                     break;
