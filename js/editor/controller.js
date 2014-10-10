@@ -33,7 +33,7 @@ View.prototype.controller = (function () {
                     mouse = view.pan.mouse();
                     // Create new node
                     var node = { x : mouse[0], y : mouse[1] };
-                    view.graph().nodes.push(d);
+                    view.graph().nodes.push(node);
                     view.update();
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     view.select().node(node);
@@ -87,6 +87,8 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mousedown':
+                    // console.log('debug', this, arguments, d);
+                    // break;
                     d_source = d;
                     state = states.node_select_or_drag;
                     break;
@@ -197,9 +199,6 @@ View.prototype.controller = (function () {
                 delete node_d.r;
                 view.graph().nodes.push(node_d);
                 view.update();
-                if (!d3.event.ctrlKey) { view.select().nothing(); }
-                view.select().node(node_d);
-                view.select().edge(edge_d);
                 state = states.init;
                 break;
             case 'mouseover':

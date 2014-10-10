@@ -3,6 +3,16 @@
 /*global d3, ed, elements, pan*/
 "use strict";
 
+// Structure of SVG elements:
+// <svg>
+//   <g>
+//     <g .nodes>
+//       <g>
+//         <circle>
+//     <g .edges>
+//       <g>
+//         <path .edge>
+//         <path .catch>
 
 
 // Returns new empty graphoo
@@ -165,49 +175,38 @@ View.prototype.update = function () {
 
 
 
-View.prototype.update_nodes = function () {
-    // The below code is equal to:
-    // this.node = this.node.data(this.graph().nodes);
-    // this.node.enter().call(elements.add_node, this.node_handler);
-    // this.node.exit().remove();
-
-    // return;
-
-    // Copy of data array
-    var nodes = this.graph().nodes.slice(0);
-    // Get nodes data linked to svg elements
-    var exist = [];
-    this.node.each(function (d) {
-        var i = nodes.indexOf(d);
-        if (i < 0) {
-            d3.select(this).remove();
-        } else {
-            exist.push(d);
-            nodes.splice(i, 1);
-        }
-    });
-    // Now, 'nodes' contains data which are not linked to svg elements
-    // We create svg elements for that data
-    var nodes_group = this.svg.select('g.nodes');
-    while (nodes.length) {
-        nodes_group.call(elements.add_node, this.node_handler);
-        exist.push(nodes.pop());
+// Returns an unique identifier
+var uid = (function () {
+    var id = 0;
+    return function () {
+        return id++;
     }
-    // Get all svg elements related to nodes
-    this.node = nodes_group.selectAll('g');
-    // Link datum to each svg element
-    var i = 0;
-    this.node.datum(function (d) {
-        return exist[i++];
-    });
+}());
+
+
+
+// Returns key of thge datum
+function key(d) {
+    if (d.uid === undefined) { d.uid = uid(); }
+    return d.uid;
 }
+
+
+
+View.prototype.update_nodes = function () {
+    this.node = this.node.data(this.graph().nodes, key);
+    this.node.enter().call(elements.add_node, this.node_handler);
+    this.node.exit().remove();
+}
+
 
 
 View.prototype.update_edges = function () {
     // The below code is equal to:
-    // this.link = this.link.data(this.graph().edges);
-    // this.link.enter().call(elements.add_link, this.edge_handler);
-    // this.link.exit().remove();
+    this.edge = this.edge.data(this.graph().edges, key);
+    this.edge.enter().call(elements.add_edge, this.edge_handler);
+    this.edge.exit().remove();
+    return;
 
     // Copy of data array
     var edges = this.graph().edges.slice(0);
@@ -226,7 +225,7 @@ View.prototype.update_edges = function () {
     // We create svg elements for that data
     var edges_group = this.svg.select('g.edges');
     while (edges.length) {
-        edges_group.call(elements.add_edge, this.edge_handler);
+        elements.add_edge(edges_group, this.edge_handler);
         exist.push(edges.pop());
     }
     // Get all svg elements related to edges

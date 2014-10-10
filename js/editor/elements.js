@@ -144,27 +144,30 @@ elements.get_node_transformation = function (d) {
 
 
 function node_radius (d) {
-    return d ? d.r : 16;
+    if (d && d.r) {
+        return d.r;
+    }
+    return 16;
 }
 
 
-
-// Adds SVG element representing a graph node
+// Adds SVG elements representing graph nodes
 elements.add_node = function (selection, handler) {
-    selection.append('g')
+    var g = selection.append('g')
         .attr('transform', elements.get_node_transformation)
-        .append('circle')
-        .attr('r', node_radius)
         .on('mousedown', handler)
         .on('mouseup', handler)
         .on('mouseover', handler)
         .on('mouseout', handler)
         .on('dblclick', handler);
+
+    g.append('circle')
+        .attr('r', node_radius);
 };
 
 
 
-// Adds SVG elements representing a graph link/edge
+// Adds SVG elements representing graph links/edges
 // Returns root of the added elements
 elements.add_edge = function (selection, handler) {
     var g = selection.append('g')

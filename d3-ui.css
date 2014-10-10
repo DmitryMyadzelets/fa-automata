@@ -37,33 +37,26 @@ div {
 }
 
 /* SVG */
-g.nodes circle {
+/*g.nodes circle {
   fill: dodgerblue;
   stroke: #555;
   stroke-width: 0.09em;
   fill-opacity: 0.5;
 }
-
-
-circle.node {
+*/
+/*g.nodes circle.selected {
   fill: dodgerblue;
-  stroke: #555;
-  stroke-width: 0.09em;
-  fill-opacity: 0.5;
 }
+*/
 
-circle.node:hover {
-  /*stroke: blue;*/
-}
-
-.selected,
+/*.selected,
 .selection {
   fill: none;
   stroke: black;
-  /*stroke-dasharray: 0.5em,0.3em;*/
+  stroke-dasharray: 0.5em,0.3em;
   stroke-dasharray: 0.6em,0.2em;
 }
-
+*/
 rect.selection {
     shape-rendering : crispEdges;
 }

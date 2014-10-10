@@ -89,7 +89,7 @@ View.prototype.select = (function () {
                 d.selected = false;
                 nodes.splice(index, 1);
             }
-            node.classed('selected', d.selected);
+            node.select('circle').classed('selected', d.selected);
         },
         nodes : function () {
             return nodes;
