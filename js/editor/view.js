@@ -206,35 +206,6 @@ View.prototype.update_edges = function () {
     this.edge = this.edge.data(this.graph().edges, key);
     this.edge.enter().call(elements.add_edge, this.edge_handler);
     this.edge.exit().remove();
-    return;
-
-    // Copy of data array
-    var edges = this.graph().edges.slice(0);
-    // Get edges data linked to svg elements
-    var exist = [];
-    this.edge.each(function (d) {
-        var i = edges.indexOf(d);
-        if (i < 0) {
-            d3.select(this).remove();
-        } else {
-            exist.push(d);
-            edges.splice(i, 1);
-        }
-    });
-    // Now, 'edges' contains data which are not linked to svg elements
-    // We create svg elements for that data
-    var edges_group = this.svg.select('g.edges');
-    while (edges.length) {
-        elements.add_edge(edges_group, this.edge_handler);
-        exist.push(edges.pop());
-    }
-    // Get all svg elements related to edges
-    this.edge = edges_group.selectAll('g');
-    // Link datum to each svg element
-    var i = 0;
-    this.edge.datum(function (d) {
-        return exist[i++];
-    });
 }
 
 

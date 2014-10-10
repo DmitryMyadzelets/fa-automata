@@ -379,7 +379,8 @@ View.prototype.controller = (function () {
             view = null;
             source = null;
 
-            d3.event.stopPropagation();
+            // d3.event.stopPropagation();
+
             // If there wes a transition from state to state
             if (old_state !== state) {
                 // Trace current transition
