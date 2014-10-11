@@ -100,6 +100,7 @@ View.prototype.controller = (function () {
                     if (d3.event.shiftKey) {
                         mouse = view.pan.mouse();
                         if (!d_source.selected) {
+                            if (!d3.event.ctrlKey) { view.select().nothing(); }
                             view.select().node(d_source);
                         }
                         nodes = view.select().nodes();
@@ -179,6 +180,8 @@ View.prototype.controller = (function () {
             case 'mouseup':
                 delete node_d.r; // in order to use default radius
                 view.nodes().add(node_d);
+                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                view.select().node(node_d);
                 state = states.init;
                 break;
             case 'mouseover':
