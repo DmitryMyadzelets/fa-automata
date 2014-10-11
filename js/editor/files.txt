@@ -4,6 +4,7 @@ router.js
 elements.js
 pan.js
 view.js
+view.data.js
 select.js
 controller.js
 end.js

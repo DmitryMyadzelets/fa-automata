@@ -30,13 +30,10 @@ View.prototype.controller = (function () {
                 case 'mousemove':
                     break;
                 case 'dblclick':
+                    if (!d3.event.ctrlKey) { view.select().nothing(); }
                     mouse = view.pan.mouse();
                     // Create new node
-                    var node = { x : mouse[0], y : mouse[1] };
-                    view.graph().nodes.push(node);
-                    view.update();
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    view.select().node(node);
+                    view.nodes().add({ x : mouse[0], y : mouse[1] }).select();
                     break;
                 case 'mousedown':
                     if (d3.event.shiftKey) {
@@ -50,32 +47,17 @@ View.prototype.controller = (function () {
                 case 'keydown':
                     switch (d3.event.keyCode) {
                     case 46: // Delete
-                        var nodes = view.graph().nodes;
-                        var edges = view.graph().edges;
-                        selected_nodes = view.select().nodes();
                         selected_edges = view.select().edges();
-                        // Add edges of selected nodes
-                        var i = edges.length;
-                        var e;
-                        while (i-- > 0) {
-                            e = edges[i];
-                            if (selected_nodes.indexOf(e.source) >= 0 || selected_nodes.indexOf(e.target) >= 0) {
-                                if (selected_edges.indexOf(e) < 0) { selected_edges.push(e); }
-                            }
-                        }
-                        // delete selected nodes
-                        while (selected_nodes.length) {
-                            i = nodes.indexOf(selected_nodes.pop());
-                            if (i < 0) { continue; }
-                            nodes.splice(i, 1);
-                        }
-                        // delete selected edges
-                        while (selected_edges.length) {
-                            i = edges.indexOf(selected_edges.pop());
-                            if (i < 0) { continue; }
-                            edges.splice(i, 1);
-                        }
-                        view.update();
+
+                        // Delete selected nodes
+                        var nodes = view.nodes().remove(view.select().nodes());
+                        // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
+                        var edges = nodes.edges();
+                        edges = edges.concat(view.select().edges().filter(
+                            function (d) { return edges.indexOf(d) < 0; }
+                            ));
+                        // Delete edges
+                        view.edges().remove(edges);
                         state = states.wait_for_keyup;
                         break;
                     // default:
@@ -87,17 +69,18 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mousedown':
-                    // console.log('debug', this, arguments, d);
-                    // break;
                     d_source = d;
                     state = states.node_select_or_drag;
+                    break;
+                case 'dblclick':
+                    d3.event.stopPropagation();
                     break;
                 }
                 break;
             case 'edge':
                 switch (type) {
                 case 'mousedown':
-                    // What to drag: head or tail of the edge? What is more close to mouse pointer.
+                    // What to drag: head or tail of the edge? What is closer to the mouse pointer.
                     var head = [], tail = [];
                     mouse = view.pan.mouse();
                     vec.subtract(mouse, [d.x1, d.y1], tail);
@@ -136,11 +119,9 @@ View.prototype.controller = (function () {
                     node_d = { x : mouse[0], y : mouse[1], r : 1 };
                     // Create new edge
                     edge_d = { source : d_source, target : node_d };
+                    view.edges().add(edge_d);
                     drag_target = true;
-                    view.graph().edges.push(edge_d);
-                    view.update_edges();
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
-                    edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                     // Then attach edge to this new node
                     view.force.stop();
                     state = states.drag_edge;
@@ -196,9 +177,8 @@ View.prototype.controller = (function () {
                 edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                 break;
             case 'mouseup':
-                delete node_d.r;
-                view.graph().nodes.push(node_d);
-                view.update();
+                delete node_d.r; // in order to use default radius
+                view.nodes().add(node_d);
                 state = states.init;
                 break;
             case 'mouseover':
