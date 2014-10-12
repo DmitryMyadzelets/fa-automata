@@ -139,6 +139,10 @@ function View(aContainer, aGraph) {
 
     this.svg = svg;
 
+    var undo = new Undo();
+    this.undo = undo.undo;
+    this.redo = undo.redo;
+
     // Attach graph
     this.graph(aGraph);
 }

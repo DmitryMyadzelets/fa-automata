@@ -60,6 +60,18 @@ View.prototype.controller = (function () {
                         view.edges().remove(edges);
                         state = states.wait_for_keyup;
                         break;
+                    case 89: // Y
+                        if (d3.event.ctrlKey) {
+                            view.redo();
+                        }
+                        state = states.wait_for_keyup;
+                        break;
+                    case 90: // Z
+                        if (d3.event.ctrlKey) {
+                            view.undo();
+                        }
+                        state = states.wait_for_keyup;
+                        break;
                     // default:
                     //     console.log('Key', d3.event.keyCode);
                     }
