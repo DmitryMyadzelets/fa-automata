@@ -6,6 +6,6 @@ pan.js
 view.js
 view.data.js
 select.js
-controller.js
 undo.js
+controller.js
 end.js
