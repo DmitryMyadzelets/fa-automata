@@ -33,7 +33,7 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     mouse = view.pan.mouse();
                     // Create new node
-                    commands.add_node(view, { x : mouse[0], y : mouse[1] });
+                    commands.start().add_node(view, { x : mouse[0], y : mouse[1] });
                     // view.nodes().add({ x : mouse[0], y : mouse[1] }).select();
                     break;
                 case 'mousedown':
@@ -48,17 +48,16 @@ View.prototype.controller = (function () {
                 case 'keydown':
                     switch (d3.event.keyCode) {
                     case 46: // Delete
-                        selected_edges = view.select().edges();
-
-                        // Delete selected nodes
-                        var nodes = view.nodes().remove(view.select().nodes());
+                        var nodes = view.select().nodes();
                         // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                        var edges = nodes.edges();
+                        var edges = view.nodes(nodes).edges();
                         edges = edges.concat(view.select().edges().filter(
                             function (d) { return edges.indexOf(d) < 0; }
                             ));
-                        // Delete edges
-                        view.edges().remove(edges);
+                        // Delete nodes edges
+                        commands.start()
+                            .del_node(view, nodes.splice(0))
+                            .del_edge(view, edges);
                         state = states.wait_for_keyup;
                         break;
                     case 89: // Y
@@ -70,6 +69,7 @@ View.prototype.controller = (function () {
                         break;
                     case 90: // Z
                         if (d3.event.ctrlKey) {
+                            console.log('undo stack:', commands.stack);
                             commands.undo();
                             // view.undo();
                         }

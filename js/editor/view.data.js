@@ -18,10 +18,18 @@ View.prototype.nodes = (function () {
     	}
     }
 
+    function add(d) {
+        data.push(d);
+    }
+
     methods.add = function (d) {
         last.length = 0;
         cache(d);
-        data.push(d);
+        if (d instanceof Array) {
+            d.forEach(function (d) { add(d); } );
+        } else {
+            add(d);
+        }
         view.update();
         return methods;
     };
@@ -88,10 +96,27 @@ View.prototype.edges = (function () {
     var last = [];
     var data;
 
+    function cache (d) {
+        if (d instanceof Array) {
+            last = d.slice(0);
+        } else {
+            last.lenth = 0;
+            last.push(d);
+        }
+    }
+
+    function add(d) {
+        data.push(d);
+    }
+
     methods.add = function (d) {
         last.length = 0;
-        last.push(d);
-        data.push(d);
+        cache(d);
+        if (d instanceof Array) {
+            d.forEach(function (d) { add(d); } );
+        } else {
+            add(d);
+        }
         view.update();
         return methods;
     };
@@ -104,6 +129,7 @@ View.prototype.edges = (function () {
     }
 
     methods.remove = function (d) {
+        cache(d);
         if (d instanceof Array) {
             d.forEach(function (d) { remove(d); });
         } else {

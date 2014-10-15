@@ -20,6 +20,7 @@ Command.prototype.undo = function () {};
 // 
 var Commands = function () {
     this.stack = [];
+    this.macro = [];
     this.index = 0;
     // Index is equal to a number of commands which user can undo;
     // If index is not equal to the length of stack, it implies
@@ -29,7 +30,8 @@ var Commands = function () {
 
 
 
-Commands.prototype.startMacro = function () {
+// Starts new macro recording
+Commands.prototype.start = function () {
     if (this.index < this.stack.length) { this.stack.length = this.index; }
     this.macro = [];
     this.stack.push(this.macro);
@@ -39,40 +41,25 @@ Commands.prototype.startMacro = function () {
 
 
 
-Commands.prototype.stopMacro = function () {
-    if (this.macro) {
-        delete this.macro;
-    }
-    return this;
-};
-
-
-
-Commands.prototype.exec = function (command) {
-    if (this.macro) {
-        this.macro.push(command);
-    } else {
-        if (this.index < this.stack.length) { this.stack.length = this.index; }
-        this.stack.push(command);
-        this.index = this.stack.length;
-    }
-    command.redo();
-    return this;
-};
-
-
-
 Commands.prototype.undo = function () {
     if (this.index > 0) {
-        this.stack[--this.index].undo();
+        var macro = this.stack[--this.index];
+        var i = macro.length;
+        while (i-- > 0) {
+            macro[i].undo();
+        }
     }
 };
+
 
 
 Commands.prototype.redo = function () {
     if (this.index < this.stack.length) {
-        var command = this.stack[this.index++];
-        command.redo();
+        var macro = this.stack[this.index++];
+        var i, n = macro.length;
+        for (i = 0; i < n; i++) {
+            macro[i].redo();
+        }
     }
 };
 
@@ -89,9 +76,10 @@ Commands.prototype.new = function (name, fun) {
     var self = this;
     if (name && typeof fun === 'function') {
         this[name] = function () {
-            var cmd = new Command();
-            fun.apply(cmd, arguments);
-            self.exec(cmd);
+            var command = new Command();
+            fun.apply(command, arguments);
+            self.macro.push(command);
+            command.redo();
             return self;
         }
     }
@@ -109,7 +97,20 @@ commands.new('add_node', function (view, d) {
 
 
 commands.new('del_node', function (view, d) {
-    this.redo = function () { view.nodes().add(d); };
-    this.undo = function () { view.nodes().remove(d); };
+    this.redo = function () { view.nodes().remove(d); };
+    this.undo = function () { view.nodes().add(d); };
 });
+
+
+commands.new('add_edge', function (view, d) {
+    this.redo = function () { view.edges().add(d); };
+    this.undo = function () { view.edges().remove(d); };
+});
+
+
+commands.new('del_edge', function (view, d) {
+    this.redo = function () { view.edges().remove(d); };
+    this.undo = function () { view.edges().add(d); };
+});
+
 

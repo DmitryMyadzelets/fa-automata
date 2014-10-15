@@ -579,10 +579,18 @@ View.prototype.nodes = (function () {
     	}
     }
 
+    function add(d) {
+        data.push(d);
+    }
+
     methods.add = function (d) {
         last.length = 0;
         cache(d);
-        data.push(d);
+        if (d instanceof Array) {
+            d.forEach(function (d) { add(d); } );
+        } else {
+            add(d);
+        }
         view.update();
         return methods;
     };
@@ -649,10 +657,27 @@ View.prototype.edges = (function () {
     var last = [];
     var data;
 
+    function cache (d) {
+        if (d instanceof Array) {
+            last = d.slice(0);
+        } else {
+            last.lenth = 0;
+            last.push(d);
+        }
+    }
+
+    function add(d) {
+        data.push(d);
+    }
+
     methods.add = function (d) {
         last.length = 0;
-        last.push(d);
-        data.push(d);
+        cache(d);
+        if (d instanceof Array) {
+            d.forEach(function (d) { add(d); } );
+        } else {
+            add(d);
+        }
         view.update();
         return methods;
     };
@@ -665,6 +690,7 @@ View.prototype.edges = (function () {
     }
 
     methods.remove = function (d) {
+        cache(d);
         if (d instanceof Array) {
             d.forEach(function (d) { remove(d); });
         } else {
@@ -867,6 +893,7 @@ Command.prototype.undo = function () {};
 // 
 var Commands = function () {
     this.stack = [];
+    this.macro = [];
     this.index = 0;
     // Index is equal to a number of commands which user can undo;
     // If index is not equal to the length of stack, it implies
@@ -876,7 +903,8 @@ var Commands = function () {
 
 
 
-Commands.prototype.startMacro = function () {
+// Starts new macro recording
+Commands.prototype.start = function () {
     if (this.index < this.stack.length) { this.stack.length = this.index; }
     this.macro = [];
     this.stack.push(this.macro);
@@ -886,40 +914,25 @@ Commands.prototype.startMacro = function () {
 
 
 
-Commands.prototype.stopMacro = function () {
-    if (this.macro) {
-        delete this.macro;
-    }
-    return this;
-};
-
-
-
-Commands.prototype.exec = function (command) {
-    if (this.macro) {
-        this.macro.push(command);
-    } else {
-        if (this.index < this.stack.length) { this.stack.length = this.index; }
-        this.stack.push(command);
-        this.index = this.stack.length;
-    }
-    command.redo();
-    return this;
-};
-
-
-
 Commands.prototype.undo = function () {
     if (this.index > 0) {
-        this.stack[--this.index].undo();
+        var macro = this.stack[--this.index];
+        var i = macro.length;
+        while (i-- > 0) {
+            macro[i].undo();
+        }
     }
 };
+
 
 
 Commands.prototype.redo = function () {
     if (this.index < this.stack.length) {
-        var command = this.stack[this.index++];
-        command.redo();
+        var macro = this.stack[this.index++];
+        var i, n = macro.length;
+        for (i = 0; i < n; i++) {
+            macro[i].redo();
+        }
     }
 };
 
@@ -936,9 +949,10 @@ Commands.prototype.new = function (name, fun) {
     var self = this;
     if (name && typeof fun === 'function') {
         this[name] = function () {
-            var cmd = new Command();
-            fun.apply(cmd, arguments);
-            self.exec(cmd);
+            var command = new Command();
+            fun.apply(command, arguments);
+            self.macro.push(command);
+            command.redo();
             return self;
         }
     }
@@ -956,9 +970,22 @@ commands.new('add_node', function (view, d) {
 
 
 commands.new('del_node', function (view, d) {
-    this.redo = function () { view.nodes().add(d); };
-    this.undo = function () { view.nodes().remove(d); };
+    this.redo = function () { view.nodes().remove(d); };
+    this.undo = function () { view.nodes().add(d); };
 });
+
+
+commands.new('add_edge', function (view, d) {
+    this.redo = function () { view.edges().add(d); };
+    this.undo = function () { view.edges().remove(d); };
+});
+
+
+commands.new('del_edge', function (view, d) {
+    this.redo = function () { view.edges().remove(d); };
+    this.undo = function () { view.edges().add(d); };
+});
+
 
 
 // JSLint options:
@@ -995,7 +1022,7 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     mouse = view.pan.mouse();
                     // Create new node
-                    commands.add_node(view, { x : mouse[0], y : mouse[1] });
+                    commands.start().add_node(view, { x : mouse[0], y : mouse[1] });
                     // view.nodes().add({ x : mouse[0], y : mouse[1] }).select();
                     break;
                 case 'mousedown':
@@ -1010,17 +1037,16 @@ View.prototype.controller = (function () {
                 case 'keydown':
                     switch (d3.event.keyCode) {
                     case 46: // Delete
-                        selected_edges = view.select().edges();
-
-                        // Delete selected nodes
-                        var nodes = view.nodes().remove(view.select().nodes());
+                        var nodes = view.select().nodes();
                         // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                        var edges = nodes.edges();
+                        var edges = view.nodes(nodes).edges();
                         edges = edges.concat(view.select().edges().filter(
                             function (d) { return edges.indexOf(d) < 0; }
                             ));
-                        // Delete edges
-                        view.edges().remove(edges);
+                        // Delete nodes edges
+                        commands.start()
+                            .del_node(view, nodes.splice(0))
+                            .del_edge(view, edges);
                         state = states.wait_for_keyup;
                         break;
                     case 89: // Y
@@ -1032,6 +1058,7 @@ View.prototype.controller = (function () {
                         break;
                     case 90: // Z
                         if (d3.event.ctrlKey) {
+                            console.log('undo stack:', commands.stack);
                             commands.undo();
                             // view.undo();
                         }
