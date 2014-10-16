@@ -270,6 +270,11 @@ elements.add_node = function (selection, handler) {
 
     g.append('circle')
         .attr('r', node_radius);
+
+    g.append('text')
+        // .style('text-anchor', 'middle')
+        .attr('alignment-baseline', 'center')
+        .text(function (d) { return d.uid; });
 };
 
 
@@ -395,6 +400,7 @@ function View(aContainer, aGraph) {
     var svg = container.append('svg')
         .attr('width', width)
         .attr('height', height)
+        .classed('unselectable', true)
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
@@ -559,7 +565,6 @@ View.prototype.edge_by_data = function (d) {
 
 
 
-
 // JSLint options:
 /*global View*/
 "use strict";
@@ -647,7 +652,7 @@ View.prototype.nodes = (function () {
         }
         return methods;
     }
-}())
+}());
 
 
 
@@ -721,7 +726,7 @@ View.prototype.edges = (function () {
         }
         return methods;
     }
-}())
+}());
 
 
 

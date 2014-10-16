@@ -21,10 +21,10 @@ view1.graph({
 
 
 view2.graph({
-    nodes : [{}],
-    edges : []
-    // nodes : [{}, {}, {}],
-    // edges : [{source : 0, target : 1}, {source : 0, target : 2}]
+    // nodes : [{}],
+    // edges : []
+    nodes : [{}, {}, {}],
+    edges : [{source : 0, target : 1}, {source : 0, target : 2}]
 });
 
 

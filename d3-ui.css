@@ -79,10 +79,12 @@ g.edges path.catch {
   /*cursor: pointer;*/
 }
 
-.node text {
-  font: 10px sans-serif;
+.nodes text {
+  font-size: 1em;
+  font-family: Verdana, sans-serif;
   pointer-events: none;
-  /*text-anchor: middle;*/
+  text-anchor: middle;
+  dominant-baseline: central;
 }
 
 .label {

@@ -58,6 +58,7 @@ function View(aContainer, aGraph) {
     var svg = container.append('svg')
         .attr('width', width)
         .attr('height', height)
+        .classed('unselectable', true)
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
@@ -219,6 +220,5 @@ View.prototype.edge_by_data = function (d) {
     this.edge.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
     return obj;
 }
-
 
 

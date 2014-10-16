@@ -86,7 +86,7 @@ View.prototype.nodes = (function () {
         }
         return methods;
     }
-}())
+}());
 
 
 
@@ -160,6 +160,6 @@ View.prototype.edges = (function () {
         }
         return methods;
     }
-}())
+}());
 
 

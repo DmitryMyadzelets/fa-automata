@@ -163,6 +163,11 @@ elements.add_node = function (selection, handler) {
 
     g.append('circle')
         .attr('r', node_radius);
+
+    g.append('text')
+        // .style('text-anchor', 'middle')
+        .attr('alignment-baseline', 'center')
+        .text(function (d) { return d.uid; });
 };
 
 
