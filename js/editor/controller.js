@@ -33,8 +33,9 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     mouse = view.pan.mouse();
                     // Create new node
-                    commands.start().add_node(view, { x : mouse[0], y : mouse[1] });
-                    // view.nodes().add({ x : mouse[0], y : mouse[1] }).select();
+                    var node = { x : mouse[0], y : mouse[1] };
+                    commands.start().add_node(view, node);
+                    view.nodes(node).select();
                     break;
                 case 'mousedown':
                     if (d3.event.shiftKey) {
@@ -63,15 +64,12 @@ View.prototype.controller = (function () {
                     case 89: // Y
                         if (d3.event.ctrlKey) {
                             commands.redo();
-                            // view.redo();
                         }
                         state = states.wait_for_keyup;
                         break;
                     case 90: // Z
                         if (d3.event.ctrlKey) {
-                            console.log('undo stack:', commands.stack);
                             commands.undo();
-                            // view.undo();
                         }
                         state = states.wait_for_keyup;
                         break;
