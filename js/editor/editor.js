@@ -1124,7 +1124,7 @@ View.prototype.controller = (function () {
                     node_d = { x : mouse[0], y : mouse[1], r : 1 };
                     // Create new edge
                     edge_d = { source : d_source, target : node_d };
-                    view.edges().add(edge_d);
+                    commands.start().add_edge(view, edge_d);
                     drag_target = true;
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     // Then attach edge to this new node
@@ -1154,15 +1154,18 @@ View.prototype.controller = (function () {
                     // Start dragging the edge
                     // Firstly, create new node with zero size
                     node_d = { x : mouse[0], y : mouse[1], r : 1 };
+                    edge_d = { source : d.source, target : d.target }
                     if (drag_target) {
-                        d.target = node_d;
+                        edge_d.target = node_d;
                     } else {
-                        d.source = node_d;
+                        edge_d.source = node_d;
                     }
+                    commands.start()
+                        .del_edge(view, d)
+                        .add_edge(view, edge_d);
                     // Then attach edge to this new node
                     view.force.stop();
                     // Save values for next state
-                    edge_d = d;
                     set_edge_type.call(view, edge_d);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     state = states.drag_edge;
@@ -1183,7 +1186,7 @@ View.prototype.controller = (function () {
                 break;
             case 'mouseup':
                 delete node_d.r; // in order to use default radius
-                view.nodes().add(node_d);
+                commands.add_node(view, node_d);
                 if (!d3.event.ctrlKey) { view.select().nothing(); }
                 view.select().node(node_d);
                 state = states.init;
@@ -1215,11 +1218,8 @@ View.prototype.controller = (function () {
                     });
                     if (exists.length > 1) {
                         // Delete edge
-                        var edges = view.graph().edges;
-                        var i = edges.indexOf(edge_d);
-                        edges.splice(i, 1);
+                        commands.del_edge(view, edge_d);
                     }
-                    view.update();
                     if (!d3.event.ctrlKey) { view.select().nothing(); }
                     if (exists.length <= 1) {
                         view.select().edge(edge_d);
