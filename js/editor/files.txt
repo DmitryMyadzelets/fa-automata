@@ -2,6 +2,7 @@ start.js
 vector.js
 router.js
 elements.js
+textarea.js
 pan.js
 view.js
 view.data.js

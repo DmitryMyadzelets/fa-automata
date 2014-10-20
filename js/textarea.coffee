@@ -12,7 +12,7 @@
 
 	shown = false
 
-	if window.attachEent
+	if window.attachEvent
 		hook = (element, event, handler) ->
 			element.attachEvent('on'+event, handler)
 			null
