@@ -139,6 +139,7 @@ function View(aContainer, aGraph) {
     this.pan = pan(root_group);
 
     this.svg = svg;
+    this.container = container;
 
     // var undo = new Undo();
     // this.undo = undo.undo;

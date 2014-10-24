@@ -87,6 +87,13 @@ View.prototype.controller = (function () {
                     break;
                 case 'dblclick':
                     d3.event.stopPropagation();
+                    textarea(view.container, '', d.x, d.y, function() {
+                        var self = view;
+                        return function () {
+                            self.controller.context(self, 'node').event.apply(this, arguments);
+                        };
+                    });
+                    state = states.edit_node_text;
                     break;
                 }
                 break;
@@ -335,6 +342,19 @@ View.prototype.controller = (function () {
             if (type === 'keyup') {
                 state = states.init;
             }
+        },
+        edit_node_text : function () {
+            switch (type) {
+            case 'keydown':
+                if (d3.event.keyCode === 13) {
+                    console.log('enter edit_node_text', this, arguments);
+                } else {
+                    console.log('enter edit_node_text', this, arguments);
+                }
+            default:
+                console.log(type, view);
+            }
+            // state = states.init;
         }
     };
 
