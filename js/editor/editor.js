@@ -1271,12 +1271,16 @@ View.prototype.controller = (function () {
                     break;
                 case 'dblclick':
                     d3.event.stopPropagation();
-                    textarea(view.container, '', d.x, d.y, function() {
+                    // Callback function which is called by textarea object when 
+                    // user enters the text or cancels it.
+                    // This function invokes this automaton iteself
+                    var callback = (function () {
                         var self = view;
                         return function () {
-                            self.controller.context(self, 'node').event.apply(this, arguments);
+                            self.controller.context(self, 'textarea').event.apply(this, arguments);
                         };
-                    });
+                    }());
+                    textarea(view.container, 'some text', d.x, d.y, callback, callback);
                     state = states.edit_node_text;
                     break;
                 }
@@ -1528,17 +1532,16 @@ View.prototype.controller = (function () {
             }
         },
         edit_node_text : function () {
-            switch (type) {
-            case 'keydown':
-                if (d3.event.keyCode === 13) {
-                    console.log('enter edit_node_text', this, arguments);
-                } else {
-                    console.log('enter edit_node_text', this, arguments);
+            if (source === 'textarea') {
+                switch (type) {
+                case 'keydown':
+                    if (d3.event.keyCode === 13) {
+
+                    }
+                    break;
                 }
-            default:
-                console.log(type, view);
+                state = states.init;
             }
-            // state = states.init;
         }
     };
 
