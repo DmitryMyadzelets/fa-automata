@@ -167,7 +167,7 @@ elements.add_node = function (selection, handler) {
     g.append('text')
         // .style('text-anchor', 'middle')
         .attr('alignment-baseline', 'center')
-        .text(function (d) { return d.uid; });
+        .text(function (d) { return d.text || ''; });
 };
 
 

@@ -9,6 +9,7 @@
 //     <g .nodes>
 //       <g>
 //         <circle>
+//         <text>
 //     <g .edges>
 //       <g>
 //         <path .edge>

@@ -159,8 +159,10 @@ var textarea = (function () {
         _enter = onEnter;
         _cancel = onCancel;
 
-        // Adjust textarea vertically. For that we get height of 1em symbol:
+        // Get height of 1em symbol 
+        // Taken from [http://stackoverflow.com/questions/10463518/converting-em-to-px-in-javascript-and-getting-default-font-size]
         var h = Number(getComputedStyle(document.body, null).fontSize.match(/(\d*(\.\d*)?)px/)[1]);
+        // Adjust textarea vertically
         if (!isNaN(h)) {
             h /= 2;
             y -= h;
@@ -174,7 +176,9 @@ var textarea = (function () {
             .style('height', '1em')
             .style('left', x + 'px')
             .style('top', y + 'px')
-            .attr('placeholder', 'Type here...')
+            .attr('placeholder', 'Type here...');
+
+        editor
             .on('blur', cancel)
             .on('change', resize)
             .on('keydown', keydown)

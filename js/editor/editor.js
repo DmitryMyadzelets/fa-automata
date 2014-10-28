@@ -274,7 +274,7 @@ elements.add_node = function (selection, handler) {
     g.append('text')
         // .style('text-anchor', 'middle')
         .attr('alignment-baseline', 'center')
-        .text(function (d) { return d.uid; });
+        .text(function (d) { return d.text || ''; });
 };
 
 
@@ -462,6 +462,15 @@ var textarea = (function () {
         _enter = onEnter;
         _cancel = onCancel;
 
+        // Get height of 1em symbol 
+        // Taken from [http://stackoverflow.com/questions/10463518/converting-em-to-px-in-javascript-and-getting-default-font-size]
+        var h = Number(getComputedStyle(document.body, null).fontSize.match(/(\d*(\.\d*)?)px/)[1]);
+        // Adjust textarea vertically
+        if (!isNaN(h)) {
+            h /= 2;
+            y -= h;
+        }
+
         editor = parent.append('textarea')
             .attr('id', UID)
             .attr('rows', 1)
@@ -470,10 +479,10 @@ var textarea = (function () {
             .style('height', '1em')
             .style('left', x + 'px')
             .style('top', y + 'px')
-            .attr('placeholder', 'Type here...')
-            .attr('value', text)
+            .attr('placeholder', 'Type here...');
+
+        editor
             .on('blur', cancel)
-            // .on('blur', function () { console.log('blur', this, arguments); cancel.apply(this, arguments); })
             .on('change', resize)
             .on('keydown', keydown)
             .on('cut', delayedResize)
@@ -481,6 +490,7 @@ var textarea = (function () {
             .on('paste', delayedResize);
 
         editor.each(function() {
+            this.value = text;
             this.focus();
             this.select();
         });
@@ -540,6 +550,7 @@ function pan(container) {
 //     <g .nodes>
 //       <g>
 //         <circle>
+//         <text>
 //     <g .edges>
 //       <g>
 //         <path .edge>
@@ -1182,6 +1193,12 @@ commands.new('del_edge', function (view, d) {
 });
 
 
+commands.new('text', function (d, text) {
+    var old_text = d.text;
+    this.redo = function () { d.text = text; };
+    this.undo = function () { d.text = old_text; }
+});
+
 
 // JSLint options:
 /*global d3, View*/
@@ -1205,6 +1222,8 @@ View.prototype.controller = (function () {
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
+
+    var node_text;      // reference to the SVG text element of a node
 
     var states = {
         init : function (d) {
@@ -1270,6 +1289,8 @@ View.prototype.controller = (function () {
                     state = states.node_select_or_drag;
                     break;
                 case 'dblclick':
+                    node_d = d;
+                    node_text = d3.select(this).select('text');
                     d3.event.stopPropagation();
                     // Callback function which is called by textarea object when 
                     // user enters the text or cancels it.
@@ -1280,7 +1301,9 @@ View.prototype.controller = (function () {
                             self.controller.context(self, 'textarea').event.apply(this, arguments);
                         };
                     }());
-                    textarea(view.container, 'some text', d.x, d.y, callback, callback);
+                    var text = d.text || '';
+                    textarea(view.container, text, d.x, d.y, callback, callback);
+                    view.force.stop();
                     state = states.edit_node_text;
                     break;
                 }
@@ -1428,6 +1451,7 @@ View.prototype.controller = (function () {
                     if (exists.length <= 1) {
                         view.select().edge(edge_d);
                     }
+                    view.update();
                     state = states.init;
                     break;
                 case 'mouseout':
@@ -1536,7 +1560,8 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13) {
-
+                        commands.start().text(node_d, this.value);
+                        node_text.text(function(d) { return d.text; });
                     }
                     break;
                 }

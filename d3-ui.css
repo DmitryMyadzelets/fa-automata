@@ -96,7 +96,8 @@ g.edges path.catch {
 
 
 #c88d9c30-5871-11e4-8ed6-0800200c9a66 {
-  border: 0 none white;
+  border: solid 1px gray;
+  /*border: 0 none white;*/
   overflow: hidden;
   padding: 0;
   outline: none;
