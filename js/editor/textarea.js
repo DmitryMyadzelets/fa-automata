@@ -159,6 +159,13 @@ var textarea = (function () {
         _enter = onEnter;
         _cancel = onCancel;
 
+        // Adjust textarea vertically. For that we get height of 1em symbol:
+        var h = Number(getComputedStyle(document.body, null).fontSize.match(/(\d*(\.\d*)?)px/)[1]);
+        if (!isNaN(h)) {
+            h /= 2;
+            y -= h;
+        }
+
         editor = parent.append('textarea')
             .attr('id', UID)
             .attr('rows', 1)
@@ -168,9 +175,7 @@ var textarea = (function () {
             .style('left', x + 'px')
             .style('top', y + 'px')
             .attr('placeholder', 'Type here...')
-            .attr('value', text)
             .on('blur', cancel)
-            // .on('blur', function () { console.log('blur', this, arguments); cancel.apply(this, arguments); })
             .on('change', resize)
             .on('keydown', keydown)
             .on('cut', delayedResize)
@@ -178,6 +183,7 @@ var textarea = (function () {
             .on('paste', delayedResize);
 
         editor.each(function() {
+            this.value = text;
             this.focus();
             this.select();
         });
