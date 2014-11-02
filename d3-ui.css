@@ -1,5 +1,9 @@
 @charset 'UTF-8';
 
+/*
+http://csswizardry.com/2014/10/the-specificity-graph/
+http://cssguidelin.es/#specificity
+*/
 
 body {
     /*background-color: #336698;*/
@@ -80,7 +84,7 @@ g.edges path.catch {
 }
 
 .nodes text {
-  font-size: 1em;
+  font-size: small;
   font-family: Verdana, sans-serif;
   pointer-events: none;
   text-anchor: middle;
@@ -94,8 +98,10 @@ g.edges path.catch {
   text-shadow: 2px 2px 1px white, -2px -2px 1px white, 2px -2px 1px white, -2px 2px 1px white;
 }
 
-
+/* Textarea */
 #c88d9c30-5871-11e4-8ed6-0800200c9a66 {
+  font-size: small;
+  font-family: Verdana, sans-serif;
   border: solid 1px gray;
   /*border: 0 none white;*/
   overflow: hidden;
