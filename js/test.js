@@ -20,7 +20,7 @@ view1.graph({
 });
 
 
-
+view2.controller().control();
 view2.graph({
     // nodes : [{}],
     // edges : []

@@ -101,7 +101,8 @@ View.prototype.controller = (function () {
                         };
                     }());
                     var text = d.text || '';
-                    textarea(view.container, text, d.x, d.y, callback, callback);
+                    var pan = view.pan();
+                    textarea(view.container, text, d.x + pan[0], d.y + pan[1], callback, callback);
                     view.force.stop();
                     state = states.edit_node_text;
                     break;
