@@ -820,6 +820,16 @@ View.prototype.nodes = (function () {
         return methods;
     };
 
+    methods.text = function (d, text) {
+        d.text = text;
+        // view.update();
+        view.node.each(function(_d) {
+            if (_d === d) {
+                d3.select(this).select('text').text(text);
+            }
+        });
+    };
+
     // Returns incominng and outgoing edges of last nodes
     methods.edges = function () {
     	var ret = [];
@@ -1181,10 +1191,10 @@ commands.new('del_edge', function (view, d) {
 });
 
 
-commands.new('text', function (d, text) {
+commands.new('text', function (view, d, text) {
     var old_text = d.text;
-    this.redo = function () { d.text = text; };
-    this.undo = function () { d.text = old_text; }
+    this.redo = function () { view.nodes().text(d, text); };
+    this.undo = function () { view.nodes().text(d, old_text); };
 });
 
 
@@ -1277,16 +1287,18 @@ View.prototype.controller = (function () {
                     state = states.node_select_or_drag;
                     break;
                 case 'dblclick':
+                    d3.event.stopPropagation();
                     node_d = d;
                     node_text = d3.select(this).select('text');
-                    d3.event.stopPropagation();
+                    // Remove text temporally, since it is viewed in text editor now
+                    node_text.text('');
                     // Callback function which is called by textarea object when 
                     // user enters the text or cancels it.
                     // This function invokes this automaton iteself
                     var callback = (function () {
                         var self = view;
                         return function () {
-                            self.controller().context('textarea').event.apply(this, arguments);
+                            self.controller().context('text').event.apply(this, arguments);
                         };
                     }());
                     var text = d.text || '';
@@ -1545,12 +1557,16 @@ View.prototype.controller = (function () {
             }
         },
         edit_node_text : function () {
-            if (source === 'textarea') {
+            if (source === 'text') {
+                // Set original text back
+                node_text.text(function(d) { return d.text; });
+                // Change text if user hit Enter
                 switch (type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13) {
-                        commands.start().text(node_d, this.value); // FIX: should be a ref to SVG text here
-                        node_text.text(function(d) { return d.text; });
+                        commands.start().text(view, node_d, this.value); // FIX: should be a ref to SVG text here
+                        
+                    } else {
                     }
                     break;
                 }

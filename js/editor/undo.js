@@ -114,9 +114,9 @@ commands.new('del_edge', function (view, d) {
 });
 
 
-commands.new('text', function (d, text) {
+commands.new('text', function (view, d, text) {
     var old_text = d.text;
-    this.redo = function () { d.text = text; };
-    this.undo = function () { d.text = old_text; }
+    this.redo = function () { view.nodes().text(d, text); };
+    this.undo = function () { view.nodes().text(d, old_text); };
 });
 

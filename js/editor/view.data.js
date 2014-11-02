@@ -65,6 +65,16 @@ View.prototype.nodes = (function () {
         return methods;
     };
 
+    methods.text = function (d, text) {
+        d.text = text;
+        // view.update();
+        view.node.each(function(_d) {
+            if (_d === d) {
+                d3.select(this).select('text').text(text);
+            }
+        });
+    };
+
     // Returns incominng and outgoing edges of last nodes
     methods.edges = function () {
     	var ret = [];
