@@ -95,7 +95,7 @@ function View(aContainer, aGraph) {
     }
 
 
-    // Makes current view focused and requests routing of window events (keys) to itb
+    // Makes current view focused and requests routing of window events (keys) to it
     function focus() {
         router.handle(plane_handler);
     }
@@ -141,10 +141,6 @@ function View(aContainer, aGraph) {
 
     this.svg = svg;
     this.container = container;
-
-    // var undo = new Undo();
-    // this.undo = undo.undo;
-    // this.redo = undo.redo;
 
     // Attach graph
     this.graph(aGraph);
