@@ -10,6 +10,7 @@ var view2 = jA.editor.view(document.getElementById('svg_container2'));
 var view3 = jA.editor.view();
 
 
+view1.controller().control(); // FIX : can't be attached when a graph already linked to the view.
 
 view1.graph({
     // nodes : [{}],
