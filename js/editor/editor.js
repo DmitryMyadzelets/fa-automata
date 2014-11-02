@@ -617,31 +617,43 @@ function View(aContainer, aGraph) {
         return View.prototype.select.context(self, root_group);
     };
 
-
     // Handles nodes events
-    this.node_handler = function () {
-        self.controller.context(self, 'node').event.apply(this, arguments);
-    };
-
+    this.node_handler;
 
     // Handles edge events
-    this.edge_handler = function () {
-        self.controller.context(self, 'edge').event.apply(this, arguments);
-    };
-
+    this.edge_handler;
 
     // Handles plane (out of other elements) events
-    function plane_handler() {
-        self.controller.context(self, 'plane').event.apply(this, arguments);
-    }
+    this.plane_handler;
+
+    function plane_handler () {
+        if (typeof self.plane_handler === 'function') {
+            self.plane_handler.apply(this, arguments);
+        }
+    };
+
+    // // Handles nodes events
+    // this.node_handler = function () {
+    //     self.controller.context(self, 'node').event.apply(this, arguments);
+    // };
 
 
-    // Makes current view focused and requests routing of window events (keys) to itb
+    // // Handles edge events
+    // this.edge_handler = function () {
+    //     self.controller.context(self, 'edge').event.apply(this, arguments);
+    // };
+
+
+    // // Handles plane (out of other elements) events
+    // function plane_handler() {
+    //     self.controller.context(self, 'plane').event.apply(this, arguments);
+    // }
+
+
+    // Makes current view focused and requests routing of window events (keys) to it
     function focus() {
         router.handle(plane_handler);
     }
-
-
 
     svg.on('mousedown', plane_handler)
         .on('mouseover', focus)
@@ -682,10 +694,6 @@ function View(aContainer, aGraph) {
 
     this.svg = svg;
     this.container = container;
-
-    // var undo = new Undo();
-    // this.undo = undo.undo;
-    // this.redo = undo.redo;
 
     // Attach graph
     this.graph(aGraph);
@@ -1298,7 +1306,7 @@ View.prototype.controller = (function () {
                     var callback = (function () {
                         var self = view;
                         return function () {
-                            self.controller.context(self, 'textarea').event.apply(this, arguments);
+                            self.controller().context('textarea').event.apply(this, arguments);
                         };
                     }());
                     var text = d.text || '';
@@ -1560,7 +1568,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13) {
-                        commands.start().text(node_d, this.value);
+                        commands.start().text(node_d, this.value); // FIX: should be a ref to SVG text here
                         node_text.text(function(d) { return d.text; });
                     }
                     break;
@@ -1582,7 +1590,8 @@ View.prototype.controller = (function () {
 
     var old_view = null;
 
-    return {
+
+    var methods = {
         event : function () {
             if (!view) { return; }
 
@@ -1618,12 +1627,35 @@ View.prototype.controller = (function () {
 
         // Sets context in which an event occurs
         // Returns controller object for subsequent invocation
-        context : function (a_view, a_element) {
-            view = a_view;
-            if (!old_view) { old_view = view; }
+        context : function (a_element) {
             source = a_element;
             return this;
+        },
+        control : function () {
+            var self = view;
+            // Handles nodes events
+            view.node_handler = function () {
+                self.controller().context('node').event.apply(this, arguments);
+            };
+
+            // Handles edge events
+            view.edge_handler = function () {
+                self.controller().context('edge').event.apply(this, arguments);
+            };
+
+            // Handles plane (out of other elements) events
+            view.plane_handler = function () {
+                self.controller().context('plane').event.apply(this, arguments);
+            }
+
+            return methods;
         }
+    };
+
+    return function () {
+        view = this;
+        if (!old_view) { old_view = view; }
+        return methods;
     };
 
 }());

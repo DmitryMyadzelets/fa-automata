@@ -76,31 +76,43 @@ function View(aContainer, aGraph) {
         return View.prototype.select.context(self, root_group);
     };
 
-
     // Handles nodes events
-    this.node_handler = function () {
-        self.controller.context(self, 'node').event.apply(this, arguments);
-    };
-
+    this.node_handler;
 
     // Handles edge events
-    this.edge_handler = function () {
-        self.controller.context(self, 'edge').event.apply(this, arguments);
-    };
-
+    this.edge_handler;
 
     // Handles plane (out of other elements) events
-    function plane_handler() {
-        self.controller.context(self, 'plane').event.apply(this, arguments);
-    }
+    this.plane_handler;
+
+    function plane_handler () {
+        if (typeof self.plane_handler === 'function') {
+            self.plane_handler.apply(this, arguments);
+        }
+    };
+
+    // // Handles nodes events
+    // this.node_handler = function () {
+    //     self.controller.context(self, 'node').event.apply(this, arguments);
+    // };
+
+
+    // // Handles edge events
+    // this.edge_handler = function () {
+    //     self.controller.context(self, 'edge').event.apply(this, arguments);
+    // };
+
+
+    // // Handles plane (out of other elements) events
+    // function plane_handler() {
+    //     self.controller.context(self, 'plane').event.apply(this, arguments);
+    // }
 
 
     // Makes current view focused and requests routing of window events (keys) to it
     function focus() {
         router.handle(plane_handler);
     }
-
-
 
     svg.on('mousedown', plane_handler)
         .on('mouseover', focus)

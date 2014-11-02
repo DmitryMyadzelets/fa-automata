@@ -97,7 +97,7 @@ View.prototype.controller = (function () {
                     var callback = (function () {
                         var self = view;
                         return function () {
-                            self.controller.context(self, 'textarea').event.apply(this, arguments);
+                            self.controller().context('textarea').event.apply(this, arguments);
                         };
                     }());
                     var text = d.text || '';
@@ -359,7 +359,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13) {
-                        commands.start().text(node_d, this.value);
+                        commands.start().text(node_d, this.value); // FIX: should be a ref to SVG text here
                         node_text.text(function(d) { return d.text; });
                     }
                     break;
@@ -381,7 +381,8 @@ View.prototype.controller = (function () {
 
     var old_view = null;
 
-    return {
+
+    var methods = {
         event : function () {
             if (!view) { return; }
 
@@ -417,12 +418,35 @@ View.prototype.controller = (function () {
 
         // Sets context in which an event occurs
         // Returns controller object for subsequent invocation
-        context : function (a_view, a_element) {
-            view = a_view;
-            if (!old_view) { old_view = view; }
+        context : function (a_element) {
             source = a_element;
             return this;
+        },
+        control : function () {
+            var self = view;
+            // Handles nodes events
+            view.node_handler = function () {
+                self.controller().context('node').event.apply(this, arguments);
+            };
+
+            // Handles edge events
+            view.edge_handler = function () {
+                self.controller().context('edge').event.apply(this, arguments);
+            };
+
+            // Handles plane (out of other elements) events
+            view.plane_handler = function () {
+                self.controller().context('plane').event.apply(this, arguments);
+            }
+
+            return methods;
         }
+    };
+
+    return function () {
+        view = this;
+        if (!old_view) { old_view = view; }
+        return methods;
     };
 
 }());
