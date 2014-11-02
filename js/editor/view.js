@@ -3,7 +3,7 @@
 /*global d3, ed, elements, pan*/
 "use strict";
 
-// Structure of SVG elements:
+// Structure of SVG tree:
 // <svg>
 //   <g>
 //     <g .nodes>

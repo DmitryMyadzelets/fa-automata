@@ -94,7 +94,7 @@ elements.make_edge = (function () {
 
 
 
-// Returns SVG string for graph edge
+// Returns SVG string for a graph edge
 elements.get_edge_transformation = (function () {
     var v1 = [0, 0];
     var v2 = [0, 0];
