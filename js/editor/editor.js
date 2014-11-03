@@ -619,10 +619,8 @@ function View(aContainer, aGraph) {
 
     // Handles nodes events
     this.node_handler;
-
     // Handles edge events
     this.edge_handler;
-
     // Handles plane (out of other elements) events
     function plane_handler () {
         if (typeof self.plane_handler === 'function') {
@@ -654,18 +652,20 @@ function View(aContainer, aGraph) {
         .append('svg:path')
             .attr('d', 'M0,0 L6,3 L0,6');
 
+    this.transform = function () {
+        self.node.attr('transform', elements.get_node_transformation);
+        self.edge.each(function (d) {
+            var str = elements.get_edge_transformation(d);
+            d3.select(this).selectAll('path').attr('d', str);
+        });
+    };
+
     this.force = d3.layout.force()
         .charge(-800)
         .linkDistance(150)
         .chargeDistance(450)
         .size([width, height])
-        .on('tick', function () {
-            self.node.attr('transform', elements.get_node_transformation);
-            self.edge.each(function (d) {
-                var str = elements.get_edge_transformation(d);
-                d3.select(this).selectAll('path').attr('d', str);
-            });
-        });
+        .on('tick', this.transform);
 
     this.node = root_group.append('g').attr('class', 'nodes').selectAll('g');
     this.edge = root_group.append('g').attr('class', 'edges').selectAll('g');
@@ -706,7 +706,7 @@ View.prototype.update = function () {
         set_edge_type.apply(self, arguments);
     });
 
-    this.force.start();
+    this.transform();
 };
 
 
@@ -738,7 +738,6 @@ View.prototype.update_nodes = function () {
 
 
 View.prototype.update_edges = function () {
-    // The below code is equal to:
     this.edge = this.edge.data(this.graph().edges, key);
     this.edge.enter().call(elements.add_edge, this.edge_handler);
     this.edge.exit().remove();
@@ -828,6 +827,23 @@ View.prototype.nodes = (function () {
                 d3.select(this).select('text').text(text);
             }
         });
+    };
+
+    function move(d, delta) {
+        d.x += delta[0];
+        d.y += delta[1];
+        d.px = d.x;
+        d.py = d.y;
+    }
+
+    methods.move = function (d, delta) {
+        if (d instanceof Array) {
+            d.forEach(function (d) { move(d, delta); } );
+        } else {
+            move(d, delta);
+        }
+        view.transform();
+        return methods;
     };
 
     // Returns incominng and outgoing edges of last nodes
@@ -1478,22 +1494,22 @@ View.prototype.controller = (function () {
                         state = states.init;
                         break;
                     }
-                    // How far we move the node
+                    // How far we move the nodes
                     var xy = mouse;
                     mouse = view.pan.mouse();
                     xy[0] = mouse[0] - xy[0];
                     xy[1] = mouse[1] - xy[1];
-                    nodes.forEach(function (d) {
-                        d.x += xy[0];
-                        d.y += xy[1];
-                        d.px = d.x;
-                        d.py = d.y;
-                    });
+                    // Change positions of the selected nodes
+                    view.nodes().move(nodes, xy);
+                    // nodes.forEach(function (d) {
+                    //     d.x += xy[0];
+                    //     d.y += xy[1];
+                    //     d.px = d.x;
+                    //     d.py = d.y;
+                    // });
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
-                    // Fix it while moving
-                    view.force.resume();
-                    // view.update();
+                    // view.force.resume();
                     break;
                 case 'mouseup':
                     nodes.forEach(function (d) { d.fixed = false; });

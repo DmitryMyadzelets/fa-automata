@@ -279,22 +279,22 @@ View.prototype.controller = (function () {
                         state = states.init;
                         break;
                     }
-                    // How far we move the node
+                    // How far we move the nodes
                     var xy = mouse;
                     mouse = view.pan.mouse();
                     xy[0] = mouse[0] - xy[0];
                     xy[1] = mouse[1] - xy[1];
-                    nodes.forEach(function (d) {
-                        d.x += xy[0];
-                        d.y += xy[1];
-                        d.px = d.x;
-                        d.py = d.y;
-                    });
+                    // Change positions of the selected nodes
+                    view.nodes().move(nodes, xy);
+                    // nodes.forEach(function (d) {
+                    //     d.x += xy[0];
+                    //     d.y += xy[1];
+                    //     d.px = d.x;
+                    //     d.py = d.y;
+                    // });
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
-                    // Fix it while moving
-                    view.force.resume();
-                    // view.update();
+                    // view.force.resume();
                     break;
                 case 'mouseup':
                     nodes.forEach(function (d) { d.fixed = false; });

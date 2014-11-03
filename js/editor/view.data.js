@@ -75,6 +75,23 @@ View.prototype.nodes = (function () {
         });
     };
 
+    function move(d, delta) {
+        d.x += delta[0];
+        d.y += delta[1];
+        d.px = d.x;
+        d.py = d.y;
+    }
+
+    methods.move = function (d, delta) {
+        if (d instanceof Array) {
+            d.forEach(function (d) { move(d, delta); } );
+        } else {
+            move(d, delta);
+        }
+        view.transform();
+        return methods;
+    };
+
     // Returns incominng and outgoing edges of last nodes
     methods.edges = function () {
     	var ret = [];
