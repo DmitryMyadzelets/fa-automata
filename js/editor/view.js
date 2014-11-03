@@ -119,12 +119,28 @@ function View(aContainer, aGraph) {
         });
     };
 
-    this.force = d3.layout.force()
+    var force = d3.layout.force()
         .charge(-800)
         .linkDistance(150)
         .chargeDistance(450)
         .size([width, height])
         .on('tick', this.transform);
+
+    this.force = (function () {
+        var started = false;
+        return function (start) {
+            if (arguments.length) {
+                if (start) {
+                    if (started) { force.resume(); }
+                    else { force.start(); started = true; }
+                } else {
+                    force.stop();
+                    started = false;
+                }
+            }
+            return started;
+        }
+    }());
 
     this.node = root_group.append('g').attr('class', 'nodes').selectAll('g');
     this.edge = root_group.append('g').attr('class', 'edges').selectAll('g');
@@ -134,23 +150,22 @@ function View(aContainer, aGraph) {
     this.svg = svg;
     this.container = container;
 
+    // Returns a graph attached to the view.
+    // If new graph is given, attches it to the view.
+    this.graph = function (graph) {
+        if (arguments.length > 0) {
+            this._graph = null;
+            this._graph = graph || get_empty_graph();
+            force.nodes(this._graph.nodes).links(this._graph.edges);
+            this.update();
+        }
+        return this._graph;
+    };
+
     // Attach graph
     this.graph(aGraph);
 }
 
-
-
-// Returns a graph attached to the view.
-// If new graph is given, attches it to the view.
-View.prototype.graph = function (graph) {
-    if (arguments.length > 0) {
-        this._graph = null;
-        this._graph = graph || get_empty_graph();
-        this.force.nodes(this._graph.nodes).links(this._graph.edges);
-        this.update();
-    }
-    return this._graph;
-};
 
 
 
