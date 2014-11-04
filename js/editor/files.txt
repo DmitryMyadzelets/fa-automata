@@ -9,4 +9,5 @@ view.data.js
 select.js
 undo.js
 controller.js
+model.js
 end.js
