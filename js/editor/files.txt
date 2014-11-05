@@ -10,4 +10,5 @@ select.js
 undo.js
 controller.js
 model.js
+model.wrap.js
 end.js

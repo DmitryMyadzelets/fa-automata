@@ -288,13 +288,7 @@ View.prototype.controller = (function () {
                     xy[0] = mouse[0] - xy[0];
                     xy[1] = mouse[1] - xy[1];
                     // Change positions of the selected nodes
-                    view.nodes().move(nodes, xy);
-                    // nodes.forEach(function (d) {
-                    //     d.x += xy[0];
-                    //     d.y += xy[1];
-                    //     d.px = d.x;
-                    //     d.py = d.y;
-                    // });
+                    view.model.node.move(nodes, xy);
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
                     // view.force.resume();

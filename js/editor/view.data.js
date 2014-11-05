@@ -18,39 +18,39 @@ View.prototype.nodes = (function () {
     	}
     }
 
-    function add(d) {
-        data.push(d);
-    }
+    // function add(d) {
+    //     data.push(d);
+    // }
 
-    methods.add = function (d) {
-        last.length = 0;
-        cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { add(d); } );
-        } else {
-            add(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.add = function (d) {
+    //     last.length = 0;
+    //     cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { add(d); } );
+    //     } else {
+    //         add(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
-    function remove(d) {
-        var i = data.indexOf(d);
-        if (i >= 0) {
-            data.splice(i, 1);
-        }
-    }
+    // function remove(d) {
+    //     var i = data.indexOf(d);
+    //     if (i >= 0) {
+    //         data.splice(i, 1);
+    //     }
+    // }
 
-    methods.remove = function (d) {
-    	cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { remove(d); });
-        } else {
-            remove(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.remove = function (d) {
+    // 	cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { remove(d); });
+    //     } else {
+    //         remove(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
     methods.select = function (d) {
         if (!arguments.length) {
@@ -65,32 +65,32 @@ View.prototype.nodes = (function () {
         return methods;
     };
 
-    methods.text = function (d, text) {
-        d.text = text;
-        // view.update();
-        view.node.each(function(_d) {
-            if (_d === d) {
-                d3.select(this).select('text').text(text);
-            }
-        });
-    };
+    // methods.text = function (d, text) {
+    //     d.text = text;
+    //     // view.update();
+    //     view.node.each(function(_d) {
+    //         if (_d === d) {
+    //             d3.select(this).select('text').text(text);
+    //         }
+    //     });
+    // };
 
-    function move(d, delta) {
-        d.x += delta[0];
-        d.y += delta[1];
-        d.px = d.x;
-        d.py = d.y;
-    }
+    // function move(d, delta) {
+    //     d.x += delta[0];
+    //     d.y += delta[1];
+    //     d.px = d.x;
+    //     d.py = d.y;
+    // }
 
-    methods.move = function (d, delta) {
-        if (d instanceof Array) {
-            d.forEach(function (d) { move(d, delta); } );
-        } else {
-            move(d, delta);
-        }
-        view.transform();
-        return methods;
-    };
+    // methods.move = function (d, delta) {
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { move(d, delta); } );
+    //     } else {
+    //         move(d, delta);
+    //     }
+    //     view.transform();
+    //     return methods;
+    // };
 
     // Returns incominng and outgoing edges of last nodes
     methods.edges = function () {
@@ -132,39 +132,39 @@ View.prototype.edges = (function () {
         }
     }
 
-    function add(d) {
-        data.push(d);
-    }
+    // function add(d) {
+    //     data.push(d);
+    // }
 
-    methods.add = function (d) {
-        last.length = 0;
-        cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { add(d); } );
-        } else {
-            add(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.add = function (d) {
+    //     last.length = 0;
+    //     cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { add(d); } );
+    //     } else {
+    //         add(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
-    function remove(d) {
-        var i = data.indexOf(d);
-        if (i >= 0) {
-            data.splice(i, 1);
-        }
-    }
+    // function remove(d) {
+    //     var i = data.indexOf(d);
+    //     if (i >= 0) {
+    //         data.splice(i, 1);
+    //     }
+    // }
 
-    methods.remove = function (d) {
-        cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { remove(d); });
-        } else {
-            remove(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.remove = function (d) {
+    //     cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { remove(d); });
+    //     } else {
+    //         remove(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
     methods.select = function (d) {
         if (!arguments.length) {

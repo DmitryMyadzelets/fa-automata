@@ -709,62 +709,77 @@ function View(aContainer, aGraph) {
 
 
 
+function view_methods() {
 
-// Updates SVG structure according to the graph structure
-View.prototype.update = function () {
-    this.update_nodes();
-    this.update_edges();
-
-    var self = this;
-    // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
-    this.edge.each(function () {
-        set_edge_type.apply(self, arguments);
-    });
-
-    this.transform();
-};
+    // Returns an unique identifier
+    var uid = (function () {
+        var id = 0;
+        return function () {
+            return id++;
+        }
+    }());
 
 
-
-// Returns an unique identifier
-var uid = (function () {
-    var id = 0;
-    return function () {
-        return id++;
+    // Returns key of the datum
+    function key(d) {
+        if (d.uid === undefined) { d.uid = uid(); }
+        return d.uid;
     }
-}());
 
 
+    // Returns subselection filtered w.r.t 'd'
+    function filter(selection, d) {
+        return selection.filter(function (v) { return v === d });
+    }
 
-// Returns key of thge datum
-function key(d) {
-    if (d.uid === undefined) { d.uid = uid(); }
-    return d.uid;
+
+    // Updates SVG structure according to the graph structure
+    this.update = function () {
+        this.update_nodes();
+        this.update_edges();
+
+        var self = this;
+        // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
+        this.edge.each(function () {
+            set_edge_type.apply(self, arguments);
+        });
+
+        this.transform();
+    };
+
+
+    this.update_nodes = function () {
+        this.node = this.node.data(this.graph().nodes, key);
+        this.node.enter().call(elements.add_node, this.node_handler);
+        this.node.exit().remove();
+    };
+
+
+    this.update_edges = function () {
+        this.edge = this.edge.data(this.graph().edges, key);
+        this.edge.enter().call(elements.add_edge, this.edge_handler);
+        this.edge.exit().remove();
+    };
+
+
+    this.node_text = function (d, text) {
+        filter(this.node, d).select('text').text(text);
+    }
+
+
+    this.edge_text = function (d, text) {
+        filter(this.edge, d).select('text').text(text);
+    }
+
+
+    this.edge_by_data = function (d) {
+        return filter(this.edge, d);
+    }
+
 }
 
 
-
-View.prototype.update_nodes = function () {
-    this.node = this.node.data(this.graph().nodes, key);
-    this.node.enter().call(elements.add_node, this.node_handler);
-    this.node.exit().remove();
-}
-
-
-
-View.prototype.update_edges = function () {
-    this.edge = this.edge.data(this.graph().edges, key);
-    this.edge.enter().call(elements.add_edge, this.edge_handler);
-    this.edge.exit().remove();
-}
-
-
-
-View.prototype.edge_by_data = function (d) {
-    obj = null;
-    this.edge.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
-    return obj;
-}
+view_methods.call(View.prototype);
 
 
 
@@ -787,39 +802,39 @@ View.prototype.nodes = (function () {
     	}
     }
 
-    function add(d) {
-        data.push(d);
-    }
+    // function add(d) {
+    //     data.push(d);
+    // }
 
-    methods.add = function (d) {
-        last.length = 0;
-        cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { add(d); } );
-        } else {
-            add(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.add = function (d) {
+    //     last.length = 0;
+    //     cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { add(d); } );
+    //     } else {
+    //         add(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
-    function remove(d) {
-        var i = data.indexOf(d);
-        if (i >= 0) {
-            data.splice(i, 1);
-        }
-    }
+    // function remove(d) {
+    //     var i = data.indexOf(d);
+    //     if (i >= 0) {
+    //         data.splice(i, 1);
+    //     }
+    // }
 
-    methods.remove = function (d) {
-    	cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { remove(d); });
-        } else {
-            remove(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.remove = function (d) {
+    // 	cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { remove(d); });
+    //     } else {
+    //         remove(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
     methods.select = function (d) {
         if (!arguments.length) {
@@ -834,32 +849,32 @@ View.prototype.nodes = (function () {
         return methods;
     };
 
-    methods.text = function (d, text) {
-        d.text = text;
-        // view.update();
-        view.node.each(function(_d) {
-            if (_d === d) {
-                d3.select(this).select('text').text(text);
-            }
-        });
-    };
+    // methods.text = function (d, text) {
+    //     d.text = text;
+    //     // view.update();
+    //     view.node.each(function(_d) {
+    //         if (_d === d) {
+    //             d3.select(this).select('text').text(text);
+    //         }
+    //     });
+    // };
 
-    function move(d, delta) {
-        d.x += delta[0];
-        d.y += delta[1];
-        d.px = d.x;
-        d.py = d.y;
-    }
+    // function move(d, delta) {
+    //     d.x += delta[0];
+    //     d.y += delta[1];
+    //     d.px = d.x;
+    //     d.py = d.y;
+    // }
 
-    methods.move = function (d, delta) {
-        if (d instanceof Array) {
-            d.forEach(function (d) { move(d, delta); } );
-        } else {
-            move(d, delta);
-        }
-        view.transform();
-        return methods;
-    };
+    // methods.move = function (d, delta) {
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { move(d, delta); } );
+    //     } else {
+    //         move(d, delta);
+    //     }
+    //     view.transform();
+    //     return methods;
+    // };
 
     // Returns incominng and outgoing edges of last nodes
     methods.edges = function () {
@@ -901,39 +916,39 @@ View.prototype.edges = (function () {
         }
     }
 
-    function add(d) {
-        data.push(d);
-    }
+    // function add(d) {
+    //     data.push(d);
+    // }
 
-    methods.add = function (d) {
-        last.length = 0;
-        cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { add(d); } );
-        } else {
-            add(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.add = function (d) {
+    //     last.length = 0;
+    //     cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { add(d); } );
+    //     } else {
+    //         add(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
-    function remove(d) {
-        var i = data.indexOf(d);
-        if (i >= 0) {
-            data.splice(i, 1);
-        }
-    }
+    // function remove(d) {
+    //     var i = data.indexOf(d);
+    //     if (i >= 0) {
+    //         data.splice(i, 1);
+    //     }
+    // }
 
-    methods.remove = function (d) {
-        cache(d);
-        if (d instanceof Array) {
-            d.forEach(function (d) { remove(d); });
-        } else {
-            remove(d);
-        }
-        view.update();
-        return methods;
-    };
+    // methods.remove = function (d) {
+    //     cache(d);
+    //     if (d instanceof Array) {
+    //         d.forEach(function (d) { remove(d); });
+    //     } else {
+    //         remove(d);
+    //     }
+    //     view.update();
+    //     return methods;
+    // };
 
     methods.select = function (d) {
         if (!arguments.length) {
@@ -1130,7 +1145,7 @@ var Commands = function () {
     this.stack = [];
     this.macro = [];
     this.index = 0;
-    // Index is equal to a number of commands which user can undo;
+    // Index is equal to a number of commands which the user can undo;
     // If index is not equal to the length of stack, it implies
     // that user did "undo". Then new command cancels all the
     // values in stack above the index.
@@ -1199,36 +1214,51 @@ var commands = new Commands();
 
 
 commands.new('add_node', function (view, d) {
-    this.redo = function () { view.nodes().add(d); };
-    this.undo = function () { view.nodes().remove(d); };
+    this.redo = function () { view.model.node.add(d); }
+    this.undo = function () { view.model.node.remove(d); }
+    // this.redo = function () { view.nodes().add(d); };
+    // this.undo = function () { view.nodes().remove(d); };
 });
 
 
 commands.new('del_node', function (view, d) {
-    this.redo = function () { view.nodes().remove(d); };
-    this.undo = function () { view.nodes().add(d); };
+    this.redo = function () { view.model.node.remove(d); }
+    this.undo = function () { view.model.node.add(d); }
+    // this.redo = function () { view.nodes().remove(d); };
+    // this.undo = function () { view.nodes().add(d); };
 });
 
 
 commands.new('add_edge', function (view, d) {
-    this.redo = function () { view.edges().add(d); };
-    this.undo = function () { view.edges().remove(d); };
+    this.redo = function () { view.model.edge.add(d); }
+    this.undo = function () { view.model.edge.remove(d); }
+    // this.redo = function () { view.edges().add(d); };
+    // this.undo = function () { view.edges().remove(d); };
 });
 
 
 commands.new('del_edge', function (view, d) {
-    this.redo = function () { view.edges().remove(d); };
-    this.undo = function () { view.edges().add(d); };
+    this.redo = function () { view.model.edge.remove(d); }
+    this.undo = function () { view.model.edge.add(d); }
+    // this.redo = function () { view.edges().remove(d); };
+    // this.undo = function () { view.edges().add(d); };
 });
 
 
 commands.new('text', function (view, d, text) {
     var old_text = d.text;
-    this.redo = function () { view.nodes().text(d, text); };
-    this.undo = function () { view.nodes().text(d, old_text); };
+    this.redo = function () { view.model.node.text(d, text); };
+    this.undo = function () { view.model.node.text(d, old_text); };
+    // this.redo = function () { view.nodes().text(d, text); };
+    // this.undo = function () { view.nodes().text(d, old_text); };
 });
 
 
+commands.new('move_node', function (view, d, delta) {
+    var back = [-delta[0], -delta[1]];
+    this.redo = function () { view.model.node.move(d, delta); };
+    this.undo = function () { view.model.node.move(d, back); };
+});
 // JSLint options:
 /*global d3, View*/
 "use strict";
@@ -1518,13 +1548,7 @@ View.prototype.controller = (function () {
                     xy[0] = mouse[0] - xy[0];
                     xy[1] = mouse[1] - xy[1];
                     // Change positions of the selected nodes
-                    view.nodes().move(nodes, xy);
-                    // nodes.forEach(function (d) {
-                    //     d.x += xy[0];
-                    //     d.y += xy[1];
-                    //     d.px = d.x;
-                    //     d.py = d.y;
-                    // });
+                    view.model.node.move(nodes, xy);
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
                     // view.force.resume();
@@ -1694,15 +1718,39 @@ View.prototype.controller = (function () {
 
 
 // JSLint options:
-/*global View*/
+/*global */
 "use strict";
 
 var Model = (function () {
+
+    // Helpers
+    // Calls function 'fun' for a single datum or an array of data
+    function foreach(d, fun) {
+        if (d instanceof Array) {
+            d.forEach(fun);
+        } else {
+            fun(d);
+        }
+    }
 
 
     // Methods for nodes only
     function nodes_methods() {
 
+        var delta = [0, 0];
+
+        function move(d) {
+            d.x += delta[0];
+            d.y += delta[1];
+            d.px = d.x;
+            d.py = d.y;
+        }
+
+        this.move = function (d, dxy) {
+            delta[0] = dxy[0];
+            delta[1] = dxy[1]
+            foreach(d, move);
+        };
     }
 
 
@@ -1754,15 +1802,6 @@ var Model = (function () {
 
         var data;
 
-        // Calls function 'fun' for a single datum or an array of data
-        function foreach(d, fun) {
-            if (d instanceof Array) {
-                d.forEach(fun);
-            } else {
-                fun(d);
-            }
-        }
-
         function add(d) {
             data.push(d);
         }
@@ -1787,6 +1826,13 @@ var Model = (function () {
             foreach(d, remove);
             return this;
         };
+
+        // Sets text for the datum
+        this.text = function (d, text) {
+            d.text = text;
+            return this;
+        };
+
     };
 
 
@@ -1804,7 +1850,7 @@ var Model = (function () {
 
     // Model public interface
     return {
-        // Returns a new graph object
+        // Creates and returns a new graph object
         graph : function () {
             var o = {
                 node : Object.create(nodes_prototype),
@@ -1812,18 +1858,92 @@ var Model = (function () {
             };
             o.node.data = [];
             o.edge.data = [];
-            // Returns a simple object with only nodes and edges (for serialisation etc)
+            // Returns a simple object with only nodes and edges (for serialization etc)
             o.object = function () {
                 return {
                     nodes : this.node.data,
                     edges : this.edge.data
                 };
             };
+            if (typeof wrap === 'function') {
+                o = wrap(o);
+            }
             return o;
         }
     };
 
 }());
+
+
+
+// JSLint options:
+/*global View*/
+"use strict";
+
+// Incapsulates and returns the graph object.
+//  Overrides methods which change the graph. 
+//  When the methods are called invokes correspondent View methods.
+function wrap (graph) {
+
+    graph.node = Object.create(graph.node);
+    graph.edge = Object.create(graph.edge);
+
+    var node = graph.node.__proto__;
+    var edge = graph.edge.__proto__;
+
+    function update_view() {
+        graph.view.update();
+    }
+
+    graph.node.add = function (d) {
+        var ret = node.add.apply(this, arguments);
+        update_view();
+        return ret;
+    };
+
+
+    graph.node.remove = function (d) {
+        var ret = node.remove.apply(this, arguments);
+        update_view();
+        return ret;
+    };
+
+
+    graph.edge.add = function (d) {
+        var ret = edge.add.apply(this, arguments);
+        update_view();
+        return ret;
+    };
+
+
+    graph.edge.remove = function (d) {
+        var ret = edge.remove.apply(this, arguments);
+        update_view();
+        return ret;
+    };
+
+    graph.node.text = function (d, text) {
+        var ret = node.text.apply(this, arguments);
+        graph.view.node_text(d, text);
+        return ret;
+    };
+
+
+    graph.edge.text = function (d, text) {
+        var ret = edge.text.apply(this, arguments);
+        graph.view.edge_text(d, text);
+        return ret;
+    };
+
+
+    graph.node.move = function () {
+        var ret = node.move.apply(this, arguments);
+        graph.view.transform();
+        return ret;
+    };
+
+    return graph;
+}
 
 
 

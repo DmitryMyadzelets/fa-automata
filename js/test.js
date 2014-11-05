@@ -11,7 +11,6 @@ var view3 = jA.editor.view();
 
 
 view1.controller().control(); // FIX : can't be attached when a graph already linked to the view.
-
 view1.graph({
     // nodes : [{}],
     // edges : []
@@ -21,12 +20,10 @@ view1.graph({
 
 
 view2.controller().control();
-view2.graph({
-    // nodes : [{}],
-    // edges : []
-    nodes : [{}, {}, {}],
-    edges : [{source : 0, target : 1}, {source : 0, target : 2}]
-});
+var graph = jA.model.graph();
+view2.graph(graph.object());
+view2.model = graph;
+graph.view = view2;
 
 
 

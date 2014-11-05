@@ -1,14 +1,38 @@
 
 // JSLint options:
-/*global View*/
+/*global */
 "use strict";
 
 var Model = (function () {
+
+    // Helpers
+    // Calls function 'fun' for a single datum or an array of data
+    function foreach(d, fun) {
+        if (d instanceof Array) {
+            d.forEach(fun);
+        } else {
+            fun(d);
+        }
+    }
 
 
     // Methods for nodes only
     function nodes_methods() {
 
+        var delta = [0, 0];
+
+        function move(d) {
+            d.x += delta[0];
+            d.y += delta[1];
+            d.px = d.x;
+            d.py = d.y;
+        }
+
+        this.move = function (d, dxy) {
+            delta[0] = dxy[0];
+            delta[1] = dxy[1]
+            foreach(d, move);
+        };
     }
 
 
@@ -60,15 +84,6 @@ var Model = (function () {
 
         var data;
 
-        // Calls function 'fun' for a single datum or an array of data
-        function foreach(d, fun) {
-            if (d instanceof Array) {
-                d.forEach(fun);
-            } else {
-                fun(d);
-            }
-        }
-
         function add(d) {
             data.push(d);
         }
@@ -93,6 +108,13 @@ var Model = (function () {
             foreach(d, remove);
             return this;
         };
+
+        // Sets text for the datum
+        this.text = function (d, text) {
+            d.text = text;
+            return this;
+        };
+
     };
 
 
@@ -110,7 +132,7 @@ var Model = (function () {
 
     // Model public interface
     return {
-        // Returns a new graph object
+        // Creates and returns a new graph object
         graph : function () {
             var o = {
                 node : Object.create(nodes_prototype),
@@ -118,13 +140,16 @@ var Model = (function () {
             };
             o.node.data = [];
             o.edge.data = [];
-            // Returns a simple object with only nodes and edges (for serialisation etc)
+            // Returns a simple object with only nodes and edges (for serialization etc)
             o.object = function () {
                 return {
                     nodes : this.node.data,
                     edges : this.edge.data
                 };
             };
+            if (typeof wrap === 'function') {
+                o = wrap(o);
+            }
             return o;
         }
     };

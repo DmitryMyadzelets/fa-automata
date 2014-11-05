@@ -22,7 +22,7 @@ var Commands = function () {
     this.stack = [];
     this.macro = [];
     this.index = 0;
-    // Index is equal to a number of commands which user can undo;
+    // Index is equal to a number of commands which the user can undo;
     // If index is not equal to the length of stack, it implies
     // that user did "undo". Then new command cancels all the
     // values in stack above the index.
@@ -91,32 +91,48 @@ var commands = new Commands();
 
 
 commands.new('add_node', function (view, d) {
-    this.redo = function () { view.nodes().add(d); };
-    this.undo = function () { view.nodes().remove(d); };
+    this.redo = function () { view.model.node.add(d); }
+    this.undo = function () { view.model.node.remove(d); }
+    // this.redo = function () { view.nodes().add(d); };
+    // this.undo = function () { view.nodes().remove(d); };
 });
 
 
 commands.new('del_node', function (view, d) {
-    this.redo = function () { view.nodes().remove(d); };
-    this.undo = function () { view.nodes().add(d); };
+    this.redo = function () { view.model.node.remove(d); }
+    this.undo = function () { view.model.node.add(d); }
+    // this.redo = function () { view.nodes().remove(d); };
+    // this.undo = function () { view.nodes().add(d); };
 });
 
 
 commands.new('add_edge', function (view, d) {
-    this.redo = function () { view.edges().add(d); };
-    this.undo = function () { view.edges().remove(d); };
+    this.redo = function () { view.model.edge.add(d); }
+    this.undo = function () { view.model.edge.remove(d); }
+    // this.redo = function () { view.edges().add(d); };
+    // this.undo = function () { view.edges().remove(d); };
 });
 
 
 commands.new('del_edge', function (view, d) {
-    this.redo = function () { view.edges().remove(d); };
-    this.undo = function () { view.edges().add(d); };
+    this.redo = function () { view.model.edge.remove(d); }
+    this.undo = function () { view.model.edge.add(d); }
+    // this.redo = function () { view.edges().remove(d); };
+    // this.undo = function () { view.edges().add(d); };
 });
 
 
 commands.new('text', function (view, d, text) {
     var old_text = d.text;
-    this.redo = function () { view.nodes().text(d, text); };
-    this.undo = function () { view.nodes().text(d, old_text); };
+    this.redo = function () { view.model.node.text(d, text); };
+    this.undo = function () { view.model.node.text(d, old_text); };
+    // this.redo = function () { view.nodes().text(d, text); };
+    // this.undo = function () { view.nodes().text(d, old_text); };
 });
 
+
+commands.new('move_node', function (view, d, delta) {
+    var back = [-delta[0], -delta[1]];
+    this.redo = function () { view.model.node.move(d, delta); };
+    this.undo = function () { view.model.node.move(d, back); };
+});

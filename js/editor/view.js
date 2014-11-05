@@ -168,61 +168,76 @@ function View(aContainer, aGraph) {
 
 
 
+function view_methods() {
 
-// Updates SVG structure according to the graph structure
-View.prototype.update = function () {
-    this.update_nodes();
-    this.update_edges();
-
-    var self = this;
-    // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
-    this.edge.each(function () {
-        set_edge_type.apply(self, arguments);
-    });
-
-    this.transform();
-};
+    // Returns an unique identifier
+    var uid = (function () {
+        var id = 0;
+        return function () {
+            return id++;
+        }
+    }());
 
 
-
-// Returns an unique identifier
-var uid = (function () {
-    var id = 0;
-    return function () {
-        return id++;
+    // Returns key of the datum
+    function key(d) {
+        if (d.uid === undefined) { d.uid = uid(); }
+        return d.uid;
     }
-}());
 
 
+    // Returns subselection filtered w.r.t 'd'
+    function filter(selection, d) {
+        return selection.filter(function (v) { return v === d });
+    }
 
-// Returns key of thge datum
-function key(d) {
-    if (d.uid === undefined) { d.uid = uid(); }
-    return d.uid;
+
+    // Updates SVG structure according to the graph structure
+    this.update = function () {
+        this.update_nodes();
+        this.update_edges();
+
+        var self = this;
+        // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
+        this.edge.each(function () {
+            set_edge_type.apply(self, arguments);
+        });
+
+        this.transform();
+    };
+
+
+    this.update_nodes = function () {
+        this.node = this.node.data(this.graph().nodes, key);
+        this.node.enter().call(elements.add_node, this.node_handler);
+        this.node.exit().remove();
+    };
+
+
+    this.update_edges = function () {
+        this.edge = this.edge.data(this.graph().edges, key);
+        this.edge.enter().call(elements.add_edge, this.edge_handler);
+        this.edge.exit().remove();
+    };
+
+
+    this.node_text = function (d, text) {
+        filter(this.node, d).select('text').text(text);
+    }
+
+
+    this.edge_text = function (d, text) {
+        filter(this.edge, d).select('text').text(text);
+    }
+
+
+    this.edge_by_data = function (d) {
+        return filter(this.edge, d);
+    }
+
 }
 
 
-
-View.prototype.update_nodes = function () {
-    this.node = this.node.data(this.graph().nodes, key);
-    this.node.enter().call(elements.add_node, this.node_handler);
-    this.node.exit().remove();
-}
-
-
-
-View.prototype.update_edges = function () {
-    this.edge = this.edge.data(this.graph().edges, key);
-    this.edge.enter().call(elements.add_edge, this.edge_handler);
-    this.edge.exit().remove();
-}
-
-
-
-View.prototype.edge_by_data = function (d) {
-    obj = null;
-    this.edge.each(function (_d) { if (_d === d) { obj = d3.select(this); }});
-    return obj;
-}
+view_methods.call(View.prototype);
 
 
