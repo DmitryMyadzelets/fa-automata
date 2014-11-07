@@ -18,6 +18,7 @@ View.prototype.controller = (function () {
     var edge_d;         // reference to an edge object
     var node_d;         // reference to a node object
     var drag_target;    // drag target node of edge [true, false]
+    var start_xy;       // ititial coordinates of dragging
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -59,7 +60,7 @@ View.prototype.controller = (function () {
                             ));
                         // Delete nodes edges
                         commands.start()
-                            .del_node(view, nodes.splice(0))
+                            .del_node(view, nodes)
                             .del_edge(view, edges);
                         state = states.wait_for_keyup;
                         break;
@@ -88,6 +89,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mousedown':
                     d_source = d;
+                    start_xy = view.pan.mouse();
                     state = states.node_select_or_drag;
                     break;
                 case 'dblclick':
@@ -288,13 +290,14 @@ View.prototype.controller = (function () {
                     xy[0] = mouse[0] - xy[0];
                     xy[1] = mouse[1] - xy[1];
                     // Change positions of the selected nodes
-                    view.model.node.move(nodes, xy);
+                    view.model.node.shift(nodes, xy);
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
                     // view.force.resume();
                     break;
                 case 'mouseup':
                     nodes.forEach(function (d) { d.fixed = false; });
+                    commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
                 }
@@ -303,6 +306,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mouseup':
                     nodes.forEach(function (d) { d.fixed = false; });
+                    commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
                 }

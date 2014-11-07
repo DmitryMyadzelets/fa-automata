@@ -244,7 +244,7 @@ elements.get_edge_transformation = (function () {
 var b = true;
 
 elements.get_node_transformation = function (d) {
-    if (!d || d.x === undefined || d.y === undefined) { return ""; }
+    if (!d || d.x === undefined || d.y === undefined) { return ''; }
     return "translate(" + d.x + "," + d.y + ")";
 };
 
@@ -1139,12 +1139,12 @@ Command.prototype.undo = function () {};
 
 
 
-// 'Commands' class
+// 'Commands' object
 // 
-var Commands = function () {
-    this.stack = [];
-    this.macro = [];
-    this.index = 0;
+var commands = {
+    stack : [],
+    macro : [],
+    index : 0
     // Index is equal to a number of commands which the user can undo;
     // If index is not equal to the length of stack, it implies
     // that user did "undo". Then new command cancels all the
@@ -1152,96 +1152,101 @@ var Commands = function () {
 };
 
 
+function commands_methods() {
 
-// Starts new macro recording
-Commands.prototype.start = function () {
-    if (this.index < this.stack.length) { this.stack.length = this.index; }
-    this.macro = [];
-    this.stack.push(this.macro);
-    this.index = this.stack.length;
-    return this;
-};
+    // Starts new macro recording
+    this.start = function () {
+        if (this.index < this.stack.length) { this.stack.length = this.index; }
+        this.macro = [];
+        this.stack.push(this.macro);
+        this.index = this.stack.length;
+        return this;
+    };
 
 
+    this.undo = function () {
+        if (this.index > 0) {
+            var macro = this.stack[--this.index];
+            var i = macro.length;
+            while (i-- > 0) {
+                macro[i].undo();
+            }
+        }
+    };
 
-Commands.prototype.undo = function () {
-    if (this.index > 0) {
-        var macro = this.stack[--this.index];
-        var i = macro.length;
-        while (i-- > 0) {
-            macro[i].undo();
+
+    this.redo = function () {
+        if (this.index < this.stack.length) {
+            var macro = this.stack[this.index++];
+            var i, n = macro.length;
+            for (i = 0; i < n; i++) {
+                macro[i].redo();
+            }
+        }
+    };
+
+
+    // Makes a copy of each item of arguments if it is an array
+    function copy_arguments() {
+        var i = arguments.length;
+        while (i--) {
+            if (arguments[i] instanceof Array) {
+                arguments[i] = arguments[i].slice(0);
+            }
         }
     }
-};
 
 
-
-Commands.prototype.redo = function () {
-    if (this.index < this.stack.length) {
-        var macro = this.stack[this.index++];
-        var i, n = macro.length;
-        for (i = 0; i < n; i++) {
-            macro[i].redo();
+    // Creates new command-function as the key of a 'Commands' instance, i.e. it will be
+    // var command = new Commands();
+    // ...
+    // command
+    this.new = function (name, fun) {
+        if (this[name] && console) {
+            console.error('Command', name, 'already exists');
+            return;
         }
-    }
-};
-
-
-// Creates new command-function as the key of a 'Commands' instance, i.e. it will be
-// var command = new Commands();
-// ...
-// command
-Commands.prototype.new = function (name, fun) {
-    if (this[name] && console ) {
-        console.error('Command', name, 'already exists' );
-        return;
-    }
-    var self = this;
-    if (name && typeof fun === 'function') {
-        this[name] = function () {
-            var command = new Command();
-            fun.apply(command, arguments);
-            self.macro.push(command);
-            command.redo();
-            return self;
+        var self = this;
+        if (name && typeof fun === 'function') {
+            this[name] = function () {
+                var command = new Command();
+                copy_arguments(arguments);
+                fun.apply(command, arguments);
+                self.macro.push(command);
+                command.redo();
+                return self;
+            };
         }
-    }
-};
+    };
+}
 
 
 
-var commands = new Commands();
+commands_methods.call(commands);
+
 
 
 commands.new('add_node', function (view, d) {
-    this.redo = function () { view.model.node.add(d); }
-    this.undo = function () { view.model.node.remove(d); }
-    // this.redo = function () { view.nodes().add(d); };
-    // this.undo = function () { view.nodes().remove(d); };
+    this.redo = function () { view.model.node.add(d); };
+    this.undo = function () { view.model.node.remove(d); };
 });
 
 
 commands.new('del_node', function (view, d) {
-    this.redo = function () { view.model.node.remove(d); }
-    this.undo = function () { view.model.node.add(d); }
-    // this.redo = function () { view.nodes().remove(d); };
-    // this.undo = function () { view.nodes().add(d); };
+    this.redo = function () { view.model.node.remove(d); };
+    this.undo = function () { view.model.node.add(d); };
 });
 
 
 commands.new('add_edge', function (view, d) {
-    this.redo = function () { view.model.edge.add(d); }
-    this.undo = function () { view.model.edge.remove(d); }
-    // this.redo = function () { view.edges().add(d); };
-    // this.undo = function () { view.edges().remove(d); };
+    this.redo = function () { view.model.edge.add(d); };
+    this.undo = function () { view.model.edge.remove(d); };
 });
 
 
 commands.new('del_edge', function (view, d) {
-    this.redo = function () { view.model.edge.remove(d); }
-    this.undo = function () { view.model.edge.add(d); }
-    // this.redo = function () { view.edges().remove(d); };
-    // this.undo = function () { view.edges().add(d); };
+    this.redo = function () { view.model.edge.remove(d); };
+    this.undo = function () { view.model.edge.add(d); };
 });
 
 
@@ -1249,16 +1254,16 @@ commands.new('text', function (view, d, text) {
     var old_text = d.text;
     this.redo = function () { view.model.node.text(d, text); };
     this.undo = function () { view.model.node.text(d, old_text); };
-    // this.redo = function () { view.nodes().text(d, text); };
-    // this.undo = function () { view.nodes().text(d, old_text); };
 });
 
 
-commands.new('move_node', function (view, d, delta) {
-    var back = [-delta[0], -delta[1]];
-    this.redo = function () { view.model.node.move(d, delta); };
-    this.undo = function () { view.model.node.move(d, back); };
+commands.new('move_node', function (view, d, pxy, xy) {
+    this.redo = function () { view.model.node.move(d, xy); };
+    this.undo = function () { view.model.node.move(d, pxy); };
 });
+
+
+
 // JSLint options:
 /*global d3, View*/
 "use strict";
@@ -1278,6 +1283,7 @@ View.prototype.controller = (function () {
     var edge_d;         // reference to an edge object
     var node_d;         // reference to a node object
     var drag_target;    // drag target node of edge [true, false]
+    var start_xy;       // ititial coordinates of dragging
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -1319,7 +1325,7 @@ View.prototype.controller = (function () {
                             ));
                         // Delete nodes edges
                         commands.start()
-                            .del_node(view, nodes.splice(0))
+                            .del_node(view, nodes)
                             .del_edge(view, edges);
                         state = states.wait_for_keyup;
                         break;
@@ -1348,6 +1354,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mousedown':
                     d_source = d;
+                    start_xy = view.pan.mouse();
                     state = states.node_select_or_drag;
                     break;
                 case 'dblclick':
@@ -1548,13 +1555,14 @@ View.prototype.controller = (function () {
                     xy[0] = mouse[0] - xy[0];
                     xy[1] = mouse[1] - xy[1];
                     // Change positions of the selected nodes
-                    view.model.node.move(nodes, xy);
+                    view.model.node.shift(nodes, xy);
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
                     // view.force.resume();
                     break;
                 case 'mouseup':
                     nodes.forEach(function (d) { d.fixed = false; });
+                    commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
                 }
@@ -1563,6 +1571,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mouseup':
                     nodes.forEach(function (d) { d.fixed = false; });
+                    commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
                 }
@@ -1738,19 +1747,36 @@ var Model = (function () {
     function nodes_methods() {
 
         var delta = [0, 0];
+        var xy = [0, 0];
 
-        function move(d) {
+        function shift(d) {
             d.x += delta[0];
             d.y += delta[1];
             d.px = d.x;
             d.py = d.y;
         }
 
-        this.move = function (d, dxy) {
+        function move(d) {
+            d.x = xy[0];
+            d.y = xy[1];
+            d.px = d.x;
+            d.py = d.y;
+        }
+
+        // Changes node position relatively to the previous one
+        this.shift = function (d, dxy) {
             delta[0] = dxy[0];
             delta[1] = dxy[1]
+            foreach(d, shift);
+        };
+
+        // Moves node to new position
+        this.move = function (d, _xy) {
+            xy[0] = _xy[0];
+            xy[1] = _xy[1]
             foreach(d, move);
         };
+
     }
 
 
@@ -1932,6 +1958,13 @@ function wrap (graph) {
     graph.edge.text = function (d, text) {
         var ret = edge.text.apply(this, arguments);
         graph.view.edge_text(d, text);
+        return ret;
+    };
+
+
+    graph.node.shift = function () {
+        var ret = node.shift.apply(this, arguments);
+        graph.view.transform();
         return ret;
     };
 

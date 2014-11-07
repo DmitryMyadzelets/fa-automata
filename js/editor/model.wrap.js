@@ -59,6 +59,13 @@ function wrap (graph) {
     };
 
 
+    graph.node.shift = function () {
+        var ret = node.shift.apply(this, arguments);
+        graph.view.transform();
+        return ret;
+    };
+
+
     graph.node.move = function () {
         var ret = node.move.apply(this, arguments);
         graph.view.transform();

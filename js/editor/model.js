@@ -20,19 +20,36 @@ var Model = (function () {
     function nodes_methods() {
 
         var delta = [0, 0];
+        var xy = [0, 0];
 
-        function move(d) {
+        function shift(d) {
             d.x += delta[0];
             d.y += delta[1];
             d.px = d.x;
             d.py = d.y;
         }
 
-        this.move = function (d, dxy) {
+        function move(d) {
+            d.x = xy[0];
+            d.y = xy[1];
+            d.px = d.x;
+            d.py = d.y;
+        }
+
+        // Changes node position relatively to the previous one
+        this.shift = function (d, dxy) {
             delta[0] = dxy[0];
             delta[1] = dxy[1]
+            foreach(d, shift);
+        };
+
+        // Moves node to new position
+        this.move = function (d, _xy) {
+            xy[0] = _xy[0];
+            xy[1] = _xy[1]
             foreach(d, move);
         };
+
     }
 
 

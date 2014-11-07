@@ -137,7 +137,7 @@ elements.get_edge_transformation = (function () {
 var b = true;
 
 elements.get_node_transformation = function (d) {
-    if (!d || d.x === undefined || d.y === undefined) { return ""; }
+    if (!d || d.x === undefined || d.y === undefined) { return ''; }
     return "translate(" + d.x + "," + d.y + ")";
 };
 
