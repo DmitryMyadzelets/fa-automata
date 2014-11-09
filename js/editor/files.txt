@@ -5,7 +5,6 @@ elements.js
 textarea.js
 pan.js
 view.js
-view.data.js
 select.js
 undo.js
 controller.js

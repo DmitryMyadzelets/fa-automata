@@ -170,6 +170,16 @@ function View(aContainer, aGraph) {
 
 function view_methods() {
 
+    // Helpers
+    // Calls function 'fun' for a single datum or an array of data
+    function foreach(d, fun) {
+        if (d instanceof Array) {
+            d.forEach(fun);
+        } else {
+            fun(d);
+        }
+    }
+
     // Returns an unique identifier
     var uid = (function () {
         var id = 0;
@@ -223,21 +233,69 @@ function view_methods() {
 
     this.node_text = function (d, text) {
         filter(this.node, d).select('text').text(text);
-    }
+    };
 
 
     this.edge_text = function (d, text) {
         filter(this.edge, d).select('text').text(text);
-    }
+    };
 
 
     this.edge_by_data = function (d) {
         return filter(this.edge, d);
-    }
+    };
+
+    // Methods for visual selection
+
+    // Adds/removes a CSS class for node[s] to show them selected
+    this.select_node = function (d, val) {
+        var self = this;
+        val = val === undefined? true : !!val;
+        foreach(d, function(v) {
+            filter(self.node, v).select('circle').classed('selected', val);
+        });
+    };
+
+
+    // Adds/removes a CSS class for edge[s] to show them selected
+    this.select_edge = function (d, val) {
+        var self = this;
+        val = val === undefined? true : !!val;
+        foreach(d, function(v) {
+            filter(self.edge, v).select('path.edge').classed('selected', val);
+        });
+    };
+
+
+    this.selected_nodes = function () {
+        var ret = [];
+        var nodes = this.node.select('.selected');
+        nodes.each(function(d) { ret.push(d); });
+        return ret;
+    };
+
+
+    this.selected_edges = function () {
+        var ret = [];
+        var edges = this.edge.select('.selected');
+        edges.each(function(d) { ret.push(d); });
+        return ret;
+    };
+
+
+    // Removes a selection CSS class for all the nodes and edges
+    this.unselect_all = function () {
+        this.svg.selectAll('.selected').classed('selected', false);
+    };
 
 }
 
 
 view_methods.call(View.prototype);
 
+
+// view.select_node(d | [d], true | false)
+// view.selected_node(d) -> true | false
+// view.selected_nodes() -> []
+// view.unselect_all()
 

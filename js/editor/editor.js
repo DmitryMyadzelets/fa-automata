@@ -711,6 +711,16 @@ function View(aContainer, aGraph) {
 
 function view_methods() {
 
+    // Helpers
+    // Calls function 'fun' for a single datum or an array of data
+    function foreach(d, fun) {
+        if (d instanceof Array) {
+            d.forEach(fun);
+        } else {
+            fun(d);
+        }
+    }
+
     // Returns an unique identifier
     var uid = (function () {
         var id = 0;
@@ -764,17 +774,60 @@ function view_methods() {
 
     this.node_text = function (d, text) {
         filter(this.node, d).select('text').text(text);
-    }
+    };
 
 
     this.edge_text = function (d, text) {
         filter(this.edge, d).select('text').text(text);
-    }
+    };
 
 
     this.edge_by_data = function (d) {
         return filter(this.edge, d);
-    }
+    };
+
+    // Methods for visual selection
+
+    // Adds/removes a CSS class for node[s] to show them selected
+    this.select_node = function (d, val) {
+        var self = this;
+        val = val === undefined? true : !!val;
+        foreach(d, function(v) {
+            filter(self.node, v).select('circle').classed('selected', val);
+        });
+    };
+
+
+    // Adds/removes a CSS class for edge[s] to show them selected
+    this.select_edge = function (d, val) {
+        var self = this;
+        val = val === undefined? true : !!val;
+        foreach(d, function(v) {
+            filter(self.edge, v).select('path.edge').classed('selected', val);
+        });
+    };
+
+
+    this.selected_nodes = function () {
+        var ret = [];
+        var nodes = this.node.select('.selected');
+        nodes.each(function(d) { ret.push(d); });
+        return ret;
+    };
+
+
+    this.selected_edges = function () {
+        var ret = [];
+        var edges = this.edge.select('.selected');
+        edges.each(function(d) { ret.push(d); });
+        return ret;
+    };
+
+
+    // Removes a selection CSS class for all the nodes and edges
+    this.unselect_all = function () {
+        this.svg.selectAll('.selected').classed('selected', false);
+    };
 
 }
 
@@ -782,197 +835,10 @@ function view_methods() {
 view_methods.call(View.prototype);
 
 
-
-// JSLint options:
-/*global View*/
-"use strict";
-
-View.prototype.nodes = (function () {
-    var view;
-    var methods = {};
-    var last = [];
-    var data;
-
-    function cache (d) {
-    	if (d instanceof Array) {
-    		last = d.slice(0);
-    	} else {
-    		last.lenth = 0;
-    		last.push(d);
-    	}
-    }
-
-    // function add(d) {
-    //     data.push(d);
-    // }
-
-    // methods.add = function (d) {
-    //     last.length = 0;
-    //     cache(d);
-    //     if (d instanceof Array) {
-    //         d.forEach(function (d) { add(d); } );
-    //     } else {
-    //         add(d);
-    //     }
-    //     view.update();
-    //     return methods;
-    // };
-
-    // function remove(d) {
-    //     var i = data.indexOf(d);
-    //     if (i >= 0) {
-    //         data.splice(i, 1);
-    //     }
-    // }
-
-    // methods.remove = function (d) {
-    // 	cache(d);
-    //     if (d instanceof Array) {
-    //         d.forEach(function (d) { remove(d); });
-    //     } else {
-    //         remove(d);
-    //     }
-    //     view.update();
-    //     return methods;
-    // };
-
-    methods.select = function (d) {
-        if (!arguments.length) {
-            if (last.length) {
-                view.select().node(last[0]);
-            }
-        } else if (!d) {
-            view.select().nothing();
-        } else {
-            view.select().node(d);
-        }
-        return methods;
-    };
-
-    // methods.text = function (d, text) {
-    //     d.text = text;
-    //     // view.update();
-    //     view.node.each(function(_d) {
-    //         if (_d === d) {
-    //             d3.select(this).select('text').text(text);
-    //         }
-    //     });
-    // };
-
-    // function move(d, delta) {
-    //     d.x += delta[0];
-    //     d.y += delta[1];
-    //     d.px = d.x;
-    //     d.py = d.y;
-    // }
-
-    // methods.move = function (d, delta) {
-    //     if (d instanceof Array) {
-    //         d.forEach(function (d) { move(d, delta); } );
-    //     } else {
-    //         move(d, delta);
-    //     }
-    //     view.transform();
-    //     return methods;
-    // };
-
-    // Returns incominng and outgoing edges of last nodes
-    methods.edges = function () {
-    	var ret = [];
-    	view.graph().edges.forEach(function (d) {
-    		if (last.indexOf(d.source) >= 0 || last.indexOf(d.target) >= 0) {
-    			if (ret.indexOf(d) < 0) {
-    				ret.push(d);
-    			}
-    		}
-    	});
-    	return ret;
-    }
-
-    return function (d) {
-        view = this;
-        data = view.graph().nodes;
-        if (arguments.length) {
-        	cache(d);
-        }
-        return methods;
-    }
-}());
-
-
-
-View.prototype.edges = (function () {
-    var view;
-    var methods = {};
-    var last = [];
-    var data;
-
-    function cache (d) {
-        if (d instanceof Array) {
-            last = d.slice(0);
-        } else {
-            last.lenth = 0;
-            last.push(d);
-        }
-    }
-
-    // function add(d) {
-    //     data.push(d);
-    // }
-
-    // methods.add = function (d) {
-    //     last.length = 0;
-    //     cache(d);
-    //     if (d instanceof Array) {
-    //         d.forEach(function (d) { add(d); } );
-    //     } else {
-    //         add(d);
-    //     }
-    //     view.update();
-    //     return methods;
-    // };
-
-    // function remove(d) {
-    //     var i = data.indexOf(d);
-    //     if (i >= 0) {
-    //         data.splice(i, 1);
-    //     }
-    // }
-
-    // methods.remove = function (d) {
-    //     cache(d);
-    //     if (d instanceof Array) {
-    //         d.forEach(function (d) { remove(d); });
-    //     } else {
-    //         remove(d);
-    //     }
-    //     view.update();
-    //     return methods;
-    // };
-
-    methods.select = function (d) {
-        if (!arguments.length) {
-            if (last.length) {
-                view.select().edge(last[0]);
-            }
-        } else if (!d) {
-            view.select().nothing();
-        } else {
-            view.select().edge(d);
-        }
-        return methods;
-    };
-
-    return function (d) {
-        view = this;
-        data = view.graph().edges;
-        if (arguments.length) {
-        	cache(d);
-        }
-        return methods;
-    }
-}());
-
+// view.select_node(d | [d], true | false)
+// view.selected_node(d) -> true | false
+// view.selected_nodes() -> []
+// view.unselect_all()
 
 
 // JSLint options:
@@ -1055,45 +921,44 @@ View.prototype.select = (function () {
             return this;
         },
         // Changes look of the graph node as selected
-        node : function (d) {
-            var node = view.node.filter(function (_d) { return _d === d; });
-            var index = nodes.indexOf(d);
-            if (index < 0) {
-                d.selected = true;
-                nodes.push(d);
-            } else {
-                d.selected = false;
-                nodes.splice(index, 1);
-            }
-            node.select('circle').classed('selected', d.selected);
-        },
+        // node : function (d) {
+        //     var node = view.node.filter(function (_d) { return _d === d; });
+        //     var index = nodes.indexOf(d);
+        //     if (index < 0) {
+        //         d.selected = true;
+        //         nodes.push(d);
+        //     } else {
+        //         d.selected = false;
+        //         nodes.splice(index, 1);
+        //     }
+        //     node.select('circle').classed('selected', d.selected);
+        // },
         nodes : function () {
             return nodes;
         },
         edges : function () {
             return edges;
         },
-        edge : function (d) {
-            var edge = view.edge.select('.edge')
-                .filter(function (_d) { return _d === d; });
-            var index = edges.indexOf(d);
-            if (index < 0) {
-                d.selected = true;
-                edges.push(d);
-            } else {
-                d.selected = false;
-                edges.splice(index, 1);
-            }
-            edge.classed('selected', d.selected);
-        },
-        nothing : function () {
-            nodes.length = 0;
-            edges.length = 0;
-            svg = svg || d3;
-            svg.selectAll('.selected')
-                .classed('selected', false)
-                .each(function (d) { d.selected = false; });
-        },
+        // edge : function (d) {
+        //     var edge = view.edge.filter(function (_d) { return _d === d; });
+        //     var index = edges.indexOf(d);
+        //     if (index < 0) {
+        //         d.selected = true;
+        //         edges.push(d);
+        //     } else {
+        //         d.selected = false;
+        //         edges.splice(index, 1);
+        //     }
+        //     edge.select('path.edge').classed('selected', d.selected);
+        // },
+        // nothing : function () {
+        //     nodes.length = 0;
+        //     edges.length = 0;
+        //     svg = svg || d3;
+        //     svg.selectAll('.selected')
+        //         .classed('selected', false)
+        //         .each(function (d) { d.selected = false; });
+        // },
         // Updates graphical appearance of selected_nodes nodes
         by_rectangle : function (r) {
             // Correct coordinates according to the current panoram
@@ -1105,7 +970,7 @@ View.prototype.select = (function () {
             view.node.each(function (d) {
                 // Check if center of the node is in the selection rectange
                 if (point_in_rectangle(d.x, d.y, r)) {
-                    view.select().node(d);
+                    view.select_node(d);
                 }
             });
             view.edge.each(function (d) {
@@ -1113,7 +978,7 @@ View.prototype.select = (function () {
                 // are in the selection
                 if (point_in_rectangle(d.x1, d.y1, r) &&
                         point_in_rectangle(d.x2, d.y2, r)) {
-                    view.select().edge(d);
+                    view.select_edge(d);
                 }
             });
         }
@@ -1298,12 +1163,12 @@ View.prototype.controller = (function () {
                 case 'mousemove':
                     break;
                 case 'dblclick':
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    if (!d3.event.ctrlKey) { view.unselect_all(); }
                     mouse = view.pan.mouse();
                     // Create new node
                     var node = { x : mouse[0], y : mouse[1] };
                     commands.start().add_node(view, node);
-                    view.nodes(node).select();
+                    view.select_node(node);
                     break;
                 case 'mousedown':
                     if (d3.event.shiftKey) {
@@ -1317,10 +1182,11 @@ View.prototype.controller = (function () {
                 case 'keydown':
                     switch (d3.event.keyCode) {
                     case 46: // Delete
-                        var nodes = view.select().nodes();
+                        var nodes = view.selected_nodes();
                         // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                        var edges = view.nodes(nodes).edges();
-                        edges = edges.concat(view.select().edges().filter(
+                        // var edges = view.nodes(nodes).edges();
+                        var edges = view.model.edge.adjacent(nodes);
+                        edges = edges.concat(view.selected_edges().filter(
                             function (d) { return edges.indexOf(d) < 0; }
                             ));
                         // Delete nodes edges
@@ -1403,10 +1269,10 @@ View.prototype.controller = (function () {
                     if (d3.event.shiftKey) {
                         mouse = view.pan.mouse();
                         if (!d_source.selected) {
-                            if (!d3.event.ctrlKey) { view.select().nothing(); }
-                            view.select().node(d_source);
+                            if (!d3.event.ctrlKey) { view.unselect_all(); }
+                            view.select_node(d_source);
                         }
-                        nodes = view.select().nodes();
+                        nodes = view.selected_nodes();
                         nodes.forEach(function (d) { d.fixed = true; });
                         state = states.drag_node;
                     }
@@ -1431,8 +1297,8 @@ View.prototype.controller = (function () {
                     state = states.drag_edge;
                     break;
                 case 'mouseup':
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    view.select().node(d_source);
+                    if (!d3.event.ctrlKey) { view.unselect_all(); }
+                    view.select_node(d_source);
                     state = states.init;
                     break;
                 }
@@ -1444,8 +1310,8 @@ View.prototype.controller = (function () {
             case 'edge':
                 switch (type) {
                 case 'mouseup':
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
-                    view.select().edge(d);
+                    if (!d3.event.ctrlKey) { view.unselect_all(); }
+                    view.select_edge(d);
                     state = states.init;
                     break;
                 case 'mouseout':
@@ -1486,8 +1352,8 @@ View.prototype.controller = (function () {
             case 'mouseup':
                 delete node_d.r; // in order to use default radius
                 commands.add_node(view, node_d);
-                if (!d3.event.ctrlKey) { view.select().nothing(); }
-                view.select().node(node_d);
+                if (!d3.event.ctrlKey) { view.unselect_all(); }
+                view.select_node(node_d);
                 state = states.init;
                 break;
             case 'mouseover':
@@ -1519,9 +1385,9 @@ View.prototype.controller = (function () {
                         // Delete edge
                         commands.del_edge(view, edge_d);
                     }
-                    if (!d3.event.ctrlKey) { view.select().nothing(); }
+                    if (!d3.event.ctrlKey) { view.unselect_all(); }
                     if (exists.length <= 1) {
-                        view.select().edge(edge_d);
+                        view.select_edge(edge_d);
                     }
                     view.update();
                     state = states.init;
@@ -1581,14 +1447,14 @@ View.prototype.controller = (function () {
         wait_for_selection : function () {
             switch (type) {
             case 'mousemove':
-                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                if (!d3.event.ctrlKey) { view.unselect_all(); }
                 select_rect = view.selection_rectangle();
                 select_rect.show(mouse);
                 mouse = d3.mouse(this);
                 state = states.selection;
                 break;
             case 'mouseup':
-                if (!d3.event.ctrlKey) { view.select().nothing(); }
+                if (!d3.event.ctrlKey) { view.unselect_all(); }
                 state = states.init;
                 break;
             default:
