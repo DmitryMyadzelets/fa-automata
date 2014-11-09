@@ -54,7 +54,6 @@ View.prototype.controller = (function () {
                     case 46: // Delete
                         var nodes = view.selected_nodes();
                         // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                        // var edges = view.nodes(nodes).edges();
                         var edges = view.model.edge.adjacent(nodes);
                         edges = edges.concat(view.selected_edges().filter(
                             function (d) { return edges.indexOf(d) < 0; }
@@ -281,7 +280,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mousemove':
                     if (!d3.event.shiftKey) {
-                        nodes.forEach(function (d) { d.fixed = false; });
+                        nodes.forEach(function (d) { delete d.fixed; });
                         state = states.init;
                         break;
                     }
@@ -297,7 +296,7 @@ View.prototype.controller = (function () {
                     // view.force.resume();
                     break;
                 case 'mouseup':
-                    nodes.forEach(function (d) { d.fixed = false; });
+                    nodes.forEach(function (d) { delete d.fixed; });
                     commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
@@ -306,7 +305,7 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mouseup':
-                    nodes.forEach(function (d) { d.fixed = false; });
+                    nodes.forEach(function (d) { delete d.fixed; });
                     commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
