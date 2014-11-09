@@ -30,7 +30,7 @@ View.prototype.selection_rectangle = (function () {
         });
     };
 
-    // Updates position of the rectangle depending of current mouse position
+    // Updates position of the rectangle wrt the current mouse position
     fnc.update = function (xy) {
         x = xy[0];
         y = xy[1];
