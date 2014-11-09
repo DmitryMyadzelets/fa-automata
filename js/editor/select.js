@@ -78,45 +78,6 @@ View.prototype.select = (function () {
             svg = a_svg;
             return this;
         },
-        // Changes look of the graph node as selected
-        // node : function (d) {
-        //     var node = view.node.filter(function (_d) { return _d === d; });
-        //     var index = nodes.indexOf(d);
-        //     if (index < 0) {
-        //         d.selected = true;
-        //         nodes.push(d);
-        //     } else {
-        //         d.selected = false;
-        //         nodes.splice(index, 1);
-        //     }
-        //     node.select('circle').classed('selected', d.selected);
-        // },
-        nodes : function () {
-            return nodes;
-        },
-        edges : function () {
-            return edges;
-        },
-        // edge : function (d) {
-        //     var edge = view.edge.filter(function (_d) { return _d === d; });
-        //     var index = edges.indexOf(d);
-        //     if (index < 0) {
-        //         d.selected = true;
-        //         edges.push(d);
-        //     } else {
-        //         d.selected = false;
-        //         edges.splice(index, 1);
-        //     }
-        //     edge.select('path.edge').classed('selected', d.selected);
-        // },
-        // nothing : function () {
-        //     nodes.length = 0;
-        //     edges.length = 0;
-        //     svg = svg || d3;
-        //     svg.selectAll('.selected')
-        //         .classed('selected', false)
-        //         .each(function (d) { d.selected = false; });
-        // },
         // Updates graphical appearance of selected_nodes nodes
         by_rectangle : function (r) {
             // Correct coordinates according to the current panoram
