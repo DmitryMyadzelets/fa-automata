@@ -190,6 +190,11 @@ elements.add_edge = function (selection, handler) {
     g.append('path')
         .attr('class', 'catch');
 
+    g.append('text')
+        // .style('text-anchor', 'middle')
+        .attr('alignment-baseline', 'center')
+        .text(function (d) { return d.text || ''; });
+
     return g;
 };
 

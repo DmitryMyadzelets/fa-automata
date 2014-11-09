@@ -127,12 +127,17 @@ commands.new('del_edge', function (view, d) {
 });
 
 
-commands.new('text', function (view, d, text) {
+commands.new('node_text', function (view, d, text) {
     var old_text = d.text;
     this.redo = function () { view.model.node.text(d, text); };
     this.undo = function () { view.model.node.text(d, old_text); };
 });
 
+commands.new('edge_text', function (view, d, text) {
+    var old_text = d.text;
+    this.redo = function () { view.model.edge.text(d, text); };
+    this.undo = function () { view.model.edge.text(d, old_text); };
+});
 
 commands.new('move_node', function (view, d, pxy, xy) {
     this.redo = function () { view.model.node.move(d, xy); };

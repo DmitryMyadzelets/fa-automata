@@ -297,6 +297,11 @@ elements.add_edge = function (selection, handler) {
     g.append('path')
         .attr('class', 'catch');
 
+    g.append('text')
+        // .style('text-anchor', 'middle')
+        .attr('alignment-baseline', 'center')
+        .text(function (d) { return d.text || ''; });
+
     return g;
 };
 
@@ -1076,12 +1081,17 @@ commands.new('del_edge', function (view, d) {
 });
 
 
-commands.new('text', function (view, d, text) {
+commands.new('node_text', function (view, d, text) {
     var old_text = d.text;
     this.redo = function () { view.model.node.text(d, text); };
     this.undo = function () { view.model.node.text(d, old_text); };
 });
 
+commands.new('edge_text', function (view, d, text) {
+    var old_text = d.text;
+    this.redo = function () { view.model.edge.text(d, text); };
+    this.undo = function () { view.model.edge.text(d, old_text); };
+});
 
 commands.new('move_node', function (view, d, pxy, xy) {
     this.redo = function () { view.model.node.move(d, xy); };
@@ -1114,7 +1124,7 @@ View.prototype.controller = (function () {
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
 
-    var node_text;      // reference to the SVG text element of a node
+    var svg_text;      // reference to the SVG text element of a node
 
     var states = {
         init : function (d) {
@@ -1148,7 +1158,7 @@ View.prototype.controller = (function () {
                         var edges = view.model.edge.adjacent(nodes);
                         edges = edges.concat(view.selected_edges().filter(
                             function (d) { return edges.indexOf(d) < 0; }
-                            ));
+                        ));
                         // Delete nodes edges
                         commands.start()
                             .del_node(view, nodes)
@@ -1185,10 +1195,10 @@ View.prototype.controller = (function () {
                     break;
                 case 'dblclick':
                     d3.event.stopPropagation();
-                    node_d = d;
-                    node_text = d3.select(this).select('text');
+                    d_source = d;
+                    svg_text = d3.select(this).select('text');
                     // Remove text temporally, since it is viewed in text editor now
-                    node_text.text('');
+                    svg_text.text('');
                     // Callback function which is called by textarea object when 
                     // user enters the text or cancels it.
                     // This function invokes this automaton iteself
@@ -1216,6 +1226,29 @@ View.prototype.controller = (function () {
                     vec.subtract(mouse, [d.x2, d.y2], head);
                     drag_target = vec.length(head) < vec.length(tail);
                     state = states.edge_select_or_drag;
+                    break;
+                case 'dblclick':
+                    d3.event.stopPropagation();
+                    d_source = d;
+                    svg_text = d3.select(this).select('text');
+                    // Remove text temporally, since it is viewed in text editor now
+                    svg_text.text('');
+                    // Callback function which is called by textarea object when 
+                    // user enters the text or cancels it.
+                    // This function invokes this automaton iteself
+                    var callback = (function () {
+                        var self = view;
+                        return function () {
+                            self.controller().context('text').event.apply(this, arguments);
+                        };
+                    }());
+                    var text = d.text || '';
+                    var pan = view.pan();
+                    var x = (d.source.x + d.target.x) / 2 + pan[0];
+                    var y = (d.source.y + d.target.y) / 2 + pan[0];
+                    textarea(view.container, text, x, y, callback, callback);
+                    view.force(false);
+                    state = states.edit_edge_text;
                     break;
                 }
                 break;
@@ -1452,12 +1485,29 @@ View.prototype.controller = (function () {
         edit_node_text : function () {
             if (source === 'text') {
                 // Set original text back
-                node_text.text(function(d) { return d.text; });
+                svg_text.text(function(d) { return d.text; });
                 // Change text if user hit Enter
                 switch (type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13) {
-                        commands.start().text(view, node_d, this.value); // FIX: should be a ref to SVG text here
+                        commands.start().node_text(view, d_source, this.value); // FIX: should be a ref to SVG text here
+                        
+                    } else {
+                    }
+                    break;
+                }
+                state = states.init;
+            }
+        },
+        edit_edge_text : function () {
+            if (source === 'text') {
+                // Set original text back
+                svg_text.text(function(d) { return d.text; });
+                // Change text if user hit Enter
+                switch (type) {
+                case 'keydown':
+                    if (d3.event.keyCode === 13) {
+                        commands.start().edge_text(view, d_source, this.value); // FIX: should be a ref to SVG text here
                         
                     } else {
                     }
