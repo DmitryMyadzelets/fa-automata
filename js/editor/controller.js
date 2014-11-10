@@ -36,6 +36,7 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.unselect_all(); }
                     mouse = view.pan.mouse();
                     // Create new node
+                    // var node = { x : mouse[0], y : mouse[1], px : mouse[0], py : mouse[1] };
                     var node = { x : mouse[0], y : mouse[1] };
                     commands.start().add_node(view, node);
                     view.select_node(node);
@@ -77,7 +78,7 @@ View.prototype.controller = (function () {
                         state = states.wait_for_keyup;
                         break;
                     case 70: // F
-                        view.force(!view.force());
+                        view.spring(!view.spring());
                         break;
                     // default:
                     //     console.log('Key', d3.event.keyCode);
@@ -110,7 +111,7 @@ View.prototype.controller = (function () {
                     var text = d.text || '';
                     var pan = view.pan();
                     textarea(view.container, text, d.x + pan[0], d.y + pan[1], callback, callback);
-                    view.force(false);
+                    view.spring(false);
                     state = states.edit_node_text;
                     break;
                 }
@@ -146,7 +147,7 @@ View.prototype.controller = (function () {
                     var x = (d.source.x + d.target.x) / 2 + pan[0];
                     var y = (d.source.y + d.target.y) / 2 + pan[0];
                     textarea(view.container, text, x, y, callback, callback);
-                    view.force(false);
+                    view.spring(false);
                     state = states.edit_edge_text;
                     break;
                 }
@@ -185,7 +186,7 @@ View.prototype.controller = (function () {
                     drag_target = true;
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     // Then attach edge to this new node
-                    view.force(false);
+                    view.spring(false);
                     state = states.drag_edge;
                     break;
                 case 'mouseup':
@@ -221,7 +222,7 @@ View.prototype.controller = (function () {
                         .del_edge(view, d)
                         .add_edge(view, edge_d);
                     // Then attach edge to this new node
-                    view.force(false);
+                    view.spring(false);
                     // Save values for next state
                     set_edge_type.call(view, edge_d);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
@@ -316,7 +317,6 @@ View.prototype.controller = (function () {
                     view.model.node.shift(nodes, xy);
                     xy[0] = mouse[0];
                     xy[1] = mouse[1];
-                    // view.force.resume();
                     break;
                 case 'mouseup':
                     nodes.forEach(function (d) { delete d.fixed; });

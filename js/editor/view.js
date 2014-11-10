@@ -126,7 +126,7 @@ function View(aContainer, aGraph) {
         .size([width, height])
         .on('tick', this.transform);
 
-    this.force = (function () {
+    this.spring = (function () {
         var started = false;
         return function (start) {
             if (arguments.length) {
@@ -150,17 +150,7 @@ function View(aContainer, aGraph) {
     this.svg = svg;
     this.container = container;
 
-    // Returns a graph attached to the view.
-    // If new graph is given, attches it to the view.
-    this.graph = function (graph) {
-        if (arguments.length > 0) {
-            this._graph = null;
-            this._graph = graph || get_empty_graph();
-            force.nodes(this._graph.nodes).links(this._graph.edges);
-            this.update();
-        }
-        return this._graph;
-    };
+    this.force = force;
 
     // Attach graph
     this.graph(aGraph);
@@ -216,10 +206,33 @@ function view_methods() {
     };
 
 
+    // Return whether graph nodes have coordnates
+    function has_no_coordinates(nodes) {
+        var ret = false;
+        nodes.forEach(function (v) { if(v.x === undefined || v.y === undefined) ret = true; });
+        return ret;
+    }
+
+    // Returns a graph attached to the view.
+    // If new graph is given, attches it to the view.
+    this.graph = function (graph) {
+        if (arguments.length > 0) {
+            this._graph = null;
+            this._graph = graph || get_empty_graph();
+            if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
+            this.update();
+        }
+        return this._graph;
+    };
+
+
     // Updates SVG structure according to the graph structure
     this.update = function () {
+        if (this.spring()) { this.force.stop(); }
         update_nodes.call(this);
         update_edges.call(this);
+        this.force.nodes(this._graph.nodes).links(this._graph.edges);
+        if (this.spring()) { this.force.start(); }
 
         var self = this;
         // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
