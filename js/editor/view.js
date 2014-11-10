@@ -202,10 +202,24 @@ function view_methods() {
     }
 
 
+    function update_nodes() {
+        this.node = this.node.data(this.graph().nodes, key);
+        this.node.enter().call(elements.add_node, this.node_handler);
+        this.node.exit().remove();
+    }
+
+
+    function update_edges () {
+        this.edge = this.edge.data(this.graph().edges, key);
+        this.edge.enter().call(elements.add_edge, this.edge_handler);
+        this.edge.exit().remove();
+    };
+
+
     // Updates SVG structure according to the graph structure
     this.update = function () {
-        this.update_nodes();
-        this.update_edges();
+        update_nodes.call(this);
+        update_edges.call(this);
 
         var self = this;
         // Identify type of edge {int} (0-straight, 1-curved, 2-loop)
@@ -216,19 +230,6 @@ function view_methods() {
         this.transform();
     };
 
-
-    this.update_nodes = function () {
-        this.node = this.node.data(this.graph().nodes, key);
-        this.node.enter().call(elements.add_node, this.node_handler);
-        this.node.exit().remove();
-    };
-
-
-    this.update_edges = function () {
-        this.edge = this.edge.data(this.graph().edges, key);
-        this.edge.enter().call(elements.add_edge, this.edge_handler);
-        this.edge.exit().remove();
-    };
 
 
     this.node_text = function (d, text) {
