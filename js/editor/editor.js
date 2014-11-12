@@ -1873,10 +1873,16 @@ function wrap (graph) {
 
 
 
-ed.view = function (container, graph) {
-    return new View(container, graph);
-};
+ed.instance = function (container) {
+	var o = {
 
+	};
+	o.graph = Model.graph();
+	o.view = new View(container, o.graph.object());
+	o.view.model = o.graph;
+	o.graph.view = o.view;
+	o.view.controller().control();
+};
 
 
 this.jA = this.jA || {};
