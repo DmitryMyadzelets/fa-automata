@@ -54,7 +54,7 @@ View.prototype.controller = (function () {
                 case 'keydown':
                     switch (d3.event.keyCode) {
                     case 46: // Delete
-                        var nodes = view.selected_nodes();
+                        nodes = view.selected_nodes();
                         // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
                         var edges = view.model.edge.adjacent(nodes);
                         edges = edges.concat(view.selected_edges().filter(
@@ -92,7 +92,24 @@ View.prototype.controller = (function () {
                 case 'mousedown':
                     d_source = d;
                     start_xy = view.pan.mouse();
-                    state = states.node_select_or_drag;
+                    // Conditional selection
+                    nodes = view.selected_nodes();
+                    var selected = nodes.indexOf(d) >= 0;
+                    if (d3.event.shiftKey) {
+                        view.select_node(d);
+                        nodes = view.selected_nodes();
+                        nodes.forEach(function (d) { d.fixed = true; });
+                        state = states.drag_node;
+                    } else {
+                        if (d3.event.ctrlKey) {
+                            // Invert selection of the node
+                            view.select_node(d, !selected);
+                        } else {
+                            view.unselect_all();
+                            view.select_node(d);
+                        }
+                        state = states.node_select_or_drag;
+                    }
                     break;
                 case 'dblclick':
                     d3.event.stopPropagation();
@@ -157,22 +174,6 @@ View.prototype.controller = (function () {
         },
         node_select_or_drag : function () {
             switch (source) {
-            case 'plane':
-                switch (type) {
-                case 'mousemove':
-                    if (d3.event.shiftKey) {
-                        mouse = view.pan.mouse();
-                        if (!d_source.selected) {
-                            if (!d3.event.ctrlKey) { view.unselect_all(); }
-                            view.select_node(d_source);
-                        }
-                        nodes = view.selected_nodes();
-                        nodes.forEach(function (d) { d.fixed = true; });
-                        state = states.drag_node;
-                    }
-                    break;
-                }
-                break;
             case 'node':
                 switch (type) {
                 case 'mouseout':
@@ -191,8 +192,6 @@ View.prototype.controller = (function () {
                     state = states.drag_edge;
                     break;
                 case 'mouseup':
-                    if (!d3.event.ctrlKey) { view.unselect_all(); }
-                    view.select_node(d_source);
                     state = states.init;
                     break;
                 }
@@ -247,7 +246,9 @@ View.prototype.controller = (function () {
                 delete node_d.r; // in order to use default radius
                 commands.add_node(model, node_d);
                 if (!d3.event.ctrlKey) { view.unselect_all(); }
-                view.select_node(node_d);
+                view.select_edge(edge_d);
+                view.select_node(edge_d.target);
+                if (d3.event.ctrlKey) { view.select_node(edge_d.source); }
                 state = states.init;
                 break;
             case 'mouseover':
@@ -304,11 +305,11 @@ View.prototype.controller = (function () {
             case 'plane':
                 switch (type) {
                 case 'mousemove':
-                    if (!d3.event.shiftKey) {
-                        nodes.forEach(function (d) { delete d.fixed; });
-                        state = states.init;
-                        break;
-                    }
+                    // if (!d3.event.shiftKey) {
+                    //     nodes.forEach(function (d) { delete d.fixed; });
+                    //     state = states.init;
+                    //     break;
+                    // }
                     // How far we move the nodes
                     var xy = mouse;
                     mouse = view.pan.mouse();
