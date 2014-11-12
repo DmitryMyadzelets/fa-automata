@@ -103,45 +103,45 @@ commands_methods.call(commands);
 
 
 
-commands.new('add_node', function (view, d) {
-    this.redo = function () { view.model.node.add(d); };
-    this.undo = function () { view.model.node.remove(d); };
+commands.new('add_node', function (model, d) {
+    this.redo = function () { model.node.add(d); };
+    this.undo = function () { model.node.remove(d); };
 });
 
 
-commands.new('del_node', function (view, d) {
-    this.redo = function () { view.model.node.remove(d); };
-    this.undo = function () { view.model.node.add(d); };
+commands.new('del_node', function (model, d) {
+    this.redo = function () { model.node.remove(d); };
+    this.undo = function () { model.node.add(d); };
 });
 
 
-commands.new('add_edge', function (view, d) {
-    this.redo = function () { view.model.edge.add(d); };
-    this.undo = function () { view.model.edge.remove(d); };
+commands.new('add_edge', function (model, d) {
+    this.redo = function () { model.edge.add(d); };
+    this.undo = function () { model.edge.remove(d); };
 });
 
 
-commands.new('del_edge', function (view, d) {
-    this.redo = function () { view.model.edge.remove(d); };
-    this.undo = function () { view.model.edge.add(d); };
+commands.new('del_edge', function (model, d) {
+    this.redo = function () { model.edge.remove(d); };
+    this.undo = function () { model.edge.add(d); };
 });
 
 
-commands.new('node_text', function (view, d, text) {
+commands.new('node_text', function (model, d, text) {
     var old_text = d.text;
-    this.redo = function () { view.model.node.text(d, text); };
-    this.undo = function () { view.model.node.text(d, old_text); };
+    this.redo = function () { model.node.text(d, text); };
+    this.undo = function () { model.node.text(d, old_text); };
 });
 
-commands.new('edge_text', function (view, d, text) {
+commands.new('edge_text', function (model, d, text) {
     var old_text = d.text;
-    this.redo = function () { view.model.edge.text(d, text); };
-    this.undo = function () { view.model.edge.text(d, old_text); };
+    this.redo = function () { model.edge.text(d, text); };
+    this.undo = function () { model.edge.text(d, old_text); };
 });
 
-commands.new('move_node', function (view, d, pxy, xy) {
-    this.redo = function () { view.model.node.move(d, xy); };
-    this.undo = function () { view.model.node.move(d, pxy); };
+commands.new('move_node', function (model, d, pxy, xy) {
+    this.redo = function () { model.node.move(d, xy); };
+    this.undo = function () { model.node.move(d, pxy); };
 });
 
 

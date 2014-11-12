@@ -1071,45 +1071,45 @@ commands_methods.call(commands);
 
 
 
-commands.new('add_node', function (view, d) {
-    this.redo = function () { view.model.node.add(d); };
-    this.undo = function () { view.model.node.remove(d); };
+commands.new('add_node', function (model, d) {
+    this.redo = function () { model.node.add(d); };
+    this.undo = function () { model.node.remove(d); };
 });
 
 
-commands.new('del_node', function (view, d) {
-    this.redo = function () { view.model.node.remove(d); };
-    this.undo = function () { view.model.node.add(d); };
+commands.new('del_node', function (model, d) {
+    this.redo = function () { model.node.remove(d); };
+    this.undo = function () { model.node.add(d); };
 });
 
 
-commands.new('add_edge', function (view, d) {
-    this.redo = function () { view.model.edge.add(d); };
-    this.undo = function () { view.model.edge.remove(d); };
+commands.new('add_edge', function (model, d) {
+    this.redo = function () { model.edge.add(d); };
+    this.undo = function () { model.edge.remove(d); };
 });
 
 
-commands.new('del_edge', function (view, d) {
-    this.redo = function () { view.model.edge.remove(d); };
-    this.undo = function () { view.model.edge.add(d); };
+commands.new('del_edge', function (model, d) {
+    this.redo = function () { model.edge.remove(d); };
+    this.undo = function () { model.edge.add(d); };
 });
 
 
-commands.new('node_text', function (view, d, text) {
+commands.new('node_text', function (model, d, text) {
     var old_text = d.text;
-    this.redo = function () { view.model.node.text(d, text); };
-    this.undo = function () { view.model.node.text(d, old_text); };
+    this.redo = function () { model.node.text(d, text); };
+    this.undo = function () { model.node.text(d, old_text); };
 });
 
-commands.new('edge_text', function (view, d, text) {
+commands.new('edge_text', function (model, d, text) {
     var old_text = d.text;
-    this.redo = function () { view.model.edge.text(d, text); };
-    this.undo = function () { view.model.edge.text(d, old_text); };
+    this.redo = function () { model.edge.text(d, text); };
+    this.undo = function () { model.edge.text(d, old_text); };
 });
 
-commands.new('move_node', function (view, d, pxy, xy) {
-    this.redo = function () { view.model.node.move(d, xy); };
-    this.undo = function () { view.model.node.move(d, pxy); };
+commands.new('move_node', function (model, d, pxy, xy) {
+    this.redo = function () { model.node.move(d, xy); };
+    this.undo = function () { model.node.move(d, pxy); };
 });
 
 
@@ -1122,6 +1122,7 @@ commands.new('move_node', function (view, d, pxy, xy) {
 View.prototype.controller = (function () {
 
     var view;           // a view where current event occur
+    var model;          // a model connected to the current view
     var source;         // a SVG element where current event occur
     var type;           // type of event (copy of d3.type)
 
@@ -1153,7 +1154,7 @@ View.prototype.controller = (function () {
                     // Create new node
                     // var node = { x : mouse[0], y : mouse[1], px : mouse[0], py : mouse[1] };
                     var node = { x : mouse[0], y : mouse[1] };
-                    commands.start().add_node(view, node);
+                    commands.start().add_node(model, node);
                     view.select_node(node);
                     break;
                 case 'mousedown':
@@ -1176,8 +1177,8 @@ View.prototype.controller = (function () {
                         ));
                         // Delete nodes edges
                         commands.start()
-                            .del_node(view, nodes)
-                            .del_edge(view, edges);
+                            .del_node(model, nodes)
+                            .del_edge(model, edges);
                         state = states.wait_for_keyup;
                         break;
                     case 89: // Y
@@ -1297,7 +1298,7 @@ View.prototype.controller = (function () {
                     node_d = { x : mouse[0], y : mouse[1], r : 1 };
                     // Create new edge
                     edge_d = { source : d_source, target : node_d };
-                    commands.start().add_edge(view, edge_d);
+                    commands.start().add_edge(model, edge_d);
                     drag_target = true;
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     // Then attach edge to this new node
@@ -1334,8 +1335,8 @@ View.prototype.controller = (function () {
                         edge_d.source = node_d;
                     }
                     commands.start()
-                        .del_edge(view, d)
-                        .add_edge(view, edge_d);
+                        .del_edge(model, d)
+                        .add_edge(model, edge_d);
                     // Then attach edge to this new node
                     view.spring(false);
                     // Save values for next state
@@ -1359,7 +1360,7 @@ View.prototype.controller = (function () {
                 break;
             case 'mouseup':
                 delete node_d.r; // in order to use default radius
-                commands.add_node(view, node_d);
+                commands.add_node(model, node_d);
                 if (!d3.event.ctrlKey) { view.unselect_all(); }
                 view.select_node(node_d);
                 state = states.init;
@@ -1391,7 +1392,7 @@ View.prototype.controller = (function () {
                     });
                     if (exists.length > 1) {
                         // Delete edge
-                        commands.del_edge(view, edge_d);
+                        commands.del_edge(model, edge_d);
                     }
                     if (!d3.event.ctrlKey) { view.unselect_all(); }
                     if (exists.length <= 1) {
@@ -1435,7 +1436,7 @@ View.prototype.controller = (function () {
                     break;
                 case 'mouseup':
                     nodes.forEach(function (d) { delete d.fixed; });
-                    commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
+                    commands.start().move_node(model, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
                 }
@@ -1444,7 +1445,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mouseup':
                     nodes.forEach(function (d) { delete d.fixed; });
-                    commands.start().move_node(view, nodes, start_xy, view.pan.mouse());
+                    commands.start().move_node(model, nodes, start_xy, view.pan.mouse());
                     state = states.init;
                     break;
                 }
@@ -1504,7 +1505,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13) {
-                        commands.start().node_text(view, d_source, this.value); // FIX: should be a ref to SVG text here
+                        commands.start().node_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
                         
                     } else {
                     }
@@ -1521,7 +1522,7 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13) {
-                        commands.start().edge_text(view, d_source, this.value); // FIX: should be a ref to SVG text here
+                        commands.start().edge_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
                         
                     } else {
                     }
@@ -1585,6 +1586,7 @@ View.prototype.controller = (function () {
             source = a_element;
             return this;
         },
+        // Sets event handlers for the given View
         control : function () {
             var self = view;
             // Handles nodes events
@@ -1608,6 +1610,7 @@ View.prototype.controller = (function () {
 
     return function () {
         view = this;
+        model = view.model;
         if (!old_view) { old_view = view; }
         return methods;
     };
