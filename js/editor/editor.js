@@ -1211,6 +1211,7 @@ View.prototype.controller = (function () {
                 case 'mousedown':
                     d_source = d;
                     start_xy = view.pan.mouse();
+                    mouse = view.pan.mouse();
                     // Conditional selection
                     nodes = view.selected_nodes();
                     var selected = nodes.indexOf(d) >= 0;
