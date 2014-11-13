@@ -83,7 +83,7 @@ g.edges path.catch {
   /*cursor: pointer;*/
 }
 
-.nodes text {
+.nodes text, .edges text {
   font-size: small;
   font-family: Verdana, sans-serif;
   pointer-events: none;

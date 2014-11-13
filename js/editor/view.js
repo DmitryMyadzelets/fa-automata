@@ -115,7 +115,11 @@ function View(aContainer, aGraph) {
         self.node.attr('transform', elements.get_node_transformation);
         self.edge.each(function (d) {
             var str = elements.get_edge_transformation(d);
-            d3.select(this).selectAll('path').attr('d', str);
+            var e = d3.select(this);
+            e.selectAll('path').attr('d', str);
+            e.select('text')
+                .attr('x', (d.source.x + d.target.x) >> 1)
+                .attr('y', (d.source.y + d.target.y) >> 1);
         });
     };
 
