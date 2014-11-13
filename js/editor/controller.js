@@ -164,7 +164,7 @@ View.prototype.controller = (function () {
                     var text = d.text || '';
                     var pan = view.pan();
                     var x = (d.source.x + d.target.x) / 2 + pan[0];
-                    var y = (d.source.y + d.target.y) / 2 + pan[0];
+                    var y = (d.source.y + d.target.y) / 2 + pan[1];
                     textarea(view.container, text, x, y, callback, callback);
                     view.spring(false);
                     state = states.edit_edge_text;
