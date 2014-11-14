@@ -1214,26 +1214,27 @@ View.prototype.controller = (function () {
                     mouse = view.pan.mouse();
                     // Conditional selection
                     nodes = view.selected_nodes();
-                    var selected = nodes.indexOf(d) >= 0;
+                    // OR selection
                     if (d3.event.shiftKey) {
                         view.select_node(d);
                         nodes = view.selected_nodes();
                         nodes.forEach(function (d) { d.fixed = true; });
                         state = states.drag_node;
                     } else {
+                        // XOR selection mode
                         if (d3.event.ctrlKey) {
                             // Invert selection of the node
-                            view.select_node(d, !selected);
+                            view.select_node(d, nodes.indexOf(d) < 0);
                         } else {
+                            // AND selection
                             view.unselect_all();
                             view.select_node(d);
                         }
-                        state = states.node_select_or_drag;
+                        state = states.wait_for_new_edge;
                     }
                     break;
                 case 'dblclick':
                     d3.event.stopPropagation();
-                    d_source = d;
                     svg_text = d3.select(this).select('text');
                     // Remove text temporally, since it is viewed in text editor now
                     svg_text.text('');
@@ -1257,13 +1258,31 @@ View.prototype.controller = (function () {
             case 'edge':
                 switch (type) {
                 case 'mousedown':
+                    // Conditional selection
+                    edges = view.selected_edges();
+                    // OR selection
+                    if (d3.event.shiftKey) {
+                        view.select_edge(d);
+                        edges = view.selected_edges();
+                    } else {
+                        // XOR selection mode
+                        if (d3.event.ctrlKey) {
+                            // Invert selection of the node
+                            view.select_edge(d, edges.indexOf(d) < 0);
+                        } else {
+                            // AND selection
+                            view.unselect_all();
+                            view.select_edge(d);
+                        }
+                        state = states.wait_for_new_edge;
+                    }
                     // What to drag: head or tail of the edge? What is closer to the mouse pointer.
                     var head = [], tail = [];
                     mouse = view.pan.mouse();
                     vec.subtract(mouse, [d.x1, d.y1], tail);
                     vec.subtract(mouse, [d.x2, d.y2], head);
                     drag_target = vec.length(head) < vec.length(tail);
-                    state = states.edge_select_or_drag;
+                    state = states.wait_for_edge_draging;
                     break;
                 case 'dblclick':
                     d3.event.stopPropagation();
@@ -1292,39 +1311,32 @@ View.prototype.controller = (function () {
                 break;
             }
         },
-        node_select_or_drag : function () {
-            switch (source) {
-            case 'node':
-                switch (type) {
-                case 'mouseout':
-                    if (d3.event.shiftKey) { break; }
-                    mouse = view.pan.mouse();
-                    // Start dragging the edge
-                    // Firstly, create new node with zero size
-                    node_d = { x : mouse[0], y : mouse[1], r : 1 };
-                    // Create new edge
-                    edge_d = { source : d_source, target : node_d };
-                    commands.start().add_edge(model, edge_d);
-                    drag_target = true;
-                    edge_svg = view.edge_by_data(edge_d).selectAll('path');
-                    // Then attach edge to this new node
-                    view.spring(false);
-                    state = states.drag_edge;
-                    break;
-                case 'mouseup':
-                    state = states.init;
-                    break;
-                }
+        wait_for_new_edge : function () {
+            switch (type) {
+            case 'mouseup':
+                state = states.init;
+                break;
+            case 'mouseout':
+                mouse = view.pan.mouse();
+                // Start dragging the edge
+                // Firstly, create new node with zero size
+                node_d = { x : mouse[0], y : mouse[1], r : 1 };
+                // Create new edge
+                edge_d = { source : d_source, target : node_d };
+                commands.start().add_edge(model, edge_d);
+                drag_target = true;
+                edge_svg = view.edge_by_data(edge_d).selectAll('path');
+                // Then attach edge to this new node
+                view.spring(false);
+                state = states.drag_edge;
                 break;
             }
         },
-        edge_select_or_drag : function (d) {
+        wait_for_edge_draging : function (d) {
             switch (source) {
             case 'edge':
                 switch (type) {
                 case 'mouseup':
-                    if (!d3.event.ctrlKey) { view.unselect_all(); }
-                    view.select_edge(d);
                     state = states.init;
                     break;
                 case 'mouseout':
@@ -1346,6 +1358,8 @@ View.prototype.controller = (function () {
                     // Save values for next state
                     set_edge_type.call(view, edge_d);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
+                    view.unselect_all();
+                    view.select_edge(edge_d);
                     state = states.drag_edge;
                     break;
                 default:
@@ -1367,8 +1381,7 @@ View.prototype.controller = (function () {
                 commands.add_node(model, node_d);
                 if (!d3.event.ctrlKey) { view.unselect_all(); }
                 view.select_edge(edge_d);
-                view.select_node(edge_d.target);
-                if (d3.event.ctrlKey) { view.select_node(edge_d.source); }
+                view.select_node(drag_target ? edge_d.target : edge_d.source);
                 state = states.init;
                 break;
             case 'mouseover':
