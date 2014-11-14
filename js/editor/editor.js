@@ -1587,7 +1587,7 @@ View.prototype.controller = (function () {
             return this;
         },
         // Sets event handlers for the given View
-        control : function () {
+        control_view : function () {
             var self = view;
             // Handles nodes events
             view.node_handler = function () {
@@ -1881,7 +1881,7 @@ ed.instance = function (container) {
 	o.view = new View(container, o.graph.object());
 	o.view.model = o.graph;
 	o.graph.view = o.view;
-	o.view.controller().control();
+	o.view.controller().control_view();
 };
 
 

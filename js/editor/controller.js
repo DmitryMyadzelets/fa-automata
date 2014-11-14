@@ -468,7 +468,7 @@ View.prototype.controller = (function () {
             return this;
         },
         // Sets event handlers for the given View
-        control : function () {
+        control_view : function () {
             var self = view;
             // Handles nodes events
             view.node_handler = function () {

@@ -7,7 +7,7 @@ ed.instance = function (container) {
 	o.view = new View(container, o.graph.object());
 	o.view.model = o.graph;
 	o.graph.view = o.view;
-	o.view.controller().control();
+	o.view.controller().control_view();
 };
 
 
