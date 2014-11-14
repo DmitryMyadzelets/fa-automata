@@ -1379,7 +1379,6 @@ View.prototype.controller = (function () {
             case 'mouseup':
                 delete node_d.r; // in order to use default radius
                 commands.add_node(model, node_d);
-                if (!d3.event.ctrlKey) { view.unselect_all(); }
                 view.select_edge(edge_d);
                 view.select_node(drag_target ? edge_d.target : edge_d.source);
                 state = states.init;
