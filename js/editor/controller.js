@@ -314,40 +314,22 @@ View.prototype.controller = (function () {
             }
         },
         drag_node : function () {
-            switch (source) {
-            case 'plane':
-                switch (type) {
-                case 'mousemove':
-                    // if (!d3.event.shiftKey) {
-                    //     nodes.forEach(function (d) { delete d.fixed; });
-                    //     state = states.init;
-                    //     break;
-                    // }
-                    // How far we move the nodes
-                    var xy = mouse;
-                    mouse = view.pan.mouse();
-                    xy[0] = mouse[0] - xy[0];
-                    xy[1] = mouse[1] - xy[1];
-                    // Change positions of the selected nodes
-                    view.model.node.shift(nodes, xy);
-                    xy[0] = mouse[0];
-                    xy[1] = mouse[1];
-                    break;
-                case 'mouseup':
-                    nodes.forEach(function (d) { delete d.fixed; });
-                    commands.start().move_node(model, nodes, start_xy, view.pan.mouse());
-                    state = states.init;
-                    break;
-                }
+            switch (type) {
+            case 'mousemove':
+                // How far we move the nodes
+                var xy = mouse;
+                mouse = view.pan.mouse();
+                xy[0] = mouse[0] - xy[0];
+                xy[1] = mouse[1] - xy[1];
+                // Change positions of the selected nodes
+                view.model.node.shift(nodes, xy);
+                xy[0] = mouse[0];
+                xy[1] = mouse[1];
                 break;
-            case 'node':
-                switch (type) {
-                case 'mouseup':
-                    nodes.forEach(function (d) { delete d.fixed; });
-                    commands.start().move_node(model, nodes, start_xy, view.pan.mouse());
-                    state = states.init;
-                    break;
-                }
+            case 'mouseup':
+                nodes.forEach(function (d) { delete d.fixed; });
+                commands.start().move_node(model, nodes, start_xy, view.pan.mouse());
+                state = states.init;
                 break;
             }
         },
