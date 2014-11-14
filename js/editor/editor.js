@@ -1156,7 +1156,6 @@ View.prototype.controller = (function () {
                     if (!d3.event.ctrlKey) { view.unselect_all(); }
                     mouse = view.pan.mouse();
                     // Create new node
-                    // var node = { x : mouse[0], y : mouse[1], px : mouse[0], py : mouse[1] };
                     var node = { x : mouse[0], y : mouse[1] };
                     commands.start().add_node(model, node);
                     view.select_node(node);
