@@ -1310,6 +1310,7 @@ View.prototype.controller = (function () {
                     }());
                     var text = d.text || '';
                     var pan = view.pan();
+                    // Place the text 
                     var x = (d.source.x + d.target.x) / 2 + pan[0];
                     var y = (d.source.y + d.target.y) / 2 + pan[1];
                     textarea(view.container, text, x, y, callback, callback);
@@ -1426,7 +1427,7 @@ View.prototype.controller = (function () {
                     if (exists.length <= 1) {
                         view.select_edge(edge_d);
                     }
-                    view.update();
+                    // view.update();
                     state = states.init;
                     break;
                 case 'mouseout':
@@ -1459,7 +1460,7 @@ View.prototype.controller = (function () {
                 // FIX : don't do anything if movement is zero
                 to_xy.length = 0;
                 nodes.forEach(function (d) { delete d.fixed; to_xy.push(d.x, d.y); });
-                commands.start().move_node(model, nodes, nodes_xy, to_xy);
+                commands.start().move_node(model, nodes, from_xy, to_xy);
                 state = states.init;
                 break;
             }
@@ -1826,6 +1827,7 @@ function wrap (graph) {
 
     function update_view() {
         graph.view.update();
+        console.log('update');
     }
 
     graph.node.add = function (d) {

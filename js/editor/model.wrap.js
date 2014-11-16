@@ -16,6 +16,7 @@ function wrap (graph) {
 
     function update_view() {
         graph.view.update();
+        console.log('update');
     }
 
     graph.node.add = function (d) {
