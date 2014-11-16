@@ -1147,7 +1147,7 @@ View.prototype.controller = (function () {
     var edge_d;         // reference to an edge object
     var node_d;         // reference to a node object
     var drag_target;    // drag target node of edge [true, false]
-    var nodes_xy = [];  // coordinates of nodes before dragging
+    var from_xy = [];  // coordinates of nodes before dragging
     var to_xy = [];
 
     var state;          // Reference to a current state
@@ -1226,8 +1226,8 @@ View.prototype.controller = (function () {
                     if (d3.event.shiftKey) {
                         view.select_node(d);
                         nodes = view.selected_nodes();
-                        nodes_xy.length = 0;
-                        nodes.forEach(function (d) { d.fixed = true; nodes_xy.push(d.x, d.y); });
+                        from_xy.length = 0;
+                        nodes.forEach(function (d) { d.fixed = true; from_xy.push(d.x, d.y); });
                         state = states.drag_node;
                     } else {
                         // XOR selection mode
@@ -1457,7 +1457,6 @@ View.prototype.controller = (function () {
                 break;
             case 'mouseup':
                 // FIX : don't do anything if movement is zero
-                // var to_xy = [];
                 to_xy.length = 0;
                 nodes.forEach(function (d) { delete d.fixed; to_xy.push(d.x, d.y); });
                 commands.start().move_node(model, nodes, nodes_xy, to_xy);
