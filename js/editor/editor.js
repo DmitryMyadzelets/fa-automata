@@ -659,14 +659,7 @@ function View(aContainer, aGraph) {
 
     this.transform = function () {
         self.node.attr('transform', elements.get_node_transformation);
-        self.edge.each(function (d) {
-            var str = elements.get_edge_transformation(d);
-            var e = d3.select(this);
-            e.selectAll('path').attr('d', str);
-            e.select('text')
-                .attr('x', (d.source.x + d.target.x) >> 1)
-                .attr('y', (d.source.y + d.target.y) >> 1);
-        });
+        self.edge.each(self.transform_edge);
     };
 
     var force = d3.layout.force()
@@ -852,16 +845,20 @@ function view_methods() {
         this.svg.selectAll('.selected').classed('selected', false);
     };
 
+
+    this.transform_edge = function (d) {
+        var str = elements.get_edge_transformation(d);
+        var e = d3.select(this);
+        e.selectAll('path').attr('d', str);
+        e.select('text')
+            .attr('x', (d.source.x + d.target.x) >> 1)
+            .attr('y', (d.source.y + d.target.y) >> 1);
+    };
 }
 
 
 view_methods.call(View.prototype);
 
-
-// view.select_node(d | [d], true | false)
-// view.selected_node(d) -> true | false
-// view.selected_nodes() -> []
-// view.unselect_all()
 
 
 // JSLint options:
@@ -1360,6 +1357,7 @@ View.prototype.controller = (function () {
                     } else {
                         edge_d.source = node_d;
                     }
+                    edge_d.text = d.text;
                     commands.start()
                         .del_edge(model, d)
                         .add_edge(model, edge_d);
@@ -1427,7 +1425,7 @@ View.prototype.controller = (function () {
                     if (exists.length <= 1) {
                         view.select_edge(edge_d);
                     }
-                    // view.update();
+                    view.update();
                     state = states.init;
                     break;
                 case 'mouseout':
@@ -1827,7 +1825,6 @@ function wrap (graph) {
 
     function update_view() {
         graph.view.update();
-        console.log('update');
     }
 
     graph.node.add = function (d) {

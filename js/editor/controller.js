@@ -232,6 +232,7 @@ View.prototype.controller = (function () {
                     } else {
                         edge_d.source = node_d;
                     }
+                    edge_d.text = d.text;
                     commands.start()
                         .del_edge(model, d)
                         .add_edge(model, edge_d);
@@ -299,7 +300,7 @@ View.prototype.controller = (function () {
                     if (exists.length <= 1) {
                         view.select_edge(edge_d);
                     }
-                    // view.update();
+                    view.update();
                     state = states.init;
                     break;
                 case 'mouseout':
