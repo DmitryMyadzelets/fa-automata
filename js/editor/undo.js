@@ -63,8 +63,8 @@ function commands_methods() {
     };
 
 
-    // Makes a copy of each item of arguments if it is an array
-    function copy_arguments() {
+    // Makes a copy of each item in arguments if it is an array
+    function copy_arguments(arguments) {
         var i = arguments.length;
         while (i--) {
             if (arguments[i] instanceof Array) {
@@ -101,6 +101,15 @@ function commands_methods() {
 
 commands_methods.call(commands);
 
+    // Makes a copy of each item in arguments if it is an array
+    function copy_arguments() {
+        var i = arguments.length;
+        while (i--) {
+            if (arguments[i] instanceof Array) {
+                arguments[i] = arguments[i].slice(0);
+            }
+        }
+    }
 
 
 commands.new('add_node', function (model, d) {
@@ -139,9 +148,9 @@ commands.new('edge_text', function (model, d, text) {
     this.undo = function () { model.edge.text(d, old_text); };
 });
 
-commands.new('move_node', function (model, d, pxy, xy) {
-    this.redo = function () { model.node.move(d, xy); };
-    this.undo = function () { model.node.move(d, pxy); };
+commands.new('move_node', function (model, d, from, to) {
+    this.redo = function () { model.node.move(d, to); };
+    this.undo = function () { model.node.move(d, from); };
 });
 
 

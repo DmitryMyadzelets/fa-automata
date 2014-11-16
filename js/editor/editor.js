@@ -1035,8 +1035,8 @@ function commands_methods() {
     };
 
 
-    // Makes a copy of each item of arguments if it is an array
-    function copy_arguments() {
+    // Makes a copy of each item in arguments if it is an array
+    function copy_arguments(arguments) {
         var i = arguments.length;
         while (i--) {
             if (arguments[i] instanceof Array) {
@@ -1073,6 +1073,15 @@ function commands_methods() {
 
 commands_methods.call(commands);
 
+    // Makes a copy of each item in arguments if it is an array
+    function copy_arguments() {
+        var i = arguments.length;
+        while (i--) {
+            if (arguments[i] instanceof Array) {
+                arguments[i] = arguments[i].slice(0);
+            }
+        }
+    }
 
 
 commands.new('add_node', function (model, d) {
@@ -1111,9 +1120,9 @@ commands.new('edge_text', function (model, d, text) {
     this.undo = function () { model.edge.text(d, old_text); };
 });
 
-commands.new('move_node', function (model, d, pxy, xy) {
-    this.redo = function () { model.node.move(d, xy); };
-    this.undo = function () { model.node.move(d, pxy); };
+commands.new('move_node', function (model, d, from, to) {
+    this.redo = function () { model.node.move(d, to); };
+    this.undo = function () { model.node.move(d, from); };
 });
 
 
@@ -1138,7 +1147,8 @@ View.prototype.controller = (function () {
     var edge_d;         // reference to an edge object
     var node_d;         // reference to a node object
     var drag_target;    // drag target node of edge [true, false]
-    var start_xy;       // ititial coordinates of dragging
+    var nodes_xy = [];  // coordinates of nodes before dragging
+    var to_xy = [];
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -1209,7 +1219,6 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mousedown':
                     d_source = d;
-                    start_xy = view.pan.mouse();
                     mouse = view.pan.mouse();
                     // Conditional selection
                     nodes = view.selected_nodes();
@@ -1217,7 +1226,8 @@ View.prototype.controller = (function () {
                     if (d3.event.shiftKey) {
                         view.select_node(d);
                         nodes = view.selected_nodes();
-                        nodes.forEach(function (d) { d.fixed = true; });
+                        nodes_xy.length = 0;
+                        nodes.forEach(function (d) { d.fixed = true; nodes_xy.push(d.x, d.y); });
                         state = states.drag_node;
                     } else {
                         // XOR selection mode
@@ -1445,8 +1455,11 @@ View.prototype.controller = (function () {
                 xy[1] = mouse[1];
                 break;
             case 'mouseup':
-                nodes.forEach(function (d) { delete d.fixed; });
-                commands.start().move_node(model, nodes, start_xy, view.pan.mouse());
+                // FIX : don't do anything if movement is zero
+                // var to_xy = [];
+                to_xy.length = 0;
+                nodes.forEach(function (d) { delete d.fixed; to_xy.push(d.x, d.y); });
+                commands.start().move_node(model, nodes, nodes_xy, to_xy);
                 state = states.init;
                 break;
             }
@@ -1644,16 +1657,14 @@ var Model = (function () {
         function shift(d) {
             d.x += delta[0];
             d.y += delta[1];
-            d.px = d.x;
-            d.py = d.y;
         }
 
-        function move(d) {
-            d.x = xy[0];
-            d.y = xy[1];
-            d.px = d.x;
-            d.py = d.y;
-        }
+        // function move(d) {
+        //     d.x = xy[0];
+        //     d.y = xy[1];
+        //     d.px = d.x;
+        //     d.py = d.y;
+        // }
 
         // Changes node position relatively to the previous one
         this.shift = function (d, dxy) {
@@ -1663,10 +1674,14 @@ var Model = (function () {
         };
 
         // Moves node to new position
-        this.move = function (d, _xy) {
-            xy[0] = _xy[0];
-            xy[1] = _xy[1]
-            foreach(d, move);
+        this.move = function (d, xy) {
+            if (xy instanceof Array) {
+                var i = 0;
+                foreach(d, function (d) {
+                    d.x = xy[i++];
+                    d.y = xy[i++];
+                });
+            }
         };
 
     }

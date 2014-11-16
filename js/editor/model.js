@@ -25,16 +25,14 @@ var Model = (function () {
         function shift(d) {
             d.x += delta[0];
             d.y += delta[1];
-            d.px = d.x;
-            d.py = d.y;
         }
 
-        function move(d) {
-            d.x = xy[0];
-            d.y = xy[1];
-            d.px = d.x;
-            d.py = d.y;
-        }
+        // function move(d) {
+        //     d.x = xy[0];
+        //     d.y = xy[1];
+        //     d.px = d.x;
+        //     d.py = d.y;
+        // }
 
         // Changes node position relatively to the previous one
         this.shift = function (d, dxy) {
@@ -44,10 +42,14 @@ var Model = (function () {
         };
 
         // Moves node to new position
-        this.move = function (d, _xy) {
-            xy[0] = _xy[0];
-            xy[1] = _xy[1]
-            foreach(d, move);
+        this.move = function (d, xy) {
+            if (xy instanceof Array) {
+                var i = 0;
+                foreach(d, function (d) {
+                    d.x = xy[i++];
+                    d.y = xy[i++];
+                });
+            }
         };
 
     }

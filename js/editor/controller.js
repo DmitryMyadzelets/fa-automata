@@ -19,7 +19,8 @@ View.prototype.controller = (function () {
     var edge_d;         // reference to an edge object
     var node_d;         // reference to a node object
     var drag_target;    // drag target node of edge [true, false]
-    var start_xy;       // ititial coordinates of dragging
+    var nodes_xy = [];  // coordinates of nodes before dragging
+    var to_xy = [];
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -90,7 +91,6 @@ View.prototype.controller = (function () {
                 switch (type) {
                 case 'mousedown':
                     d_source = d;
-                    start_xy = view.pan.mouse();
                     mouse = view.pan.mouse();
                     // Conditional selection
                     nodes = view.selected_nodes();
@@ -98,7 +98,8 @@ View.prototype.controller = (function () {
                     if (d3.event.shiftKey) {
                         view.select_node(d);
                         nodes = view.selected_nodes();
-                        nodes.forEach(function (d) { d.fixed = true; });
+                        nodes_xy.length = 0;
+                        nodes.forEach(function (d) { d.fixed = true; nodes_xy.push(d.x, d.y); });
                         state = states.drag_node;
                     } else {
                         // XOR selection mode
@@ -326,8 +327,11 @@ View.prototype.controller = (function () {
                 xy[1] = mouse[1];
                 break;
             case 'mouseup':
-                nodes.forEach(function (d) { delete d.fixed; });
-                commands.start().move_node(model, nodes, start_xy, view.pan.mouse());
+                // FIX : don't do anything if movement is zero
+                // var to_xy = [];
+                to_xy.length = 0;
+                nodes.forEach(function (d) { delete d.fixed; to_xy.push(d.x, d.y); });
+                commands.start().move_node(model, nodes, nodes_xy, to_xy);
                 state = states.init;
                 break;
             }
