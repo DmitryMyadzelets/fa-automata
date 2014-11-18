@@ -223,6 +223,14 @@ function view_methods() {
     };
 
 
+    this.size = function (width, height) {
+        if (arguments.length) {
+            this.svg.attr('width', width).attr('height', height);
+            this.force.size([width, height]);
+        }
+    };
+
+
     // Updates SVG structure according to the graph structure
     this.update = function () {
         if (this.spring()) { this.force.stop(); }

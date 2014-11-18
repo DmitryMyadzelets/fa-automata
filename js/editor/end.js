@@ -1,13 +1,12 @@
 
 ed.instance = function (container) {
-	var o = {
-
-	};
+	var o = {};
 	o.graph = Model.graph();
 	o.view = new View(container, o.graph.object());
 	o.view.model = o.graph;
 	o.graph.view = o.view;
 	o.view.controller().control_view();
+	return o;
 };
 
 

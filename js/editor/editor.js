@@ -769,6 +769,14 @@ function view_methods() {
     };
 
 
+    this.size = function (width, height) {
+        if (arguments.length) {
+            this.svg.attr('width', width).attr('height', height);
+            this.force.size([width, height]);
+        }
+    };
+
+
     // Updates SVG structure according to the graph structure
     this.update = function () {
         if (this.spring()) { this.force.stop(); }
@@ -1223,6 +1231,7 @@ View.prototype.controller = (function () {
                     if (d3.event.shiftKey) {
                         view.select_node(d);
                         nodes = view.selected_nodes();
+                        // Remember nodes coordinates for undo the command
                         from_xy.length = 0;
                         nodes.forEach(function (d) { d.fixed = true; from_xy.push(d.x, d.y); });
                         state = states.drag_node;
@@ -1288,7 +1297,7 @@ View.prototype.controller = (function () {
                     vec.subtract(mouse, [d.x1, d.y1], tail);
                     vec.subtract(mouse, [d.x2, d.y2], head);
                     drag_target = vec.length(head) < vec.length(tail);
-                    state = states.wait_for_edge_draging;
+                    state = states.wait_for_edge_dragging;
                     break;
                 case 'dblclick':
                     d3.event.stopPropagation();
@@ -1339,7 +1348,7 @@ View.prototype.controller = (function () {
                 break;
             }
         },
-        wait_for_edge_draging : function (d) {
+        wait_for_edge_dragging : function (d) {
             switch (source) {
             case 'edge':
                 switch (type) {
@@ -1887,14 +1896,13 @@ function wrap (graph) {
 
 
 ed.instance = function (container) {
-	var o = {
-
-	};
+	var o = {};
 	o.graph = Model.graph();
 	o.view = new View(container, o.graph.object());
 	o.view.model = o.graph;
 	o.graph.view = o.view;
 	o.view.controller().control_view();
+	return o;
 };
 
 

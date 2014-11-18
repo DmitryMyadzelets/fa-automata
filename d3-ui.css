@@ -3,6 +3,9 @@
 /*
 http://csswizardry.com/2014/10/the-specificity-graph/
 http://cssguidelin.es/#specificity
+
+Matherial Design:
+www.google.com/design/spec/material-design/
 */
 
 body {
@@ -14,9 +17,9 @@ body {
 div {
   position: relative;
   float: left;
-  border:solid 1px orange;
+  border: solid 1px orange;
   margin: 1px;
-  padding: 1px;
+  /*padding: 1px;*/
   /*width: 100%;*/
   /*height: 1000px;*/
   /*overflow: hidden;
