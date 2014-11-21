@@ -189,8 +189,8 @@ View.prototype.controller = (function () {
                     var text = d.text || '';
                     var pan = view.pan();
                     // Place the text 
-                    var x = (d.source.x + d.target.x) / 2 + pan[0];
-                    var y = (d.source.y + d.target.y) / 2 + pan[1];
+                    var x = d.tx + pan[0];
+                    var y = d.ty + pan[1];
                     textarea(view.container, text, x, y, callback, callback);
                     view.spring.off();
                     state = states.edit_edge_text;

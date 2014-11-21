@@ -214,12 +214,17 @@ elements.get_edge_transformation = (function () {
         v2[1] = d.target.y;
         elements.make_edge.r1 = d.source.r !== undefined ? d.source.r : 16;
         elements.make_edge.r2 = d.target.r !== undefined ? d.target.r : 16;
+        // text coordinates (between the edge's nodes, by default)
+        d.tx = (d.source.x + d.target.x) >> 1;
+        d.ty = (d.source.y + d.target.y) >> 1;
         switch (d.type) {
         case 1:
             elements.make_edge.curve(v1, v2, cv);
             break;
         case 2:
             elements.make_edge.loop(v1, v2, cv, cv2);
+            d.tx = (cv[0] + cv2[0]) >> 1;
+            d.ty = (cv[1] + cv2[1]) >> 1;
             break;
         default:
             elements.make_edge.stright(v1, v2);
@@ -862,8 +867,8 @@ function view_methods() {
         var e = d3.select(this);
         e.selectAll('path').attr('d', str);
         e.select('text')
-            .attr('x', (d.source.x + d.target.x) >> 1)
-            .attr('y', (d.source.y + d.target.y) >> 1);
+            .attr('x', d.tx)
+            .attr('y', d.ty);
     };
 }
 
@@ -1333,8 +1338,8 @@ View.prototype.controller = (function () {
                     var text = d.text || '';
                     var pan = view.pan();
                     // Place the text 
-                    var x = (d.source.x + d.target.x) / 2 + pan[0];
-                    var y = (d.source.y + d.target.y) / 2 + pan[1];
+                    var x = d.tx + pan[0];
+                    var y = d.ty + pan[1];
                     textarea(view.container, text, x, y, callback, callback);
                     view.spring.off();
                     state = states.edit_edge_text;

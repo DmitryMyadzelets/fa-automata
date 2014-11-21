@@ -107,12 +107,17 @@ elements.get_edge_transformation = (function () {
         v2[1] = d.target.y;
         elements.make_edge.r1 = d.source.r !== undefined ? d.source.r : 16;
         elements.make_edge.r2 = d.target.r !== undefined ? d.target.r : 16;
+        // text coordinates (between the edge's nodes, by default)
+        d.tx = (d.source.x + d.target.x) >> 1;
+        d.ty = (d.source.y + d.target.y) >> 1;
         switch (d.type) {
         case 1:
             elements.make_edge.curve(v1, v2, cv);
             break;
         case 2:
             elements.make_edge.loop(v1, v2, cv, cv2);
+            d.tx = (cv[0] + cv2[0]) >> 1;
+            d.ty = (cv[1] + cv2[1]) >> 1;
             break;
         default:
             elements.make_edge.stright(v1, v2);

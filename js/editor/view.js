@@ -316,8 +316,8 @@ function view_methods() {
         var e = d3.select(this);
         e.selectAll('path').attr('d', str);
         e.select('text')
-            .attr('x', (d.source.x + d.target.x) >> 1)
-            .attr('y', (d.source.y + d.target.y) >> 1);
+            .attr('x', d.tx)
+            .attr('y', d.ty);
     };
 }
 
