@@ -81,7 +81,11 @@ View.prototype.controller = (function () {
                         state = states.wait_for_keyup;
                         break;
                     case 70: // F
-                        view.spring(!view.spring());
+                        if (view.spring()) {
+                            view.spring(false);
+                        } else {
+                            commands.start().spring(view, model);
+                        }
                         break;
                     // default:
                     //     console.log('Key', d3.event.keyCode);

@@ -153,4 +153,12 @@ commands.new('move_node', function (model, d, from, to) {
     this.undo = function () { model.node.move(d, from); };
 });
 
+commands.new('spring', function (view, model) {
+    var xy = [];
+    var nodes =  model.object().nodes;
+    nodes.forEach(function (d) { xy.push(d.x, d.y); });
+    this.redo = function () { view.spring(true); };
+    this.undo = function () { view.spring(false); model.node.move(nodes, xy); };
+});
+
 

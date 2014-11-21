@@ -1133,6 +1133,14 @@ commands.new('move_node', function (model, d, from, to) {
     this.undo = function () { model.node.move(d, from); };
 });
 
+commands.new('spring', function (view, model) {
+    var xy = [];
+    var nodes =  model.object().nodes;
+    nodes.forEach(function (d) { xy.push(d.x, d.y); });
+    this.redo = function () { view.spring(true); };
+    this.undo = function () { view.spring(false); model.node.move(nodes, xy); };
+});
+
 
 
 // JSLint options:
@@ -1217,7 +1225,11 @@ View.prototype.controller = (function () {
                         state = states.wait_for_keyup;
                         break;
                     case 70: // F
-                        view.spring(!view.spring());
+                        if (view.spring()) {
+                            view.spring(false);
+                        } else {
+                            commands.start().spring(view, model);
+                        }
                         break;
                     // default:
                     //     console.log('Key', d3.event.keyCode);
