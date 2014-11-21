@@ -69,12 +69,14 @@ View.prototype.controller = (function () {
                     case 89: // Y
                         if (d3.event.ctrlKey) {
                             commands.redo();
+                            view.spring.on();
                         }
                         state = states.wait_for_keyup;
                         break;
                     case 90: // Z
                         if (d3.event.ctrlKey) {
                             commands.undo();
+                            view.spring.on();
                         }
                         state = states.wait_for_keyup;
                         break;
@@ -132,7 +134,6 @@ View.prototype.controller = (function () {
                     var text = d.text || '';
                     var pan = view.pan();
                     textarea(view.container, text, d.x + pan[0], d.y + pan[1], callback, callback);
-                    view.spring(false);
                     state = states.edit_node_text;
                     break;
                 }
@@ -187,7 +188,7 @@ View.prototype.controller = (function () {
                     var x = (d.source.x + d.target.x) / 2 + pan[0];
                     var y = (d.source.y + d.target.y) / 2 + pan[1];
                     textarea(view.container, text, x, y, callback, callback);
-                    view.spring(false);
+                    view.spring.off();
                     state = states.edit_edge_text;
                     break;
                 }
@@ -210,7 +211,7 @@ View.prototype.controller = (function () {
                 drag_target = true;
                 edge_svg = view.edge_by_data(edge_d).selectAll('path');
                 // Then attach edge to this new node
-                view.spring(false);
+                view.spring.off();
                 state = states.drag_edge;
                 break;
             }
@@ -238,7 +239,7 @@ View.prototype.controller = (function () {
                         .del_edge(model, d)
                         .add_edge(model, edge_d);
                     // Then attach edge to this new node
-                    view.spring(false);
+                    view.spring.off();
                     // Save values for next state
                     set_edge_type.call(view, edge_d);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
@@ -266,6 +267,7 @@ View.prototype.controller = (function () {
                 view.unselect_all();
                 view.select_edge(edge_d);
                 view.select_node(drag_target ? edge_d.target : edge_d.source);
+                view.spring.on();
                 state = states.init;
                 break;
             case 'mouseover':
@@ -334,7 +336,12 @@ View.prototype.controller = (function () {
                 // FIX : don't do anything if movement is zero
                 to_xy.length = 0;
                 nodes.forEach(function (d) { delete d.fixed; to_xy.push(d.x, d.y); });
-                commands.start().move_node(model, nodes, from_xy, to_xy);
+                // Record the command only when the force is not working
+                if (view.spring()) {
+                    view.spring.on();
+                } else {
+                    commands.start().move_node(model, nodes, from_xy, to_xy);
+                }
                 state = states.init;
                 break;
             }
@@ -398,6 +405,7 @@ View.prototype.controller = (function () {
                     }
                     break;
                 }
+                view.spring.on();
                 state = states.init;
             }
         },
@@ -415,6 +423,7 @@ View.prototype.controller = (function () {
                     }
                     break;
                 }
+                view.spring.on();
                 state = states.init;
             }
         }

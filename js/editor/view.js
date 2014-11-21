@@ -125,7 +125,7 @@ function View(aContainer, aGraph) {
 
     this.spring = (function () {
         var started = false;
-        return function (start) {
+        var fn = function (start) {
             if (arguments.length) {
                 if (start) {
                     if (started) { force.resume(); }
@@ -137,6 +137,9 @@ function View(aContainer, aGraph) {
             }
             return started;
         }
+        fn.on = function () { if (started) { force.resume(); } };
+        fn.off = function () { if (started) { force.stop(); } };
+        return fn;
     }());
 
     this.node = root_group.append('g').attr('class', 'nodes').selectAll('g');

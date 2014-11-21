@@ -25,6 +25,8 @@ var Model = (function () {
         function shift(d) {
             d.x += delta[0];
             d.y += delta[1];
+            d.px = d.x;
+            d.py = d.y;
         }
 
         // function move(d) {
@@ -48,6 +50,8 @@ var Model = (function () {
                 foreach(d, function (d) {
                     d.x = xy[i++];
                     d.y = xy[i++];
+                    d.px = d.x;
+                    d.py = d.y;
                 });
             }
         };
