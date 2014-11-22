@@ -113,6 +113,10 @@ elements.get_edge_transformation = (function () {
         switch (d.type) {
         case 1:
             elements.make_edge.curve(v1, v2, cv);
+            // d.tx = cv[0];
+            // d.ty = cv[1];
+            d.tx = (cv[0] + v2[0]) >> 1;
+            d.ty = (cv[1] + v2[1]) >> 1;
             break;
         case 2:
             elements.make_edge.loop(v1, v2, cv, cv2);
