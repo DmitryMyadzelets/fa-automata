@@ -333,6 +333,7 @@ View.prototype.controller = (function () {
                 xy[1] = mouse[1] - xy[1];
                 // Change positions of the selected nodes
                 view.model.node.shift(nodes, xy);
+                view.spring.on();
                 xy[0] = mouse[0];
                 xy[1] = mouse[1];
                 break;
