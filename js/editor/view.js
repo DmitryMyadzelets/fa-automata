@@ -209,7 +209,14 @@ function view_methods() {
     // Return whether graph nodes have coordnates
     function has_no_coordinates(nodes) {
         var ret = false;
-        nodes.forEach(function (v) { if(v.x === undefined || v.y === undefined) ret = true; });
+        nodes.forEach(function (v) { if (v.x === undefined || v.y === undefined) ret = true; });
+        return ret;
+    }
+
+    // Returns whether at least one edge reffers to the nodes by indexe rather then objects
+    function has_indexes(edges) {
+        var ret = false;
+        edges.forEach(function (v) { if (typeof v.source === 'number' || typeof v.target === 'number') ret = true; });
         return ret;
     }
 
@@ -219,8 +226,14 @@ function view_methods() {
         if (arguments.length > 0) {
             this._graph = null;
             this._graph = graph || get_empty_graph();
-            if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
             this.update();
+            // The start-tick-stop sequence replaces indexes by nodes in each edge.[source, target]
+            if (has_indexes(this._graph.edges)) {
+                this.force.start();
+                this.force.tick()
+                this.force.stop();
+            }
+            if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
         }
         return this._graph;
     };
