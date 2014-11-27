@@ -1,11 +1,18 @@
 
 ed.instance = function (container) {
-	var o = {};
-	o.graph = Model.graph();
-	o.view = new View(container, o.graph.object());
-	o.view.model = o.graph;
-	o.graph.view = o.view;
-	o.view.controller().control_view();
+	var o = {
+		view : new View(container),
+		set_graph : function (graph) {
+			this.graph = Model.graph(graph);
+			this.view.model = this.graph;
+			this.graph.view = this.view;
+			this.view.graph(this.graph.object());
+		}
+	};
+
+	o.view.controller().control_view(); // Attaches controller's handlers to the view
+	o.set_graph();
+
 	return o;
 };
 

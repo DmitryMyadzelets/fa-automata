@@ -156,24 +156,53 @@ var Model = (function () {
     // Model public interface
     return {
         // Creates and returns a new graph object
-        graph : function () {
-            var o = {
+        graph : function (user_graph) {
+            var graph = {
                 node : Object.create(nodes_prototype),
                 edge : Object.create(edges_prototype),
             };
-            o.node.data = [];
-            o.edge.data = [];
-            // Returns a simple object with only nodes and edges (for serialization etc)
-            o.object = function () {
+            graph.node.data = [];
+            graph.edge.data = [];
+
+            // Replace default nodes and edges arrays with ones provided by user.
+            // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
+            if(user_graph) {
+                if (user_graph['nodes'] instanceof Array) {
+                    graph.node.data = user_graph['nodes'];
+                    if (user_graph['edges'] instanceof Array) {
+                        graph.edge.data = user_graph['edges'];
+                    }
+                }
+            }
+
+            // Returns a simple object only with nodes and edges (for serialization etc)
+            graph.object = function () {
                 return {
                     nodes : this.node.data,
                     edges : this.edge.data
                 };
             };
+
+            // Returns graph object with the nodes references in edges replaced by indexes
+            // graph.compact_object = function () {
+            //     var self = this;
+            //     var edges = this.edge.data.slice(0);
+            //     edges.map(function (edge) {
+            //         // FIX: you replace these fields on the object in use! don't do it!
+            //         edge.source = self.node.data.indexOf(edge.source);
+            //         edge.target = self.node.data.indexOf(edge.target);
+            //         return edge;
+            //     });
+            //     return {
+            //         nodes : this.node.data,
+            //         edges : edges
+            //     };
+            // };
+
             if (typeof wrap === 'function') {
-                o = wrap(o);
+                graph = wrap(graph);
             }
-            return o;
+            return graph;
         }
     };
 
