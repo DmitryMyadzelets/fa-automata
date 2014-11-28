@@ -17,6 +17,8 @@ ed.instance = function (container) {
 };
 
 
+ed.commands = commands;
+
 this.jA = this.jA || {};
 this.jA.editor = ed;
 this.jA.model = Model;

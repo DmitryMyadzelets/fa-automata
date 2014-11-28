@@ -21,15 +21,23 @@ Command.prototype.undo = function () {};
 var commands = {
     stack : [],
     macro : [],
-    index : 0
     // Index is equal to a number of commands which the user can undo;
     // If index is not equal to the length of stack, it implies
     // that user did "undo". Then new command cancels all the
     // values in stack above the index.
+    index : 0,
+    on : {}
 };
 
 
 function commands_methods() {
+
+    function on_event() {
+        var fun = this.on['update'];
+        if (typeof fun === 'function') {
+            fun();
+        }
+    }
 
     // Starts new macro recording
     this.start = function () {
@@ -48,6 +56,7 @@ function commands_methods() {
             while (i-- > 0) {
                 macro[i].undo();
             }
+            on_event.call(this);
         }
     };
 
@@ -59,6 +68,7 @@ function commands_methods() {
             for (i = 0; i < n; i++) {
                 macro[i].redo();
             }
+            on_event.call(this);
         }
     };
 
@@ -91,6 +101,7 @@ function commands_methods() {
                 fun.apply(command, arguments);
                 self.macro.push(command);
                 command.redo();
+                on_event.call(this);
                 return self;
             };
         }

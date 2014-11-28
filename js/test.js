@@ -40,3 +40,51 @@ var view3 = jA.editor.instance();
 }());
 
 
+function save_graph (graph, name) {
+    if ($ && $.jStorage && $.jStorage.storageAvailable()) {
+        // $.jStorage.flush();
+        var s = JSON.stringify(graph);
+        console.log(s);
+        $.jStorage.set(name, s);
+    }
+}
+
+
+function load_graph (name) {
+    if ($ && $.jStorage && $.jStorage.storageAvailable()) {
+        return JSON.parse($.jStorage.get(name));
+    }
+    return null;
+}
+
+
+jA.editor.commands.on['update'] = function () {
+    var graph = view1.graph.compact_object();
+    save_graph(graph, 'graph');
+};
+
+
+(function init () {
+    var graph = load_graph('graph');
+    if (typeof graph === 'object') {
+        console.log(graph);
+        view1.set_graph(graph);
+    }
+}());
+
+// window.foo = function () {
+//     var s = JSON.stringify(view1.graph.compact_object());
+//     console.log('JSON', s);
+//     view2.set_graph(JSON.parse(s));
+//     // return s;
+// };
+
+
+window.moo = function () {
+    view1.set_graph({
+        nodes: [{}, {}],
+        edges : [{source : 0, target : 1}, {source : 1, target : 1}]
+     });
+}
+
+

@@ -15,6 +15,36 @@ var ed = { version: "1.0.0" };
 // http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
 
 
+
+// Returns a [deep] copy of the object
+function clone(obj, deep) {
+    if (obj === null || typeof(obj) !== 'object') {
+        return obj;
+    }
+    var copy = obj.constructor();
+
+    for(var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            copy[key] = deep ? clone(obj[key], true) : obj[key];
+        }
+    }
+    return copy;
+}
+
+
+// Converts all numerical values of the object to integers
+function float2int(obj) {
+    for(var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            if (typeof obj[key] === 'number') {
+                obj[key] |= 0;
+            } else {
+                float2int(obj[key]);
+            }
+        }
+    }
+}
+
 "use strict";
 
 //
@@ -764,7 +794,14 @@ function view_methods() {
     // Return whether graph nodes have coordnates
     function has_no_coordinates(nodes) {
         var ret = false;
-        nodes.forEach(function (v) { if(v.x === undefined || v.y === undefined) ret = true; });
+        nodes.forEach(function (v) { if (v.x === undefined || v.y === undefined) ret = true; });
+        return ret;
+    }
+
+    // Returns whether at least one edge reffers to the nodes by indexe rather then objects
+    function has_indexes(edges) {
+        var ret = false;
+        edges.forEach(function (v) { if (typeof v.source === 'number' || typeof v.target === 'number') ret = true; });
         return ret;
     }
 
@@ -774,8 +811,14 @@ function view_methods() {
         if (arguments.length > 0) {
             this._graph = null;
             this._graph = graph || get_empty_graph();
-            if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
             this.update();
+            // The start-tick-stop sequence replaces indexes by nodes in each edge.[source, target]
+            if (has_indexes(this._graph.edges)) {
+                this.force.start();
+                this.force.tick()
+                this.force.stop();
+            }
+            if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
         }
         return this._graph;
     };
@@ -1010,15 +1053,23 @@ Command.prototype.undo = function () {};
 var commands = {
     stack : [],
     macro : [],
-    index : 0
     // Index is equal to a number of commands which the user can undo;
     // If index is not equal to the length of stack, it implies
     // that user did "undo". Then new command cancels all the
     // values in stack above the index.
+    index : 0,
+    on : {}
 };
 
 
 function commands_methods() {
+
+    function on_event() {
+        var fun = this.on['update'];
+        if (typeof fun === 'function') {
+            fun();
+        }
+    }
 
     // Starts new macro recording
     this.start = function () {
@@ -1037,6 +1088,7 @@ function commands_methods() {
             while (i-- > 0) {
                 macro[i].undo();
             }
+            on_event.call(this);
         }
     };
 
@@ -1048,6 +1100,7 @@ function commands_methods() {
             for (i = 0; i < n; i++) {
                 macro[i].redo();
             }
+            on_event.call(this);
         }
     };
 
@@ -1080,6 +1133,7 @@ function commands_methods() {
                 fun.apply(command, arguments);
                 self.macro.push(command);
                 command.redo();
+                on_event.call(this);
                 return self;
             };
         }
@@ -1486,6 +1540,7 @@ View.prototype.controller = (function () {
                 xy[1] = mouse[1] - xy[1];
                 // Change positions of the selected nodes
                 view.model.node.shift(nodes, xy);
+                view.spring.on();
                 xy[0] = mouse[0];
                 xy[1] = mouse[1];
                 break;
@@ -1829,24 +1884,55 @@ var Model = (function () {
     // Model public interface
     return {
         // Creates and returns a new graph object
-        graph : function () {
-            var o = {
+        graph : function (user_graph) {
+            var graph = {
                 node : Object.create(nodes_prototype),
                 edge : Object.create(edges_prototype),
             };
-            o.node.data = [];
-            o.edge.data = [];
-            // Returns a simple object with only nodes and edges (for serialization etc)
-            o.object = function () {
+            graph.node.data = [];
+            graph.edge.data = [];
+
+            // Replace default nodes and edges arrays with ones provided by user.
+            // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
+            if(user_graph) {
+                if (user_graph['nodes'] instanceof Array) {
+                    graph.node.data = user_graph['nodes'];
+                    if (user_graph['edges'] instanceof Array) {
+                        graph.edge.data = user_graph['edges'];
+                    }
+                }
+            }
+
+            // Returns a simple graph object with only nodes and edges (for serialization etc)
+            graph.object = function () {
                 return {
                     nodes : this.node.data,
                     edges : this.edge.data
                 };
             };
+
+            // Returns graph object with the nodes references in edges replaced by indexes
+            graph.compact_object = function () {
+                var graph = this.object();
+                // Copy edges while calculating the indexes to the nodes
+                graph.edges = graph.edges.map(function (edge) {
+                    var e = clone(edge);
+                    e.source = graph.nodes.indexOf(edge.source);
+                    e.target = graph.nodes.indexOf(edge.target);
+                    return e;
+                });
+                // Make deep clone, i.e. the objects of the copy will have no references to the source
+                graph = clone(graph, true);
+                // Conert all the  float values to integers
+                float2int(graph);
+                return graph;
+            };
+
+
             if (typeof wrap === 'function') {
-                o = wrap(o);
+                graph = wrap(graph);
             }
-            return o;
+            return graph;
         }
     };
 
@@ -1933,15 +2019,24 @@ function wrap (graph) {
 
 
 ed.instance = function (container) {
-	var o = {};
-	o.graph = Model.graph();
-	o.view = new View(container, o.graph.object());
-	o.view.model = o.graph;
-	o.graph.view = o.view;
-	o.view.controller().control_view();
+	var o = {
+		view : new View(container),
+		set_graph : function (graph) {
+			this.graph = Model.graph(graph);
+			this.view.model = this.graph;
+			this.graph.view = this.view;
+			this.view.graph(this.graph.object());
+		}
+	};
+
+	o.view.controller().control_view(); // Attaches controller's handlers to the view
+	o.set_graph();
+
 	return o;
 };
 
+
+ed.commands = commands;
 
 this.jA = this.jA || {};
 this.jA.editor = ed;

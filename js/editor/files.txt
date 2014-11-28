@@ -1,4 +1,5 @@
 start.js
+utils.js
 vector.js
 router.js
 elements.js

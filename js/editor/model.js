@@ -175,7 +175,7 @@ var Model = (function () {
                 }
             }
 
-            // Returns a simple object only with nodes and edges (for serialization etc)
+            // Returns a simple graph object with only nodes and edges (for serialization etc)
             graph.object = function () {
                 return {
                     nodes : this.node.data,
@@ -184,20 +184,22 @@ var Model = (function () {
             };
 
             // Returns graph object with the nodes references in edges replaced by indexes
-            // graph.compact_object = function () {
-            //     var self = this;
-            //     var edges = this.edge.data.slice(0);
-            //     edges.map(function (edge) {
-            //         // FIX: you replace these fields on the object in use! don't do it!
-            //         edge.source = self.node.data.indexOf(edge.source);
-            //         edge.target = self.node.data.indexOf(edge.target);
-            //         return edge;
-            //     });
-            //     return {
-            //         nodes : this.node.data,
-            //         edges : edges
-            //     };
-            // };
+            graph.compact_object = function () {
+                var graph = this.object();
+                // Copy edges while calculating the indexes to the nodes
+                graph.edges = graph.edges.map(function (edge) {
+                    var e = clone(edge);
+                    e.source = graph.nodes.indexOf(edge.source);
+                    e.target = graph.nodes.indexOf(edge.target);
+                    return e;
+                });
+                // Make deep clone, i.e. the objects of the copy will have no references to the source
+                graph = clone(graph, true);
+                // Conert all the  float values to integers
+                float2int(graph);
+                return graph;
+            };
+
 
             if (typeof wrap === 'function') {
                 graph = wrap(graph);
