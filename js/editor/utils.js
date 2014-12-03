@@ -20,11 +20,16 @@ function clone(obj, deep) {
 function float2int(obj) {
     for(var key in obj) {
         if (obj.hasOwnProperty(key)) {
-            if (typeof obj[key] === 'number') {
+            switch (typeof obj[key]) {
+            case 'number':
                 obj[key] |= 0;
-            } else {
+                break;
+            case 'object':
                 float2int(obj[key]);
+                break;
             }
         }
     }
 }
+
+
