@@ -183,7 +183,8 @@ var Model = (function () {
                 };
             };
 
-            // Returns graph object with the nodes references in edges replaced by indexes
+            // Returns graph object ready for convertion to JSON, 
+            // with the nodes references in edges replaced by indexes
             graph.storable = function () {
                 var graph = this.object();
                 // Copy edges while calculating the indexes to the nodes
@@ -195,7 +196,7 @@ var Model = (function () {
                 });
                 // Make deep clone, i.e. the objects of the copy will have no references to the source
                 graph = clone(graph, true);
-                // Conert all the  float values to integers
+                // Convert all the  float values to integers
                 float2int(graph);
                 return graph;
             };
