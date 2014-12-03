@@ -220,19 +220,29 @@ function view_methods() {
         return ret;
     }
 
+
+    // Removes key for each element of the array
+    function delete_keys(array, key) {
+        array.forEach(function (o) { delete o[key]; });
+    }
+
     // Returns a graph attached to the view.
     // If new graph is given, attches it to the view.
     this.graph = function (graph) {
         if (arguments.length > 0) {
             this._graph = null;
             this._graph = graph || get_empty_graph();
+            // Delete old 'uid' keys
+            delete_keys(this._graph.nodes, 'uid');
+            delete_keys(this._graph.edges, 'uid');
+
+            // Replace indexes by nodes in each edge.[source, target]
+            var self = this;
+            this._graph.edges.forEach(function (edge) {
+                if (typeof edge.source == "number") edge.source = self._graph.nodes[edge.source];
+                if (typeof edge.target == "number") edge.target = self._graph.nodes[edge.target];
+            });
             this.update();
-            // The start-tick-stop sequence replaces indexes by nodes in each edge.[source, target]
-            if (has_indexes(this._graph.edges)) {
-                this.force.start();
-                this.force.tick()
-                this.force.stop();
-            }
             if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
         }
         return this._graph;

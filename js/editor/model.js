@@ -184,7 +184,7 @@ var Model = (function () {
             };
 
             // Returns graph object with the nodes references in edges replaced by indexes
-            graph.compact_object = function () {
+            graph.storable = function () {
                 var graph = this.object();
                 // Copy edges while calculating the indexes to the nodes
                 graph.edges = graph.edges.map(function (edge) {

@@ -42,7 +42,6 @@ var view3 = jA.editor.instance();
 
 function save_graph (graph, name) {
     if ($ && $.jStorage && $.jStorage.storageAvailable()) {
-        // $.jStorage.flush();
         var s = JSON.stringify(graph);
         console.log(s);
         $.jStorage.set(name, s);
@@ -52,6 +51,7 @@ function save_graph (graph, name) {
 
 function load_graph (name) {
     if ($ && $.jStorage && $.jStorage.storageAvailable()) {
+        // $.jStorage.flush();
         return JSON.parse($.jStorage.get(name));
     }
     return null;
@@ -59,7 +59,7 @@ function load_graph (name) {
 
 
 jA.editor.commands.on['update'] = function () {
-    var graph = view1.graph.compact_object();
+    var graph = view1.graph.storable();
     save_graph(graph, 'graph');
 };
 
