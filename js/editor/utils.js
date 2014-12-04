@@ -1,6 +1,6 @@
 
 
-// Returns a [deep] copy of the object
+// Returns a [deep] copy of the given object
 function clone(obj, deep) {
     if (obj === null || typeof(obj) !== 'object') {
         return obj;
@@ -16,7 +16,8 @@ function clone(obj, deep) {
 }
 
 
-// Converts all numerical values of the object to integers
+
+// Converts all numerical values of the object and its properties to integers
 function float2int(obj) {
     for(var key in obj) {
         if (obj.hasOwnProperty(key)) {

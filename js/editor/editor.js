@@ -16,7 +16,7 @@ var ed = { version: "1.0.0" };
 
 
 
-// Returns a [deep] copy of the object
+// Returns a [deep] copy of the given object
 function clone(obj, deep) {
     if (obj === null || typeof(obj) !== 'object') {
         return obj;
@@ -32,7 +32,8 @@ function clone(obj, deep) {
 }
 
 
-// Converts all numerical values of the object to integers
+
+// Converts all numerical values of the object and its properties to integers
 function float2int(obj) {
     for(var key in obj) {
         if (obj.hasOwnProperty(key)) {
@@ -1211,6 +1212,11 @@ commands.new('move_node', function (model, d, from, to) {
     this.undo = function () { model.node.move(d, from); };
 });
 
+commands.new('move_edge', function (model, d, from, to) {
+    this.redo = function () { model.edge.move(d, to[0], to[1]); };
+    this.undo = function () { model.edge.move(d, from[0], from[1]); };
+});
+
 commands.new('spring', function (view, model) {
     var xy = [];
     var nodes =  model.object().nodes;
@@ -1454,16 +1460,18 @@ View.prototype.controller = (function () {
                     // Start dragging the edge
                     // Firstly, create new node with zero size
                     node_d = { x : mouse[0], y : mouse[1], r : 1 };
-                    edge_d = { source : d.source, target : d.target }
+                    edge_d = d;
+                    // edge_d = { source : d.source, target : d.target }
+                    var from = [edge_d.source, edge_d.target];
                     if (drag_target) {
-                        edge_d.target = node_d;
+                        d.target = node_d;
                     } else {
-                        edge_d.source = node_d;
+                        d.source = node_d;
                     }
-                    edge_d.text = d.text;
-                    commands.start()
-                        .del_edge(model, d)
-                        .add_edge(model, edge_d);
+                    // edge_d.text = d.text;
+                    commands.start().move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                        // .del_edge(model, d)
+                        // .add_edge(model, edge_d);
                     // Then attach edge to this new node
                     view.spring.off();
                     // Save values for next state
@@ -1499,11 +1507,13 @@ View.prototype.controller = (function () {
             case 'mouseover':
                 switch (source) {
                 case 'node':
+                    var from = [edge_d.source, edge_d.target];
                     if (drag_target) {
                         edge_d.target = d;
                     } else {
                         edge_d.source = d;
                     }
+                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
                     set_edge_type.call(view, edge_d);
                     edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                     state = states.drop_edge_or_exit;
@@ -1533,11 +1543,13 @@ View.prototype.controller = (function () {
                     state = states.init;
                     break;
                 case 'mouseout':
+                    var from = [edge_d.source, edge_d.target];
                     if (drag_target) {
                         edge_d.target = node_d;
                     } else {
                         edge_d.source = node_d;
                     }
+                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
                     set_edge_type.call(view, edge_d);
                     state = states.drag_edge;
                     break;
@@ -1567,7 +1579,7 @@ View.prototype.controller = (function () {
                 if (view.spring()) {
                     view.spring.on();
                 } else {
-                    commands.start().move_node(model, nodes, from_xy, to_xy);
+                    commands.move_node(model, nodes, from_xy, to_xy);
                 }
                 state = states.init;
                 break;
@@ -1820,7 +1832,6 @@ var Model = (function () {
             return out;
         }
 
-
         // Returns array of incoming and outgoing edges of the given node[s]
         this.adjacent = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
@@ -1988,23 +1999,33 @@ function wrap (graph) {
         return ret;
     };
 
+    graph.node.text = function (d, text) {
+        var ret = node.text.apply(this, arguments);
+        graph.view.node_text(d, text);
+        return ret;
+    };
 
-    graph.edge.add = function (d) {
+    graph.node.shift = function () {
+        var ret = node.shift.apply(this, arguments);
+        graph.view.transform();
+        return ret;
+    };
+
+    graph.node.move = function () {
+        var ret = node.move.apply(this, arguments);
+        graph.view.transform();
+        return ret;
+    };
+
+    graph.edge.add = function () {
         var ret = edge.add.apply(this, arguments);
         update_view();
         return ret;
     };
 
-
-    graph.edge.remove = function (d) {
+    graph.edge.remove = function () {
         var ret = edge.remove.apply(this, arguments);
         update_view();
-        return ret;
-    };
-
-    graph.node.text = function (d, text) {
-        var ret = node.text.apply(this, arguments);
-        graph.view.node_text(d, text);
         return ret;
     };
 
@@ -2015,19 +2036,15 @@ function wrap (graph) {
         return ret;
     };
 
-
-    graph.node.shift = function () {
-        var ret = node.shift.apply(this, arguments);
-        graph.view.transform();
-        return ret;
+    // Move edge to nodes 'target', 'source'
+    graph.edge.move = function (d, source, target) {
+        d.source = source;
+        d.target = target;
+        update_view();
     };
 
 
-    graph.node.move = function () {
-        var ret = node.move.apply(this, arguments);
-        graph.view.transform();
-        return ret;
-    };
+
 
     return graph;
 }

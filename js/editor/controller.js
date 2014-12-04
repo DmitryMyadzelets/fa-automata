@@ -232,16 +232,18 @@ View.prototype.controller = (function () {
                     // Start dragging the edge
                     // Firstly, create new node with zero size
                     node_d = { x : mouse[0], y : mouse[1], r : 1 };
-                    edge_d = { source : d.source, target : d.target }
+                    edge_d = d;
+                    // edge_d = { source : d.source, target : d.target }
+                    var from = [edge_d.source, edge_d.target];
                     if (drag_target) {
-                        edge_d.target = node_d;
+                        d.target = node_d;
                     } else {
-                        edge_d.source = node_d;
+                        d.source = node_d;
                     }
-                    edge_d.text = d.text;
-                    commands.start()
-                        .del_edge(model, d)
-                        .add_edge(model, edge_d);
+                    // edge_d.text = d.text;
+                    commands.start().move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                        // .del_edge(model, d)
+                        // .add_edge(model, edge_d);
                     // Then attach edge to this new node
                     view.spring.off();
                     // Save values for next state
@@ -277,11 +279,13 @@ View.prototype.controller = (function () {
             case 'mouseover':
                 switch (source) {
                 case 'node':
+                    var from = [edge_d.source, edge_d.target];
                     if (drag_target) {
                         edge_d.target = d;
                     } else {
                         edge_d.source = d;
                     }
+                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
                     set_edge_type.call(view, edge_d);
                     edge_svg.attr('d', elements.get_edge_transformation(edge_d));
                     state = states.drop_edge_or_exit;
@@ -311,11 +315,13 @@ View.prototype.controller = (function () {
                     state = states.init;
                     break;
                 case 'mouseout':
+                    var from = [edge_d.source, edge_d.target];
                     if (drag_target) {
                         edge_d.target = node_d;
                     } else {
                         edge_d.source = node_d;
                     }
+                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
                     set_edge_type.call(view, edge_d);
                     state = states.drag_edge;
                     break;
@@ -345,7 +351,7 @@ View.prototype.controller = (function () {
                 if (view.spring()) {
                     view.spring.on();
                 } else {
-                    commands.start().move_node(model, nodes, from_xy, to_xy);
+                    commands.move_node(model, nodes, from_xy, to_xy);
                 }
                 state = states.init;
                 break;

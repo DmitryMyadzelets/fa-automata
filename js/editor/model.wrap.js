@@ -31,23 +31,33 @@ function wrap (graph) {
         return ret;
     };
 
+    graph.node.text = function (d, text) {
+        var ret = node.text.apply(this, arguments);
+        graph.view.node_text(d, text);
+        return ret;
+    };
 
-    graph.edge.add = function (d) {
+    graph.node.shift = function () {
+        var ret = node.shift.apply(this, arguments);
+        graph.view.transform();
+        return ret;
+    };
+
+    graph.node.move = function () {
+        var ret = node.move.apply(this, arguments);
+        graph.view.transform();
+        return ret;
+    };
+
+    graph.edge.add = function () {
         var ret = edge.add.apply(this, arguments);
         update_view();
         return ret;
     };
 
-
-    graph.edge.remove = function (d) {
+    graph.edge.remove = function () {
         var ret = edge.remove.apply(this, arguments);
         update_view();
-        return ret;
-    };
-
-    graph.node.text = function (d, text) {
-        var ret = node.text.apply(this, arguments);
-        graph.view.node_text(d, text);
         return ret;
     };
 
@@ -58,19 +68,15 @@ function wrap (graph) {
         return ret;
     };
 
-
-    graph.node.shift = function () {
-        var ret = node.shift.apply(this, arguments);
-        graph.view.transform();
-        return ret;
+    // Move edge to nodes 'target', 'source'
+    graph.edge.move = function (d, source, target) {
+        d.source = source;
+        d.target = target;
+        update_view();
     };
 
 
-    graph.node.move = function () {
-        var ret = node.move.apply(this, arguments);
-        graph.view.transform();
-        return ret;
-    };
+
 
     return graph;
 }

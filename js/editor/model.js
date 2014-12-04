@@ -77,7 +77,6 @@ var Model = (function () {
             return out;
         }
 
-
         // Returns array of incoming and outgoing edges of the given node[s]
         this.adjacent = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
