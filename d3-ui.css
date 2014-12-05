@@ -92,11 +92,8 @@ g.edges path.catch {
   dominant-baseline: central;
 }
 
-.label {
-  font: 10px sans-serif;
-  pointer-events: none;
-  /*text-anchor: middle;*/
-  text-shadow: 2px 2px 1px white, -2px -2px 1px white, 2px -2px 1px white, -2px 2px 1px white;
+.edges text {
+  text-shadow: 2px 2px .5px white, -2px -2px .5px white, 2px -2px .5px white, -2px 2px .5px white;
 }
 
 /* Textarea */
