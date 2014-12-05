@@ -148,7 +148,7 @@ d3.select(window)
 
 var elements = {};
 
-
+var NODE_RADIUS = 16;
 //
 // Methods to calculate loop, stright and curved lines for links
 // 
@@ -156,7 +156,7 @@ elements.make_edge = (function () {
     var v = [0, 0]; // temporal vector
     // var r = node_radius;
     var norm = [0, 0];
-    var r = 16;
+    var r = NODE_RADIUS;
     // Constants for calculating a loop
     var K = (function () {
         var ANGLE_FROM = Math.PI / 3;
@@ -299,8 +299,29 @@ function node_radius (d) {
     if (d && d.r) {
         return d.r;
     }
-    return 16;
+    return NODE_RADIUS;
 }
+
+function node_marked_radius (d) {
+    if (d && d.r) {
+        return d.r;
+    }
+    return NODE_RADIUS - 3;
+}
+
+elements.mark_node = function (selection) {
+    // Mark what is not marked already
+    // Note that we don't mark nodes which are marked already
+    selection
+        .filter(function (d) { return !!d.marked && d3.select(this).select('circle.marked').empty(); })
+        .append('circle')
+        .attr('r', node_marked_radius)
+        .classed('marked', true);
+    // Unmark    
+    selection.filter(function (d) { return !d.marked; })
+        .selectAll('circle.marked')
+        .remove();
+};
 
 
 // Adds SVG elements representing graph nodes
@@ -314,7 +335,9 @@ elements.add_node = function (selection, handler) {
         .on('dblclick', handler);
 
     g.append('circle')
-        .attr('r', node_radius);
+        .attr('r', node_radius)
+
+    g.call(elements.mark_node);
 
     g.append('text')
         // .style('text-anchor', 'middle')
@@ -776,10 +799,13 @@ function view_methods() {
         return d.uid;
     }
 
-
-    // Returns subselection filtered w.r.t 'd'
+    // Returns subselection filtered w.r.t 'd' or [d, ..., d]
     function filter(selection, d) {
-        return selection.filter(function (v) { return v === d });
+        if (d instanceof Array) {
+            return selection.filter(function (v) { return d.indexOf(v) >= 0; });
+        } else {
+            return selection.filter(function (v) { return v === d });
+        }
     }
 
 
@@ -869,6 +895,11 @@ function view_methods() {
 
     this.node_text = function (d, text) {
         filter(this.node, d).select('text').text(text);
+    };
+
+    this.mark_node = function (d) {
+        var nodes = filter(this.node, d);
+        nodes.call(elements.mark_node);
     };
 
 
@@ -1212,6 +1243,16 @@ commands.new('move_node', function (model, d, from, to) {
     this.undo = function () { model.node.move(d, from); };
 });
 
+commands.new('mark_node', function (model, d) {
+    this.redo = function () { model.node.mark(d); };
+    this.undo = function () { model.node.unmark(d); };
+});
+
+commands.new('unmark_node', function (model, d) {
+    this.redo = function () { model.node.unmark(d); };
+    this.undo = function () { model.node.mark(d); };
+});
+
 commands.new('move_edge', function (model, d, from, to) {
     this.redo = function () { model.edge.move(d, to[0], to[1]); };
     this.undo = function () { model.edge.move(d, from[0], from[1]); };
@@ -1294,6 +1335,26 @@ View.prototype.controller = (function () {
                             .del_edge(model, edges);
                         state = states.wait_for_keyup;
                         break;
+                    case 70: // F
+                        // On/off spring behaviour
+                        if (view.spring()) {
+                            view.spring(false);
+                        } else {
+                            commands.start().spring(view, model);
+                        }
+                        break;
+                    case 73: // I
+                        // Mark a selected state as the initial one
+                        break;
+                    case 77: // M
+                        // Mark selected states
+                        nodes = view.selected_nodes();
+                        if (d3.event.ctrlKey) {
+                            commands.start().unmark_node(model, nodes);
+                        } else {
+                            commands.start().mark_node(model, nodes);
+                        }
+                        break;
                     case 89: // Y
                         if (d3.event.ctrlKey) {
                             commands.redo();
@@ -1307,13 +1368,6 @@ View.prototype.controller = (function () {
                             view.spring.on();
                         }
                         state = states.wait_for_keyup;
-                        break;
-                    case 70: // F
-                        if (view.spring()) {
-                            view.spring(false);
-                        } else {
-                            commands.start().spring(view, model);
-                        }
                         break;
                     // default:
                     //     console.log('Key', d3.event.keyCode);
@@ -1811,6 +1865,12 @@ var Model = (function () {
             }
         };
 
+        function mark(d) { d.marked = true; }
+        function unmark(d) { delete d.marked; }
+
+        this.mark = function (d) { foreach(d, mark); }
+        this.unmark = function (d) { foreach(d, unmark); }
+
     }
 
 
@@ -2014,6 +2074,18 @@ function wrap (graph) {
     graph.node.move = function () {
         var ret = node.move.apply(this, arguments);
         graph.view.transform();
+        return ret;
+    };
+
+    graph.node.mark = function (d) {
+        var ret = node.mark.apply(this, arguments);
+        graph.view.mark_node(d);
+        return ret;
+    };
+
+    graph.node.unmark = function (d) {
+        var ret = node.unmark.apply(this, arguments);
+        graph.view.mark_node(d);
         return ret;
     };
 

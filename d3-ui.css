@@ -64,10 +64,8 @@ rect.selection {
     shape-rendering : crispEdges;
 }
 
-.marked {
+g.nodes circle.marked {
   fill: none;
-  stroke: #333;
-  stroke-width: 0.8px;
 }
 
 /* Edge of graph */

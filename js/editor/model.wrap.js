@@ -49,6 +49,18 @@ function wrap (graph) {
         return ret;
     };
 
+    graph.node.mark = function (d) {
+        var ret = node.mark.apply(this, arguments);
+        graph.view.mark_node(d);
+        return ret;
+    };
+
+    graph.node.unmark = function (d) {
+        var ret = node.unmark.apply(this, arguments);
+        graph.view.mark_node(d);
+        return ret;
+    };
+
     graph.edge.add = function () {
         var ret = edge.add.apply(this, arguments);
         update_view();

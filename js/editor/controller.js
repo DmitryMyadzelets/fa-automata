@@ -66,6 +66,26 @@ View.prototype.controller = (function () {
                             .del_edge(model, edges);
                         state = states.wait_for_keyup;
                         break;
+                    case 70: // F
+                        // On/off spring behaviour
+                        if (view.spring()) {
+                            view.spring(false);
+                        } else {
+                            commands.start().spring(view, model);
+                        }
+                        break;
+                    case 73: // I
+                        // Mark a selected state as the initial one
+                        break;
+                    case 77: // M
+                        // Mark selected states
+                        nodes = view.selected_nodes();
+                        if (d3.event.ctrlKey) {
+                            commands.start().unmark_node(model, nodes);
+                        } else {
+                            commands.start().mark_node(model, nodes);
+                        }
+                        break;
                     case 89: // Y
                         if (d3.event.ctrlKey) {
                             commands.redo();
@@ -79,13 +99,6 @@ View.prototype.controller = (function () {
                             view.spring.on();
                         }
                         state = states.wait_for_keyup;
-                        break;
-                    case 70: // F
-                        if (view.spring()) {
-                            view.spring(false);
-                        } else {
-                            commands.start().spring(view, model);
-                        }
                         break;
                     // default:
                     //     console.log('Key', d3.event.keyCode);

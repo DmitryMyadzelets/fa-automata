@@ -5,7 +5,7 @@
 
 var elements = {};
 
-
+var NODE_RADIUS = 16;
 //
 // Methods to calculate loop, stright and curved lines for links
 // 
@@ -13,7 +13,7 @@ elements.make_edge = (function () {
     var v = [0, 0]; // temporal vector
     // var r = node_radius;
     var norm = [0, 0];
-    var r = 16;
+    var r = NODE_RADIUS;
     // Constants for calculating a loop
     var K = (function () {
         var ANGLE_FROM = Math.PI / 3;
@@ -156,8 +156,29 @@ function node_radius (d) {
     if (d && d.r) {
         return d.r;
     }
-    return 16;
+    return NODE_RADIUS;
 }
+
+function node_marked_radius (d) {
+    if (d && d.r) {
+        return d.r;
+    }
+    return NODE_RADIUS - 3;
+}
+
+elements.mark_node = function (selection) {
+    // Mark what is not marked already
+    // Note that we don't mark nodes which are marked already
+    selection
+        .filter(function (d) { return !!d.marked && d3.select(this).select('circle.marked').empty(); })
+        .append('circle')
+        .attr('r', node_marked_radius)
+        .classed('marked', true);
+    // Unmark    
+    selection.filter(function (d) { return !d.marked; })
+        .selectAll('circle.marked')
+        .remove();
+};
 
 
 // Adds SVG elements representing graph nodes
@@ -171,7 +192,9 @@ elements.add_node = function (selection, handler) {
         .on('dblclick', handler);
 
     g.append('circle')
-        .attr('r', node_radius);
+        .attr('r', node_radius)
+
+    g.call(elements.mark_node);
 
     g.append('text')
         // .style('text-anchor', 'middle')

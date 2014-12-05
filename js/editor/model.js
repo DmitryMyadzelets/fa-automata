@@ -56,6 +56,12 @@ var Model = (function () {
             }
         };
 
+        function mark(d) { d.marked = true; }
+        function unmark(d) { delete d.marked; }
+
+        this.mark = function (d) { foreach(d, mark); }
+        this.unmark = function (d) { foreach(d, unmark); }
+
     }
 
 

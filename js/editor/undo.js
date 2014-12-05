@@ -164,6 +164,16 @@ commands.new('move_node', function (model, d, from, to) {
     this.undo = function () { model.node.move(d, from); };
 });
 
+commands.new('mark_node', function (model, d) {
+    this.redo = function () { model.node.mark(d); };
+    this.undo = function () { model.node.unmark(d); };
+});
+
+commands.new('unmark_node', function (model, d) {
+    this.redo = function () { model.node.unmark(d); };
+    this.undo = function () { model.node.mark(d); };
+});
+
 commands.new('move_edge', function (model, d, from, to) {
     this.redo = function () { model.edge.move(d, to[0], to[1]); };
     this.undo = function () { model.edge.move(d, from[0], from[1]); };

@@ -185,10 +185,13 @@ function view_methods() {
         return d.uid;
     }
 
-
-    // Returns subselection filtered w.r.t 'd'
+    // Returns subselection filtered w.r.t 'd' or [d, ..., d]
     function filter(selection, d) {
-        return selection.filter(function (v) { return v === d });
+        if (d instanceof Array) {
+            return selection.filter(function (v) { return d.indexOf(v) >= 0; });
+        } else {
+            return selection.filter(function (v) { return v === d });
+        }
     }
 
 
@@ -278,6 +281,11 @@ function view_methods() {
 
     this.node_text = function (d, text) {
         filter(this.node, d).select('text').text(text);
+    };
+
+    this.mark_node = function (d) {
+        var nodes = filter(this.node, d);
+        nodes.call(elements.mark_node);
     };
 
 
