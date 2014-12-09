@@ -56,11 +56,23 @@ var Model = (function () {
             }
         };
 
+        // [Un]Marking nodes\states
+
         function mark(d) { d.marked = true; }
         function unmark(d) { delete d.marked; }
 
         this.mark = function (d) { foreach(d, mark); }
         this.unmark = function (d) { foreach(d, unmark); }
+
+        // Making [not] initial nodes\states
+
+        function initial(d) { d.initial = true; }
+        function uninitial(d) { delete d.initial; }
+
+        this.initial = function (d) {
+            foreach(this.data, uninitial);
+            foreach(d, initial);
+        }
 
     }
 

@@ -9,7 +9,9 @@
 //     <g .nodes>
 //       <g>
 //         <circle>
+//         <circle .marked>
 //         <text>
+//         <path .edge> // for initial node\state
 //     <g .edges>
 //       <g>
 //         <path .edge>
@@ -339,6 +341,14 @@ function view_methods() {
     // Removes a selection CSS class for all the nodes and edges
     this.unselect_all = function () {
         this.svg.selectAll('.selected').classed('selected', false);
+    };
+
+
+    this.initial = function (d) {
+        // Remove all initial states
+        this.node.selectAll('path.edge').remove();
+        // Add initial states
+        elements.initial(filter(this.node, d));
     };
 
 

@@ -149,6 +149,7 @@ d3.select(window)
 var elements = {};
 
 var NODE_RADIUS = 16;
+var INITIAL_LENGTH = NODE_RADIUS * 1.6;
 //
 // Methods to calculate loop, stright and curved lines for links
 // 
@@ -324,6 +325,20 @@ elements.mark_node = function (selection) {
 };
 
 
+// Adds\removes elements which make a node look as the inital state
+elements.initial = function (selection, show) {
+    if (arguments.length < 2 || !!show) {
+        selection.append('path')
+            .attr('class', 'edge')
+            .attr('marker-end', 'url(#marker-arrow)')
+            .attr('d', function () { return 'M' + (-NODE_RADIUS - INITIAL_LENGTH) + ',0L' + (-NODE_RADIUS) + ',0'; });
+        // selection.classed('initial', false);
+    } else {
+        selection.select('path.edge').remove();
+    }
+};
+
+
 // Adds SVG elements representing graph nodes
 elements.add_node = function (selection, handler) {
     var g = selection.append('g')
@@ -343,6 +358,8 @@ elements.add_node = function (selection, handler) {
         // .style('text-anchor', 'middle')
         .attr('alignment-baseline', 'center')
         .text(function (d) { return d.text || ''; });
+
+    elements.initial(g.filter(function(d) { return !!d.initial; }));
 };
 
 
@@ -623,7 +640,9 @@ function pan(container) {
 //     <g .nodes>
 //       <g>
 //         <circle>
+//         <circle .marked>
 //         <text>
+//         <path .edge> // for initial node\state
 //     <g .edges>
 //       <g>
 //         <path .edge>
@@ -956,6 +975,14 @@ function view_methods() {
     };
 
 
+    this.initial = function (d) {
+        // Remove all initial states
+        this.node.selectAll('path.edge').remove();
+        // Add initial states
+        elements.initial(filter(this.node, d));
+    };
+
+
     this.transform_edge = function (d) {
         var str = elements.get_edge_transformation(d);
         var e = d3.select(this);
@@ -1253,6 +1280,11 @@ commands.new('unmark_node', function (model, d) {
     this.undo = function () { model.node.mark(d); };
 });
 
+commands.new('initial', function (model, from, to) {
+    this.redo = function () { model.node.initial(to); };
+    this.undo = function () { model.node.initial(from); };
+});
+
 commands.new('move_edge', function (model, d, from, to) {
     this.redo = function () { model.edge.move(d, to[0], to[1]); };
     this.undo = function () { model.edge.move(d, from[0], from[1]); };
@@ -1345,6 +1377,9 @@ View.prototype.controller = (function () {
                         break;
                     case 73: // I
                         // Mark a selected state as the initial one
+                        commands.start().initial(model,
+                            view._graph.nodes.filter(function (d) { return !!d.initial; }),
+                            view.selected_nodes());
                         break;
                     case 77: // M
                         // Mark selected states
@@ -1865,11 +1900,23 @@ var Model = (function () {
             }
         };
 
+        // [Un]Marking nodes\states
+
         function mark(d) { d.marked = true; }
         function unmark(d) { delete d.marked; }
 
         this.mark = function (d) { foreach(d, mark); }
         this.unmark = function (d) { foreach(d, unmark); }
+
+        // Making [not] initial nodes\states
+
+        function initial(d) { d.initial = true; }
+        function uninitial(d) { delete d.initial; }
+
+        this.initial = function (d) {
+            foreach(this.data, uninitial);
+            foreach(d, initial);
+        }
 
     }
 
@@ -2087,6 +2134,11 @@ function wrap (graph) {
         var ret = node.unmark.apply(this, arguments);
         graph.view.mark_node(d);
         return ret;
+    };
+
+    graph.node.initial = function (d) {
+        node.initial(d);
+        graph.view.initial(d);
     };
 
     graph.edge.add = function () {

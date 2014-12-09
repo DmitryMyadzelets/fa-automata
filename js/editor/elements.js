@@ -6,6 +6,7 @@
 var elements = {};
 
 var NODE_RADIUS = 16;
+var INITIAL_LENGTH = NODE_RADIUS * 1.6;
 //
 // Methods to calculate loop, stright and curved lines for links
 // 
@@ -181,6 +182,20 @@ elements.mark_node = function (selection) {
 };
 
 
+// Adds\removes elements which make a node look as the inital state
+elements.initial = function (selection, show) {
+    if (arguments.length < 2 || !!show) {
+        selection.append('path')
+            .attr('class', 'edge')
+            .attr('marker-end', 'url(#marker-arrow)')
+            .attr('d', function () { return 'M' + (-NODE_RADIUS - INITIAL_LENGTH) + ',0L' + (-NODE_RADIUS) + ',0'; });
+        // selection.classed('initial', false);
+    } else {
+        selection.select('path.edge').remove();
+    }
+};
+
+
 // Adds SVG elements representing graph nodes
 elements.add_node = function (selection, handler) {
     var g = selection.append('g')
@@ -200,6 +215,8 @@ elements.add_node = function (selection, handler) {
         // .style('text-anchor', 'middle')
         .attr('alignment-baseline', 'center')
         .text(function (d) { return d.text || ''; });
+
+    elements.initial(g.filter(function(d) { return !!d.initial; }));
 };
 
 

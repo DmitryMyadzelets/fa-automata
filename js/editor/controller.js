@@ -76,6 +76,9 @@ View.prototype.controller = (function () {
                         break;
                     case 73: // I
                         // Mark a selected state as the initial one
+                        commands.start().initial(model,
+                            view._graph.nodes.filter(function (d) { return !!d.initial; }),
+                            view.selected_nodes());
                         break;
                     case 77: // M
                         // Mark selected states

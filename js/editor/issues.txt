@@ -18,5 +18,5 @@ May to do
 - Unlink the Controller from d3 (view's implementation).
 - Make Commands and the Model have the same methods.
 - Make a nice appearence and disappearance of nodes when they are added\removed.
-- Make nodes and edges highlited (CSS class).
+- Make nodes and edges highlighted (CSS class).
 - Make BFS or DFS plugin.

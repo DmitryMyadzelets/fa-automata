@@ -61,6 +61,11 @@ function wrap (graph) {
         return ret;
     };
 
+    graph.node.initial = function (d) {
+        node.initial(d);
+        graph.view.initial(d);
+    };
+
     graph.edge.add = function () {
         var ret = edge.add.apply(this, arguments);
         update_view();

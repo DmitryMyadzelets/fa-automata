@@ -174,6 +174,11 @@ commands.new('unmark_node', function (model, d) {
     this.undo = function () { model.node.mark(d); };
 });
 
+commands.new('initial', function (model, from, to) {
+    this.redo = function () { model.node.initial(to); };
+    this.undo = function () { model.node.initial(from); };
+});
+
 commands.new('move_edge', function (model, d, from, to) {
     this.redo = function () { model.edge.move(d, to[0], to[1]); };
     this.undo = function () { model.edge.move(d, from[0], from[1]); };

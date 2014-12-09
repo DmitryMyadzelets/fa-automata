@@ -70,13 +70,13 @@ g.nodes circle.marked {
 
 /* Edge of graph */
 
-g.edges path.edge {
+path.edge {
   fill: none;
   stroke: #333;
   stroke-width: 0.09em;
 }
 
-g.edges path.catch {
+path.catch {
   fill: none;
   stroke: yellow;
   stroke-width: 0.8em;
