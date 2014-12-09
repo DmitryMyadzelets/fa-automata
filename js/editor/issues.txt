@@ -1,10 +1,10 @@
 Bugs
-- Doesn't appear nodes when a new graph attached without active forces.
+- Nodes don't appear when a new graph attached without active forces.
 - Stack of undo\redo reffers to a wrong view\objects when a new graph attached. (Make a local stack attached to the view).a
 
 
 Must to do
-- Make 'initial' state command
++ Make 'initial' state command
 - Make export to a usable formats.
 	- What programs can accept SVG? Latex (how?), Inscape, ...
 - Make github...io page for demonstration.
