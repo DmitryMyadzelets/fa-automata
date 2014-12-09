@@ -1,0 +1,22 @@
+Bugs
+- Doesn't appear nodes when a new graph attached without active forces.
+- Stack of undo\redo reffers to a wrong view\objects when a new graph attached. (Make a local stack attached to the view).a
+
+
+Must to do
+- Make 'initial' state command
+- Make export to a usable formats.
+	- What programs can accept SVG? Latex (how?), Inscape, ...
+- Make github...io page for demonstration.
+	- Describe API
+
+
+May to do
+- Too many savings to local storage while editing.
+- Implement edge movement in the model (it's in wrapper only).
+- Make on('update', function () {} ) instead of o[key] = function () {} for the events.
+- Unlink the Controller from d3 (view's implementation).
+- Make Commands and the Model have the same methods.
+- Make a nice appearence and disappearance of nodes when they are added\removed.
+- Make nodes and edges highlited (CSS class).
+- Make BFS or DFS plugin.
