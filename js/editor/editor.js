@@ -845,7 +845,10 @@ function view_methods() {
     // Return whether graph nodes have coordnates
     function has_no_coordinates(nodes) {
         var ret = false;
-        nodes.forEach(function (v) { if (v.x === undefined || v.y === undefined) ret = true; });
+        nodes.forEach(function (v, index) {
+            if (v.x === undefined) { v.x = index; ret = true; }
+            if (v.y === undefined) { v.y = index; ret = true; }
+        });
         return ret;
     }
 
@@ -878,8 +881,8 @@ function view_methods() {
                 if (typeof edge.source == "number") edge.source = self._graph.nodes[edge.source];
                 if (typeof edge.target == "number") edge.target = self._graph.nodes[edge.target];
             });
-            this.update();
             if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
+            this.update();
         }
         return this._graph;
     };
@@ -895,11 +898,12 @@ function view_methods() {
 
     // Updates SVG structure according to the graph structure
     this.update = function () {
-        if (this.spring()) { this.force.stop(); }
+        var is_spring = this.spring();
+        if (is_spring) { this.spring(false); }
         update_nodes.call(this);
         update_edges.call(this);
         this.force.nodes(this._graph.nodes).links(this._graph.edges);
-        if (this.spring()) { this.force.start(); }
+        if (is_spring) { this.spring(true); }
 
         var self = this;
         // Identify type of edge {int} (0-straight, 1-curved, 2-loop)

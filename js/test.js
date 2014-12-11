@@ -83,6 +83,7 @@ jA.editor.commands.on['update'] = function () {
 window.moo = function () {
     view1.set_graph({
         nodes: [{}, {}],
+        // nodes: [{ x : 10, y : 200 }, { x : 50, y : 5 }],
         edges : [{source : 0, target : 1}, {source : 1, target : 1}]
      });
 }

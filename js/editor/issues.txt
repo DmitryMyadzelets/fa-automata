@@ -1,5 +1,5 @@
 Bugs
-- Nodes don't appear when a new graph attached without active forces.
++ Nodes don't appear when a new graph attached without active forces.
 - Stack of undo\redo reffers to a wrong view\objects when a new graph attached. (Make a local stack attached to the view).a
 
 
@@ -20,3 +20,8 @@ May to do
 - Make a nice appearence and disappearance of nodes when they are added\removed.
 - Make nodes and edges highlighted (CSS class).
 - Make BFS or DFS plugin.
+
+
+Architecture wrt SOLID principles
+- Open Close Principle (OSP). The nodes are always circles now, but it can be changed. Calculation of edges implies that the nodes are circles. a node should provid connection points to an edge (like in Violet UML editor), given some information from the edge (e.g. an outgoing angle, a reference to another node etc.);
+- Compose atomic undoable uperations into compaund operations? E.g. Create new edge into empty space = adding an edge and a node.
