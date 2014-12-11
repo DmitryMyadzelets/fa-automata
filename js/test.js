@@ -79,6 +79,19 @@ jA.editor.commands.on['update'] = function () {
 //     // return s;
 // };
 
+d3.select('#btn_save').on('click', function () {
+    // var doc = document.getElementById('svg_container1');
+    var doc = document.getElementById('svg_container1').getElementsByTagName('svg')[0];
+    console.log(doc);
+    var blob = new Blob(
+        [(new XMLSerializer).serializeToString(doc)],
+        {type: 'image/svg+xml'}
+    );
+    console.log(blob);
+    saveAs(blob, 'graph' + '.svg');
+    // alert('click');
+});
+
 
 window.moo = function () {
     view1.set_graph({

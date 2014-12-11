@@ -6,10 +6,10 @@ Bugs
 Must to do
 + Make 'initial' state command
 - Make export to a usable formats.
-	- What programs can accept SVG? Latex (how?), Inscape, ...
+	+ What programs can accept SVG? Latex (how?), Inscape, ...
+	- Image
 - Make github...io page for demonstration.
 	- Describe API
-
 
 May to do
 - Too many savings to local storage while editing.
