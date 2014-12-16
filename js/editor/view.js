@@ -67,8 +67,6 @@ function View(aContainer, aGraph) {
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
 
-    var root_group = svg.append('g');
-
     // Returns View.prototype.selection_rectangle object with context of 
     // current SVG object
     this.selection_rectangle = function () {
@@ -105,7 +103,9 @@ function View(aContainer, aGraph) {
         .on('dragstart', function () { d3.event.preventDefault(); });
 
     // Arrow marker
-    svg.append('svg:defs').append('svg:marker')
+    var defs = svg.append('svg:defs');
+    
+    defs.append('svg:marker')
             .attr('id', 'marker-arrow')
             .attr('orient', 'auto')
             .attr('markerWidth', 6)
@@ -114,6 +114,33 @@ function View(aContainer, aGraph) {
             .attr('refY', 3)
         .append('svg:path')
             .attr('d', 'M0,0 L6,3 L0,6');
+
+
+
+    defs.append('style')
+        .attr('type', 'text/css')
+        .text('[CDATA['
+            + 'circle { fill: dodgerblue; stroke: #555; stroke-width: 0.09em; fill-opacity: 0.5; }' 
+            + ']]');
+    // <style type="text/css"><![CDATA[
+    //       rect {
+    //         fill: red;
+    //         stroke: blue;
+    //         stroke-width: 3
+    //       }
+    //     ]]></style>
+
+    var css_text = "<![CDATA[ \
+          .states { \
+              fill: none; \
+              stroke: #fff; \
+              stroke-linejoin: round; \
+          } \
+      ]]> ";
+    defs.append('foo').text(css_text);
+
+
+    var root_group = svg.append('g');
 
     this.transform = function () {
         self.node.attr('transform', elements.get_node_transformation);
