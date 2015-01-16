@@ -43,7 +43,7 @@ var view3 = jA.editor.instance();
 function save_graph (graph, name) {
     if ($ && $.jStorage && $.jStorage.storageAvailable()) {
         var s = JSON.stringify(graph);
-        console.log(s);
+        // console.log(s);
         $.jStorage.set(name, s);
     }
 }
@@ -80,17 +80,44 @@ jA.editor.commands.on['update'] = function () {
 // };
 
 d3.select('#btn_save').on('click', function () {
-    // var doc = document.getElementById('svg_container1');
-    var doc = document.getElementById('svg_container1').getElementsByTagName('svg')[0];
-    console.log(doc);
+    // A separate SVG document must have its styling included into a CDATA section.
+    // The below code does it.
+
+    // Get SVG document, make a copy, and set namespace explicitly
+    var svg = document.getElementById('svg_container1').getElementsByTagName('svg')[0];
+    if (!svg) { return; }
+    svg = svg.cloneNode(true);
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+    // Make a fake parent node in oder do delete copy of SVG late
+    var foo = document.createElement('foo');
+    foo.appendChild(svg);
+    
+    var defs = foo.getElementsByTagName('defs')[0];
+    if (defs) {
+        var style = defs.getElementsByTagName('style')[0];
+        if (style) {
+            var cdata = document.createTextNode('<![CDATA[' + style.innerHTML + ' ]]>');
+
+            style.parentNode.removeChild(style);
+            style = document.createElement('style');
+            style.appendChild(cdata);
+            defs.appendChild(style);
+        }
+    }
+
+    // Save the SVG into a file
     var blob = new Blob(
-        [(new XMLSerializer).serializeToString(doc)],
+        // [(new XMLSerializer).serializeToString(doc)],
+        [foo.innerHTML],
         {type: 'image/svg+xml'}
     );
-    console.log(blob);
     saveAs(blob, 'graph' + '.svg');
-    // alert('click');
+
+    // Delete the copy of SVG
+    svg.parentNode.removeChild(svg);
 });
+
 
 
 window.moo = function () {

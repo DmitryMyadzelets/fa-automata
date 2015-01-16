@@ -48,6 +48,49 @@ function set_edge_type(d) {
 
 
 
+// Returns text for SVG styling
+function embedded_style() {
+    // Embedded SVG styling
+    var style = '';
+
+    style += ' \
+    g.nodes circle { \
+        fill: dodgerblue; \
+        stroke: #555; \
+        stroke-width: 0.09em; \
+        fill-opacity: 0.5; \
+        } \
+    ';
+
+    style += ' \
+    path.edge { \
+        fill: none; \
+        stroke: #333; \
+        stroke-width: 0.09em; \
+        } \
+    ';
+
+    style += ' \
+    path.catch { \
+        fill: none; \
+        }\
+    ';
+
+    style += ' \
+    .nodes text, .edges text { \
+        font-size: small; \
+        font-family: Verdana, sans-serif; \
+        pointer-events: none; \
+        text-anchor: middle; \
+        dominant-baseline: central; \
+        } \
+    ';
+
+    return style;
+}
+
+
+
 function View(aContainer, aGraph) {
     var self = this;
 
@@ -116,29 +159,7 @@ function View(aContainer, aGraph) {
             .attr('d', 'M0,0 L6,3 L0,6');
 
 
-
-    defs.append('style')
-        .attr('type', 'text/css')
-        .text('[CDATA['
-            + 'circle { fill: dodgerblue; stroke: #555; stroke-width: 0.09em; fill-opacity: 0.5; }' 
-            + ']]');
-    // <style type="text/css"><![CDATA[
-    //       rect {
-    //         fill: red;
-    //         stroke: blue;
-    //         stroke-width: 3
-    //       }
-    //     ]]></style>
-
-    var css_text = "<![CDATA[ \
-          .states { \
-              fill: none; \
-              stroke: #fff; \
-              stroke-linejoin: round; \
-          } \
-      ]]> ";
-    defs.append('foo').text(css_text);
-
+    defs.append('style').html(embedded_style());
 
     var root_group = svg.append('g');
 

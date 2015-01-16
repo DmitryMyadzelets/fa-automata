@@ -43,14 +43,16 @@ div {
    user-select: none;
 }
 
+
 /* SVG */
-g.nodes circle {
-  fill: dodgerblue;
-  stroke: #555;
+g.nodes circle { 
   stroke-width: 0.09em;
-  fill-opacity: 0.5;
 }
 
+
+g.nodes circle.marked {
+  fill: none;
+}
 
 .selected,
 .selection {
@@ -61,19 +63,13 @@ g.nodes circle {
 }
 
 rect.selection {
-    shape-rendering : crispEdges;
+  shape-rendering : crispEdges;
 }
 
-g.nodes circle.marked {
-  fill: none;
-}
 
 /* Edge of graph */
 
 path.edge {
-  fill: none;
-  stroke: #333;
-  stroke-width: 0.09em;
 }
 
 path.catch {
@@ -82,14 +78,6 @@ path.catch {
   stroke-width: 0.8em;
   stroke-opacity: 0.0;
   /*cursor: pointer;*/
-}
-
-.nodes text, .edges text {
-  font-size: small;
-  font-family: Verdana, sans-serif;
-  pointer-events: none;
-  text-anchor: middle;
-  dominant-baseline: central;
 }
 
 .edges text {
