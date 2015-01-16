@@ -367,7 +367,7 @@ View.prototype.controller = (function () {
                 if (view.spring()) {
                     view.spring.on();
                 } else {
-                    commands.move_node(model, nodes, from_xy, to_xy);
+                    commands.start().move_node(model, nodes, from_xy, to_xy);
                 }
                 state = states.init;
                 break;
