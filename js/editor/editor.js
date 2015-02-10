@@ -1532,7 +1532,7 @@ View.prototype.controller = (function () {
                             view.unselect_all();
                             view.select_edge(d);
                         }
-                        state = states.wait_for_new_edge;
+                        state = states.wait_for_new_edge; // BUG! Never goes there!
                     }
                     // What to drag: head or tail of the edge? What is closer to the mouse pointer.
                     var head = [], tail = [];
