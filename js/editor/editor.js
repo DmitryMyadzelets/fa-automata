@@ -679,6 +679,49 @@ function set_edge_type(d) {
 
 
 
+// Returns text for SVG styling
+function embedded_style() {
+    // Embedded SVG styling
+    var style = '';
+
+    style += ' \
+    g.nodes circle { \
+        fill: dodgerblue; \
+        stroke: #555; \
+        stroke-width: 0.09em; \
+        fill-opacity: 0.5; \
+        } \
+    ';
+
+    style += ' \
+    path.edge { \
+        fill: none; \
+        stroke: #333; \
+        stroke-width: 0.09em; \
+        } \
+    ';
+
+    style += ' \
+    path.catch { \
+        fill: none; \
+        }\
+    ';
+
+    style += ' \
+    .nodes text, .edges text { \
+        font-size: small; \
+        font-family: Verdana, sans-serif; \
+        pointer-events: none; \
+        text-anchor: middle; \
+        dominant-baseline: central; \
+        } \
+    ';
+
+    return style;
+}
+
+
+
 function View(aContainer, aGraph) {
     var self = this;
 
@@ -697,8 +740,6 @@ function View(aContainer, aGraph) {
         .classed('unselectable', true)
         // Disable browser popup menu
         .on('contextmenu', function () { d3.event.preventDefault(); });
-
-    var root_group = svg.append('g');
 
     // Returns View.prototype.selection_rectangle object with context of 
     // current SVG object
@@ -736,7 +777,9 @@ function View(aContainer, aGraph) {
         .on('dragstart', function () { d3.event.preventDefault(); });
 
     // Arrow marker
-    svg.append('svg:defs').append('svg:marker')
+    var defs = svg.append('svg:defs');
+    
+    defs.append('svg:marker')
             .attr('id', 'marker-arrow')
             .attr('orient', 'auto')
             .attr('markerWidth', 6)
@@ -745,6 +788,11 @@ function View(aContainer, aGraph) {
             .attr('refY', 3)
         .append('svg:path')
             .attr('d', 'M0,0 L6,3 L0,6');
+
+
+    defs.append('style').html(embedded_style());
+
+    var root_group = svg.append('g');
 
     this.transform = function () {
         self.node.attr('transform', elements.get_node_transformation);
@@ -1674,7 +1722,7 @@ View.prototype.controller = (function () {
                 if (view.spring()) {
                     view.spring.on();
                 } else {
-                    commands.move_node(model, nodes, from_xy, to_xy);
+                    commands.start().move_node(model, nodes, from_xy, to_xy);
                 }
                 state = states.init;
                 break;

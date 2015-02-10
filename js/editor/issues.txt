@@ -6,9 +6,9 @@ Bugs
 Must to do
 + Make 'initial' state command
 - Make export to a usable formats.
-	+ What programs can accept SVG? Latex (how?), Inscape, ...
+	+ SVG. What programs can accept SVG? Latex (how?), Inscape, ...
 	- Image
-- Make github...io page for demonstration.
++ Make github...io page for demonstration.
 	- Describe API
 
 May to do
@@ -23,5 +23,5 @@ May to do
 
 
 Architecture wrt SOLID principles
-- Open Close Principle (OSP). The nodes are always circles now, but it can be changed. Calculation of edges implies that the nodes are circles. a node should provid connection points to an edge (like in Violet UML editor), given some information from the edge (e.g. an outgoing angle, a reference to another node etc.);
-- Compose atomic undoable uperations into compaund operations? E.g. Create new edge into empty space = adding an edge and a node.
+- Open Closed Principle (OSP). The nodes are always circles now, but it can be changed. Calculation of edges implies that the nodes are circles. a node should provide connection points to an edge (like in Violet UML editor), given some information from the edge (e.g. an outgoing angle, a reference to another node etc.);
+- Compose atomic undoable operations into compaund operations? E.g. Create new edge into empty space = adding an edge and a node.
