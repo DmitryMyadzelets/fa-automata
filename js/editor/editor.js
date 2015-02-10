@@ -1355,8 +1355,71 @@ commands.new('spring', function (view, model) {
 
 
 // JSLint options:
-/*global d3, View*/
+/*global d3, View, commands, textarea, vec*/
 "use strict";
+
+
+// Return whether the editor is in the ADD mode
+function mode_add() {
+    return d3.event.ctrlKey;
+}
+
+
+// Controller of the selection by rectangle
+var control_selection = (function () {
+
+    var mouse;
+    var rect;
+    var loop;
+
+    // The state machine
+    var state;
+    var states = {
+        init : function () {
+            mouse = d3.mouse(this);
+            state = states.ready;
+        },
+        ready : function (view) {
+            switch (d3.event.type) {
+            case 'mousemove':
+                if (!mode_add()) { view.unselect_all(); }
+                rect = view.selection_rectangle();
+                rect.show(mouse);
+                state = states.update;
+                break;
+            case 'mouseup':
+                if (!mode_add()) { view.unselect_all(); }
+                state = states.init;
+                break;
+            default:
+                state = states.init;
+            }
+        },
+        update : function (view) {
+            switch (d3.event.type) {
+            case 'mousemove':
+                rect.update(d3.mouse(this));
+                break;
+            case 'mouseup':
+                view.select().by_rectangle(rect());
+                rect.hide();
+                state = states.init;
+                break;
+            }
+        }
+    };
+
+    state = states.init;
+
+    loop = function () {
+        state.apply(this, arguments);
+        loop.done = state === states.init;
+        return loop;
+    };
+    return loop;
+}());
+
+
 
 
 View.prototype.controller = (function () {
@@ -1403,8 +1466,8 @@ View.prototype.controller = (function () {
                         state = states.move_graph;
                         break;
                     }
-                    mouse = d3.mouse(this);
-                    state = states.wait_for_selection;
+                    control_selection.call(this, view);
+                    state = states.selection;
                     break;
                 case 'keydown':
                     switch (d3.event.keyCode) {
@@ -1728,33 +1791,9 @@ View.prototype.controller = (function () {
                 break;
             }
         },
-        wait_for_selection : function () {
-            switch (type) {
-            case 'mousemove':
-                if (!d3.event.ctrlKey) { view.unselect_all(); }
-                select_rect = view.selection_rectangle();
-                select_rect.show(mouse);
-                mouse = d3.mouse(this);
-                state = states.selection;
-                break;
-            case 'mouseup':
-                if (!d3.event.ctrlKey) { view.unselect_all(); }
-                state = states.init;
-                break;
-            default:
-                state = states.init;
-            }
-        },
         selection : function () {
-            switch (type) {
-            case 'mousemove':
-                select_rect.update(d3.mouse(this));
-                break;
-            case 'mouseup':
-                view.select().by_rectangle(select_rect());
-                select_rect.hide();
+            if (control_selection.call(this, view).done) {
                 state = states.init;
-                break;
             }
         },
         move_graph : function () {
