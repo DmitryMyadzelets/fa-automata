@@ -16,6 +16,7 @@ function mode_move() {
 }
 
 
+// ===========================================================================
 // Controller of the selection by rectangle
 // Returns itself
 // .done implies it is in the initial state
@@ -71,6 +72,7 @@ var control_selection = (function () {
 
 
 
+// ===========================================================================
 var control_nodes_drag = (function () {
 
     var loop, mouse, nodes;
@@ -80,7 +82,6 @@ var control_nodes_drag = (function () {
     var state, states = {
         init : function (view) {
             mouse = view.pan.mouse();
-            console.log(mouse);
             state = states.ready;
         },
         ready : function (view) {

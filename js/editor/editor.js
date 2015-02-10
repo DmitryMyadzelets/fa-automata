@@ -1371,6 +1371,7 @@ function mode_move() {
 }
 
 
+// ===========================================================================
 // Controller of the selection by rectangle
 // Returns itself
 // .done implies it is in the initial state
@@ -1426,6 +1427,7 @@ var control_selection = (function () {
 
 
 
+// ===========================================================================
 var control_nodes_drag = (function () {
 
     var loop, mouse, nodes;
@@ -1435,7 +1437,6 @@ var control_nodes_drag = (function () {
     var state, states = {
         init : function (view) {
             mouse = view.pan.mouse();
-            console.log(mouse);
             state = states.ready;
         },
         ready : function (view) {
@@ -1507,8 +1508,6 @@ View.prototype.controller = (function () {
     var edge_d;         // reference to an edge object
     var node_d;         // reference to a node object
     var drag_target;    // drag target node of edge [true, false]
-    var from_xy = [];  // coordinates of nodes before dragging
-    var to_xy = [];
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -1617,15 +1616,8 @@ View.prototype.controller = (function () {
                             view.select_node(d);
                         }
                     }
-
-                    nodes = view.selected_nodes();
-                    mouse = view.pan.mouse();
-                    // Conditional selection
-                    // OR selection
+                    // Drag the node or create new edge
                     if (mode_move()) {
-                        // // Remember nodes coordinates for undo the command
-                        // from_xy.length = 0;
-                        // nodes.forEach(function (d) { d.fixed = true; from_xy.push(d.x, d.y); });
                         control_nodes_drag.call(this, view);
                         state = states.drag_node;
                     } else {
@@ -1843,33 +1835,7 @@ View.prototype.controller = (function () {
         drag_node : function () {
             if (control_nodes_drag.call(this, view, model).done) {
                 state = states.init;
-            };
-            // switch (type) {
-            // case 'mousemove':
-            //     // How far we move the nodes
-            //     var xy = mouse;
-            //     mouse = view.pan.mouse();
-            //     xy[0] = mouse[0] - xy[0];
-            //     xy[1] = mouse[1] - xy[1];
-            //     // Change positions of the selected nodes
-            //     view.model.node.shift(nodes, xy);
-            //     view.spring.on();
-            //     xy[0] = mouse[0];
-            //     xy[1] = mouse[1];
-            //     break;
-            // case 'mouseup':
-            //     // FIX : don't do anything if movement is zero
-            //     to_xy.length = 0;
-            //     nodes.forEach(function (d) { delete d.fixed; to_xy.push(d.x, d.y); });
-            //     // Record the command only when the force is not working
-            //     if (view.spring()) {
-            //         view.spring.on();
-            //     } else {
-            //         commands.start().move_node(model, nodes, from_xy, to_xy);
-            //     }
-            //     state = states.init;
-            //     break;
-            // }
+            }
         },
         selection : function () {
             if (control_selection.call(this, view).done) {
