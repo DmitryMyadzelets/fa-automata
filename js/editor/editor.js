@@ -1609,7 +1609,7 @@ View.prototype.controller = (function () {
                         // XOR selection mode
                         if (mode_add()) {
                             // Invert selection of the node
-                            view.select_node(d, nodes.indexOf(d) < 0);
+                            view.select_node(d, view.selected_nodes().indexOf(d) < 0);
                         } else {
                             // AND selection
                             view.unselect_all();
