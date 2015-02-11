@@ -22,7 +22,7 @@ function mode_move() {
 // .done implies it is in the initial state
 var control_selection = (function () {
 
-    var loop, mouse, rect;
+    var mouse, rect;
 
     // The state machine
     var state, states = {
@@ -59,23 +59,19 @@ var control_selection = (function () {
             }
         }
     };
-
     state = states.init;
-
-    loop = function () {
+    return function loop() {
         state.apply(this, arguments);
         loop.done = state === states.init;
         return loop;
     };
-    return loop;
 }());
-
 
 
 // ===========================================================================
 var control_nodes_drag = (function () {
 
-    var loop, mouse, nodes;
+    var mouse, nodes;
     var from_xy = [], xy, to_xy = [];
 
     // The state machine
@@ -129,12 +125,38 @@ var control_nodes_drag = (function () {
 
     state = states.init;
 
-    loop = function () {
+    return function loop() {
         state.apply(this, arguments);
         loop.done = state === states.init;
         return loop;
     };
-    return loop;
+}());
+
+
+// ===========================================================================
+var control_graph_move = (function () {
+    var state, states = {
+        init : function (view) {
+            view.pan.start();
+            state = states.update;
+        },
+        update : function (view) {
+            switch (d3.event.type) {
+            case 'mousemove':
+                view.pan.to_mouse();
+                break;
+            case 'mouseup':
+                state = states.init;
+                break;
+            }
+        }
+    };
+    state = states.init;
+    return function loop() {
+        state.apply(this, arguments);
+        loop.done = state === states.init;
+        return loop;
+    };
 }());
 
 
@@ -177,7 +199,7 @@ View.prototype.controller = (function () {
                     break;
                 case 'mousedown':
                     if (mode_move()) {
-                        view.pan.start();
+                        control_graph_move(view);
                         state = states.move_graph;
                     } else {
                         control_selection.call(this, view);
@@ -488,14 +510,8 @@ View.prototype.controller = (function () {
             }
         },
         move_graph : function () {
-            switch (type) {
-            case 'mousemove':
-                if (!mode_move()) { state = states.init; }
-                view.pan.to_mouse();
-                break;
-            case 'mouseup':
+            if (control_graph_move(view).done) {
                 state = states.init;
-                break;
             }
         },
         wait_for_keyup : function () {
