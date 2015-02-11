@@ -133,33 +133,6 @@ var control_nodes_drag = (function () {
 }());
 
 
-// ===========================================================================
-var control_graph_move = (function () {
-    var state, states = {
-        init : function (view) {
-            view.pan.start();
-            state = states.update;
-        },
-        update : function (view) {
-            switch (d3.event.type) {
-            case 'mousemove':
-                view.pan.to_mouse();
-                break;
-            case 'mouseup':
-                state = states.init;
-                break;
-            }
-        }
-    };
-    state = states.init;
-    return function loop() {
-        state.apply(this, arguments);
-        loop.done = state === states.init;
-        return loop;
-    };
-}());
-
-
 
 View.prototype.controller = (function () {
 
@@ -199,7 +172,7 @@ View.prototype.controller = (function () {
                     break;
                 case 'mousedown':
                     if (mode_move()) {
-                        control_graph_move(view);
+                        view.pan.start();
                         state = states.move_graph;
                     } else {
                         control_selection.call(this, view);
@@ -510,8 +483,14 @@ View.prototype.controller = (function () {
             }
         },
         move_graph : function () {
-            if (control_graph_move(view).done) {
+            switch (type) {
+            case 'mousemove':
+                if (!mode_move()) { state = states.init; }
+                view.pan.to_mouse();
+                break;
+            case 'mouseup':
                 state = states.init;
+                break;
             }
         },
         wait_for_keyup : function () {
