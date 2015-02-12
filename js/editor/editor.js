@@ -1371,7 +1371,7 @@ function mode_move() {
 }
 
 
-// ===========================================================================
+
 // Controller of the selection by rectangle
 // Returns itself
 // .done implies it is in the initial state
@@ -1424,7 +1424,7 @@ var control_selection = (function () {
 }());
 
 
-// ===========================================================================
+
 var control_nodes_drag = (function () {
 
     var mouse, nodes;
@@ -1489,7 +1489,6 @@ var control_nodes_drag = (function () {
 
 
 
-// ===========================================================================
 var control_text_edit = (function () {
 
     var d, svg_text, text, enter;
@@ -1548,6 +1547,166 @@ var control_text_edit = (function () {
 
 
 
+var control_edge_drag = (function () {
+
+    var mouse, d_source, node_d, edge_d, drag_target, edge_svg, from, exists;
+
+    var state, states = {
+        init : function (view, source, d) {
+            d_source = d;
+            switch (source) {
+            case 'node':
+                state = states.wait_for_new_edge;
+                break;
+            case 'edge':
+                // What to drag: head or tail of the edge? What is closer to the mouse pointer.
+                var head = [], tail = [];
+                mouse = view.pan.mouse();
+                vec.subtract(mouse, [d.x1, d.y1], tail);
+                vec.subtract(mouse, [d.x2, d.y2], head);
+                drag_target = vec.length(head) < vec.length(tail);
+                state = states.wait_for_edge_dragging;
+                break;
+            }
+        },
+        wait_for_new_edge : function (view, model) {
+            switch (d3.event.type) {
+            case 'mouseup':
+                state = states.init;
+                break;
+            case 'mouseout':
+                mouse = view.pan.mouse();
+                // Start dragging the edge
+                // Firstly, create new node with zero size
+                node_d = { x : mouse[0], y : mouse[1], r : 1 };
+                // Create new edge
+                edge_d = { source : d_source, target : node_d };
+                commands.start().add_edge(model, edge_d);
+                drag_target = true;
+                edge_svg = view.edge_by_data(edge_d).selectAll('path');
+                // Then attach edge to this new node
+                view.spring.off();
+                state = states.drag_edge;
+                break;
+            }
+        },
+        wait_for_edge_dragging : function (view, model, source, d) {
+            switch (source) {
+            case 'edge':
+                switch (d3.event.type) {
+                case 'mouseout':
+                    mouse = view.pan.mouse();
+                    // Start dragging the edge
+                    // Firstly, create new node with zero size
+                    node_d = { x : mouse[0], y : mouse[1], r : 1 };
+                    edge_d = d;
+                    // edge_d = { source : d.source, target : d.target }
+                    from = [edge_d.source, edge_d.target];
+                    if (drag_target) {
+                        d.target = node_d;
+                    } else {
+                        d.source = node_d;
+                    }
+                    // edge_d.text = d.text;
+                    commands.start().move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                        // .del_edge(model, d)
+                        // .add_edge(model, edge_d);
+                    // Then attach edge to this new node
+                    view.spring.off();
+                    // Save values for next state
+                    set_edge_type.call(view, edge_d);
+                    edge_svg = view.edge_by_data(edge_d).selectAll('path');
+                    view.unselect_all();
+                    view.select_edge(edge_d);
+                    state = states.drag_edge;
+                    break;
+                default:
+                    state = states.init;
+                }
+                break;
+            }
+        },
+        drag_edge : function (view, model, source, d) {
+            switch (d3.event.type) {
+            case 'mousemove':
+                mouse = view.pan.mouse();
+                node_d.x = mouse[0];
+                node_d.y = mouse[1];
+                edge_svg.attr('d', elements.get_edge_transformation(edge_d));
+                break;
+            case 'mouseup':
+                delete node_d.r; // in order to use default radius
+                commands.add_node(model, node_d);
+                view.unselect_all();
+                view.select_edge(edge_d);
+                view.select_node(drag_target ? edge_d.target : edge_d.source);
+                view.spring.on();
+                state = states.init;
+                break;
+            case 'mouseover':
+                switch (source) {
+                case 'node':
+                    from = [edge_d.source, edge_d.target];
+                    if (drag_target) {
+                        edge_d.target = d;
+                    } else {
+                        edge_d.source = d;
+                    }
+                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    set_edge_type.call(view, edge_d);
+                    edge_svg.attr('d', elements.get_edge_transformation(edge_d));
+                    state = states.drop_edge_or_exit;
+                    break;
+                }
+                break;
+            }
+        },
+        drop_edge_or_exit : function (view, model, source) {
+            switch (source) {
+            case 'node':
+                switch (d3.event.type) {
+                case 'mouseup':
+                    // Get existing edges between selected nodes
+                    exists = view.graph().edges.filter(function (v) {
+                        return ((v.source === edge_d.source) && (v.target === edge_d.target));
+                    });
+                    if (exists.length > 1) {
+                        // Delete edge
+                        commands.del_edge(model, edge_d);
+                    }
+                    if (!mode_add()) { view.unselect_all(); }
+                    if (exists.length <= 1) {
+                        view.select_edge(edge_d);
+                    }
+                    view.update();
+                    state = states.init;
+                    break;
+                case 'mouseout':
+                    from = [edge_d.source, edge_d.target];
+                    if (drag_target) {
+                        edge_d.target = node_d;
+                    } else {
+                        edge_d.source = node_d;
+                    }
+                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    set_edge_type.call(view, edge_d);
+                    state = states.drag_edge;
+                    break;
+                }
+                break;
+            }
+        }
+    };
+    state = states.init;
+
+    return function loop() {
+        state.apply(this, arguments);
+        loop.done = state === states.init;
+        return loop;
+    };
+}());
+
+
 View.prototype.controller = (function () {
 
     var view;           // a view where current event occur
@@ -1556,12 +1715,7 @@ View.prototype.controller = (function () {
     var type;           // type of event (copy of d3.type)
 
     var mouse;          // mouse position
-    var d_source;       // referrence to a data of svg element
     var nodes;          // array of nodes (data)
-    var edge_svg;       // reference to a SVG edge
-    var edge_d;         // reference to an edge object
-    var node_d;         // reference to a node object
-    var drag_target;    // drag target node of edge [true, false]
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -1654,8 +1808,6 @@ View.prototype.controller = (function () {
             case 'node':
                 switch (type) {
                 case 'mousedown':
-                    d_source = d;
-
                     // Selection
                     if (mode_move()) {
                         view.select_node(d);
@@ -1675,7 +1827,9 @@ View.prototype.controller = (function () {
                         control_nodes_drag.call(this, view);
                         state = states.drag_node;
                     } else {
-                        state = states.wait_for_new_edge;
+                        control_edge_drag.call(this, view, source, d);
+                        // state = states.wait_for_new_edge;
+                        state = states.drag_edge;
                     }
                     break;
                 case 'dblclick':
@@ -1711,15 +1865,9 @@ View.prototype.controller = (function () {
                             view.unselect_all();
                             view.select_edge(d);
                         }
-                        state = states.wait_for_new_edge; // BUG! Never goes there!
                     }
-                    // What to drag: head or tail of the edge? What is closer to the mouse pointer.
-                    var head = [], tail = [];
-                    mouse = view.pan.mouse();
-                    vec.subtract(mouse, [d.x1, d.y1], tail);
-                    vec.subtract(mouse, [d.x2, d.y2], head);
-                    drag_target = vec.length(head) < vec.length(tail);
-                    state = states.wait_for_edge_dragging;
+                    control_edge_drag.call(this, view, source, d);
+                    state = states.drag_edge;
                     break;
                 case 'dblclick':
                     pan = view.pan();
@@ -1737,134 +1885,9 @@ View.prototype.controller = (function () {
                 break;
             }
         },
-        wait_for_new_edge : function () {
-            switch (type) {
-            case 'mouseup':
-                state = states.init;
-                break;
-            case 'mouseout':
-                mouse = view.pan.mouse();
-                // Start dragging the edge
-                // Firstly, create new node with zero size
-                node_d = { x : mouse[0], y : mouse[1], r : 1 };
-                // Create new edge
-                edge_d = { source : d_source, target : node_d };
-                commands.start().add_edge(model, edge_d);
-                drag_target = true;
-                edge_svg = view.edge_by_data(edge_d).selectAll('path');
-                // Then attach edge to this new node
-                view.spring.off();
-                state = states.drag_edge;
-                break;
-            }
-        },
-        wait_for_edge_dragging : function (d) {
-            switch (source) {
-            case 'edge':
-                switch (type) {
-                case 'mouseup':
-                    state = states.init;
-                    break;
-                case 'mouseout':
-                    mouse = view.pan.mouse();
-                    // Start dragging the edge
-                    // Firstly, create new node with zero size
-                    node_d = { x : mouse[0], y : mouse[1], r : 1 };
-                    edge_d = d;
-                    // edge_d = { source : d.source, target : d.target }
-                    var from = [edge_d.source, edge_d.target];
-                    if (drag_target) {
-                        d.target = node_d;
-                    } else {
-                        d.source = node_d;
-                    }
-                    // edge_d.text = d.text;
-                    commands.start().move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
-                        // .del_edge(model, d)
-                        // .add_edge(model, edge_d);
-                    // Then attach edge to this new node
-                    view.spring.off();
-                    // Save values for next state
-                    set_edge_type.call(view, edge_d);
-                    edge_svg = view.edge_by_data(edge_d).selectAll('path');
-                    view.unselect_all();
-                    view.select_edge(edge_d);
-                    state = states.drag_edge;
-                    break;
-                default:
-                    state = states.init;
-                }
-                break;
-            }
-        },
         drag_edge : function (d) {
-            switch (type) {
-            case 'mousemove':
-                mouse = view.pan.mouse();
-                node_d.x = mouse[0];
-                node_d.y = mouse[1];
-                edge_svg.attr('d', elements.get_edge_transformation(edge_d));
-                break;
-            case 'mouseup':
-                delete node_d.r; // in order to use default radius
-                commands.add_node(model, node_d);
-                view.unselect_all();
-                view.select_edge(edge_d);
-                view.select_node(drag_target ? edge_d.target : edge_d.source);
-                view.spring.on();
+            if (control_edge_drag.call(this, view, model, source, d).done) {
                 state = states.init;
-                break;
-            case 'mouseover':
-                switch (source) {
-                case 'node':
-                    var from = [edge_d.source, edge_d.target];
-                    if (drag_target) {
-                        edge_d.target = d;
-                    } else {
-                        edge_d.source = d;
-                    }
-                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
-                    set_edge_type.call(view, edge_d);
-                    edge_svg.attr('d', elements.get_edge_transformation(edge_d));
-                    state = states.drop_edge_or_exit;
-                    break;
-                }
-                break;
-            }
-        },
-        drop_edge_or_exit : function () {
-            switch (source) {
-            case 'node':
-                switch (type) {
-                case 'mouseup':
-                    // Get existing edges between selected nodes
-                    var exists = view.graph().edges.filter(function (v) {
-                        return ((v.source === edge_d.source) && (v.target === edge_d.target));
-                    });
-                    if (exists.length > 1) {
-                        // Delete edge
-                        commands.del_edge(model, edge_d);
-                    }
-                    if (!mode_add()) { view.unselect_all(); }
-                    if (exists.length <= 1) {
-                        view.select_edge(edge_d);
-                    }
-                    view.update();
-                    state = states.init;
-                    break;
-                case 'mouseout':
-                    var from = [edge_d.source, edge_d.target];
-                    if (drag_target) {
-                        edge_d.target = node_d;
-                    } else {
-                        edge_d.source = node_d;
-                    }
-                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
-                    set_edge_type.call(view, edge_d);
-                    state = states.drag_edge;
-                    break;
-                }
-                break;
             }
         },
         drag_node : function () {
@@ -1897,37 +1920,7 @@ View.prototype.controller = (function () {
             if (control_text_edit.call(this, view, source).done) {
                 state = states.init;
             }
-            // if (source === 'text') {
-            //     // Set original text back
-            //     svg_text.text(function (d) { return d.text; });
-            //     // Change text if user hit Enter
-            //     switch (type) {
-            //     case 'keydown':
-            //         if (d3.event.keyCode === 13) {
-            //             commands.start().node_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
-            //         }
-            //         break;
-            //     }
-            //     view.spring.on();
-            //     state = states.init;
-            // }
         }
-        // edit_edge_text : function () {
-        //     if (source === 'text') {
-        //         // Set original text back
-        //         svg_text.text(function (d) { return d.text; });
-        //         // Change text if user hit Enter
-        //         switch (type) {
-        //         case 'keydown':
-        //             if (d3.event.keyCode === 13) {
-        //                 commands.start().edge_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
-        //             }
-        //             break;
-        //         }
-        //         view.spring.on();
-        //         state = states.init;
-        //     }
-        // }
     };
 
     state = states.init;
