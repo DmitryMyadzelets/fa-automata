@@ -1491,28 +1491,32 @@ var control_nodes_drag = (function () {
 
 // ===========================================================================
 var control_text_edit = (function () {
-    var d, svg_text, text;
-    var enter;
 
+    var d, svg_text, text, enter;
+    var view;
+
+    // Callback function which is called by textarea object when 
+    // user enters the text or cancels it.
+    // This function invokes the parent automaton
+    function callback() {
+        view.controller().context('text').event.apply(this, arguments);
+    }
+
+    // The state machine
     var state, states = {
-        init : function (view, datum, x, y, onenter) {
+        init : function (aView, datum, x, y, onenter) {
             d3.event.stopPropagation();
+
+            view = aView;
             d = datum;
             enter = onenter;
             svg_text = d3.select(this).select('text');
             // Remove text temporally, since it is viewed in text editor now
             svg_text.text('');
-            // Callback function which is called by textarea object when 
-            // user enters the text or cancels it.
-            // This function invokes this automaton iteself
-            var callback = (function () {
-                var self = view;
-                return function () {
-                    self.controller().context('text').event.apply(this, arguments);
-                };
-            }());
+
             text = d.text || '';
             textarea(view.container, text, x, y, callback, callback);
+
             view.spring.off();
             state = states.wait;
         },
@@ -1520,7 +1524,7 @@ var control_text_edit = (function () {
             if (source === 'text') {
                 // Set original text back
                 svg_text.text(text);
-                // Change text if user hit Enter
+                // Call the 'enter' function if the user hits Enter
                 switch (d3.event.type) {
                 case 'keydown':
                     if (d3.event.keyCode === 13 && typeof enter === 'function') {
