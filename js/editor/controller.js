@@ -60,6 +60,7 @@ var control_selection = (function () {
         }
     };
     state = states.init;
+
     return function loop() {
         state.apply(this, arguments);
         loop.done = state === states.init;
@@ -122,7 +123,61 @@ var control_nodes_drag = (function () {
             }
         }
     };
+    state = states.init;
 
+    return function loop() {
+        state.apply(this, arguments);
+        loop.done = state === states.init;
+        return loop;
+    };
+}());
+
+
+
+// ===========================================================================
+var control_text_edit = (function () {
+    var d, svg_text, text;
+    var enter;
+
+    var state, states = {
+        init : function (view, datum, x, y, onenter) {
+            d3.event.stopPropagation();
+            d = datum;
+            enter = onenter;
+            svg_text = d3.select(this).select('text');
+            // Remove text temporally, since it is viewed in text editor now
+            svg_text.text('');
+            // Callback function which is called by textarea object when 
+            // user enters the text or cancels it.
+            // This function invokes this automaton iteself
+            var callback = (function () {
+                var self = view;
+                return function () {
+                    self.controller().context('text').event.apply(this, arguments);
+                };
+            }());
+            text = d.text || '';
+            textarea(view.container, text, x, y, callback, callback);
+            view.spring.off();
+            state = states.wait;
+        },
+        wait : function (view, source) {
+            if (source === 'text') {
+                // Set original text back
+                svg_text.text(text);
+                // Change text if user hit Enter
+                switch (d3.event.type) {
+                case 'keydown':
+                    if (d3.event.keyCode === 13 && typeof enter === 'function') {
+                        enter.call(this, d);
+                    }
+                    break;
+                }
+                view.spring.on();
+                state = states.init;
+            }
+        }
+    };
     state = states.init;
 
     return function loop() {
@@ -152,7 +207,7 @@ View.prototype.controller = (function () {
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
 
-    var svg_text;      // reference to the SVG text element of a node
+    var pan, x, y;
 
     var states = {
         init : function (d) {
@@ -265,23 +320,16 @@ View.prototype.controller = (function () {
                     }
                     break;
                 case 'dblclick':
-                    d3.event.stopPropagation();
-                    svg_text = d3.select(this).select('text');
-                    // Remove text temporally, since it is viewed in text editor now
-                    svg_text.text('');
-                    // Callback function which is called by textarea object when 
-                    // user enters the text or cancels it.
-                    // This function invokes this automaton iteself
-                    var callback = (function () {
-                        var self = view;
-                        return function () {
-                            self.controller().context('text').event.apply(this, arguments);
-                        };
-                    }());
-                    var text = d.text || '';
-                    var pan = view.pan();
-                    textarea(view.container, text, d.x + pan[0], d.y + pan[1], callback, callback);
-                    state = states.edit_node_text;
+                    pan = view.pan();
+                    x = d.x + pan[0];
+                    y = d.y + pan[1];
+
+                    control_text_edit.call(this, view, d, x, y, function (d) {
+                        commands.start().node_text(model, d, this.value);
+
+                    });
+
+                    state = states.edit_text;
                     break;
                 }
                 break;
@@ -315,28 +363,16 @@ View.prototype.controller = (function () {
                     state = states.wait_for_edge_dragging;
                     break;
                 case 'dblclick':
-                    d3.event.stopPropagation();
-                    d_source = d;
-                    svg_text = d3.select(this).select('text');
-                    // Remove text temporally, since it is viewed in text editor now
-                    svg_text.text('');
-                    // Callback function which is called by textarea object when 
-                    // user enters the text or cancels it.
-                    // This function invokes this automaton iteself
-                    var callback = (function () {
-                        var self = view;
-                        return function () {
-                            self.controller().context('text').event.apply(this, arguments);
-                        };
-                    }());
-                    var text = d.text || '';
-                    var pan = view.pan();
-                    // Place the text 
-                    var x = d.tx + pan[0];
-                    var y = d.ty + pan[1];
-                    textarea(view.container, text, x, y, callback, callback);
-                    view.spring.off();
-                    state = states.edit_edge_text;
+                    pan = view.pan();
+                    x = d.tx + pan[0];
+                    y = d.ty + pan[1];
+
+                    control_text_edit.call(this, view, d, x, y, function (d) {
+                        commands.start().edge_text(model, d, this.value);
+
+                    });
+
+                    state = states.edit_text;
                     break;
                 }
                 break;
@@ -498,38 +534,41 @@ View.prototype.controller = (function () {
                 state = states.init;
             }
         },
-        edit_node_text : function () {
-            if (source === 'text') {
-                // Set original text back
-                svg_text.text(function (d) { return d.text; });
-                // Change text if user hit Enter
-                switch (type) {
-                case 'keydown':
-                    if (d3.event.keyCode === 13) {
-                        commands.start().node_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
-                    }
-                    break;
-                }
-                view.spring.on();
+        edit_text : function () {
+            if (control_text_edit.call(this, view, source).done) {
                 state = states.init;
             }
-        },
-        edit_edge_text : function () {
-            if (source === 'text') {
-                // Set original text back
-                svg_text.text(function (d) { return d.text; });
-                // Change text if user hit Enter
-                switch (type) {
-                case 'keydown':
-                    if (d3.event.keyCode === 13) {
-                        commands.start().edge_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
-                    }
-                    break;
-                }
-                view.spring.on();
-                state = states.init;
-            }
+            // if (source === 'text') {
+            //     // Set original text back
+            //     svg_text.text(function (d) { return d.text; });
+            //     // Change text if user hit Enter
+            //     switch (type) {
+            //     case 'keydown':
+            //         if (d3.event.keyCode === 13) {
+            //             commands.start().node_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
+            //         }
+            //         break;
+            //     }
+            //     view.spring.on();
+            //     state = states.init;
+            // }
         }
+        // edit_edge_text : function () {
+        //     if (source === 'text') {
+        //         // Set original text back
+        //         svg_text.text(function (d) { return d.text; });
+        //         // Change text if user hit Enter
+        //         switch (type) {
+        //         case 'keydown':
+        //             if (d3.event.keyCode === 13) {
+        //                 commands.start().edge_text(model, d_source, this.value); // FIX: should be a ref to SVG text here
+        //             }
+        //             break;
+        //         }
+        //         view.spring.on();
+        //         state = states.init;
+        //     }
+        // }
     };
 
     state = states.init;
