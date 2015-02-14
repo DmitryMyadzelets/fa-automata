@@ -122,15 +122,15 @@ function View(aContainer, aGraph) {
     };
 
     // Handles nodes events
-    this.node_handler;
+    this.node_handler = undefined;
     // Handles edge events
-    this.edge_handler;
+    this.edge_handler = undefined;
     // Handles plane (out of other elements) events
-    function plane_handler () {
+    function plane_handler() {
         if (typeof self.plane_handler === 'function') {
             self.plane_handler.apply(this, arguments);
         }
-    };
+    }
 
     // Makes current view focused and requests routing of window events (keys) to it
     function focus() {
@@ -147,7 +147,7 @@ function View(aContainer, aGraph) {
 
     // Arrow marker
     var defs = svg.append('svg:defs');
-    
+
     defs.append('svg:marker')
             .attr('id', 'marker-arrow')
             .attr('orient', 'auto')
@@ -180,15 +180,19 @@ function View(aContainer, aGraph) {
         var fn = function (start) {
             if (arguments.length) {
                 if (start) {
-                    if (started) { force.resume(); }
-                    else { force.start(); started = true; }
+                    if (started) {
+                        force.resume();
+                    } else {
+                        force.start();
+                        started = true;
+                    }
                 } else {
                     force.stop();
                     started = false;
                 }
             }
             return started;
-        }
+        };
         fn.on = function () { if (started) { force.resume(); } };
         fn.off = function () { if (started) { force.stop(); } };
         return fn;
@@ -227,7 +231,7 @@ function view_methods() {
         var id = 0;
         return function () {
             return id++;
-        }
+        };
     }());
 
 
@@ -241,9 +245,8 @@ function view_methods() {
     function filter(selection, d) {
         if (d instanceof Array) {
             return selection.filter(function (v) { return d.indexOf(v) >= 0; });
-        } else {
-            return selection.filter(function (v) { return v === d });
         }
+        return selection.filter(function (v) { return v === d; });
     }
 
 
@@ -254,11 +257,11 @@ function view_methods() {
     }
 
 
-    function update_edges () {
+    function update_edges() {
         this.edge = this.edge.data(this.graph().edges, key);
         this.edge.enter().call(elements.add_edge, this.edge_handler);
         this.edge.exit().remove();
-    };
+    }
 
 
     // Return whether graph nodes have coordnates
@@ -272,11 +275,11 @@ function view_methods() {
     }
 
     // Returns whether at least one edge reffers to the nodes by indexe rather then objects
-    function has_indexes(edges) {
-        var ret = false;
-        edges.forEach(function (v) { if (typeof v.source === 'number' || typeof v.target === 'number') ret = true; });
-        return ret;
-    }
+    // function has_indexes(edges) {
+    //     var ret = false;
+    //     edges.forEach(function (v) { if (typeof v.source === 'number' || typeof v.target === 'number') { ret = true; } });
+    //     return ret;
+    // }
 
 
     // Removes key for each element of the array
@@ -297,8 +300,8 @@ function view_methods() {
             // Replace indexes by nodes in each edge.[source, target]
             var self = this;
             this._graph.edges.forEach(function (edge) {
-                if (typeof edge.source == "number") edge.source = self._graph.nodes[edge.source];
-                if (typeof edge.target == "number") edge.target = self._graph.nodes[edge.target];
+                if (typeof edge.source === "number") { edge.source = self._graph.nodes[edge.source]; }
+                if (typeof edge.target === "number") { edge.target = self._graph.nodes[edge.target]; }
             });
             if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
             this.update();
@@ -359,8 +362,8 @@ function view_methods() {
     // Adds/removes a CSS class for node[s] to show them selected
     this.select_node = function (d, val) {
         var self = this;
-        val = val === undefined? true : !!val;
-        foreach(d, function(v) {
+        val = val === undefined ? true : !!val;
+        foreach(d, function (v) {
             filter(self.node, v).select('circle').classed('selected', val);
         });
     };
@@ -369,8 +372,8 @@ function view_methods() {
     // Adds/removes a CSS class for edge[s] to show them selected
     this.select_edge = function (d, val) {
         var self = this;
-        val = val === undefined? true : !!val;
-        foreach(d, function(v) {
+        val = val === undefined ? true : !!val;
+        foreach(d, function (v) {
             filter(self.edge, v).select('path.edge').classed('selected', val);
         });
     };
@@ -379,7 +382,7 @@ function view_methods() {
     this.selected_nodes = function () {
         var ret = [];
         var nodes = this.node.select('.selected');
-        nodes.each(function(d) { ret.push(d); });
+        nodes.each(function (d) { ret.push(d); });
         return ret;
     };
 
@@ -387,7 +390,7 @@ function view_methods() {
     this.selected_edges = function () {
         var ret = [];
         var edges = this.edge.select('.selected');
-        edges.each(function(d) { ret.push(d); });
+        edges.each(function (d) { ret.push(d); });
         return ret;
     };
 

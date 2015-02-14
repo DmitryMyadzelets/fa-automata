@@ -354,13 +354,13 @@ var control_edge_drag = (function () {
 
 View.prototype.controller = (function () {
 
-    var view;           // a view where current event occur
+    var view;           // a view where the current event occurs
     var model;          // a model connected to the current view
-    var source;         // a SVG element where current event occurs
-    var type;           // type of the current event (copy of d3.event.type)
+    var source;         // a SVG element where the current event occurs
 
     var mouse;          // mouse position
     var nodes;          // array of nodes (data)
+    var edges;          // array of edges (data)
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -369,170 +369,164 @@ View.prototype.controller = (function () {
 
     var states = {
         init : function (d) {
-            switch (source) {
-            case 'plane':
-                switch (type) {
-                case 'mousemove':
-                    // placed here to prevent the enumeration of other cases
+            if (d3.event.type === 'keydown') {
+                switch (d3.event.keyCode) {
+                case 46: // Delete
+                    nodes = view.selected_nodes();
+                    // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
+                    edges = view.model.edge.adjacent(nodes);
+                    edges = edges.concat(view.selected_edges().filter(
+                        function (d) { return edges.indexOf(d) < 0; }
+                    ));
+                    // Delete nodes edges
+                    commands.start()
+                        .del_node(model, nodes)
+                        .del_edge(model, edges);
+                    state = states.wait_for_keyup;
                     break;
-                case 'dblclick':
-                    if (!mode_add()) { view.unselect_all(); }
-                    mouse = view.pan.mouse();
-                    // Create new node
-                    var node = { x : mouse[0], y : mouse[1] };
-                    commands.start().add_node(model, node);
-                    view.select_node(node);
-                    break;
-                case 'mousedown':
-                    if (mode_move()) {
-                        view.pan.start();
-                        state = states.move_graph;
+                case 70: // F
+                    // On/off spring behaviour
+                    if (view.spring()) {
+                        view.spring(false);
                     } else {
-                        control_selection.call(this, view);
-                        state = states.selection;
+                        commands.start().spring(view, model);
                     }
                     break;
-                case 'keydown':
-                    switch (d3.event.keyCode) {
-                    case 46: // Delete
-                        nodes = view.selected_nodes();
-                        // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                        var edges = view.model.edge.adjacent(nodes);
-                        edges = edges.concat(view.selected_edges().filter(
-                            function (d) { return edges.indexOf(d) < 0; }
-                        ));
-                        // Delete nodes edges
-                        commands.start()
-                            .del_node(model, nodes)
-                            .del_edge(model, edges);
-                        state = states.wait_for_keyup;
-                        break;
-                    case 70: // F
-                        // On/off spring behaviour
-                        if (view.spring()) {
-                            view.spring(false);
-                        } else {
-                            commands.start().spring(view, model);
-                        }
-                        break;
-                    case 73: // I
-                        // Mark a selected state as the initial one
-                        commands.start().initial(model,
-                            view._graph.nodes.filter(function (d) { return !!d.initial; }),
-                            view.selected_nodes());
-                        break;
-                    case 77: // M
-                        // Mark selected states
-                        nodes = view.selected_nodes();
-                        if (mode_add()) {
-                            commands.start().unmark_node(model, nodes);
-                        } else {
-                            commands.start().mark_node(model, nodes);
-                        }
-                        break;
-                    case 89: // Y
-                        if (mode_add()) {
-                            commands.redo();
-                            view.spring.on();
-                        }
-                        state = states.wait_for_keyup;
-                        break;
-                    case 90: // Z
-                        if (mode_add()) {
-                            commands.undo();
-                            view.spring.on();
-                        }
-                        state = states.wait_for_keyup;
-                        break;
-                    // default:
-                    //     console.log('Key', d3.event.keyCode);
+                case 73: // I
+                    // Mark a selected state as the initial one
+                    commands.start().initial(model,
+                        view._graph.nodes.filter(function (d) { return !!d.initial; }),
+                        view.selected_nodes());
+                    break;
+                case 77: // M
+                    // Mark selected states
+                    nodes = view.selected_nodes();
+                    if (mode_add()) {
+                        commands.start().unmark_node(model, nodes);
+                    } else {
+                        commands.start().mark_node(model, nodes);
                     }
                     break;
+                case 89: // Y
+                    if (mode_add()) {
+                        commands.redo();
+                        view.spring.on();
+                    }
+                    state = states.wait_for_keyup;
+                    break;
+                case 90: // Z
+                    if (mode_add()) {
+                        commands.undo();
+                        view.spring.on();
+                    }
+                    state = states.wait_for_keyup;
+                    break;
+                // default:
+                //     console.log('Key', d3.event.keyCode);
                 }
-                break;
-            case 'node':
-                switch (type) {
-                case 'mousedown':
-                    // Selection
-                    if (mode_move()) {
-                        view.select_node(d);
-                    } else {
-                        // XOR selection mode
-                        if (mode_add()) {
-                            // Invert selection of the node
-                            view.select_node(d, view.selected_nodes().indexOf(d) < 0);
+            } else {
+                switch (source) {
+                case 'plane':
+                    switch (d3.event.type) {
+                    case 'mousemove':
+                        // placed here to prevent the enumeration of other cases
+                        break;
+                    case 'dblclick':
+                        if (!mode_add()) { view.unselect_all(); }
+                        mouse = view.pan.mouse();
+                        // Create new node
+                        var node = { x : mouse[0], y : mouse[1] };
+                        commands.start().add_node(model, node);
+                        view.select_node(node);
+                        break;
+                    case 'mousedown':
+                        if (mode_move()) {
+                            view.pan.start();
+                            state = states.drag_graph;
                         } else {
-                            // AND selection
-                            view.unselect_all();
+                            control_selection.call(this, view);
+                            state = states.selection;
+                        }
+                        break;
+                    }
+                    break;
+                case 'node':
+                    switch (d3.event.type) {
+                    case 'mousedown':
+                        // Selection
+                        if (mode_move()) {
                             view.select_node(d);
-                        }
-                    }
-                    // Drag the node or create new edge
-                    if (mode_move()) {
-                        control_nodes_drag.call(this, view);
-                        state = states.drag_node;
-                    } else {
-                        control_edge_drag.call(this, view, source, d);
-                        // state = states.wait_for_new_edge;
-                        state = states.drag_edge;
-                    }
-                    break;
-                case 'dblclick':
-                    pan = view.pan();
-                    x = d.x + pan[0];
-                    y = d.y + pan[1];
-
-                    control_text_edit.call(this, view, d, x, y, function (d) {
-                        commands.start().node_text(model, d, this.value);
-
-                    });
-
-                    state = states.edit_text;
-                    break;
-                }
-                break;
-            case 'edge':
-                switch (type) {
-                case 'mousedown':
-                    // Conditional selection
-                    edges = view.selected_edges();
-                    // OR selection
-                    if (mode_move()) {
-                        view.select_edge(d);
-                        edges = view.selected_edges();
-                    } else {
-                        // XOR selection mode
-                        if (mode_add()) {
-                            // Invert selection of the node
-                            view.select_edge(d, edges.indexOf(d) < 0);
                         } else {
-                            // AND selection
-                            view.unselect_all();
-                            view.select_edge(d);
+                            // XOR selection mode
+                            if (mode_add()) {
+                                // Invert selection of the node
+                                view.select_node(d, view.selected_nodes().indexOf(d) < 0);
+                            } else {
+                                // AND selection
+                                view.unselect_all();
+                                view.select_node(d);
+                            }
                         }
+                        // Drag the node or create new edge
+                        if (mode_move()) {
+                            control_nodes_drag.call(this, view);
+                            state = states.drag_node;
+                        } else {
+                            control_edge_drag.call(this, view, source, d);
+                            // state = states.wait_for_new_edge;
+                            state = states.drag_edge;
+                        }
+                        break;
+                    case 'dblclick':
+                        pan = view.pan();
+                        x = d.x + pan[0];
+                        y = d.y + pan[1];
+
+                        control_text_edit.call(this, view, d, x, y, function (d) {
+                            commands.start().node_text(model, d, this.value);
+                        });
+
+                        state = states.edit_text;
+                        break;
                     }
-                    control_edge_drag.call(this, view, source, d);
-                    state = states.drag_edge;
                     break;
-                case 'dblclick':
-                    pan = view.pan();
-                    x = d.tx + pan[0];
-                    y = d.ty + pan[1];
+                case 'edge':
+                    switch (d3.event.type) {
+                    case 'mousedown':
+                        // Conditional selection
+                        edges = view.selected_edges();
+                        // OR selection
+                        if (mode_move()) {
+                            view.select_edge(d);
+                            edges = view.selected_edges();
+                        } else {
+                            // XOR selection mode
+                            if (mode_add()) {
+                                // Invert selection of the node
+                                view.select_edge(d, edges.indexOf(d) < 0);
+                            } else {
+                                // AND selection
+                                view.unselect_all();
+                                view.select_edge(d);
+                            }
+                        }
+                        control_edge_drag.call(this, view, source, d);
+                        state = states.drag_edge;
+                        break;
+                    case 'dblclick':
+                        pan = view.pan();
+                        x = d.tx + pan[0];
+                        y = d.ty + pan[1];
 
-                    control_text_edit.call(this, view, d, x, y, function (d) {
-                        commands.start().edge_text(model, d, this.value);
+                        control_text_edit.call(this, view, d, x, y, function (d) {
+                            commands.start().edge_text(model, d, this.value);
+                        });
 
-                    });
-
-                    state = states.edit_text;
+                        state = states.edit_text;
+                        break;
+                    }
                     break;
                 }
-                break;
-            }
-        },
-        drag_edge : function (d) {
-            if (control_edge_drag.call(this, view, model, source, d).done) {
-                state = states.init;
             }
         },
         drag_node : function () {
@@ -540,13 +534,13 @@ View.prototype.controller = (function () {
                 state = states.init;
             }
         },
-        selection : function () {
-            if (control_selection.call(this, view).done) {
+        drag_edge : function (d) {
+            if (control_edge_drag.call(this, view, model, source, d).done) {
                 state = states.init;
             }
         },
-        move_graph : function () {
-            switch (type) {
+        drag_graph : function () {
+            switch (d3.event.type) {
             case 'mousemove':
                 if (!mode_move()) { state = states.init; }
                 view.pan.to_mouse();
@@ -556,8 +550,13 @@ View.prototype.controller = (function () {
                 break;
             }
         },
+        selection : function () {
+            if (control_selection.call(this, view).done) {
+                state = states.init;
+            }
+        },
         wait_for_keyup : function () {
-            if (type === 'keyup') {
+            if (d3.event.type === 'keyup') {
                 state = states.init;
             }
         },
@@ -596,7 +595,6 @@ View.prototype.controller = (function () {
 
             // Set default event source in case it is not set by 'set_event' method
             source = source || d3.event.target.nodeName;
-            type = d3.event.type;
 
             old_state = state;
             state.apply(this, arguments);
@@ -607,9 +605,9 @@ View.prototype.controller = (function () {
 
             // d3.event.stopPropagation();
 
-            // If there wes a transition from state to state
+            // If there was a transition from state to state
             if (old_state !== state) {
-                // Trace current transition
+                // Trace the current transition
                 console.log('transition:', old_state._name + ' -> ' + state._name);
             }
         },

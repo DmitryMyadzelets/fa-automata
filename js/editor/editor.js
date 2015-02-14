@@ -14,16 +14,18 @@ var ed = { version: "1.0.0" };
 // http://bl.ocks.org/benzguo/4370043
 // http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
 
-
+/*jslint bitwise: true */
+"use strict";
 
 // Returns a [deep] copy of the given object
 function clone(obj, deep) {
-    if (obj === null || typeof(obj) !== 'object') {
+    if (obj === null || typeof obj !== 'object') {
         return obj;
     }
     var copy = obj.constructor();
 
-    for(var key in obj) {
+    var key;
+    for (key in obj) {
         if (obj.hasOwnProperty(key)) {
             copy[key] = deep ? clone(obj[key], true) : obj[key];
         }
@@ -35,7 +37,8 @@ function clone(obj, deep) {
 
 // Converts all numerical values of the object and its properties to integers
 function float2int(obj) {
-    for(var key in obj) {
+    var key;
+    for (key in obj) {
         if (obj.hasOwnProperty(key)) {
             switch (typeof obj[key]) {
             case 'number':
@@ -143,7 +146,8 @@ d3.select(window)
 
 
 // JSLint options:
-/*global vec, View */
+/*global vec, View, d3 */
+/*jslint bitwise: true */
 "use strict";
 
 var elements = {};
@@ -252,20 +256,20 @@ elements.get_edge_transformation = (function () {
         elements.make_edge.r1 = d.source.r !== undefined ? d.source.r : 16;
         elements.make_edge.r2 = d.target.r !== undefined ? d.target.r : 16;
         // text coordinates (between the edge's nodes, by default)
-        d.tx = (d.source.x + d.target.x) >> 1;
-        d.ty = (d.source.y + d.target.y) >> 1;
+        d.tx = (d.source.x + d.target.x) >>> 1;
+        d.ty = (d.source.y + d.target.y) >>> 1;
         switch (d.type) {
         case 1:
             elements.make_edge.curve(v1, v2, cv);
             // d.tx = cv[0];
             // d.ty = cv[1];
-            d.tx = (cv[0] + v2[0]) >> 1;
-            d.ty = (cv[1] + v2[1]) >> 1;
+            d.tx = (cv[0] + v2[0]) >>> 1;
+            d.ty = (cv[1] + v2[1]) >>> 1;
             break;
         case 2:
             elements.make_edge.loop(v1, v2, cv, cv2);
-            d.tx = (cv[0] + cv2[0]) >> 1;
-            d.ty = (cv[1] + cv2[1]) >> 1;
+            d.tx = (cv[0] + cv2[0]) >>> 1;
+            d.ty = (cv[1] + cv2[1]) >>> 1;
             break;
         default:
             elements.make_edge.stright(v1, v2);
@@ -296,14 +300,14 @@ elements.get_node_transformation = function (d) {
 
 
 
-function node_radius (d) {
+function node_radius(d) {
     if (d && d.r) {
         return d.r;
     }
     return NODE_RADIUS;
 }
 
-function node_marked_radius (d) {
+function node_marked_radius(d) {
     if (d && d.r) {
         return d.r;
     }
@@ -350,7 +354,7 @@ elements.add_node = function (selection, handler) {
         .on('dblclick', handler);
 
     g.append('circle')
-        .attr('r', node_radius)
+        .attr('r', node_radius);
 
     g.call(elements.mark_node);
 
@@ -359,7 +363,7 @@ elements.add_node = function (selection, handler) {
         .attr('alignment-baseline', 'center')
         .text(function (d) { return d.text || ''; });
 
-    elements.initial(g.filter(function(d) { return !!d.initial; }));
+    elements.initial(g.filter(function (d) { return !!d.initial; }));
 };
 
 
@@ -753,15 +757,15 @@ function View(aContainer, aGraph) {
     };
 
     // Handles nodes events
-    this.node_handler;
+    this.node_handler = undefined;
     // Handles edge events
-    this.edge_handler;
+    this.edge_handler = undefined;
     // Handles plane (out of other elements) events
-    function plane_handler () {
+    function plane_handler() {
         if (typeof self.plane_handler === 'function') {
             self.plane_handler.apply(this, arguments);
         }
-    };
+    }
 
     // Makes current view focused and requests routing of window events (keys) to it
     function focus() {
@@ -778,7 +782,7 @@ function View(aContainer, aGraph) {
 
     // Arrow marker
     var defs = svg.append('svg:defs');
-    
+
     defs.append('svg:marker')
             .attr('id', 'marker-arrow')
             .attr('orient', 'auto')
@@ -811,15 +815,19 @@ function View(aContainer, aGraph) {
         var fn = function (start) {
             if (arguments.length) {
                 if (start) {
-                    if (started) { force.resume(); }
-                    else { force.start(); started = true; }
+                    if (started) {
+                        force.resume();
+                    } else {
+                        force.start();
+                        started = true;
+                    }
                 } else {
                     force.stop();
                     started = false;
                 }
             }
             return started;
-        }
+        };
         fn.on = function () { if (started) { force.resume(); } };
         fn.off = function () { if (started) { force.stop(); } };
         return fn;
@@ -858,7 +866,7 @@ function view_methods() {
         var id = 0;
         return function () {
             return id++;
-        }
+        };
     }());
 
 
@@ -872,9 +880,8 @@ function view_methods() {
     function filter(selection, d) {
         if (d instanceof Array) {
             return selection.filter(function (v) { return d.indexOf(v) >= 0; });
-        } else {
-            return selection.filter(function (v) { return v === d });
         }
+        return selection.filter(function (v) { return v === d; });
     }
 
 
@@ -885,11 +892,11 @@ function view_methods() {
     }
 
 
-    function update_edges () {
+    function update_edges() {
         this.edge = this.edge.data(this.graph().edges, key);
         this.edge.enter().call(elements.add_edge, this.edge_handler);
         this.edge.exit().remove();
-    };
+    }
 
 
     // Return whether graph nodes have coordnates
@@ -903,11 +910,11 @@ function view_methods() {
     }
 
     // Returns whether at least one edge reffers to the nodes by indexe rather then objects
-    function has_indexes(edges) {
-        var ret = false;
-        edges.forEach(function (v) { if (typeof v.source === 'number' || typeof v.target === 'number') ret = true; });
-        return ret;
-    }
+    // function has_indexes(edges) {
+    //     var ret = false;
+    //     edges.forEach(function (v) { if (typeof v.source === 'number' || typeof v.target === 'number') { ret = true; } });
+    //     return ret;
+    // }
 
 
     // Removes key for each element of the array
@@ -928,8 +935,8 @@ function view_methods() {
             // Replace indexes by nodes in each edge.[source, target]
             var self = this;
             this._graph.edges.forEach(function (edge) {
-                if (typeof edge.source == "number") edge.source = self._graph.nodes[edge.source];
-                if (typeof edge.target == "number") edge.target = self._graph.nodes[edge.target];
+                if (typeof edge.source === "number") { edge.source = self._graph.nodes[edge.source]; }
+                if (typeof edge.target === "number") { edge.target = self._graph.nodes[edge.target]; }
             });
             if (has_no_coordinates(this._graph.nodes)) { this.spring(true); }
             this.update();
@@ -990,8 +997,8 @@ function view_methods() {
     // Adds/removes a CSS class for node[s] to show them selected
     this.select_node = function (d, val) {
         var self = this;
-        val = val === undefined? true : !!val;
-        foreach(d, function(v) {
+        val = val === undefined ? true : !!val;
+        foreach(d, function (v) {
             filter(self.node, v).select('circle').classed('selected', val);
         });
     };
@@ -1000,8 +1007,8 @@ function view_methods() {
     // Adds/removes a CSS class for edge[s] to show them selected
     this.select_edge = function (d, val) {
         var self = this;
-        val = val === undefined? true : !!val;
-        foreach(d, function(v) {
+        val = val === undefined ? true : !!val;
+        foreach(d, function (v) {
             filter(self.edge, v).select('path.edge').classed('selected', val);
         });
     };
@@ -1010,7 +1017,7 @@ function view_methods() {
     this.selected_nodes = function () {
         var ret = [];
         var nodes = this.node.select('.selected');
-        nodes.each(function(d) { ret.push(d); });
+        nodes.each(function (d) { ret.push(d); });
         return ret;
     };
 
@@ -1018,7 +1025,7 @@ function view_methods() {
     this.selected_edges = function () {
         var ret = [];
         var edges = this.edge.select('.selected');
-        edges.each(function(d) { ret.push(d); });
+        edges.each(function (d) { ret.push(d); });
         return ret;
     };
 
@@ -1193,7 +1200,7 @@ var commands = {
 function commands_methods() {
 
     function on_event() {
-        var fun = this.on['update'];
+        var fun = this.on.update;
         if (typeof fun === 'function') {
             fun();
         }
@@ -1272,15 +1279,15 @@ function commands_methods() {
 
 commands_methods.call(commands);
 
-    // Makes a copy of each item in arguments if it is an array
-    function copy_arguments() {
-        var i = arguments.length;
-        while (i--) {
-            if (arguments[i] instanceof Array) {
-                arguments[i] = arguments[i].slice(0);
-            }
+// Makes a copy of each item in arguments if it is an array
+function copy_arguments() {
+    var i = arguments.length;
+    while (i--) {
+        if (arguments[i] instanceof Array) {
+            arguments[i] = arguments[i].slice(0);
         }
     }
+}
 
 
 commands.new('add_node', function (model, d) {
@@ -1709,13 +1716,13 @@ var control_edge_drag = (function () {
 
 View.prototype.controller = (function () {
 
-    var view;           // a view where current event occur
+    var view;           // a view where the current event occurs
     var model;          // a model connected to the current view
-    var source;         // a SVG element where current event occur
-    var type;           // type of event (copy of d3.type)
+    var source;         // a SVG element where the current event occurs
 
     var mouse;          // mouse position
     var nodes;          // array of nodes (data)
+    var edges;          // array of edges (data)
 
     var state;          // Reference to a current state
     var old_state;      // Reference to a previous state
@@ -1724,170 +1731,164 @@ View.prototype.controller = (function () {
 
     var states = {
         init : function (d) {
-            switch (source) {
-            case 'plane':
-                switch (type) {
-                case 'mousemove':
-                    // placed here to prevent the enumeration of other cases
+            if (d3.event.type === 'keydown') {
+                switch (d3.event.keyCode) {
+                case 46: // Delete
+                    nodes = view.selected_nodes();
+                    // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
+                    edges = view.model.edge.adjacent(nodes);
+                    edges = edges.concat(view.selected_edges().filter(
+                        function (d) { return edges.indexOf(d) < 0; }
+                    ));
+                    // Delete nodes edges
+                    commands.start()
+                        .del_node(model, nodes)
+                        .del_edge(model, edges);
+                    state = states.wait_for_keyup;
                     break;
-                case 'dblclick':
-                    if (!mode_add()) { view.unselect_all(); }
-                    mouse = view.pan.mouse();
-                    // Create new node
-                    var node = { x : mouse[0], y : mouse[1] };
-                    commands.start().add_node(model, node);
-                    view.select_node(node);
-                    break;
-                case 'mousedown':
-                    if (mode_move()) {
-                        view.pan.start();
-                        state = states.move_graph;
+                case 70: // F
+                    // On/off spring behaviour
+                    if (view.spring()) {
+                        view.spring(false);
                     } else {
-                        control_selection.call(this, view);
-                        state = states.selection;
+                        commands.start().spring(view, model);
                     }
                     break;
-                case 'keydown':
-                    switch (d3.event.keyCode) {
-                    case 46: // Delete
-                        nodes = view.selected_nodes();
-                        // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                        var edges = view.model.edge.adjacent(nodes);
-                        edges = edges.concat(view.selected_edges().filter(
-                            function (d) { return edges.indexOf(d) < 0; }
-                        ));
-                        // Delete nodes edges
-                        commands.start()
-                            .del_node(model, nodes)
-                            .del_edge(model, edges);
-                        state = states.wait_for_keyup;
-                        break;
-                    case 70: // F
-                        // On/off spring behaviour
-                        if (view.spring()) {
-                            view.spring(false);
-                        } else {
-                            commands.start().spring(view, model);
-                        }
-                        break;
-                    case 73: // I
-                        // Mark a selected state as the initial one
-                        commands.start().initial(model,
-                            view._graph.nodes.filter(function (d) { return !!d.initial; }),
-                            view.selected_nodes());
-                        break;
-                    case 77: // M
-                        // Mark selected states
-                        nodes = view.selected_nodes();
-                        if (mode_add()) {
-                            commands.start().unmark_node(model, nodes);
-                        } else {
-                            commands.start().mark_node(model, nodes);
-                        }
-                        break;
-                    case 89: // Y
-                        if (mode_add()) {
-                            commands.redo();
-                            view.spring.on();
-                        }
-                        state = states.wait_for_keyup;
-                        break;
-                    case 90: // Z
-                        if (mode_add()) {
-                            commands.undo();
-                            view.spring.on();
-                        }
-                        state = states.wait_for_keyup;
-                        break;
-                    // default:
-                    //     console.log('Key', d3.event.keyCode);
+                case 73: // I
+                    // Mark a selected state as the initial one
+                    commands.start().initial(model,
+                        view._graph.nodes.filter(function (d) { return !!d.initial; }),
+                        view.selected_nodes());
+                    break;
+                case 77: // M
+                    // Mark selected states
+                    nodes = view.selected_nodes();
+                    if (mode_add()) {
+                        commands.start().unmark_node(model, nodes);
+                    } else {
+                        commands.start().mark_node(model, nodes);
                     }
                     break;
+                case 89: // Y
+                    if (mode_add()) {
+                        commands.redo();
+                        view.spring.on();
+                    }
+                    state = states.wait_for_keyup;
+                    break;
+                case 90: // Z
+                    if (mode_add()) {
+                        commands.undo();
+                        view.spring.on();
+                    }
+                    state = states.wait_for_keyup;
+                    break;
+                // default:
+                //     console.log('Key', d3.event.keyCode);
                 }
-                break;
-            case 'node':
-                switch (type) {
-                case 'mousedown':
-                    // Selection
-                    if (mode_move()) {
-                        view.select_node(d);
-                    } else {
-                        // XOR selection mode
-                        if (mode_add()) {
-                            // Invert selection of the node
-                            view.select_node(d, view.selected_nodes().indexOf(d) < 0);
+            } else {
+                switch (source) {
+                case 'plane':
+                    switch (d3.event.type) {
+                    case 'mousemove':
+                        // placed here to prevent the enumeration of other cases
+                        break;
+                    case 'dblclick':
+                        if (!mode_add()) { view.unselect_all(); }
+                        mouse = view.pan.mouse();
+                        // Create new node
+                        var node = { x : mouse[0], y : mouse[1] };
+                        commands.start().add_node(model, node);
+                        view.select_node(node);
+                        break;
+                    case 'mousedown':
+                        if (mode_move()) {
+                            view.pan.start();
+                            state = states.drag_graph;
                         } else {
-                            // AND selection
-                            view.unselect_all();
+                            control_selection.call(this, view);
+                            state = states.selection;
+                        }
+                        break;
+                    }
+                    break;
+                case 'node':
+                    switch (d3.event.type) {
+                    case 'mousedown':
+                        // Selection
+                        if (mode_move()) {
                             view.select_node(d);
-                        }
-                    }
-                    // Drag the node or create new edge
-                    if (mode_move()) {
-                        control_nodes_drag.call(this, view);
-                        state = states.drag_node;
-                    } else {
-                        control_edge_drag.call(this, view, source, d);
-                        // state = states.wait_for_new_edge;
-                        state = states.drag_edge;
-                    }
-                    break;
-                case 'dblclick':
-                    pan = view.pan();
-                    x = d.x + pan[0];
-                    y = d.y + pan[1];
-
-                    control_text_edit.call(this, view, d, x, y, function (d) {
-                        commands.start().node_text(model, d, this.value);
-
-                    });
-
-                    state = states.edit_text;
-                    break;
-                }
-                break;
-            case 'edge':
-                switch (type) {
-                case 'mousedown':
-                    // Conditional selection
-                    edges = view.selected_edges();
-                    // OR selection
-                    if (mode_move()) {
-                        view.select_edge(d);
-                        edges = view.selected_edges();
-                    } else {
-                        // XOR selection mode
-                        if (mode_add()) {
-                            // Invert selection of the node
-                            view.select_edge(d, edges.indexOf(d) < 0);
                         } else {
-                            // AND selection
-                            view.unselect_all();
-                            view.select_edge(d);
+                            // XOR selection mode
+                            if (mode_add()) {
+                                // Invert selection of the node
+                                view.select_node(d, view.selected_nodes().indexOf(d) < 0);
+                            } else {
+                                // AND selection
+                                view.unselect_all();
+                                view.select_node(d);
+                            }
                         }
+                        // Drag the node or create new edge
+                        if (mode_move()) {
+                            control_nodes_drag.call(this, view);
+                            state = states.drag_node;
+                        } else {
+                            control_edge_drag.call(this, view, source, d);
+                            // state = states.wait_for_new_edge;
+                            state = states.drag_edge;
+                        }
+                        break;
+                    case 'dblclick':
+                        pan = view.pan();
+                        x = d.x + pan[0];
+                        y = d.y + pan[1];
+
+                        control_text_edit.call(this, view, d, x, y, function (d) {
+                            commands.start().node_text(model, d, this.value);
+                        });
+
+                        state = states.edit_text;
+                        break;
                     }
-                    control_edge_drag.call(this, view, source, d);
-                    state = states.drag_edge;
                     break;
-                case 'dblclick':
-                    pan = view.pan();
-                    x = d.tx + pan[0];
-                    y = d.ty + pan[1];
+                case 'edge':
+                    switch (d3.event.type) {
+                    case 'mousedown':
+                        // Conditional selection
+                        edges = view.selected_edges();
+                        // OR selection
+                        if (mode_move()) {
+                            view.select_edge(d);
+                            edges = view.selected_edges();
+                        } else {
+                            // XOR selection mode
+                            if (mode_add()) {
+                                // Invert selection of the node
+                                view.select_edge(d, edges.indexOf(d) < 0);
+                            } else {
+                                // AND selection
+                                view.unselect_all();
+                                view.select_edge(d);
+                            }
+                        }
+                        control_edge_drag.call(this, view, source, d);
+                        state = states.drag_edge;
+                        break;
+                    case 'dblclick':
+                        pan = view.pan();
+                        x = d.tx + pan[0];
+                        y = d.ty + pan[1];
 
-                    control_text_edit.call(this, view, d, x, y, function (d) {
-                        commands.start().edge_text(model, d, this.value);
+                        control_text_edit.call(this, view, d, x, y, function (d) {
+                            commands.start().edge_text(model, d, this.value);
+                        });
 
-                    });
-
-                    state = states.edit_text;
+                        state = states.edit_text;
+                        break;
+                    }
                     break;
                 }
-                break;
-            }
-        },
-        drag_edge : function (d) {
-            if (control_edge_drag.call(this, view, model, source, d).done) {
-                state = states.init;
             }
         },
         drag_node : function () {
@@ -1895,13 +1896,13 @@ View.prototype.controller = (function () {
                 state = states.init;
             }
         },
-        selection : function () {
-            if (control_selection.call(this, view).done) {
+        drag_edge : function (d) {
+            if (control_edge_drag.call(this, view, model, source, d).done) {
                 state = states.init;
             }
         },
-        move_graph : function () {
-            switch (type) {
+        drag_graph : function () {
+            switch (d3.event.type) {
             case 'mousemove':
                 if (!mode_move()) { state = states.init; }
                 view.pan.to_mouse();
@@ -1911,8 +1912,13 @@ View.prototype.controller = (function () {
                 break;
             }
         },
+        selection : function () {
+            if (control_selection.call(this, view).done) {
+                state = states.init;
+            }
+        },
         wait_for_keyup : function () {
-            if (type === 'keyup') {
+            if (d3.event.type === 'keyup') {
                 state = states.init;
             }
         },
@@ -1951,7 +1957,6 @@ View.prototype.controller = (function () {
 
             // Set default event source in case it is not set by 'set_event' method
             source = source || d3.event.target.nodeName;
-            type = d3.event.type;
 
             old_state = state;
             state.apply(this, arguments);
@@ -1962,9 +1967,9 @@ View.prototype.controller = (function () {
 
             // d3.event.stopPropagation();
 
-            // If there wes a transition from state to state
+            // If there was a transition from state to state
             if (old_state !== state) {
-                // Trace current transition
+                // Trace the current transition
                 console.log('transition:', old_state._name + ' -> ' + state._name);
             }
         },
@@ -2009,7 +2014,7 @@ View.prototype.controller = (function () {
 
 
 // JSLint options:
-/*global */
+/*global clone, float2int, wrap*/
 "use strict";
 
 var Model = (function () {
@@ -2029,7 +2034,7 @@ var Model = (function () {
     function nodes_methods() {
 
         var delta = [0, 0];
-        var xy = [0, 0];
+        // var xy = [0, 0];
 
         function shift(d) {
             d.x += delta[0];
@@ -2048,7 +2053,7 @@ var Model = (function () {
         // Changes node position relatively to the previous one
         this.shift = function (d, dxy) {
             delta[0] = dxy[0];
-            delta[1] = dxy[1]
+            delta[1] = dxy[1];
             foreach(d, shift);
         };
 
@@ -2070,8 +2075,8 @@ var Model = (function () {
         function mark(d) { d.marked = true; }
         function unmark(d) { delete d.marked; }
 
-        this.mark = function (d) { foreach(d, mark); }
-        this.unmark = function (d) { foreach(d, unmark); }
+        this.mark = function (d) { foreach(d, mark); };
+        this.unmark = function (d) { foreach(d, unmark); };
 
         // Making [not] initial nodes\states
 
@@ -2081,7 +2086,7 @@ var Model = (function () {
         this.initial = function (d) {
             foreach(this.data, uninitial);
             foreach(d, initial);
-        }
+        };
 
     }
 
@@ -2164,7 +2169,7 @@ var Model = (function () {
             return this;
         };
 
-    };
+    }
 
 
     // The prototype with basic methods
@@ -2192,11 +2197,11 @@ var Model = (function () {
 
             // Replace default nodes and edges arrays with ones provided by user.
             // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
-            if(user_graph) {
-                if (user_graph['nodes'] instanceof Array) {
-                    graph.node.data = user_graph['nodes'];
-                    if (user_graph['edges'] instanceof Array) {
-                        graph.edge.data = user_graph['edges'];
+            if (user_graph) {
+                if (user_graph.nodes instanceof Array) {
+                    graph.node.data = user_graph.nodes;
+                    if (user_graph.edges instanceof Array) {
+                        graph.edge.data = user_graph.edges;
                     }
                 }
             }
@@ -2212,19 +2217,19 @@ var Model = (function () {
             // Returns graph object ready for convertion to JSON, 
             // with the nodes references in edges replaced by indexes
             graph.storable = function () {
-                var graph = this.object();
+                var g = this.object();
                 // Copy edges while calculating the indexes to the nodes
-                graph.edges = graph.edges.map(function (edge) {
+                g.edges = g.edges.map(function (edge) {
                     var e = clone(edge);
-                    e.source = graph.nodes.indexOf(edge.source);
-                    e.target = graph.nodes.indexOf(edge.target);
+                    e.source = g.nodes.indexOf(edge.source);
+                    e.target = g.nodes.indexOf(edge.target);
                     return e;
                 });
                 // Make deep clone, i.e. the objects of the copy will have no references to the source
-                graph = clone(graph, true);
+                g = clone(g, true);
                 // Convert all the  float values to integers
-                float2int(graph);
-                return graph;
+                float2int(g);
+                return g;
             };
 
 
@@ -2246,7 +2251,7 @@ var Model = (function () {
 // Incapsulates and returns the graph object.
 //  Overrides methods which change the graph. 
 //  When the methods are called invokes correspondent View methods.
-function wrap (graph) {
+function wrap(graph) {
 
     graph.node = Object.create(graph.node);
     graph.edge = Object.create(graph.edge);
@@ -2341,20 +2346,20 @@ function wrap (graph) {
 
 
 ed.instance = function (container) {
-	var o = {
-		view : new View(container),
-		set_graph : function (graph) {
-			this.graph = Model.graph(graph);
-			this.view.model = this.graph;
-			this.graph.view = this.view;
-			this.view.graph(this.graph.object());
-		}
-	};
+    var o = {
+        view : new View(container),
+        set_graph : function (graph) {
+            this.graph = Model.graph(graph);
+            this.view.model = this.graph;
+            this.graph.view = this.view;
+            this.view.graph(this.graph.object());
+        }
+    };
 
-	o.view.controller().control_view(); // Attaches controller's handlers to the view
-	o.set_graph();
+    o.view.controller().control_view(); // Attaches controller's handlers to the view
+    o.set_graph();
 
-	return o;
+    return o;
 };
 
 

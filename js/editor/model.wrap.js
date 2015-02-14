@@ -6,7 +6,7 @@
 // Incapsulates and returns the graph object.
 //  Overrides methods which change the graph. 
 //  When the methods are called invokes correspondent View methods.
-function wrap (graph) {
+function wrap(graph) {
 
     graph.node = Object.create(graph.node);
     graph.edge = Object.create(graph.edge);

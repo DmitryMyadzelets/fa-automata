@@ -1,9 +1,9 @@
 Bugs
 + Nodes don't appear when a new graph attached without active forces.
-- Stack of undo\redo reffers to a wrong view\objects when a new graph attached. (Make a local stack attached to the view).a
+- Stack of undo\redo reffers to a wrong view\objects when a new graph attached. (Make a local stack attached to the view).
 
 
-Must to do
+Must do
 + Make 'initial' state command
 - Make export to a usable formats.
 	+ SVG. What programs can accept SVG? Latex (how?), Inscape, ...
@@ -11,7 +11,7 @@ Must to do
 + Make github...io page for demonstration.
 	- Describe API
 
-May to do
+May do
 - Too many savings to local storage while editing.
 - Implement edge movement in the model (it's in wrapper only).
 - Make on('update', function () {} ) instead of o[key] = function () {} for the events.
@@ -25,3 +25,4 @@ May to do
 Architecture wrt SOLID principles
 - Open Closed Principle (OSP). The nodes are always circles now, but it can be changed. Calculation of edges implies that the nodes are circles. a node should provide connection points to an edge (like in Violet UML editor), given some information from the edge (e.g. an outgoing angle, a reference to another node etc.);
 - Compose atomic undoable operations into compaund operations? E.g. Create new edge into empty space = adding an edge and a node.
+

@@ -33,7 +33,7 @@ var commands = {
 function commands_methods() {
 
     function on_event() {
-        var fun = this.on['update'];
+        var fun = this.on.update;
         if (typeof fun === 'function') {
             fun();
         }
@@ -112,15 +112,15 @@ function commands_methods() {
 
 commands_methods.call(commands);
 
-    // Makes a copy of each item in arguments if it is an array
-    function copy_arguments() {
-        var i = arguments.length;
-        while (i--) {
-            if (arguments[i] instanceof Array) {
-                arguments[i] = arguments[i].slice(0);
-            }
+// Makes a copy of each item in arguments if it is an array
+function copy_arguments() {
+    var i = arguments.length;
+    while (i--) {
+        if (arguments[i] instanceof Array) {
+            arguments[i] = arguments[i].slice(0);
         }
     }
+}
 
 
 commands.new('add_node', function (model, d) {

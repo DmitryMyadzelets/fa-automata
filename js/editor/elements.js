@@ -1,6 +1,7 @@
 
 // JSLint options:
-/*global vec, View */
+/*global vec, View, d3 */
+/*jslint bitwise: true */
 "use strict";
 
 var elements = {};
@@ -109,20 +110,20 @@ elements.get_edge_transformation = (function () {
         elements.make_edge.r1 = d.source.r !== undefined ? d.source.r : 16;
         elements.make_edge.r2 = d.target.r !== undefined ? d.target.r : 16;
         // text coordinates (between the edge's nodes, by default)
-        d.tx = (d.source.x + d.target.x) >> 1;
-        d.ty = (d.source.y + d.target.y) >> 1;
+        d.tx = (d.source.x + d.target.x) >>> 1;
+        d.ty = (d.source.y + d.target.y) >>> 1;
         switch (d.type) {
         case 1:
             elements.make_edge.curve(v1, v2, cv);
             // d.tx = cv[0];
             // d.ty = cv[1];
-            d.tx = (cv[0] + v2[0]) >> 1;
-            d.ty = (cv[1] + v2[1]) >> 1;
+            d.tx = (cv[0] + v2[0]) >>> 1;
+            d.ty = (cv[1] + v2[1]) >>> 1;
             break;
         case 2:
             elements.make_edge.loop(v1, v2, cv, cv2);
-            d.tx = (cv[0] + cv2[0]) >> 1;
-            d.ty = (cv[1] + cv2[1]) >> 1;
+            d.tx = (cv[0] + cv2[0]) >>> 1;
+            d.ty = (cv[1] + cv2[1]) >>> 1;
             break;
         default:
             elements.make_edge.stright(v1, v2);
@@ -153,14 +154,14 @@ elements.get_node_transformation = function (d) {
 
 
 
-function node_radius (d) {
+function node_radius(d) {
     if (d && d.r) {
         return d.r;
     }
     return NODE_RADIUS;
 }
 
-function node_marked_radius (d) {
+function node_marked_radius(d) {
     if (d && d.r) {
         return d.r;
     }
@@ -207,7 +208,7 @@ elements.add_node = function (selection, handler) {
         .on('dblclick', handler);
 
     g.append('circle')
-        .attr('r', node_radius)
+        .attr('r', node_radius);
 
     g.call(elements.mark_node);
 
@@ -216,7 +217,7 @@ elements.add_node = function (selection, handler) {
         .attr('alignment-baseline', 'center')
         .text(function (d) { return d.text || ''; });
 
-    elements.initial(g.filter(function(d) { return !!d.initial; }));
+    elements.initial(g.filter(function (d) { return !!d.initial; }));
 };
 
 

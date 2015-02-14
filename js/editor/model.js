@@ -1,6 +1,6 @@
 
 // JSLint options:
-/*global */
+/*global clone, float2int, wrap*/
 "use strict";
 
 var Model = (function () {
@@ -20,7 +20,7 @@ var Model = (function () {
     function nodes_methods() {
 
         var delta = [0, 0];
-        var xy = [0, 0];
+        // var xy = [0, 0];
 
         function shift(d) {
             d.x += delta[0];
@@ -39,7 +39,7 @@ var Model = (function () {
         // Changes node position relatively to the previous one
         this.shift = function (d, dxy) {
             delta[0] = dxy[0];
-            delta[1] = dxy[1]
+            delta[1] = dxy[1];
             foreach(d, shift);
         };
 
@@ -61,8 +61,8 @@ var Model = (function () {
         function mark(d) { d.marked = true; }
         function unmark(d) { delete d.marked; }
 
-        this.mark = function (d) { foreach(d, mark); }
-        this.unmark = function (d) { foreach(d, unmark); }
+        this.mark = function (d) { foreach(d, mark); };
+        this.unmark = function (d) { foreach(d, unmark); };
 
         // Making [not] initial nodes\states
 
@@ -72,7 +72,7 @@ var Model = (function () {
         this.initial = function (d) {
             foreach(this.data, uninitial);
             foreach(d, initial);
-        }
+        };
 
     }
 
@@ -155,7 +155,7 @@ var Model = (function () {
             return this;
         };
 
-    };
+    }
 
 
     // The prototype with basic methods
@@ -183,11 +183,11 @@ var Model = (function () {
 
             // Replace default nodes and edges arrays with ones provided by user.
             // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
-            if(user_graph) {
-                if (user_graph['nodes'] instanceof Array) {
-                    graph.node.data = user_graph['nodes'];
-                    if (user_graph['edges'] instanceof Array) {
-                        graph.edge.data = user_graph['edges'];
+            if (user_graph) {
+                if (user_graph.nodes instanceof Array) {
+                    graph.node.data = user_graph.nodes;
+                    if (user_graph.edges instanceof Array) {
+                        graph.edge.data = user_graph.edges;
                     }
                 }
             }
@@ -203,19 +203,19 @@ var Model = (function () {
             // Returns graph object ready for convertion to JSON, 
             // with the nodes references in edges replaced by indexes
             graph.storable = function () {
-                var graph = this.object();
+                var g = this.object();
                 // Copy edges while calculating the indexes to the nodes
-                graph.edges = graph.edges.map(function (edge) {
+                g.edges = g.edges.map(function (edge) {
                     var e = clone(edge);
-                    e.source = graph.nodes.indexOf(edge.source);
-                    e.target = graph.nodes.indexOf(edge.target);
+                    e.source = g.nodes.indexOf(edge.source);
+                    e.target = g.nodes.indexOf(edge.target);
                     return e;
                 });
                 // Make deep clone, i.e. the objects of the copy will have no references to the source
-                graph = clone(graph, true);
+                g = clone(g, true);
                 // Convert all the  float values to integers
-                float2int(graph);
-                return graph;
+                float2int(g);
+                return g;
             };
 
 
