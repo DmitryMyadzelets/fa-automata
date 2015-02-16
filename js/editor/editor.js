@@ -1,6 +1,6 @@
 !function () {
 
-var ed = { version: "1.0.0" };
+var editor = { version: "1.0.0" };
 
 //
 // This module implements an user interface for interacting with 
@@ -2017,7 +2017,7 @@ View.prototype.controller = (function () {
 /*global clone, float2int, wrap*/
 "use strict";
 
-var Model = (function () {
+var Graph = (function () {
 
     // Helpers
     // Calls function 'fun' for a single datum or an array of data
@@ -2087,7 +2087,6 @@ var Model = (function () {
             foreach(this.data, uninitial);
             foreach(d, initial);
         };
-
     }
 
 
@@ -2173,7 +2172,7 @@ var Model = (function () {
 
 
     // The prototype with basic methods
-    var basic_prototype = Object.create({});
+    var basic_prototype = {};
     basic_methods.call(basic_prototype);
 
     // The prototype with nodes methods
@@ -2184,61 +2183,60 @@ var Model = (function () {
     edges_methods.call(edges_prototype);
 
 
-    // Model public interface
-    return {
-        // Creates and returns a new graph object
-        graph : function (user_graph) {
-            var graph = {
-                node : Object.create(nodes_prototype),
-                edge : Object.create(edges_prototype),
-            };
-            graph.node.data = [];
-            graph.edge.data = [];
+    // Graph public interface
 
-            // Replace default nodes and edges arrays with ones provided by user.
-            // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
-            if (user_graph) {
-                if (user_graph.nodes instanceof Array) {
-                    graph.node.data = user_graph.nodes;
-                    if (user_graph.edges instanceof Array) {
-                        graph.edge.data = user_graph.edges;
-                    }
+    var graph = function (user_graph) {
+
+        this.node = Object.create(nodes_prototype);
+        this.edge = Object.create(edges_prototype);
+
+        this.node.data = [];
+        this.edge.data = [];
+
+        // Replace default nodes and edges arrays with ones provided by user.
+        // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
+        if (user_graph) {
+            if (user_graph.nodes instanceof Array) {
+                this.node.data = user_graph.nodes;
+                if (user_graph.edges instanceof Array) {
+                    this.edge.data = user_graph.edges;
                 }
             }
+        }
 
-            // Returns a simple graph object with only nodes and edges (for serialization etc)
-            graph.object = function () {
-                return {
-                    nodes : this.node.data,
-                    edges : this.edge.data
-                };
-            };
-
-            // Returns graph object ready for convertion to JSON, 
-            // with the nodes references in edges replaced by indexes
-            graph.storable = function () {
-                var g = this.object();
-                // Copy edges while calculating the indexes to the nodes
-                g.edges = g.edges.map(function (edge) {
-                    var e = clone(edge);
-                    e.source = g.nodes.indexOf(edge.source);
-                    e.target = g.nodes.indexOf(edge.target);
-                    return e;
-                });
-                // Make deep clone, i.e. the objects of the copy will have no references to the source
-                g = clone(g, true);
-                // Convert all the  float values to integers
-                float2int(g);
-                return g;
-            };
-
-
-            if (typeof wrap === 'function') {
-                graph = wrap(graph);
-            }
-            return graph;
+        if (typeof wrap === 'function') {
+            wrap(this);
         }
     };
+
+    // Returns a simple graph object with only nodes and edges (for serialization etc)
+    graph.prototype.object = function () {
+        return {
+            nodes : this.node.data,
+            edges : this.edge.data
+        };
+    };
+
+    // Returns graph object ready for convertion to JSON, 
+    // with the nodes references in edges replaced by indexes
+    graph.prototype.storable = function () {
+        var g = this.object();
+        // Copy edges while calculating the indexes to the nodes
+        g.edges = g.edges.map(function (edge) {
+            var e = clone(edge);
+            e.source = g.nodes.indexOf(edge.source);
+            e.target = g.nodes.indexOf(edge.target);
+            return e;
+        });
+        // Make deep clone, such that the objects of the copy will have no references to the source
+        g = clone(g, true);
+        // Convert all the float values to integers
+        float2int(g);
+        return g;
+    };
+
+
+    return graph;
 
 }());
 
@@ -2345,28 +2343,25 @@ function wrap(graph) {
 
 
 
-ed.instance = function (container) {
-    var o = {
-        view : new View(container),
-        set_graph : function (graph) {
-            this.graph = Model.graph(graph);
-            this.view.model = this.graph;
-            this.graph.view = this.view;
-            this.view.graph(this.graph.object());
-        }
+editor.Instance = function (container) {
+    this.view = new View(container);
+    this.set_graph = function (graph) {
+        // this.graph = Graph.graph(graph);
+        this.graph = new Graph(graph);
+        this.view.model = this.graph;
+        this.graph.view = this.view;
+        this.view.graph(this.graph.object());
     };
 
-    o.view.controller().control_view(); // Attaches controller's handlers to the view
-    o.set_graph();
-
-    return o;
+    this.view.controller().control_view(); // Attaches controller's handlers to the view
+    this.set_graph();
 };
 
 
-ed.commands = commands;
+editor.commands = commands;
+editor.Graph = Graph;
 
-this.jA = this.jA || {};
-this.jA.editor = ed;
-this.jA.model = Model;
+this.jas = this.jas || {};
+this.jas.editor = editor;
 
 }(window);

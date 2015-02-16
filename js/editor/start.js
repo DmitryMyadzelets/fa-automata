@@ -1,6 +1,6 @@
 !function () {
 
-var ed = { version: "1.0.0" };
+var editor = { version: "1.0.0" };
 
 //
 // This module implements an user interface for interacting with 
