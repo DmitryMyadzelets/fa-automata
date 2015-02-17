@@ -1,6 +1,6 @@
-
 // JSLint options:
 /*global clone, float2int, wrap*/
+
 "use strict";
 
 var Graph = (function () {

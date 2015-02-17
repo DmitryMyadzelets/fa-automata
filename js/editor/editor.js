@@ -52,7 +52,19 @@ function float2int(obj) {
     }
 }
 
-
+// Simple observer of object's methods
+// Sets a hook for the method call of the given object
+function after(obj, method, hook) {
+    var old = obj[method];
+    if (typeof old !== 'function' || typeof hook !== 'function') {
+        throw new Error('the parameters must be functions');
+    }
+    obj[method] = function () {
+        var ret = old.apply(this, arguments);
+        hook.apply(this, arguments);
+        return ret;
+    };
+}
 
 "use strict";
 
@@ -2012,9 +2024,9 @@ View.prototype.controller = (function () {
 }());
 
 
-
 // JSLint options:
 /*global clone, float2int, wrap*/
+
 "use strict";
 
 var Graph = (function () {
@@ -2236,7 +2248,7 @@ var Graph = (function () {
 
 
 // JSLint options:
-/*global View*/
+/*global View, after*/
 "use strict";
 
 // Incapsulates and returns the graph object.
@@ -2245,20 +2257,6 @@ var Graph = (function () {
 function wrap(graph, aView) {
 
     var view = aView;
-
-    // Creates a new function for o.key, which calls the old o.key and 'fn' after it
-    function after(o, key, fn) {
-        var ofn = o[key];
-        if (typeof ofn !== 'function' || typeof fn !== 'function') {
-            throw new Error('Function should be called after function here');
-        }
-        o[key] = function () {
-            var ret = ofn.apply(this, arguments);
-            fn.apply(this, arguments);
-            return ret;
-        };
-    }
-
 
     function update_view() {
         view.update();
@@ -2282,28 +2280,37 @@ function wrap(graph, aView) {
 }
 
 
+// JSLint options:
+/*global editor, View, Graph, commands, wrap, after*/
 
-editor.Instance = function (container) {
+var Instance = function (container) {
+
     this.view = new View(container);
-    this.set_graph = function (graph) {
-        // Create new graph
-        this.graph = new Graph(graph);
-        // Create wrapper to link the graph to the view
-        wrap(this.graph, this.view);
 
-        this.view.model = this.graph;
-        this.view.graph(this.graph.object());
-    };
+    // Attache controller's handlers to the view
+    this.view.controller().control_view();
 
-    this.view.controller().control_view(); // Attaches controller's handlers to the view
-    this.set_graph();
+    Instance.prototype.set_graph.call(this);
 };
 
 
-editor.commands = commands;
+Instance.prototype.set_graph = function (graph) {
+    // Create new graph
+    this.graph = new Graph(graph);
+    // Create the wrapper and link the graph to the view
+    wrap(this.graph, this.view);
+
+    this.view.model = this.graph;
+    this.view.graph(this.graph.object());
+};
+
+
+editor.Instance = Instance;
 editor.Graph = Graph;
+editor.commands = commands;
 
 this.jas = this.jas || {};
 this.jas.editor = editor;
+this.jas.after = after;
 
 }(window);

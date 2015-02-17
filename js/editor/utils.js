@@ -36,4 +36,16 @@ function float2int(obj) {
     }
 }
 
-
+// Simple observer of object's methods
+// Sets a hook for the method call of the given object
+function after(obj, method, hook) {
+    var old = obj[method];
+    if (typeof old !== 'function' || typeof hook !== 'function') {
+        throw new Error('the parameters must be functions');
+    }
+    obj[method] = function () {
+        var ret = old.apply(this, arguments);
+        hook.apply(this, arguments);
+        return ret;
+    };
+}

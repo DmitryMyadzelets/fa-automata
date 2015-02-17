@@ -1,25 +1,34 @@
+// JSLint options:
+/*global editor, View, Graph, commands, wrap, after*/
 
-editor.Instance = function (container) {
+var Instance = function (container) {
+
     this.view = new View(container);
-    this.set_graph = function (graph) {
-        // Create new graph
-        this.graph = new Graph(graph);
-        // Create wrapper to link the graph to the view
-        wrap(this.graph, this.view);
 
-        this.view.model = this.graph;
-        this.view.graph(this.graph.object());
-    };
+    // Attache controller's handlers to the view
+    this.view.controller().control_view();
 
-    this.view.controller().control_view(); // Attaches controller's handlers to the view
-    this.set_graph();
+    Instance.prototype.set_graph.call(this);
 };
 
 
-editor.commands = commands;
+Instance.prototype.set_graph = function (graph) {
+    // Create new graph
+    this.graph = new Graph(graph);
+    // Create the wrapper and link the graph to the view
+    wrap(this.graph, this.view);
+
+    this.view.model = this.graph;
+    this.view.graph(this.graph.object());
+};
+
+
+editor.Instance = Instance;
 editor.Graph = Graph;
+editor.commands = commands;
 
 this.jas = this.jas || {};
 this.jas.editor = editor;
+this.jas.after = after;
 
 }(window);
