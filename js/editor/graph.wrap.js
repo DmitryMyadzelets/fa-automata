@@ -22,11 +22,13 @@ function wrap(graph, aView) {
     after(graph.node, 'mark', view.mark_node.bind(view));
     after(graph.node, 'unmark', view.mark_node.bind(view));
     after(graph.node, 'initial', view.initial.bind(view));
+    after(graph.node, 'stress', view.stress_node.bind(view));
 
     after(graph.edge, 'add', update_view);
     after(graph.edge, 'remove', update_view);
     after(graph.edge, 'text', view.edge_text.bind(view));
     after(graph.edge, 'move', update_view);
+    after(graph.edge, 'stress', view.stress_edge.bind(view));
 
     return graph;
 }

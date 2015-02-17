@@ -132,6 +132,14 @@ var Graph = (function () {
             }
         }
 
+        function stress(d) {
+            d.stressed = true;
+        }
+
+        function unstress(d) {
+            delete d.stressed;
+        }
+
         // Adds a single datum or an array of data into the array
         this.add = function (d) {
             data = this.data;
@@ -150,6 +158,11 @@ var Graph = (function () {
         this.text = function (d, text) {
             d.text = text;
             return this;
+        };
+
+        this.stress = function (d) {
+            foreach(this.data, unstress);
+            foreach(d, stress);
         };
 
     }

@@ -1064,6 +1064,22 @@ function view_methods() {
             .attr('x', d.tx)
             .attr('y', d.ty);
     };
+
+    this.stress_node = function (d) {
+        var node = this.node;
+        node.select('.stressed').classed('stressed', false);
+        foreach(d, function (v) {
+            filter(node, v).select('circle').classed('stressed', true);
+        });
+    };
+
+    this.stress_edge = function (d) {
+        var edge = this.edge;
+        edge.select('.stressed').classed('stressed', false);
+        foreach(d, function (v) {
+            filter(edge, v).select('path.edge').classed('stressed', true);
+        });
+    };
 }
 
 
@@ -2158,6 +2174,14 @@ var Graph = (function () {
             }
         }
 
+        function stress(d) {
+            d.stressed = true;
+        }
+
+        function unstress(d) {
+            delete d.stressed;
+        }
+
         // Adds a single datum or an array of data into the array
         this.add = function (d) {
             data = this.data;
@@ -2176,6 +2200,11 @@ var Graph = (function () {
         this.text = function (d, text) {
             d.text = text;
             return this;
+        };
+
+        this.stress = function (d) {
+            foreach(this.data, unstress);
+            foreach(d, stress);
         };
 
     }
@@ -2270,11 +2299,13 @@ function wrap(graph, aView) {
     after(graph.node, 'mark', view.mark_node.bind(view));
     after(graph.node, 'unmark', view.mark_node.bind(view));
     after(graph.node, 'initial', view.initial.bind(view));
+    after(graph.node, 'stress', view.stress_node.bind(view));
 
     after(graph.edge, 'add', update_view);
     after(graph.edge, 'remove', update_view);
     after(graph.edge, 'text', view.edge_text.bind(view));
     after(graph.edge, 'move', update_view);
+    after(graph.edge, 'stress', view.stress_edge.bind(view));
 
     return graph;
 }

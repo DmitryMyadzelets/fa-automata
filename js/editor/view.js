@@ -417,6 +417,22 @@ function view_methods() {
             .attr('x', d.tx)
             .attr('y', d.ty);
     };
+
+    this.stress_node = function (d) {
+        var node = this.node;
+        node.select('.stressed').classed('stressed', false);
+        foreach(d, function (v) {
+            filter(node, v).select('circle').classed('stressed', true);
+        });
+    };
+
+    this.stress_edge = function (d) {
+        var edge = this.edge;
+        edge.select('.stressed').classed('stressed', false);
+        foreach(d, function (v) {
+            filter(edge, v).select('path.edge').classed('stressed', true);
+        });
+    };
 }
 
 
