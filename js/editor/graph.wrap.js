@@ -6,26 +6,31 @@
 // Incapsulates and returns the graph object.
 //  Overrides methods which change the graph. 
 //  When the methods are called invokes correspondent View methods.
-function wrap(graph) {
+function wrap(graph, aView) {
 
+    var view = aView;
+
+    // References to the parent objects
+    var node = graph.node;
+    var edge = graph.edge;
+
+    // Child objects
     graph.node = Object.create(graph.node);
     graph.edge = Object.create(graph.edge);
 
-    var node = graph.node.__proto__;
-    var edge = graph.edge.__proto__;
 
     function update_view() {
-        graph.view.update();
+        view.update();
     }
 
-    graph.node.add = function (d) {
+    graph.node.add = function () {
         var ret = node.add.apply(this, arguments);
         update_view();
         return ret;
     };
 
 
-    graph.node.remove = function (d) {
+    graph.node.remove = function () {
         var ret = node.remove.apply(this, arguments);
         update_view();
         return ret;
@@ -33,37 +38,37 @@ function wrap(graph) {
 
     graph.node.text = function (d, text) {
         var ret = node.text.apply(this, arguments);
-        graph.view.node_text(d, text);
+        view.node_text(d, text);
         return ret;
     };
 
     graph.node.shift = function () {
         var ret = node.shift.apply(this, arguments);
-        graph.view.transform();
+        view.transform();
         return ret;
     };
 
     graph.node.move = function () {
         var ret = node.move.apply(this, arguments);
-        graph.view.transform();
+        view.transform();
         return ret;
     };
 
     graph.node.mark = function (d) {
         var ret = node.mark.apply(this, arguments);
-        graph.view.mark_node(d);
+        view.mark_node(d);
         return ret;
     };
 
     graph.node.unmark = function (d) {
         var ret = node.unmark.apply(this, arguments);
-        graph.view.mark_node(d);
+        view.mark_node(d);
         return ret;
     };
 
     graph.node.initial = function (d) {
         node.initial(d);
-        graph.view.initial(d);
+        view.initial(d);
     };
 
     graph.edge.add = function () {
@@ -81,7 +86,7 @@ function wrap(graph) {
 
     graph.edge.text = function (d, text) {
         var ret = edge.text.apply(this, arguments);
-        graph.view.edge_text(d, text);
+        view.edge_text(d, text);
         return ret;
     };
 
@@ -91,9 +96,6 @@ function wrap(graph) {
         d.target = target;
         update_view();
     };
-
-
-
 
     return graph;
 }

@@ -20,7 +20,6 @@ var Graph = (function () {
     function nodes_methods() {
 
         var delta = [0, 0];
-        // var xy = [0, 0];
 
         function shift(d) {
             d.x += delta[0];
@@ -28,13 +27,6 @@ var Graph = (function () {
             d.px = d.x;
             d.py = d.y;
         }
-
-        // function move(d) {
-        //     d.x = xy[0];
-        //     d.y = xy[1];
-        //     d.px = d.x;
-        //     d.py = d.y;
-        // }
 
         // Changes node position relatively to the previous one
         this.shift = function (d, dxy) {
@@ -169,8 +161,7 @@ var Graph = (function () {
     edges_methods.call(edges_prototype);
 
 
-    // Graph public interface
-
+    // Graph constructor
     var graph = function (user_graph) {
 
         this.node = Object.create(nodes_prototype);
@@ -188,10 +179,6 @@ var Graph = (function () {
                     this.edge.data = user_graph.edges;
                 }
             }
-        }
-
-        if (typeof wrap === 'function') {
-            wrap(this);
         }
     };
 
