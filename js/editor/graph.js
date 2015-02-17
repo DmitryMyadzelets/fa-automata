@@ -107,6 +107,12 @@ var Graph = (function () {
             });
         };
 
+        // Move edge from its previous nodes to nodes 'target', 'source'
+        this.move = function (d, source, target) {
+            d.source = source;
+            d.target = target;
+        };
+
     }
 
 

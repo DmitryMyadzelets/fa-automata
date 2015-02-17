@@ -2121,6 +2121,12 @@ var Graph = (function () {
             });
         };
 
+        // Move edge from its previous nodes to nodes 'target', 'source'
+        this.move = function (d, source, target) {
+            d.source = source;
+            d.target = target;
+        };
+
     }
 
 
@@ -2240,92 +2246,37 @@ function wrap(graph, aView) {
 
     var view = aView;
 
-    // References to the parent objects
-    var node = graph.node;
-    var edge = graph.edge;
-
-    // Child objects
-    graph.node = Object.create(graph.node);
-    graph.edge = Object.create(graph.edge);
+    // Creates a new function for o.key, which calls the old o.key and 'fn' after it
+    function after(o, key, fn) {
+        var ofn = o[key];
+        if (typeof ofn !== 'function' || typeof fn !== 'function') {
+            throw new Error('Function should be called after function here');
+        }
+        o[key] = function () {
+            var ret = ofn.apply(this, arguments);
+            fn.apply(this, arguments);
+            return ret;
+        };
+    }
 
 
     function update_view() {
         view.update();
     }
 
-    graph.node.add = function () {
-        var ret = node.add.apply(this, arguments);
-        update_view();
-        return ret;
-    };
+    after(graph.node, 'add', update_view);
+    after(graph.node, 'remove', update_view);
+    after(graph.node, 'text', view.node_text.bind(view));
+    after(graph.node, 'shift', view.transform);
+    after(graph.node, 'move', view.transform);
+    after(graph.node, 'mark', view.mark_node.bind(view));
+    after(graph.node, 'unmark', view.mark_node.bind(view));
+    after(graph.node, 'initial', view.initial.bind(view));
 
-
-    graph.node.remove = function () {
-        var ret = node.remove.apply(this, arguments);
-        update_view();
-        return ret;
-    };
-
-    graph.node.text = function (d, text) {
-        var ret = node.text.apply(this, arguments);
-        view.node_text(d, text);
-        return ret;
-    };
-
-    graph.node.shift = function () {
-        var ret = node.shift.apply(this, arguments);
-        view.transform();
-        return ret;
-    };
-
-    graph.node.move = function () {
-        var ret = node.move.apply(this, arguments);
-        view.transform();
-        return ret;
-    };
-
-    graph.node.mark = function (d) {
-        var ret = node.mark.apply(this, arguments);
-        view.mark_node(d);
-        return ret;
-    };
-
-    graph.node.unmark = function (d) {
-        var ret = node.unmark.apply(this, arguments);
-        view.mark_node(d);
-        return ret;
-    };
-
-    graph.node.initial = function (d) {
-        node.initial(d);
-        view.initial(d);
-    };
-
-    graph.edge.add = function () {
-        var ret = edge.add.apply(this, arguments);
-        update_view();
-        return ret;
-    };
-
-    graph.edge.remove = function () {
-        var ret = edge.remove.apply(this, arguments);
-        update_view();
-        return ret;
-    };
-
-
-    graph.edge.text = function (d, text) {
-        var ret = edge.text.apply(this, arguments);
-        view.edge_text(d, text);
-        return ret;
-    };
-
-    // Move edge to nodes 'target', 'source'
-    graph.edge.move = function (d, source, target) {
-        d.source = source;
-        d.target = target;
-        update_view();
-    };
+    after(graph.edge, 'add', update_view);
+    after(graph.edge, 'remove', update_view);
+    after(graph.edge, 'text', view.edge_text.bind(view));
+    after(graph.edge, 'move', update_view);
 
     return graph;
 }
