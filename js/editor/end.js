@@ -5,7 +5,7 @@ var Instance = function (container) {
 
     this.view = new View(container);
 
-    // Attache controller's handlers to the view
+    // Attach controller's handlers to the view
     this.view.controller().control_view();
 
     Instance.prototype.set_graph.call(this);
