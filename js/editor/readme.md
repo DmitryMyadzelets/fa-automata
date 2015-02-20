@@ -73,3 +73,30 @@ For single elements only:
 
     .text(node, text)
     .text(edge, text)
+
+
+
+### Presence of methods
+
+    graph        wrapper   undo
+    node
+        add         +       +
+        remove      +       +
+        text        +       +
+        move        +       +
+        stress      +
+        shift       +
+        mark        +       +
+        unmark      +       +
+        initial     +       +
+    edge
+        add         +       +
+        remove      +       +
+        text        +       +
+        move        +       +
+        stress      +
+        adjacent
+        incoming
+        outgoing
+    view
+        spring              +

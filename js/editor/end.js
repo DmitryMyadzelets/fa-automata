@@ -15,7 +15,7 @@ var Instance = function (container) {
 Instance.prototype.set_graph = function (graph) {
     // Create new graph
     this.graph = new Graph(graph);
-    // Create the wrapper and link the graph to the view
+    // Wrap graph methods with new methods which update the view
     wrap(this.graph, this.view);
 
     this.view.model = this.graph;

@@ -58,10 +58,10 @@ function load_graph(name) {
 }
 
 
-jas.editor.commands.on['update'] = function () {
+jas.after(jas.editor.commands, 'update', function () {
     var graph = view1.graph.storable();
     save_graph(graph, 'graph');
-};
+});
 
 
 (function init() {
@@ -127,5 +127,4 @@ window.moo = function () {
         edges : [{source : 0, target : 1}, {source : 1, target : 1}]
     });
 };
-
 
