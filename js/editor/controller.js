@@ -359,9 +359,10 @@ var control_edge_drag = (function () {
 }());
 
 
-View.prototype.controller = (function () {
+var Controller = (function () {
 
     var view;           // a view where the current event occurs
+    var old_view;
     var model;          // a model connected to the current view
     var source;         // a SVG element where the current event occurs
 
@@ -373,6 +374,7 @@ View.prototype.controller = (function () {
     var old_state;      // Reference to a previous state
 
     var pan, x, y;
+
 
     var states = {
         init : function (d) {
@@ -584,76 +586,67 @@ View.prototype.controller = (function () {
         }
     }
 
-    var old_view = null;
 
+    function event() {
 
-    var methods = {
-        event : function () {
-            if (!view) { return; }
+        if (!view) { return; }
 
-            // Do not process events if the state is not initial.
-            // It is necessary when user drags elements outside of the current view.
-            if (old_view !== view) {
-                if (state !== states.init) {
-                    return;
-                }
-                old_view = view;
+        // Do not process events if the state is not initial.
+        // It is necessary when user drags elements outside of the current view.
+        if (old_view !== view) {
+            if (state !== states.init) {
+                return;
             }
-
-            // Set default event source in case it is not set by 'set_event' method
-            source = source || d3.event.target.nodeName;
-
-            old_state = state;
-            state.apply(this, arguments);
-
-            // Clear the context to prevent false process next time
-            view = null;
-            source = null;
-
-            // d3.event.stopPropagation();
-
-            // If there was a transition from state to state
-            if (old_state !== state) {
-                // Trace the current transition
-                console.log('transition:', old_state._name + ' -> ' + state._name);
-            }
-        },
-
-        // Sets context in which an event occurs
-        // Returns controller object for subsequent invocation
-        context : function (a_element) {
-            source = a_element;
-            return this;
-        },
-        // Sets event handlers for the given View
-        control_view : function () {
-            var self = view;
-            // Handles nodes events
-            view.node_handler = function () {
-                self.controller().context('node').event.apply(this, arguments);
-            };
-
-            // Handles edge events
-            view.edge_handler = function () {
-                self.controller().context('edge').event.apply(this, arguments);
-            };
-
-            // Handles plane (out of other elements) events
-            view.plane_handler = function () {
-                self.controller().context('plane').event.apply(this, arguments);
-            };
-
-            return methods;
+            old_view = view;
         }
+
+        old_state = state;
+        state.apply(this, arguments);
+
+        // Clear the context to prevent false process next time
+        view = null;
+        source = null;
+
+        // d3.event.stopPropagation();
+
+        // If there was a transition from state to state
+        if (old_state !== state) {
+            // Trace the current transition
+            console.log('transition:', old_state._name + ' -> ' + state._name);
+        }
+    }
+
+
+    var instance = function (aView) {
+        this.view = aView;
+
+        // Sets event handlers for the given View
+        var self = this;
+        // Handles nodes events
+        this.view.node_handler = function () {
+            view = self.view;
+            model = view.model;
+            source = 'node';
+            event.apply(this, arguments);
+        };
+
+        // Handles edge events
+        this.view.edge_handler = function () {
+            view = self.view;
+            model = view.model;
+            source = 'edge';
+            event.apply(this, arguments);
+        };
+
+        // Handles plane (out of other elements) events
+        this.view.plane_handler = function () {
+            view = self.view;
+            model = view.model;
+            source = 'plane';
+            event.apply(this, arguments);
+        };
     };
 
-    return function () {
-        view = this;
-        model = view.model;
-        if (!old_view) { old_view = view; }
-        return methods;
-    };
-
+    return instance;
 }());
-
 
