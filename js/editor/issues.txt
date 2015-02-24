@@ -12,6 +12,7 @@ Must do
 + Make github...io page for demonstration.
 	- Describe API
 
+
 May do
 - Too many savings to local storage while editing.
 + Implement edge movement in the model (it's in wrapper only).

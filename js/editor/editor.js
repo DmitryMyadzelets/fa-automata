@@ -1773,7 +1773,7 @@ var Controller = (function () {
                 case 46: // Delete
                     nodes = view.selected_nodes();
                     // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                    edges = commands.graph.edge.adjacent(nodes);
+                    edges = view.model.edge.adjacent(nodes);
                     edges = edges.concat(view.selected_edges().filter(
                         function (d) { return edges.indexOf(d) < 0; }
                     ));
@@ -2337,6 +2337,7 @@ Instance.prototype.set_graph = function (graph) {
     // Wrap graph methods with new methods which update the view
     wrap(this.graph, this.view);
 
+    this.view.model = graph;
     this.view.graph(this.graph.object());
 };
 
