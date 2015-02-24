@@ -1262,16 +1262,16 @@ var Commands = (function () {
                 console.error('Command', name, 'already exists');
                 return;
             }
-            var self = this;
             if (name && typeof fun === 'function') {
                 this[name] = function () {
-                    var command = new Command();
                     copy_arguments(arguments);
+                    var command = new Command();
+                    command.graph = this.graph;
                     fun.apply(command, arguments);
-                    self.macro.push(command);
+                    this.macro.push(command);
                     command.redo();
                     this.update();
-                    return self;
+                    return this;
                 };
             }
         };
@@ -1295,77 +1295,86 @@ var Commands = (function () {
     };
 
     prototype_methods.call(instance.prototype);
-    return instance;
 
+    return instance;
 }());
 
 
 
-var commands = new Commands();
-
-
-commands.new('add_node', function (graph, d) {
+Commands.prototype.new('add_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.add(d); };
     this.undo = function () { graph.node.remove(d); };
 });
 
 
-commands.new('del_node', function (graph, d) {
+Commands.prototype.new('del_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.remove(d); };
     this.undo = function () { graph.node.add(d); };
 });
 
 
-commands.new('add_edge', function (graph, d) {
+Commands.prototype.new('add_edge', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.edge.add(d); };
     this.undo = function () { graph.edge.remove(d); };
 });
 
 
-commands.new('del_edge', function (graph, d) {
+Commands.prototype.new('del_edge', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.edge.remove(d); };
     this.undo = function () { graph.edge.add(d); };
 });
 
 
-commands.new('node_text', function (graph, d, text) {
+Commands.prototype.new('node_text', function (d, text) {
+    var graph = this.graph;
     var old_text = d.text;
     this.redo = function () { graph.node.text(d, text); };
     this.undo = function () { graph.node.text(d, old_text); };
 });
 
-commands.new('edge_text', function (graph, d, text) {
+Commands.prototype.new('edge_text', function (d, text) {
+    var graph = this.graph;
     var old_text = d.text;
     this.redo = function () { graph.edge.text(d, text); };
     this.undo = function () { graph.edge.text(d, old_text); };
 });
 
-commands.new('move_node', function (graph, d, from, to) {
+Commands.prototype.new('move_node', function (d, from, to) {
+    var graph = this.graph;
     this.redo = function () { graph.node.move(d, to); };
     this.undo = function () { graph.node.move(d, from); };
 });
 
-commands.new('mark_node', function (graph, d) {
+Commands.prototype.new('mark_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.mark(d); };
     this.undo = function () { graph.node.unmark(d); };
 });
 
-commands.new('unmark_node', function (graph, d) {
+Commands.prototype.new('unmark_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.unmark(d); };
     this.undo = function () { graph.node.mark(d); };
 });
 
-commands.new('initial', function (graph, from, to) {
+Commands.prototype.new('initial', function (from, to) {
+    var graph = this.graph;
     this.redo = function () { graph.node.initial(to); };
     this.undo = function () { graph.node.initial(from); };
 });
 
-commands.new('move_edge', function (graph, d, from, to) {
+Commands.prototype.new('move_edge', function (d, from, to) {
+    var graph = this.graph;
     this.redo = function () { graph.edge.move(d, to[0], to[1]); };
     this.undo = function () { graph.edge.move(d, from[0], from[1]); };
 });
 
-commands.new('spring', function (view, graph) {
+Commands.prototype.new('spring', function (view) {
+    var graph = this.graph;
     var xy = [];
     var nodes =  graph.object().nodes;
     nodes.forEach(function (d) { xy.push(d.x, d.y); });
@@ -1390,6 +1399,8 @@ function mode_add() {
 function mode_move() {
     return d3.event.shiftKey;
 }
+
+var commands;       // commands to manipulate the model
 
 
 
@@ -1471,7 +1482,7 @@ var control_nodes_drag = (function () {
                 break;
             }
         },
-        update : function (view, model) {
+        update : function (view) {
             switch (d3.event.type) {
             case 'mousemove':
                 // How far we move the nodes
@@ -1492,7 +1503,7 @@ var control_nodes_drag = (function () {
                 if (view.spring()) {
                     view.spring.on();
                 } else {
-                    commands.start().move_node(model, nodes, from_xy, to_xy);
+                    commands.start().move_node(nodes, from_xy, to_xy);
                 }
                 state = states.init;
                 break;
@@ -1515,16 +1526,9 @@ var control_text_edit = (function () {
     var d, svg_text, text, enter;
     var view;
 
-    // Callback function which is called by textarea object when 
-    // user enters the text or cancels it.
-    // This function invokes the parent automaton
-    function callback() {
-        view.controller().context('text').event.apply(this, arguments);
-    }
-
     // The state machine
     var state, states = {
-        init : function (aView, datum, x, y, onenter) {
+        init : function (aView, datum, x, y, onenter, callback) {
             d3.event.stopPropagation();
 
             view = aView;
@@ -1590,7 +1594,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        wait_for_new_edge : function (view, model) {
+        wait_for_new_edge : function (view) {
             switch (d3.event.type) {
             case 'mouseup':
                 state = states.init;
@@ -1602,7 +1606,7 @@ var control_edge_drag = (function () {
                 node_d = { x : mouse[0], y : mouse[1], r : 1 };
                 // Create new edge
                 edge_d = { source : d_source, target : node_d };
-                commands.start().add_edge(model, edge_d);
+                commands.start().add_edge(edge_d);
                 drag_target = true;
                 edge_svg = view.edge_by_data(edge_d).selectAll('path');
                 view.spring.off();
@@ -1610,7 +1614,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        wait_for_edge_dragging : function (view, model, source, d) {
+        wait_for_edge_dragging : function (view, source, d) {
             switch (source) {
             case 'edge':
                 switch (d3.event.type) {
@@ -1626,7 +1630,7 @@ var control_edge_drag = (function () {
                         d.source = node_d;
                     }
                     // edge_d.text = d.text;
-                    commands.start().move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    commands.start().move_edge(edge_d, from, [edge_d.source, edge_d.target]);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     view.unselect_all();
                     view.select_edge(edge_d);
@@ -1639,7 +1643,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        drag_edge : function (view, model, source, d) {
+        drag_edge : function (view, source, d) {
             switch (d3.event.type) {
             case 'mousemove':
                 mouse = view.pan.mouse();
@@ -1649,7 +1653,7 @@ var control_edge_drag = (function () {
                 break;
             case 'mouseup':
                 delete node_d.r; // in order to use default radius
-                commands.add_node(model, node_d);
+                commands.add_node(node_d);
                 view.unselect_all();
                 view.select_edge(edge_d);
                 view.select_node(drag_target ? edge_d.target : edge_d.source);
@@ -1665,7 +1669,7 @@ var control_edge_drag = (function () {
                     } else {
                         edge_d.source = d;
                     }
-                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    commands.move_edge(edge_d, from, [edge_d.source, edge_d.target]);
                     view.spring.off();
                     state = states.drop_edge_or_exit;
                     break;
@@ -1673,7 +1677,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        drop_edge_or_exit : function (view, model, source) {
+        drop_edge_or_exit : function (view, source) {
             switch (source) {
             case 'node':
                 switch (d3.event.type) {
@@ -1684,7 +1688,7 @@ var control_edge_drag = (function () {
                     });
                     if (exists.length > 1) {
                         // Delete edge
-                        commands.del_edge(model, edge_d);
+                        commands.del_edge(edge_d);
                     }
                     if (!mode_add()) { view.unselect_all(); }
                     if (exists.length <= 1) {
@@ -1700,7 +1704,7 @@ var control_edge_drag = (function () {
                     } else {
                         edge_d.source = node_d;
                     }
-                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    commands.move_edge(edge_d, from, [edge_d.source, edge_d.target]);
                     view.spring.off();
                     state = states.drag_edge;
                     break;
@@ -1735,10 +1739,10 @@ var control_edge_drag = (function () {
 }());
 
 
-View.prototype.controller = (function () {
+var Controller = (function () {
 
     var view;           // a view where the current event occurs
-    var model;          // a model connected to the current view
+    var old_view;
     var source;         // a SVG element where the current event occurs
 
     var mouse;          // mouse position
@@ -1749,6 +1753,17 @@ View.prototype.controller = (function () {
     var old_state;      // Reference to a previous state
 
     var pan, x, y;
+
+    var self;
+
+    // Callback function which is called by textarea object when 
+    // user enters the text or cancels it.
+    // This function invokes the parent automaton
+    function text_callback() {
+        self.context('text');
+        self.event.apply(this, arguments);
+    }
+
 
     var states = {
         init : function (d) {
@@ -1763,8 +1778,8 @@ View.prototype.controller = (function () {
                     ));
                     // Delete nodes edges
                     commands.start()
-                        .del_node(model, nodes)
-                        .del_edge(model, edges);
+                        .del_node(nodes)
+                        .del_edge(edges);
                     state = states.wait_for_keyup;
                     break;
                 case 70: // F
@@ -1772,22 +1787,21 @@ View.prototype.controller = (function () {
                     if (view.spring()) {
                         view.spring(false);
                     } else {
-                        commands.start().spring(view, model);
+                        commands.start().spring(view);
                     }
                     break;
                 case 73: // I
                     // Mark a selected state as the initial one
-                    commands.start().initial(model,
-                        view._graph.nodes.filter(function (d) { return !!d.initial; }),
+                    commands.start().initial(view._graph.nodes.filter(function (d) { return !!d.initial; }),
                         view.selected_nodes());
                     break;
                 case 77: // M
                     // Mark selected states
                     nodes = view.selected_nodes();
                     if (mode_add()) {
-                        commands.start().unmark_node(model, nodes);
+                        commands.start().unmark_node(nodes);
                     } else {
-                        commands.start().mark_node(model, nodes);
+                        commands.start().mark_node(nodes);
                     }
                     break;
                 case 89: // Y
@@ -1819,7 +1833,7 @@ View.prototype.controller = (function () {
                         mouse = view.pan.mouse();
                         // Create new node
                         var node = { x : mouse[0], y : mouse[1] };
-                        commands.start().add_node(model, node);
+                        commands.start().add_node(node);
                         view.select_node(node);
                         break;
                     case 'mousedown':
@@ -1865,9 +1879,11 @@ View.prototype.controller = (function () {
                         x = d.x + pan[0];
                         y = d.y + pan[1];
 
-                        control_text_edit.call(this, view, d, x, y, function (d) {
-                            commands.start().node_text(model, d, this.value);
-                        });
+                        control_text_edit.call(this, view, d, x, y,
+                            function onenter(d) {
+                                commands.start().node_text(d, this.value);
+                            },
+                            text_callback);
 
                         state = states.edit_text;
                         break;
@@ -1901,9 +1917,11 @@ View.prototype.controller = (function () {
                         x = d.tx + pan[0];
                         y = d.ty + pan[1];
 
-                        control_text_edit.call(this, view, d, x, y, function (d) {
-                            commands.start().edge_text(model, d, this.value);
-                        });
+                        control_text_edit.call(this, view, d, x, y,
+                            function onenter(d) {
+                                commands.start().edge_text(d, this.value);
+                            },
+                            text_callback);
 
                         state = states.edit_text;
                         break;
@@ -1913,12 +1931,12 @@ View.prototype.controller = (function () {
             }
         },
         drag_node : function () {
-            if (control_nodes_drag.call(this, view, model).done) {
+            if (control_nodes_drag.call(this, view).done) {
                 state = states.init;
             }
         },
         drag_edge : function (d) {
-            if (control_edge_drag.call(this, view, model, source, d).done) {
+            if (control_edge_drag.call(this, view, source, d).done) {
                 state = states.init;
             }
         },
@@ -1960,78 +1978,72 @@ View.prototype.controller = (function () {
         }
     }
 
-    var old_view = null;
+    function context(src) {
+        self = this;
+        view = this.view;
+        commands = this.commands;
+        source = src;
+    }
 
 
-    var methods = {
-        event : function () {
-            if (!view) { return; }
+    function event() {
 
-            // Do not process events if the state is not initial.
-            // It is necessary when user drags elements outside of the current view.
-            if (old_view !== view) {
-                if (state !== states.init) {
-                    return;
-                }
-                old_view = view;
+        if (!view) { return; }
+
+        // Do not process events if the state is not initial.
+        // It is necessary when user drags elements outside of the current view.
+        if (old_view !== view) {
+            if (state !== states.init) {
+                return;
             }
-
-            // Set default event source in case it is not set by 'set_event' method
-            source = source || d3.event.target.nodeName;
-
-            old_state = state;
-            state.apply(this, arguments);
-
-            // Clear the context to prevent false process next time
-            view = null;
-            source = null;
-
-            // d3.event.stopPropagation();
-
-            // If there was a transition from state to state
-            if (old_state !== state) {
-                // Trace the current transition
-                console.log('transition:', old_state._name + ' -> ' + state._name);
-            }
-        },
-
-        // Sets context in which an event occurs
-        // Returns controller object for subsequent invocation
-        context : function (a_element) {
-            source = a_element;
-            return this;
-        },
-        // Sets event handlers for the given View
-        control_view : function () {
-            var self = view;
-            // Handles nodes events
-            view.node_handler = function () {
-                self.controller().context('node').event.apply(this, arguments);
-            };
-
-            // Handles edge events
-            view.edge_handler = function () {
-                self.controller().context('edge').event.apply(this, arguments);
-            };
-
-            // Handles plane (out of other elements) events
-            view.plane_handler = function () {
-                self.controller().context('plane').event.apply(this, arguments);
-            };
-
-            return methods;
+            old_view = view;
         }
+
+        old_state = state;
+        state.apply(this, arguments);
+
+        // Clear the context to prevent false process next time
+        view = null;
+        source = null;
+
+        // If there was a transition from state to state
+        if (old_state !== state) {
+            // Trace the current transition
+            console.log('transition:', old_state._name + ' -> ' + state._name);
+        }
+    }
+
+
+    var instance = function (aView, aCommands) {
+        this.view = aView;
+        this.commands = aCommands;
+
+        this.event = event;
+        this.context = context;
+
+        // Sets event handlers for the given View
+        var that = this;
+        // Handles nodes events
+        this.view.node_handler = function () {
+            context.call(that, 'node');
+            event.apply(this, arguments);
+        };
+
+        // Handles edge events
+        this.view.edge_handler = function () {
+            context.call(that, 'edge');
+            event.apply(this, arguments);
+        };
+
+        // Handles plane (out of other elements) events
+        this.view.plane_handler = function () {
+            context.call(that, 'plane');
+            event.apply(this, arguments);
+        };
     };
 
-    return function () {
-        view = this;
-        model = view.model;
-        if (!old_view) { old_view = view; }
-        return methods;
-    };
-
+    return instance;
 }());
-
 
 // JSLint options:
 /*global clone, float2int, wrap*/
@@ -2305,14 +2317,13 @@ function wrap(graph, aView) {
 
 
 // JSLint options:
-/*global editor, View, Graph, commands, wrap, after*/
+/*global editor, View, Graph, Commands, wrap, after, Controller*/
+
 
 var Instance = function (container) {
-
     this.view = new View(container);
-
-    // Attach controller's handlers to the view
-    this.view.controller().control_view();
+    this.commands = new Commands();
+    this.controller = new Controller(this.view, this.commands);
 
     Instance.prototype.set_graph.call(this);
 };
@@ -2321,6 +2332,7 @@ var Instance = function (container) {
 Instance.prototype.set_graph = function (graph) {
     // Create new graph
     this.graph = new Graph(graph);
+    this.commands.graph = this.graph;
     // Wrap graph methods with new methods which update the view
     wrap(this.graph, this.view);
 
@@ -2331,7 +2343,6 @@ Instance.prototype.set_graph = function (graph) {
 
 editor.Instance = Instance;
 editor.Graph = Graph;
-editor.commands = commands;
 
 this.jas = this.jas || {};
 this.jas.editor = editor;

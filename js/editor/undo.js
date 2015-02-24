@@ -67,16 +67,16 @@ var Commands = (function () {
                 console.error('Command', name, 'already exists');
                 return;
             }
-            var self = this;
             if (name && typeof fun === 'function') {
                 this[name] = function () {
-                    var command = new Command();
                     copy_arguments(arguments);
+                    var command = new Command();
+                    command.graph = this.graph;
                     fun.apply(command, arguments);
-                    self.macro.push(command);
+                    this.macro.push(command);
                     command.redo();
                     this.update();
-                    return self;
+                    return this;
                 };
             }
         };
@@ -100,77 +100,86 @@ var Commands = (function () {
     };
 
     prototype_methods.call(instance.prototype);
-    return instance;
 
+    return instance;
 }());
 
 
 
-var commands = new Commands();
-
-
-commands.new('add_node', function (graph, d) {
+Commands.prototype.new('add_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.add(d); };
     this.undo = function () { graph.node.remove(d); };
 });
 
 
-commands.new('del_node', function (graph, d) {
+Commands.prototype.new('del_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.remove(d); };
     this.undo = function () { graph.node.add(d); };
 });
 
 
-commands.new('add_edge', function (graph, d) {
+Commands.prototype.new('add_edge', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.edge.add(d); };
     this.undo = function () { graph.edge.remove(d); };
 });
 
 
-commands.new('del_edge', function (graph, d) {
+Commands.prototype.new('del_edge', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.edge.remove(d); };
     this.undo = function () { graph.edge.add(d); };
 });
 
 
-commands.new('node_text', function (graph, d, text) {
+Commands.prototype.new('node_text', function (d, text) {
+    var graph = this.graph;
     var old_text = d.text;
     this.redo = function () { graph.node.text(d, text); };
     this.undo = function () { graph.node.text(d, old_text); };
 });
 
-commands.new('edge_text', function (graph, d, text) {
+Commands.prototype.new('edge_text', function (d, text) {
+    var graph = this.graph;
     var old_text = d.text;
     this.redo = function () { graph.edge.text(d, text); };
     this.undo = function () { graph.edge.text(d, old_text); };
 });
 
-commands.new('move_node', function (graph, d, from, to) {
+Commands.prototype.new('move_node', function (d, from, to) {
+    var graph = this.graph;
     this.redo = function () { graph.node.move(d, to); };
     this.undo = function () { graph.node.move(d, from); };
 });
 
-commands.new('mark_node', function (graph, d) {
+Commands.prototype.new('mark_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.mark(d); };
     this.undo = function () { graph.node.unmark(d); };
 });
 
-commands.new('unmark_node', function (graph, d) {
+Commands.prototype.new('unmark_node', function (d) {
+    var graph = this.graph;
     this.redo = function () { graph.node.unmark(d); };
     this.undo = function () { graph.node.mark(d); };
 });
 
-commands.new('initial', function (graph, from, to) {
+Commands.prototype.new('initial', function (from, to) {
+    var graph = this.graph;
     this.redo = function () { graph.node.initial(to); };
     this.undo = function () { graph.node.initial(from); };
 });
 
-commands.new('move_edge', function (graph, d, from, to) {
+Commands.prototype.new('move_edge', function (d, from, to) {
+    var graph = this.graph;
     this.redo = function () { graph.edge.move(d, to[0], to[1]); };
     this.undo = function () { graph.edge.move(d, from[0], from[1]); };
 });
 
-commands.new('spring', function (view, graph) {
+Commands.prototype.new('spring', function (view) {
+    var graph = this.graph;
     var xy = [];
     var nodes =  graph.object().nodes;
     nodes.forEach(function (d) { xy.push(d.x, d.y); });

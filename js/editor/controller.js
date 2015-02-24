@@ -15,6 +15,8 @@ function mode_move() {
     return d3.event.shiftKey;
 }
 
+var commands;       // commands to manipulate the model
+
 
 
 // Controller of the selection by rectangle
@@ -95,7 +97,7 @@ var control_nodes_drag = (function () {
                 break;
             }
         },
-        update : function (view, model) {
+        update : function (view) {
             switch (d3.event.type) {
             case 'mousemove':
                 // How far we move the nodes
@@ -116,7 +118,7 @@ var control_nodes_drag = (function () {
                 if (view.spring()) {
                     view.spring.on();
                 } else {
-                    commands.start().move_node(model, nodes, from_xy, to_xy);
+                    commands.start().move_node(nodes, from_xy, to_xy);
                 }
                 state = states.init;
                 break;
@@ -139,16 +141,9 @@ var control_text_edit = (function () {
     var d, svg_text, text, enter;
     var view;
 
-    // Callback function which is called by textarea object when 
-    // user enters the text or cancels it.
-    // This function invokes the parent automaton
-    function callback() {
-        view.controller().context('text').event.apply(this, arguments);
-    }
-
     // The state machine
     var state, states = {
-        init : function (aView, datum, x, y, onenter) {
+        init : function (aView, datum, x, y, onenter, callback) {
             d3.event.stopPropagation();
 
             view = aView;
@@ -214,7 +209,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        wait_for_new_edge : function (view, model) {
+        wait_for_new_edge : function (view) {
             switch (d3.event.type) {
             case 'mouseup':
                 state = states.init;
@@ -226,7 +221,7 @@ var control_edge_drag = (function () {
                 node_d = { x : mouse[0], y : mouse[1], r : 1 };
                 // Create new edge
                 edge_d = { source : d_source, target : node_d };
-                commands.start().add_edge(model, edge_d);
+                commands.start().add_edge(edge_d);
                 drag_target = true;
                 edge_svg = view.edge_by_data(edge_d).selectAll('path');
                 view.spring.off();
@@ -234,7 +229,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        wait_for_edge_dragging : function (view, model, source, d) {
+        wait_for_edge_dragging : function (view, source, d) {
             switch (source) {
             case 'edge':
                 switch (d3.event.type) {
@@ -250,7 +245,7 @@ var control_edge_drag = (function () {
                         d.source = node_d;
                     }
                     // edge_d.text = d.text;
-                    commands.start().move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    commands.start().move_edge(edge_d, from, [edge_d.source, edge_d.target]);
                     edge_svg = view.edge_by_data(edge_d).selectAll('path');
                     view.unselect_all();
                     view.select_edge(edge_d);
@@ -263,7 +258,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        drag_edge : function (view, model, source, d) {
+        drag_edge : function (view, source, d) {
             switch (d3.event.type) {
             case 'mousemove':
                 mouse = view.pan.mouse();
@@ -273,7 +268,7 @@ var control_edge_drag = (function () {
                 break;
             case 'mouseup':
                 delete node_d.r; // in order to use default radius
-                commands.add_node(model, node_d);
+                commands.add_node(node_d);
                 view.unselect_all();
                 view.select_edge(edge_d);
                 view.select_node(drag_target ? edge_d.target : edge_d.source);
@@ -289,7 +284,7 @@ var control_edge_drag = (function () {
                     } else {
                         edge_d.source = d;
                     }
-                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    commands.move_edge(edge_d, from, [edge_d.source, edge_d.target]);
                     view.spring.off();
                     state = states.drop_edge_or_exit;
                     break;
@@ -297,7 +292,7 @@ var control_edge_drag = (function () {
                 break;
             }
         },
-        drop_edge_or_exit : function (view, model, source) {
+        drop_edge_or_exit : function (view, source) {
             switch (source) {
             case 'node':
                 switch (d3.event.type) {
@@ -308,7 +303,7 @@ var control_edge_drag = (function () {
                     });
                     if (exists.length > 1) {
                         // Delete edge
-                        commands.del_edge(model, edge_d);
+                        commands.del_edge(edge_d);
                     }
                     if (!mode_add()) { view.unselect_all(); }
                     if (exists.length <= 1) {
@@ -324,7 +319,7 @@ var control_edge_drag = (function () {
                     } else {
                         edge_d.source = node_d;
                     }
-                    commands.move_edge(model, edge_d, from, [edge_d.source, edge_d.target]);
+                    commands.move_edge(edge_d, from, [edge_d.source, edge_d.target]);
                     view.spring.off();
                     state = states.drag_edge;
                     break;
@@ -363,7 +358,6 @@ var Controller = (function () {
 
     var view;           // a view where the current event occurs
     var old_view;
-    var model;          // a model connected to the current view
     var source;         // a SVG element where the current event occurs
 
     var mouse;          // mouse position
@@ -374,6 +368,16 @@ var Controller = (function () {
     var old_state;      // Reference to a previous state
 
     var pan, x, y;
+
+    var self;
+
+    // Callback function which is called by textarea object when 
+    // user enters the text or cancels it.
+    // This function invokes the parent automaton
+    function text_callback() {
+        self.context('text');
+        self.event.apply(this, arguments);
+    }
 
 
     var states = {
@@ -389,8 +393,8 @@ var Controller = (function () {
                     ));
                     // Delete nodes edges
                     commands.start()
-                        .del_node(model, nodes)
-                        .del_edge(model, edges);
+                        .del_node(nodes)
+                        .del_edge(edges);
                     state = states.wait_for_keyup;
                     break;
                 case 70: // F
@@ -398,22 +402,21 @@ var Controller = (function () {
                     if (view.spring()) {
                         view.spring(false);
                     } else {
-                        commands.start().spring(view, model);
+                        commands.start().spring(view);
                     }
                     break;
                 case 73: // I
                     // Mark a selected state as the initial one
-                    commands.start().initial(model,
-                        view._graph.nodes.filter(function (d) { return !!d.initial; }),
+                    commands.start().initial(view._graph.nodes.filter(function (d) { return !!d.initial; }),
                         view.selected_nodes());
                     break;
                 case 77: // M
                     // Mark selected states
                     nodes = view.selected_nodes();
                     if (mode_add()) {
-                        commands.start().unmark_node(model, nodes);
+                        commands.start().unmark_node(nodes);
                     } else {
-                        commands.start().mark_node(model, nodes);
+                        commands.start().mark_node(nodes);
                     }
                     break;
                 case 89: // Y
@@ -445,7 +448,7 @@ var Controller = (function () {
                         mouse = view.pan.mouse();
                         // Create new node
                         var node = { x : mouse[0], y : mouse[1] };
-                        commands.start().add_node(model, node);
+                        commands.start().add_node(node);
                         view.select_node(node);
                         break;
                     case 'mousedown':
@@ -491,9 +494,11 @@ var Controller = (function () {
                         x = d.x + pan[0];
                         y = d.y + pan[1];
 
-                        control_text_edit.call(this, view, d, x, y, function (d) {
-                            commands.start().node_text(model, d, this.value);
-                        });
+                        control_text_edit.call(this, view, d, x, y,
+                            function onenter(d) {
+                                commands.start().node_text(d, this.value);
+                            },
+                            text_callback);
 
                         state = states.edit_text;
                         break;
@@ -527,9 +532,11 @@ var Controller = (function () {
                         x = d.tx + pan[0];
                         y = d.ty + pan[1];
 
-                        control_text_edit.call(this, view, d, x, y, function (d) {
-                            commands.start().edge_text(model, d, this.value);
-                        });
+                        control_text_edit.call(this, view, d, x, y,
+                            function onenter(d) {
+                                commands.start().edge_text(d, this.value);
+                            },
+                            text_callback);
 
                         state = states.edit_text;
                         break;
@@ -539,12 +546,12 @@ var Controller = (function () {
             }
         },
         drag_node : function () {
-            if (control_nodes_drag.call(this, view, model).done) {
+            if (control_nodes_drag.call(this, view).done) {
                 state = states.init;
             }
         },
         drag_edge : function (d) {
-            if (control_edge_drag.call(this, view, model, source, d).done) {
+            if (control_edge_drag.call(this, view, source, d).done) {
                 state = states.init;
             }
         },
@@ -586,6 +593,13 @@ var Controller = (function () {
         }
     }
 
+    function context(src) {
+        self = this;
+        view = this.view;
+        commands = this.commands;
+        source = src;
+    }
+
 
     function event() {
 
@@ -607,8 +621,6 @@ var Controller = (function () {
         view = null;
         source = null;
 
-        // d3.event.stopPropagation();
-
         // If there was a transition from state to state
         if (old_state !== state) {
             // Trace the current transition
@@ -617,32 +629,30 @@ var Controller = (function () {
     }
 
 
-    var instance = function (aView) {
+    var instance = function (aView, aCommands) {
         this.view = aView;
+        this.commands = aCommands;
+
+        this.event = event;
+        this.context = context;
 
         // Sets event handlers for the given View
-        var self = this;
+        var that = this;
         // Handles nodes events
         this.view.node_handler = function () {
-            view = self.view;
-            model = view.model;
-            source = 'node';
+            context.call(that, 'node');
             event.apply(this, arguments);
         };
 
         // Handles edge events
         this.view.edge_handler = function () {
-            view = self.view;
-            model = view.model;
-            source = 'edge';
+            context.call(that, 'edge');
             event.apply(this, arguments);
         };
 
         // Handles plane (out of other elements) events
         this.view.plane_handler = function () {
-            view = self.view;
-            model = view.model;
-            source = 'plane';
+            context.call(that, 'plane');
             event.apply(this, arguments);
         };
     };

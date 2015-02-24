@@ -4,14 +4,14 @@
 console.log('test');
 
 
-var view1 = new jas.editor.Instance(document.getElementById('svg_container1'));
-var view2 = new jas.editor.Instance(document.getElementById('svg_container2'));
-var view3 = new jas.editor.Instance();
+var editor1 = new jas.editor.Instance(document.getElementById('svg_container1'));
+var editor2 = new jas.editor.Instance(document.getElementById('svg_container2'));
+var editor3 = new jas.editor.Instance();
 
 
 
-// view1.controller().control(); // FIX : can't be attached when a graph already linked to the view.
-// view1.graph({
+// editor1.controller().control(); // FIX : can't be attached when a graph already linked to the view.
+// editor1.graph({
 //     // nodes : [{}],
 //     // edges : []
 //     nodes : [{}, {}, {}],
@@ -19,7 +19,7 @@ var view3 = new jas.editor.Instance();
 // });
 
 
-// view3.graph({
+// editor3.graph({
 //     nodes : [{}, {}],
 //     edges : [{source : 0, target : 1}, {source : 1, target : 1}]
 // });
@@ -58,24 +58,23 @@ function load_graph(name) {
 }
 
 
-jas.after(jas.editor.commands, 'update', function () {
-    var graph = view1.graph.storable();
-    save_graph(graph, 'graph');
-});
+// jas.after(jas.editor.commands, 'update', function () {
+//     var graph = editor1.graph.storable();
+//     save_graph(graph, 'graph');
+// });
 
 
 (function init() {
     var graph = load_graph('graph');
     if (typeof graph === 'object') {
-        console.log(graph);
-        view1.set_graph(graph);
+        editor1.set_graph(graph);
     }
 }());
 
 // window.foo = function () {
-//     var s = JSON.stringify(view1.graph.compact_object());
+//     var s = JSON.stringify(editor1.graph.compact_object());
 //     console.log('JSON', s);
-//     view2.set_graph(JSON.parse(s));
+//     editor2.set_graph(JSON.parse(s));
 //     // return s;
 // };
 
@@ -121,7 +120,7 @@ d3.select('#btn_save').on('click', function () {
 
 
 window.moo = function () {
-    view1.set_graph({
+    editor1.set_graph({
         nodes: [{}, {}],
         // nodes: [{ x : 10, y : 200 }, { x : 50, y : 5 }],
         edges : [{source : 0, target : 1}, {source : 1, target : 1}]

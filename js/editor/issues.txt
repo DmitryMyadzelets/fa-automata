@@ -1,6 +1,7 @@
 Bugs
 + Nodes don't appear when a new graph attached without active forces.
-- Stack of undo\redo reffers to a wrong view\objects when a new graph attached. (Make a local stack attached to the view).
++ Stack of undo\redo reffers to a wrong view\objects when a new graph attached. (Make a local stack attached to the view).
+- Text editor is mouse independent. When you start edit text, and move mouse to other view, you can loose the end of text editing.
 
 
 Must do
