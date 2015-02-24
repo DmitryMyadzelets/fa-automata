@@ -18,7 +18,6 @@ Instance.prototype.set_graph = function (graph) {
     // Wrap graph methods with new methods which update the view
     wrap(this.graph, this.view);
 
-    this.view.model = this.graph;
     this.view.graph(this.graph.object());
 };
 
