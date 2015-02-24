@@ -1276,7 +1276,8 @@ var Commands = (function () {
             }
         };
 
-        this.clean = function () {
+        this.set_graph = function (aGraph) {
+            this.graph = aGraph;
             this.stack.length = 0;
             this.macro.length = 0;
         };
@@ -2332,7 +2333,7 @@ var Instance = function (container) {
 Instance.prototype.set_graph = function (graph) {
     // Create new graph
     this.graph = new Graph(graph);
-    this.commands.graph = this.graph;
+    this.commands.set_graph(this.graph);
     // Wrap graph methods with new methods which update the view
     wrap(this.graph, this.view);
 

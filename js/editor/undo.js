@@ -81,7 +81,8 @@ var Commands = (function () {
             }
         };
 
-        this.clean = function () {
+        this.set_graph = function (aGraph) {
+            this.graph = aGraph;
             this.stack.length = 0;
             this.macro.length = 0;
         };
