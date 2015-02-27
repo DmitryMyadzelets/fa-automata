@@ -1,5 +1,4 @@
 /*jslint bitwise: true */
-"use strict";
 
 // Returns a [deep] copy of the given object
 function clone(obj, deep) {

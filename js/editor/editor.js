@@ -34,7 +34,6 @@
 
 
 /*jslint bitwise: true */
-"use strict";
 
 // Returns a [deep] copy of the given object
 function clone(obj, deep) {
@@ -93,7 +92,6 @@ function after(object, method, hook) {
 }
 
 
-"use strict";
 
 //
 // 2D Vector Methods
@@ -151,10 +149,10 @@ var vec = {
 
 // JSLint options:
 /*global d3*/
-"use strict";
 
 
 var router = (function () {
+	"use strict";
 	// var objects = [];
 	var current;
 
@@ -545,11 +543,11 @@ var textarea = (function () {
 window.textarea = textarea;
 // JSLint options:
 /*global d3*/
-"use strict";
 
 
 // Return object which implements panoramic behaviour for given container
 function pan(container) {
+    "use strict";
     var a_xy = [0, 0]; // Absolute coordinates
     var d_xy = [0, 0]; // Delta coordinates
     var p_xy = [0, 0]; // Previous coordinates
@@ -633,40 +631,32 @@ function set_edge_type(d) {
 // Returns text for SVG styling
 function embedded_style() {
     // Embedded SVG styling
-    var style = '';
+    var style = [
+        'g.nodes circle {',
+        'fill: dodgerblue;',
+        'stroke: #555;',
+        'stroke-width: 0.09em;',
+        'fill-opacity: 0.5;',
+        '}',
 
-    style += ' \
-    g.nodes circle { \
-        fill: dodgerblue; \
-        stroke: #555; \
-        stroke-width: 0.09em; \
-        fill-opacity: 0.5; \
-        } \
-    ';
+        'path.edge {',
+        'fill: none;',
+        'stroke: #333;',
+        'stroke-width: 0.09em;',
+        '}',
 
-    style += ' \
-    path.edge { \
-        fill: none; \
-        stroke: #333; \
-        stroke-width: 0.09em; \
-        } \
-    ';
+        'path.catch {',
+        'fill: none;',
+        '}',
 
-    style += ' \
-    path.catch { \
-        fill: none; \
-        }\
-    ';
-
-    style += ' \
-    .nodes text, .edges text { \
-        font-size: small; \
-        font-family: Verdana, sans-serif; \
-        pointer-events: none; \
-        text-anchor: middle; \
-        dominant-baseline: central; \
-        } \
-    ';
+        ' .nodes text, .edges text {',
+        'font-size: small;',
+        'font-family: Verdana, sans-serif;',
+        'pointer-events: none;',
+        'text-anchor: middle;',
+        'dominant-baseline: central;',
+        '}'
+    ].join('');
 
     return style;
 }

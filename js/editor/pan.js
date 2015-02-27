@@ -1,11 +1,11 @@
 
 // JSLint options:
 /*global d3*/
-"use strict";
 
 
 // Return object which implements panoramic behaviour for given container
 function pan(container) {
+    "use strict";
     var a_xy = [0, 0]; // Absolute coordinates
     var d_xy = [0, 0]; // Delta coordinates
     var p_xy = [0, 0]; // Previous coordinates

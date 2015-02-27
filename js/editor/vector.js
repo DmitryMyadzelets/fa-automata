@@ -1,5 +1,4 @@
 
-"use strict";
 
 //
 // 2D Vector Methods

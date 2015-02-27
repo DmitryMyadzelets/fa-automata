@@ -7,10 +7,10 @@
 
 // JSLint options:
 /*global d3*/
-"use strict";
 
 
 var router = (function () {
+	"use strict";
 	// var objects = [];
 	var current;
 
