@@ -50,40 +50,32 @@ function set_edge_type(d) {
 // Returns text for SVG styling
 function embedded_style() {
     // Embedded SVG styling
-    var style = '';
+    var style = [
+        'g.nodes circle {',
+        'fill: dodgerblue;',
+        'stroke: #555;',
+        'stroke-width: 0.09em;',
+        'fill-opacity: 0.5;',
+        '}',
 
-    style += ' \
-    g.nodes circle { \
-        fill: dodgerblue; \
-        stroke: #555; \
-        stroke-width: 0.09em; \
-        fill-opacity: 0.5; \
-        } \
-    ';
+        'path.edge {',
+        'fill: none;',
+        'stroke: #333;',
+        'stroke-width: 0.09em;',
+        '}',
 
-    style += ' \
-    path.edge { \
-        fill: none; \
-        stroke: #333; \
-        stroke-width: 0.09em; \
-        } \
-    ';
+        'path.catch {',
+        'fill: none;',
+        '}',
 
-    style += ' \
-    path.catch { \
-        fill: none; \
-        }\
-    ';
-
-    style += ' \
-    .nodes text, .edges text { \
-        font-size: small; \
-        font-family: Verdana, sans-serif; \
-        pointer-events: none; \
-        text-anchor: middle; \
-        dominant-baseline: central; \
-        } \
-    ';
+        ' .nodes text, .edges text {',
+        'font-size: small;',
+        'font-family: Verdana, sans-serif;',
+        'pointer-events: none;',
+        'text-anchor: middle;',
+        'dominant-baseline: central;',
+        '}'
+    ].join('');
 
     return style;
 }
