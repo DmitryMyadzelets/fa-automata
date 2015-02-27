@@ -2,7 +2,6 @@
 // JSLint options:
 /*global vec, View, d3 */
 /*jslint bitwise: true */
-"use strict";
 
 var elements = {};
 
@@ -12,6 +11,7 @@ var INITIAL_LENGTH = NODE_RADIUS * 1.6;
 // Methods to calculate loop, stright and curved lines for links
 // 
 elements.make_edge = (function () {
+    "use strict";
     var v = [0, 0]; // temporal vector
     // var r = node_radius;
     var norm = [0, 0];
@@ -98,6 +98,7 @@ elements.make_edge = (function () {
 
 // Returns SVG string for a graph edge
 elements.get_edge_transformation = (function () {
+    "use strict";
     var v1 = [0, 0];
     var v2 = [0, 0];
     var cv = [0, 0];

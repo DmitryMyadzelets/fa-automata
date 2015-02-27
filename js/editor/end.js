@@ -1,33 +1,52 @@
 // JSLint options:
 /*global editor, View, Graph, Commands, wrap, after, Controller*/
 
+    /**
+     * Creates a new instance of editor
+     * @memberOf editor
+     * @class
+     * @param {Object} [container] HTML DOM element. If not given, the document body is used as a container.
+     * @example var editor = new jas.editor.Instance(document.getElementById('id_editor'));
+     */
+    var Instance = function (container) {
+        /**
+         * The view (in terms of MVC) of the editor
+         * @type {View}
+         */
+        this.view = new View(container);
+        this.commands = new Commands();
+        /**
+         * The controller (in terms of MVC) of the editor
+         * @type {Controller}
+         */
+        this.controller = new Controller(this.view, this.commands);
 
-var Instance = function (container) {
-    this.view = new View(container);
-    this.commands = new Commands();
-    this.controller = new Controller(this.view, this.commands);
+        this.set_graph();
+    };
 
-    Instance.prototype.set_graph.call(this);
-};
+    /**
+     * Attaches a graph object literal to the editor
+     * @param {object} graph object literal
+     */
+    Instance.prototype.set_graph = function (json_graph) {
+        /**
+         * The data model (in terms of MVC) of the editor
+         * @type {Graph}
+         */
+        this.graph = new Graph(json_graph);
+        this.commands.set_graph(this.graph);
+        // Wrap graph methods with new methods which update the view
+        wrap(this.graph, this.view);
+
+        this.view.model = this.graph; // FIXIT: redundent
+        this.view.graph(this.graph.object());
+    };
 
 
-Instance.prototype.set_graph = function (graph) {
-    // Create new graph
-    this.graph = new Graph(graph);
-    this.commands.set_graph(this.graph);
-    // Wrap graph methods with new methods which update the view
-    wrap(this.graph, this.view);
+    editor.Instance = Instance;
+    editor.Graph = Graph;
 
-    this.view.model = graph;
-    this.view.graph(this.graph.object());
-};
+    jas.after = after;
 
 
-editor.Instance = Instance;
-editor.Graph = Graph;
-
-this.jas = this.jas || {};
-this.jas.editor = editor;
-this.jas.after = after;
-
-}(window);
+}(window));

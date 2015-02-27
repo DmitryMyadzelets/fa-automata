@@ -4,6 +4,7 @@
 console.log('test');
 
 
+
 var editor1 = new jas.editor.Instance(document.getElementById('svg_container1'));
 var editor2 = new jas.editor.Instance(document.getElementById('svg_container2'));
 var editor3 = new jas.editor.Instance();

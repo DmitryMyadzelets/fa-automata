@@ -1,12 +1,12 @@
 
 // JSLint options:
 /*global View, after*/
-"use strict";
 
 // Incapsulates and returns the graph object.
 //  Overrides methods which change the graph. 
 //  When the methods are called invokes correspondent View methods.
 function wrap(graph, aView) {
+    "use strict";
 
     var view = aView;
 

@@ -1,7 +1,6 @@
 
 // JSLint options:
 /*global d3, View, commands, textarea, vec, elements, set_edge_type*/
-"use strict";
 
 
 // Returns whether the editor is in the ADD mode
@@ -23,6 +22,7 @@ var commands;       // commands to manipulate the model
 // Returns itself
 // .done implies it is in the initial state
 var control_selection = (function () {
+    "use strict";
 
     var mouse, rect;
 
@@ -73,6 +73,7 @@ var control_selection = (function () {
 
 
 var control_nodes_drag = (function () {
+    "use strict";
 
     var mouse, nodes;
     var from_xy = [], xy, to_xy = [];
@@ -137,6 +138,7 @@ var control_nodes_drag = (function () {
 
 
 var control_text_edit = (function () {
+    "use strict";
 
     var d, svg_text, text, enter;
     var view;
@@ -188,6 +190,7 @@ var control_text_edit = (function () {
 
 
 var control_edge_drag = (function () {
+    "use strict";
 
     var mouse, d_source, node_d, edge_d, drag_target, edge_svg, from, exists;
 
@@ -355,6 +358,7 @@ var control_edge_drag = (function () {
 
 
 var Controller = (function () {
+    "use strict";
 
     var view;           // a view where the current event occurs
     var old_view;

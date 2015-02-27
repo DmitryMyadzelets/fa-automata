@@ -36,16 +36,24 @@ function float2int(obj) {
     }
 }
 
-// Simple observer of object's methods
-// Sets a hook for the method call of the given object
-function after(obj, method, hook) {
-    var old = obj[method];
+/**
+ * Sets a hook for a method call for the given object. Acts as a simple observer of object's methods.
+ * @memberOf jas
+ * @param  {Object} object An object.
+ * @param  {Function} method A method of the object.
+ * @param  {Function} hook A callback function which will be called after the call of object's method.
+ * @return {Function} after Returns itself for chained calls.
+ */
+function after(object, method, hook) {
+    var old = object[method];
     if (typeof old !== 'function' || typeof hook !== 'function') {
         throw new Error('the parameters must be functions');
     }
-    obj[method] = function () {
+    object[method] = function () {
         var ret = old.apply(this, arguments);
         hook.apply(this, arguments);
         return ret;
     };
+    return after;
 }
+

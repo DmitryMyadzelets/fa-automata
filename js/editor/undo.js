@@ -1,11 +1,11 @@
 
 // JSLint options:
 /*global */
-"use strict";
 
 
 
 var Commands = (function () {
+    "use strict";
 
     var Command = function (redo, undo) {
         if (redo) { this.redo = redo; }

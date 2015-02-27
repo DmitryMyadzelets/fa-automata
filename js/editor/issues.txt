@@ -14,6 +14,7 @@ Must do
 
 
 May do
+- Use the function form of 'use strict'.
 - Too many savings to local storage while editing.
 + Implement edge movement in the model (it's in wrapper only).
 - Make on('update', function () {} ) instead of o[key] = function () {} for the events.

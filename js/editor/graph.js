@@ -1,9 +1,9 @@
 // JSLint options:
 /*global clone, float2int, wrap*/
 
-"use strict";
 
 var Graph = (function () {
+    "use strict";
 
     // Helpers
     // Calls function 'fun' for a single datum or an array of data
@@ -121,6 +121,10 @@ var Graph = (function () {
 
         var data;
 
+        /**
+         * Adds a node\edge to the graph.
+         * @param {object}
+         */
         function add(d) {
             data.push(d);
         }
@@ -180,10 +184,24 @@ var Graph = (function () {
     edges_methods.call(edges_prototype);
 
 
-    // Graph constructor
+    /**
+     * Creates a new instance of Graph
+     * @class
+     * @alias Graph
+     * @memberOf editor
+     * @param {object} graph object literal
+     * @return {Graph}
+     */
     var graph = function (user_graph) {
-
+        /**
+         * A namespace object for manipulation of the graph nodes
+         * @type {Object}
+         */
         this.node = Object.create(nodes_prototype);
+        /**
+         * A namespace object for manipulation of the graph edges
+         * @type {Object}
+         */
         this.edge = Object.create(edges_prototype);
 
         this.node.data = [];
@@ -201,7 +219,10 @@ var Graph = (function () {
         }
     };
 
-    // Returns a simple graph object with only nodes and edges (for serialization etc)
+    /**
+     * Returns a simple graph object literal with only nodes and edges (for serialization etc.)
+     * @return {Object} graph object literal
+     */
     graph.prototype.object = function () {
         return {
             nodes : this.node.data,
@@ -209,8 +230,11 @@ var Graph = (function () {
         };
     };
 
-    // Returns graph object ready for convertion to JSON, 
-    // with the nodes references in edges replaced by indexes
+
+    /**
+     * Returns graph object ready for convertion to JSON, with the nodes references in edges replaced by indexes
+     * @return {Object}
+     */
     graph.prototype.storable = function () {
         var g = this.object();
         // Copy edges while calculating the indexes to the nodes

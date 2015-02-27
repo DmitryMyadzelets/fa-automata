@@ -1,16 +1,35 @@
-!function () {
+(function (exports) {
+    "use strict";
 
-var editor = { version: "1.0.0" };
+    exports = exports || window;
+    exports.jas = exports.jas || {};
 
-//
-// This module implements an user interface for interacting with 
-// an automata graph.
-// 
+    /**
+     * Module 'jas'
+     * @exports jas
+     * @namespace
+     */
+    var jas = exports.jas;
 
-// Look at some examples:
-// http://bl.ocks.org/mbostock/4600693
-// http://bl.ocks.org/MoritzStefaner/1377729
-// http://bl.ocks.org/rkirsling/5001347
-// http://bl.ocks.org/benzguo/4370043
-// http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
+    //
+    // This module implements an user interface for interacting with 
+    // an automata graph.
+    // 
+    // Look at some examples:
+    // http://bl.ocks.org/mbostock/4600693
+    // http://bl.ocks.org/MoritzStefaner/1377729
+    // http://bl.ocks.org/rkirsling/5001347
+    // http://bl.ocks.org/benzguo/4370043
+    // http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
+
+
+    /**
+     * Graph editor
+     * @exports jas.editor
+     * @namespace
+     * @version 0.1.0
+     */
+    var editor = { version: "0.1.0" };
+    jas.editor = editor;
+
 

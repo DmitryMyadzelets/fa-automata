@@ -1,18 +1,37 @@
-!function () {
+(function (exports) {
+    "use strict";
 
-var editor = { version: "1.0.0" };
+    exports = exports || window;
+    exports.jas = exports.jas || {};
 
-//
-// This module implements an user interface for interacting with 
-// an automata graph.
-// 
+    /**
+     * Module 'jas'
+     * @exports jas
+     * @namespace
+     */
+    var jas = exports.jas;
 
-// Look at some examples:
-// http://bl.ocks.org/mbostock/4600693
-// http://bl.ocks.org/MoritzStefaner/1377729
-// http://bl.ocks.org/rkirsling/5001347
-// http://bl.ocks.org/benzguo/4370043
-// http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
+    //
+    // This module implements an user interface for interacting with 
+    // an automata graph.
+    // 
+    // Look at some examples:
+    // http://bl.ocks.org/mbostock/4600693
+    // http://bl.ocks.org/MoritzStefaner/1377729
+    // http://bl.ocks.org/rkirsling/5001347
+    // http://bl.ocks.org/benzguo/4370043
+    // http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
+
+
+    /**
+     * Graph editor
+     * @exports jas.editor
+     * @namespace
+     * @version 0.1.0
+     */
+    var editor = { version: "0.1.0" };
+    jas.editor = editor;
+
 
 /*jslint bitwise: true */
 "use strict";
@@ -52,19 +71,27 @@ function float2int(obj) {
     }
 }
 
-// Simple observer of object's methods
-// Sets a hook for the method call of the given object
-function after(obj, method, hook) {
-    var old = obj[method];
+/**
+ * Sets a hook for a method call for the given object. Acts as a simple observer of object's methods.
+ * @memberOf jas
+ * @param  {Object} object An object.
+ * @param  {Function} method A method of the object.
+ * @param  {Function} hook A callback function which will be called after the call of object's method.
+ * @return {Function} after Returns itself for chained calls.
+ */
+function after(object, method, hook) {
+    var old = object[method];
     if (typeof old !== 'function' || typeof hook !== 'function') {
         throw new Error('the parameters must be functions');
     }
-    obj[method] = function () {
+    object[method] = function () {
         var ret = old.apply(this, arguments);
         hook.apply(this, arguments);
         return ret;
     };
+    return after;
 }
+
 
 "use strict";
 
@@ -160,7 +187,6 @@ d3.select(window)
 // JSLint options:
 /*global vec, View, d3 */
 /*jslint bitwise: true */
-"use strict";
 
 var elements = {};
 
@@ -170,6 +196,7 @@ var INITIAL_LENGTH = NODE_RADIUS * 1.6;
 // Methods to calculate loop, stright and curved lines for links
 // 
 elements.make_edge = (function () {
+    "use strict";
     var v = [0, 0]; // temporal vector
     // var r = node_radius;
     var norm = [0, 0];
@@ -256,6 +283,7 @@ elements.make_edge = (function () {
 
 // Returns SVG string for a graph edge
 elements.get_edge_transformation = (function () {
+    "use strict";
     var v1 = [0, 0];
     var v2 = [0, 0];
     var cv = [0, 0];
@@ -407,7 +435,8 @@ elements.add_edge = function (selection, handler) {
 };
 
 
-
+// JSLint options:
+/*global window*/
 
 /**
  * Textarea control element with auto-resize.
@@ -417,106 +446,13 @@ elements.add_edge = function (selection, handler) {
 */
 
 
-var textarea = function() {
-    var delayedResize, hook, keydown, offocus, resize, shown, _onCancel, _onEnter, _text;
-
-    _text = null;
-    _onEnter = null;
-    _onCancel = null;
-    shown = false;
-
-    if (window.attachEvent) {
-        hook = function(element, event, handler) {
-            element.attachEvent('on' + event, handler);
-            return null;
-        };
-    } else {
-        hook = function(element, event, handler) {
-            element.addEventListener(event, handler, false);
-            return null;
-        };
-    }
-
-    resize = function() {
-        _text.style.height = 'auto';
-        _text.style.height = _text.scrollHeight + 'px';
-        return null;
-    };
-
-    delayedResize = function(ev) {
-        window.setTimeout(resize, 0);
-        return null;
-    };
-
-    keydown = function(ev) {
-        switch (ev.keyCode) {
-            case 13: // Enter
-                _text.style.display = "none";
-                shown = false;
-                if (typeof _onEnter === "function") {
-                    _onEnter(ev);
-                }
-                break;
-            case 27: // Escape
-                _text.style.display = "none";
-                shown = false;
-                if (typeof _onCancel === "function") {
-                    _onCancel(ev);
-                }
-                break;
-            default:
-                delayedResize();
-        }
-        return null;
-    };
-
-    offocus = function() {
-        _text.style.display = "none";
-        if (shown) {
-            shown = false;
-            if (typeof _onCancel === "function") {
-                _onCancel();
-            }
-        }
-        return null;
-    };
-
-    return {
-        attach: function(id, onEnter, onCancel) {
-            _text = document.getElementById(id);
-            hook(_text, 'keydown', keydown);
-            hook(_text, 'blur', offocus);
-            hook(_text, 'input', delayedResize);
-            _onEnter = onEnter;
-            _onCancel = onCancel;
-            _text.style.font = "0.8em Verdana 'Courier New'";
-            return null;
-        },
-        show: function(text, x, y) {
-            // _text.value = text;
-            // _text.style.width = "4em";
-            // _text.style.left = x + "px";
-            // _text.style.top = y + "px";
-            // _text.style.display = null;
-            _text.focus();
-            resize();
-            shown = true;
-            return null;
-        },
-        text: function() {
-            return _text.value;
-        }
-    };
-};
-
-
 // Creates <input> HTML object with unique ID and attach it to the textarea object
 var textarea = (function () {
     var UID = 'c88d9c30-5871-11e4-8ed6-0800200c9a66';
     var editor = null;
     var parent = null;
-    _enter = null;
-    _cancel = null;
+    var _enter = null;
+    var _cancel = null;
 
 
 
@@ -545,16 +481,16 @@ var textarea = (function () {
             delayedResize();
         }
         return null;
-    };
+    }
 
     function resize() {
-        editor.each(function() {
+        editor.each(function () {
             this.style.height = 'auto';
             this.style.height = this.scrollHeight + 'px';
         });
-    };
+    }
 
-    function delayedResize(ev) {
+    function delayedResize() {
         window.setTimeout(resize, 0);
     }
 
@@ -595,7 +531,7 @@ var textarea = (function () {
             .on('drop', delayedResize)
             .on('paste', delayedResize);
 
-        editor.each(function() {
+        editor.each(function () {
             this.value = text;
             this.focus();
             this.select();
@@ -648,7 +584,6 @@ function pan(container) {
 
 // JSLint options:
 /*global d3, ed, elements, pan*/
-"use strict";
 
 // Structure of SVG tree:
 // <svg>
@@ -739,6 +674,7 @@ function embedded_style() {
 
 
 function View(aContainer, aGraph) {
+    "use strict";
     var self = this;
 
     // Create SVG elements
@@ -1196,11 +1132,11 @@ View.prototype.select = (function () {
 
 // JSLint options:
 /*global */
-"use strict";
 
 
 
 var Commands = (function () {
+    "use strict";
 
     var Command = function (redo, undo) {
         if (redo) { this.redo = redo; }
@@ -1387,7 +1323,6 @@ Commands.prototype.new('spring', function (view) {
 
 // JSLint options:
 /*global d3, View, commands, textarea, vec, elements, set_edge_type*/
-"use strict";
 
 
 // Returns whether the editor is in the ADD mode
@@ -1409,6 +1344,7 @@ var commands;       // commands to manipulate the model
 // Returns itself
 // .done implies it is in the initial state
 var control_selection = (function () {
+    "use strict";
 
     var mouse, rect;
 
@@ -1459,6 +1395,7 @@ var control_selection = (function () {
 
 
 var control_nodes_drag = (function () {
+    "use strict";
 
     var mouse, nodes;
     var from_xy = [], xy, to_xy = [];
@@ -1523,6 +1460,7 @@ var control_nodes_drag = (function () {
 
 
 var control_text_edit = (function () {
+    "use strict";
 
     var d, svg_text, text, enter;
     var view;
@@ -1574,6 +1512,7 @@ var control_text_edit = (function () {
 
 
 var control_edge_drag = (function () {
+    "use strict";
 
     var mouse, d_source, node_d, edge_d, drag_target, edge_svg, from, exists;
 
@@ -1741,6 +1680,7 @@ var control_edge_drag = (function () {
 
 
 var Controller = (function () {
+    "use strict";
 
     var view;           // a view where the current event occurs
     var old_view;
@@ -2049,9 +1989,9 @@ var Controller = (function () {
 // JSLint options:
 /*global clone, float2int, wrap*/
 
-"use strict";
 
 var Graph = (function () {
+    "use strict";
 
     // Helpers
     // Calls function 'fun' for a single datum or an array of data
@@ -2169,6 +2109,10 @@ var Graph = (function () {
 
         var data;
 
+        /**
+         * Adds a node\edge to the graph.
+         * @param {object}
+         */
         function add(d) {
             data.push(d);
         }
@@ -2228,10 +2172,24 @@ var Graph = (function () {
     edges_methods.call(edges_prototype);
 
 
-    // Graph constructor
+    /**
+     * Creates a new instance of Graph
+     * @class
+     * @alias Graph
+     * @memberOf editor
+     * @param {object} graph object literal
+     * @return {Graph}
+     */
     var graph = function (user_graph) {
-
+        /**
+         * A namespace object for manipulation of the graph nodes
+         * @type {Object}
+         */
         this.node = Object.create(nodes_prototype);
+        /**
+         * A namespace object for manipulation of the graph edges
+         * @type {Object}
+         */
         this.edge = Object.create(edges_prototype);
 
         this.node.data = [];
@@ -2249,7 +2207,10 @@ var Graph = (function () {
         }
     };
 
-    // Returns a simple graph object with only nodes and edges (for serialization etc)
+    /**
+     * Returns a simple graph object literal with only nodes and edges (for serialization etc.)
+     * @return {Object} graph object literal
+     */
     graph.prototype.object = function () {
         return {
             nodes : this.node.data,
@@ -2257,8 +2218,11 @@ var Graph = (function () {
         };
     };
 
-    // Returns graph object ready for convertion to JSON, 
-    // with the nodes references in edges replaced by indexes
+
+    /**
+     * Returns graph object ready for convertion to JSON, with the nodes references in edges replaced by indexes
+     * @return {Object}
+     */
     graph.prototype.storable = function () {
         var g = this.object();
         // Copy edges while calculating the indexes to the nodes
@@ -2284,12 +2248,12 @@ var Graph = (function () {
 
 // JSLint options:
 /*global View, after*/
-"use strict";
 
 // Incapsulates and returns the graph object.
 //  Overrides methods which change the graph. 
 //  When the methods are called invokes correspondent View methods.
 function wrap(graph, aView) {
+    "use strict";
 
     var view = aView;
 
@@ -2320,33 +2284,52 @@ function wrap(graph, aView) {
 // JSLint options:
 /*global editor, View, Graph, Commands, wrap, after, Controller*/
 
+    /**
+     * Creates a new instance of editor
+     * @memberOf editor
+     * @class
+     * @param {Object} [container] HTML DOM element. If not given, the document body is used as a container.
+     * @example var editor = new jas.editor.Instance(document.getElementById('id_editor'));
+     */
+    var Instance = function (container) {
+        /**
+         * The view (in terms of MVC) of the editor
+         * @type {View}
+         */
+        this.view = new View(container);
+        this.commands = new Commands();
+        /**
+         * The controller (in terms of MVC) of the editor
+         * @type {Controller}
+         */
+        this.controller = new Controller(this.view, this.commands);
 
-var Instance = function (container) {
-    this.view = new View(container);
-    this.commands = new Commands();
-    this.controller = new Controller(this.view, this.commands);
+        this.set_graph();
+    };
 
-    Instance.prototype.set_graph.call(this);
-};
+    /**
+     * Attaches a graph object literal to the editor
+     * @param {object} graph object literal
+     */
+    Instance.prototype.set_graph = function (json_graph) {
+        /**
+         * The data model (in terms of MVC) of the editor
+         * @type {Graph}
+         */
+        this.graph = new Graph(json_graph);
+        this.commands.set_graph(this.graph);
+        // Wrap graph methods with new methods which update the view
+        wrap(this.graph, this.view);
+
+        this.view.model = this.graph; // FIXIT: redundent
+        this.view.graph(this.graph.object());
+    };
 
 
-Instance.prototype.set_graph = function (graph) {
-    // Create new graph
-    this.graph = new Graph(graph);
-    this.commands.set_graph(this.graph);
-    // Wrap graph methods with new methods which update the view
-    wrap(this.graph, this.view);
+    editor.Instance = Instance;
+    editor.Graph = Graph;
 
-    this.view.model = graph;
-    this.view.graph(this.graph.object());
-};
+    jas.after = after;
 
 
-editor.Instance = Instance;
-editor.Graph = Graph;
-
-this.jas = this.jas || {};
-this.jas.editor = editor;
-this.jas.after = after;
-
-}(window);
+}(window));

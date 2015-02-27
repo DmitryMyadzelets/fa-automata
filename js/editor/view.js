@@ -1,7 +1,6 @@
 
 // JSLint options:
 /*global d3, ed, elements, pan*/
-"use strict";
 
 // Structure of SVG tree:
 // <svg>
@@ -92,6 +91,7 @@ function embedded_style() {
 
 
 function View(aContainer, aGraph) {
+    "use strict";
     var self = this;
 
     // Create SVG elements
