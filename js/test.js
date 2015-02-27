@@ -41,16 +41,16 @@ var editor3 = new jas.editor.Instance();
 }());
 
 
-function save_graph(graph, name) {
+function save(object, name) {
     if ($ && $.jStorage && $.jStorage.storageAvailable()) {
-        var s = JSON.stringify(graph);
+        var s = JSON.stringify(object);
         // console.log(s);
         $.jStorage.set(name, s);
     }
 }
 
 
-function load_graph(name) {
+function load(name) {
     if ($ && $.jStorage && $.jStorage.storageAvailable()) {
         // $.jStorage.flush();
         return JSON.parse($.jStorage.get(name));
@@ -61,12 +61,12 @@ function load_graph(name) {
 
 jas.after(editor1.commands, 'update', function () {
     var graph = editor1.graph.storable();
-    save_graph(graph, 'graph');
+    save(graph, 'graph');
 });
 
 
 (function init() {
-    var graph = load_graph('graph');
+    var graph = load('graph');
     if (typeof graph === 'object') {
         editor1.set_graph(graph);
     }
