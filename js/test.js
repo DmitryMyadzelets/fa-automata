@@ -59,10 +59,10 @@ function load_graph(name) {
 }
 
 
-// jas.after(jas.editor.commands, 'update', function () {
-//     var graph = editor1.graph.storable();
-//     save_graph(graph, 'graph');
-// });
+jas.after(editor1.commands, 'update', function () {
+    var graph = editor1.graph.storable();
+    save_graph(graph, 'graph');
+});
 
 
 (function init() {
