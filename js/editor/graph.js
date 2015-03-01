@@ -7,32 +7,35 @@ var Graph = (function () {
 
     // Helpers
     // Calls function 'fun' for a single datum or an array of data
-    function foreach(d, fun) {
+    function foreach(d, fun, that) {
+        that = that || this;
         if (d instanceof Array) {
-            d.forEach(fun);
+            d.forEach(fun, that);
         } else {
-            fun(d);
+            fun.call(that, d);
         }
+    }
+
+    /**
+     * @class
+     */
+    function Node() {
     }
 
 
     // Methods for nodes only
     function nodes_methods() {
 
-        var delta = [0, 0];
-
         function shift(d) {
-            d.x += delta[0];
-            d.y += delta[1];
+            d.x += this[0];
+            d.y += this[1];
             d.px = d.x;
             d.py = d.y;
         }
 
         // Changes node position relatively to the previous one
         this.shift = function (d, dxy) {
-            delta[0] = dxy[0];
-            delta[1] = dxy[1];
-            foreach(d, shift);
+            foreach(d, shift, dxy);
         };
 
         // Moves node to new position
@@ -40,8 +43,8 @@ var Graph = (function () {
             if (xy instanceof Array) {
                 var i = 0;
                 foreach(d, function (d) {
-                    d.x = xy[i++];
-                    d.y = xy[i++];
+                    d.x = xy[i++] || d.x;
+                    d.y = xy[i++] || d.y;
                     d.px = d.x;
                     d.py = d.y;
                 });
@@ -119,20 +122,18 @@ var Graph = (function () {
     // Methods for both nodes and edges
     function basic_methods() {
 
-        var data;
-
         /**
          * Adds a node\edge to the graph.
          * @param {object}
          */
         function add(d) {
-            data.push(d);
+            this.push(d);
         }
 
         function remove(d) {
-            var i = data.indexOf(d);
+            var i = this.indexOf(d);
             if (i >= 0) {
-                data.splice(i, 1);
+                this.splice(i, 1);
             }
         }
 
@@ -146,15 +147,13 @@ var Graph = (function () {
 
         // Adds a single datum or an array of data into the array
         this.add = function (d) {
-            data = this.data;
-            foreach(d, add);
+            foreach(d, add, this.data);
             return this;
         };
 
         // Removes a single datum or an array of data from the array
         this.remove = function (d) {
-            data = this.data;
-            foreach(d, remove);
+            foreach(d, remove, this.data);
             return this;
         };
 
@@ -197,7 +196,7 @@ var Graph = (function () {
          * A namespace object for manipulation of the graph nodes
          * @type {Object}
          */
-        this.node = Object.create(nodes_prototype);
+        this.node = new Node();
         /**
          * A namespace object for manipulation of the graph edges
          * @type {Object}
