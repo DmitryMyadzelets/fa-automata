@@ -5,8 +5,12 @@ Bugs
 
 
 Must do
+- Review graph's API. This API is the second main thing exposed to the users. The first one is UI of course.
+	- http://radokirov.com/graph-editor.js/
+	- https://github.com/rkirov/graph-editor.js
+	- https://github.com/0/graph-sandbox (look at predefind graphs)
 + Make 'initial' state command
-- Make export to a usable formats.
+- Make export to usable formats.
 	+ SVG. What programs can accept SVG? Latex (how?), Inscape, ...
 	- Image
 + Make github...io page for demonstration.
@@ -14,7 +18,11 @@ Must do
 
 
 May do
-- Use the function form of 'use strict'.
+- Ideas:
+	- Selection: Shift adds to selections. Click onto already selected node doesn't change selection. Click onto not selected node with no Shift cansels already selected nodes.
+	- use 'json' name to get and set JSON graph.
+- Replace 'new' in commands to a not reserved word
++ Use the function form of 'use strict'.
 - Too many savings to local storage while editing.
 + Implement edge movement in the model (it's in wrapper only).
 - Make on('update', function () {} ) instead of o[key] = function () {} for the events.
@@ -28,4 +36,3 @@ May do
 Architecture wrt SOLID principles
 - Open Closed Principle (OSP). The nodes are always circles now, but it can be changed. Calculation of edges implies that the nodes are circles. a node should provide connection points to an edge (like in Violet UML editor), given some information from the edge (e.g. an outgoing angle, a reference to another node etc.);
 - Compose atomic undoable operations into compaund operations? E.g. Create new edge into empty space = adding an edge and a node.
-
