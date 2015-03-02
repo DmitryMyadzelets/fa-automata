@@ -333,7 +333,7 @@ var control_edge_drag = (function () {
     };
     state = states.init;
 
-    // Give names to the states-functions for debugging
+    // // Give names to the states-functions for debugging
     // var key;
     // for (key in states) {
     //     if (states.hasOwnProperty(key)) {
@@ -346,7 +346,7 @@ var control_edge_drag = (function () {
     // var ost = state;
     return function loop() {
         state.apply(this, arguments);
-        // Debug transitions
+        // // Debug transitions
         // if (ost !== state) {
         //     console.log(ost._name, state._name);
         //     ost = state;
@@ -391,14 +391,15 @@ var Controller = (function () {
                 case 46: // Delete
                     nodes = view.selected_nodes();
                     // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                    edges = view.model.edge.adjacent(nodes);
-                    edges = edges.concat(view.selected_edges().filter(
-                        function (d) { return edges.indexOf(d) < 0; }
-                    ));
-                    // Delete nodes edges
+                    edges = view.selected_edges();
+                    nodes.forEach(function (node) {
+                        edges = edges.concat(view.model.edge.adjacent(node).filter(
+                            function (d) { return edges.indexOf(d) < 0; }
+                        ));
+                    });
                     commands.start()
-                        .del_node(nodes)
-                        .del_edge(edges);
+                        .del_edge(edges)
+                        .del_node(nodes);
                     state = states.wait_for_keyup;
                     break;
                 case 70: // F
