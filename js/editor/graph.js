@@ -240,6 +240,52 @@ var Graph = (function () {
     edges_methods.call(edges_prototype);
 
 
+    // Creates an returns a JSON copy of the given graph
+    function graph2json(g) {
+        // Copy edges while calculating the indexes to the nodes
+        g.edges = g.edges.map(function (edge) {
+            var e = clone(edge);
+            e.source = g.nodes.indexOf(edge.source);
+            e.target = g.nodes.indexOf(edge.target);
+            return e;
+        });
+        // Make deep clone, such that the objects of the copy will have no references to the source
+        g = clone(g, true);
+        // Convert all the float values to integers
+        float2int(g);
+        return g;
+    }
+
+    // Copy nodes and edges from json, validating and deindexing
+    function json2graph(json_graph) {
+        // Clear old graph data
+        this.node.data.length = 0;
+        this.edge.data.length = 0;
+
+        if (typeof json_graph === 'object') {
+            // Copy nodes which are unique objects
+            foreach(json_graph.nodes, function (node) {
+                if (typeof node === 'object' && this.indexOf(node) < 0) {
+                    this.push(node);
+                }
+            }, this.node.data);
+
+            // Copy edges which have valid indexes to nodes, and replace indexes to nodes objects
+            var self = this, i, j, num_nodes = this.node.data.length;
+            foreach(json_graph.edges, function (edge) {
+                if (typeof edge === 'object' && this.indexOf(edge) < 0) {
+                    i = Number(edge.source);
+                    j = Number(edge.target);
+                    if (i >= 0 && i < num_nodes && j >= 0 && j < num_nodes) {
+                        edge.source = self.node.data[i];
+                        edge.target = self.node.data[j];
+                        this.push(edge);
+                    }
+                }
+            }, this.edge.data);
+        }
+    }
+
     /**
      * Creates a new instance of Graph
      * @class
@@ -263,30 +309,7 @@ var Graph = (function () {
         this.node.data = [];
         this.edge.data = [];
 
-        // Copy nodes and edges from json, validating and deindexing
-        if (typeof json_graph === 'object') {
-
-            // Copy nodes which are unique objects
-            foreach(json_graph.nodes, function (node) {
-                if (typeof node === 'object' && this.indexOf(node) < 0) {
-                    this.push(node);
-                }
-            }, this.node.data);
-
-            // Copy edges which have valid indexes to nodes, and replace indexes to nodes objects
-            var self = this, i, j, num_nodes = this.node.data.length;
-            foreach(json_graph.edges, function (edge) {
-                if (typeof edge === 'object' && this.indexOf(edge) < 0) {
-                    i = Number(edge.source);
-                    j = Number(edge.target);
-                    if (i >= 0 && i < num_nodes && j >= 0 && j < num_nodes) {
-                        edge.source = self.node.data[i];
-                        edge.target = self.node.data[j];
-                        this.push(edge);
-                    }
-                }
-            }, this.edge.data);
-        }
+        json2graph.call(this, json_graph);
     };
 
     /**
@@ -301,23 +324,16 @@ var Graph = (function () {
     };
 
     /**
-     * Returns graph object in JSON, with the nodes references in edges replaced by indexes
+     * Returns graph object in JSON, with the nodes references in edges replaced by indexes.
+     * If JSON graph is provided, 
      * @return {Object}
      */
-    constructor.prototype.json = function () {
-        var g = this.object();
-        // Copy edges while calculating the indexes to the nodes
-        g.edges = g.edges.map(function (edge) {
-            var e = clone(edge);
-            e.source = g.nodes.indexOf(edge.source);
-            e.target = g.nodes.indexOf(edge.target);
-            return e;
-        });
-        // Make deep clone, such that the objects of the copy will have no references to the source
-        g = clone(g, true);
-        // Convert all the float values to integers
-        float2int(g);
-        return g;
+    constructor.prototype.json = function (json_graph) {
+        if (arguments.length > 0) {
+            json2graph.call(this, json_graph);
+        } else {
+            return graph2json(this.object());
+        }
     };
 
     return constructor;

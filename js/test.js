@@ -110,9 +110,7 @@ jas.after(editor1.commands, 'update', function () {
 
 (function init() {
     var graph = load('graph');
-    if (typeof graph === 'object') {
-        editor1.set_graph(graph);
-    }
+    editor1.graph.json(graph);
 }());
 
 
@@ -158,7 +156,7 @@ d3.select('#btn_save').on('click', function () {
 
 
 window.moo = function () {
-    editor1.set_graph({
+    editor1.graph.json({
         nodes: [{}, {}],
         // nodes: [{ x : 10, y : 200 }, { x : 50, y : 5 }],
         edges : [{source : 0, target : 1}, {source : 1, target : 1}]

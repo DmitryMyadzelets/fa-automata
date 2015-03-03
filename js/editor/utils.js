@@ -41,16 +41,18 @@ function float2int(obj) {
  * @param  {Object} object An object.
  * @param  {Function} method A method of the object.
  * @param  {Function} hook A callback function which will be called after the call of object's method.
+ * @param  {Function} [context] Context wich will passed to the hook instead of `this`.
  * @return {Function} after Returns itself for chained calls.
  */
-function after(object, method, hook) {
+function after(object, method, hook, that) {
     var old = object[method];
     if (typeof old !== 'function' || typeof hook !== 'function') {
         throw new Error('the parameters must be functions');
     }
     object[method] = function () {
+        that = that || this;
         var ret = old.apply(this, arguments);
-        hook.apply(this, arguments);
+        hook.apply(that, arguments);
         return ret;
     };
     return after;

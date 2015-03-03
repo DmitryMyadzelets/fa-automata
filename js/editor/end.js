@@ -20,28 +20,26 @@
          * @type {Controller}
          */
         this.controller = new Controller(this.view, this.commands);
-
-        this.set_graph();
-    };
-
-    /**
-     * Attaches a graph object literal to the editor
-     * @param {object} graph object literal
-     */
-    Instance.prototype.set_graph = function (json_graph) {
         /**
-         * The data model (in terms of MVC) of the editor
+         * The model (in terms of MVC) of the editor
          * @type {Graph}
          */
-        this.graph = new Graph(json_graph);
-        this.commands.set_graph(this.graph);
+        this.graph = new Graph();
+
         // Wrap graph methods with new methods which update the view
         wrap(this.graph, this.view);
-
         this.view.model = this.graph; // FIXIT: redundent
-        this.view.graph(this.graph.object());
-    };
 
+
+        function update() {
+            this.commands.set_graph(this.graph);
+            this.view.graph(this.graph.object());
+        }
+        update.call(this);
+
+        // Set callback, s.t. update view and commands when a new graph is set
+        after(this.graph, 'json', update.bind(this));
+    };
 
     editor.Instance = Instance;
     editor.Graph = Graph;
