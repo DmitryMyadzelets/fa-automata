@@ -58,10 +58,53 @@ function load(name) {
     return null;
 }
 
+function save_editor1_graph() {
+    var graph = editor1.graph.json();
+    save(graph, 'graph');
+}
+
+/**
+ * State machine which calls save method after the last change when its timer expires.
+ * It accepts two events: 
+ * 1. 'update' from an editor.
+ * 2. Timer event (the timer is set by the machine itslef).
+ */
+var save_controller = (function () {
+    "use strict";
+    var timer, counter;
+
+    function tout() { state(); }
+
+    var state, states = {
+        init : function () {
+            counter = 0;
+            timer = setInterval(tout, 500);
+            state = states.wait_for_tout;
+        },
+        wait_for_tout : function (event) {
+            if (event === 'update') {
+                counter = 0;
+            } else {
+                // Wait for at least 2 consiquent timer events
+                if (++counter > 1) {
+                    clearInterval(timer);
+                    save_editor1_graph();
+                    state = states.init;
+                }
+            }
+        }
+    };
+    state = states.init;
+
+    return function loop() {
+        state.apply(this, arguments);
+        return loop;
+    };
+}());
+
 
 jas.after(editor1.commands, 'update', function () {
-    var graph = editor1.graph.storable();
-    save(graph, 'graph');
+    save_controller('update');
 });
 
 
@@ -72,12 +115,6 @@ jas.after(editor1.commands, 'update', function () {
     }
 }());
 
-// window.foo = function () {
-//     var s = JSON.stringify(editor1.graph.compact_object());
-//     console.log('JSON', s);
-//     editor2.set_graph(JSON.parse(s));
-//     // return s;
-// };
 
 d3.select('#btn_save').on('click', function () {
     // A separate SVG document must have its styling included into a CDATA section.
