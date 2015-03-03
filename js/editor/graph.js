@@ -5,8 +5,12 @@
 var Graph = (function () {
     "use strict";
 
-    // Helpers
-    // Calls function 'fun' for a single datum or an array of data
+    /**
+     * Calls function 'fun' for a single object or an array of objects
+     * @param  {Object|Array}
+     * @param  {Function}
+     * @param  {Object} [context] If provided, will be given instead of `this`
+     */
     function foreach(d, fun, that) {
         that = that || this;
         if (d instanceof Array) {
@@ -17,7 +21,9 @@ var Graph = (function () {
     }
 
 
-    // Methods for nodes only
+    /**
+     * Methods for nodes only
+     */
     function nodes_methods() {
 
         function shift(d) {
