@@ -20,7 +20,6 @@ var Graph = (function () {
         }
     }
 
-
     /**
      * Methods for nodes only
      */
@@ -264,15 +263,29 @@ var Graph = (function () {
         this.node.data = [];
         this.edge.data = [];
 
-        // Replace default nodes and edges arrays with ones provided by user.
-        // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
-        if (json_graph) {
-            if (json_graph.nodes instanceof Array) {
-                this.node.data = json_graph.nodes;
-                if (json_graph.edges instanceof Array) {
-                    this.edge.data = json_graph.edges;
+        // Copy nodes and edges from json, validating and deindexing
+        if (typeof json_graph === 'object') {
+
+            // Copy nodes which are unique objects
+            foreach(json_graph.nodes, function (node) {
+                if (typeof node === 'object' && this.indexOf(node) < 0) {
+                    this.push(node);
                 }
-            }
+            }, this.node.data);
+
+            // Copy edges which have valid indexes to nodes, and replace indexes to nodes objects
+            var self = this, i, j, num_nodes = this.node.data.length;
+            foreach(json_graph.edges, function (edge) {
+                if (typeof edge === 'object' && this.indexOf(edge) < 0) {
+                    i = Number(edge.source);
+                    j = Number(edge.target);
+                    if (i >= 0 && i < num_nodes && j >= 0 && j < num_nodes) {
+                        edge.source = self.node.data[i];
+                        edge.target = self.node.data[j];
+                        this.push(edge);
+                    }
+                }
+            }, this.edge.data);
         }
     };
 
@@ -288,7 +301,7 @@ var Graph = (function () {
     };
 
     /**
-     * Returns graph object ready for convertion to JSON, with the nodes references in edges replaced by indexes
+     * Returns graph object in JSON, with the nodes references in edges replaced by indexes
      * @return {Object}
      */
     constructor.prototype.json = function () {
