@@ -16,12 +16,6 @@ var Graph = (function () {
         }
     }
 
-    /**
-     * @class
-     */
-    function Node() {
-    }
-
 
     // Methods for nodes only
     function nodes_methods() {
@@ -33,12 +27,26 @@ var Graph = (function () {
             d.py = d.y;
         }
 
-        // Changes node position relatively to the previous one
+        function mark(d) { d.marked = true; }
+        function unmark(d) { delete d.marked; }
+
+        function initial(d) { d.initial = true; }
+        function uninitial(d) { delete d.initial; }
+
+        /**
+         * Changes the position of given node\ndoes equally and relatively to the previous
+         * @param  {Object|Array} node|nodes
+         * @param  {Array} dxy array of the coordinates chage in form: [dx, dy]
+         */
         this.shift = function (d, dxy) {
             foreach(d, shift, dxy);
         };
 
-        // Moves node to new position
+        /**
+         * Moves each given node\nodes to a new position
+         * @param  {Object|Array} node|nodes
+         * @param  {Array} xy array of coordinates in form: [x1, y1, ... xn, yn]
+         */
         this.move = function (d, xy) {
             if (xy instanceof Array) {
                 var i = 0;
@@ -51,36 +59,48 @@ var Graph = (function () {
             }
         };
 
-        // [Un]Marking nodes\states
-
-        function mark(d) { d.marked = true; }
-        function unmark(d) { delete d.marked; }
-
+        /**
+         * Marks given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.mark = function (d) { foreach(d, mark); };
+
+        /**
+         * Unmarks given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.unmark = function (d) { foreach(d, unmark); };
 
-        // Making [not] initial nodes\states
-
-        function initial(d) { d.initial = true; }
-        function uninitial(d) { delete d.initial; }
-
+        /**
+         * Makes given node\nodes (aka state) initial. Other nodes will be made not initial
+         * @param  {Object|Array} node|nodes
+         */
         this.initial = function (d) {
             foreach(this.data, uninitial);
             foreach(d, initial);
         };
     }
 
-
-    // Methods for edges only
+    /**
+     * Methods for edges only
+     */
     function edges_methods() {
 
-        // Returns array of edges filtered upon the result of the test(edge, node) call
+        /**
+         * Returns new array of (unique) edges filtered upon the result of the test(edge, node) call for each node.
+         * The callback function will be invoked `|nodes| * |edges|` times.
+         * 
+         * @param  {Array} edges Input array of edges
+         * @param  {Object|Array} nodes
+         * @param  {Function} test Callback function
+         * @return {Array} edges Output array of edges
+         */
         function filter(edges, node, test) {
             var out;
             if (node instanceof Array) {
                 out = [];
                 node.forEach(function (n) {
-                    var a = edges.filter(function (e) { return test(e, n); });
+                    var a = edges.filter(function (e) { return test(e, n) && out.indexOf(e) < 0; });
                     while (a.length) { out.push(a.pop()); }
                 });
             } else {
@@ -89,28 +109,42 @@ var Graph = (function () {
             return out;
         }
 
-        // Returns array of incoming and outgoing edges of the given node[s]
+        /**
+         * Returns array of incoming and outgoing edges of the given node\nodess]
+         * @param  {Object|Array} node|nodes
+         */
         this.adjacent = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
                 return edge.source === node || edge.target === node;
             });
         };
 
-        // Returns array of incoming edges to the given node[s]
+        /**
+         * Returns array of incoming edges to the given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.incoming = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
                 return edge.target === node;
             });
         };
 
-        // Returns array of outgoing edges from the given node[s]
+        /**
+         * Returns array of outgoing edges from the given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.outgoing = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
                 return edge.source === node;
             });
         };
 
-        // Move edge from its previous nodes to nodes 'target', 'source'
+        /**
+         * Changes edge's nodes to new given nodes
+         * @param  {Object} edge
+         * @param  {Object} source
+         * @param  {Object} target
+         */
         this.move = function (d, source, target) {
             d.source = source;
             d.target = target;
@@ -145,24 +179,42 @@ var Graph = (function () {
             delete d.stressed;
         }
 
-        // Adds a single datum or an array of data into the array
+        /**
+         * Adds a single object or an array of objects into the array
+         * @param {Object}
+         * @return {Object} Itself
+         */
         this.add = function (d) {
             foreach(d, add, this.data);
             return this;
         };
 
-        // Removes a single datum or an array of data from the array
+        /**
+         * Removes a single object or an array of objects from the array
+         * @param {Object}
+         * @return {Object} Itself
+         */
         this.remove = function (d) {
             foreach(d, remove, this.data);
             return this;
         };
 
-        // Sets text for the datum
+        /**
+         * Sets .text paremeter for the given object
+         * @param {Object}
+         * @param {String}
+         * @return {Object} Itself
+         */
         this.text = function (d, text) {
             d.text = text;
             return this;
         };
 
+        /**
+         * Sets .stressed parameter for the given object
+         * @param  {Object}
+         * @return {Object} Itsef
+         */
         this.stress = function (d) {
             foreach(this.data, unstress);
             foreach(d, stress);
@@ -191,12 +243,12 @@ var Graph = (function () {
      * @param {object} graph object literal
      * @return {Graph}
      */
-    var graph = function (user_graph) {
+    var constructor = function (json_graph) {
         /**
          * A namespace object for manipulation of the graph nodes
          * @type {Object}
          */
-        this.node = new Node();
+        this.node = Object.create(nodes_prototype);
         /**
          * A namespace object for manipulation of the graph edges
          * @type {Object}
@@ -208,11 +260,11 @@ var Graph = (function () {
 
         // Replace default nodes and edges arrays with ones provided by user.
         // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
-        if (user_graph) {
-            if (user_graph.nodes instanceof Array) {
-                this.node.data = user_graph.nodes;
-                if (user_graph.edges instanceof Array) {
-                    this.edge.data = user_graph.edges;
+        if (json_graph) {
+            if (json_graph.nodes instanceof Array) {
+                this.node.data = json_graph.nodes;
+                if (json_graph.edges instanceof Array) {
+                    this.edge.data = json_graph.edges;
                 }
             }
         }
@@ -222,19 +274,18 @@ var Graph = (function () {
      * Returns a simple graph object literal with only nodes and edges (for serialization etc.)
      * @return {Object} graph object literal
      */
-    graph.prototype.object = function () {
+    constructor.prototype.object = function () {
         return {
             nodes : this.node.data,
             edges : this.edge.data
         };
     };
 
-
     /**
      * Returns graph object ready for convertion to JSON, with the nodes references in edges replaced by indexes
      * @return {Object}
      */
-    graph.prototype.storable = function () {
+    constructor.prototype.json = function () {
         var g = this.object();
         // Copy edges while calculating the indexes to the nodes
         g.edges = g.edges.map(function (edge) {
@@ -250,8 +301,7 @@ var Graph = (function () {
         return g;
     };
 
-
-    return graph;
+    return constructor;
 
 }());
 
