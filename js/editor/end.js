@@ -21,7 +21,6 @@
         this.view = new View(container);
         // Wrap graph methods with new methods which update the view
         wrap(this.graph, this.view);
-        this.view.model = this.graph; // FIXIT: redundant
         /**
          * Commands for undo\redo behaviour
          * @type {Commands}

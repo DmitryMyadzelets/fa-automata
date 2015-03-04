@@ -107,7 +107,7 @@ var control_nodes_drag = (function () {
                 xy[0] = mouse[0] - xy[0];
                 xy[1] = mouse[1] - xy[1];
                 // Change positions of the selected nodes
-                view.model.node.shift(nodes, xy);
+                commands.graph.node.shift(nodes, xy);
                 view.spring.on();
                 xy[0] = mouse[0];
                 xy[1] = mouse[1];
@@ -392,11 +392,9 @@ var Controller = (function () {
                     nodes = view.selected_nodes();
                     // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
                     edges = view.selected_edges();
-                    nodes.forEach(function (node) {
-                        edges = edges.concat(view.model.edge.adjacent(node).filter(
-                            function (d) { return edges.indexOf(d) < 0; }
-                        ));
-                    });
+                    edges = edges.concat(commands.graph.edge.adjacent(nodes).filter(
+                        function (node) { return edges.indexOf(node) < 0; }
+                    ));
                     commands.start()
                         .del_edge(edges)
                         .del_node(nodes);
@@ -634,7 +632,7 @@ var Controller = (function () {
     }
 
 
-    var instance = function (aView, aCommands) {
+    var constructor = function (aView, aCommands) {
         this.view = aView;
         this.commands = aCommands;
 
@@ -662,6 +660,6 @@ var Controller = (function () {
         };
     };
 
-    return instance;
+    return constructor;
 }());
 
