@@ -81,15 +81,15 @@ var Commands = (function () {
             }
         };
 
-        this.set_graph = function (aGraph) {
-            this.graph = aGraph;
+        this.clear_history = function () {
             this.stack.length = 0;
             this.macro.length = 0;
         };
     }
 
 
-    var instance = function () {
+    var constructor = function (aGraph) {
+        this.graph = aGraph;
         this.stack = [];
         this.macro = [];
         // Index is equal to a number of commands which the user can undo;
@@ -100,9 +100,9 @@ var Commands = (function () {
         this.update = dummy;
     };
 
-    prototype_methods.call(instance.prototype);
+    prototype_methods.call(constructor.prototype);
 
-    return instance;
+    return constructor;
 }());
 
 

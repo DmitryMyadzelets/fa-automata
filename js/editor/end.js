@@ -10,29 +10,31 @@
      */
     var Instance = function (container) {
         /**
+         * The model (in terms of MVC) of the editor
+         * @type {Graph}
+         */
+        this.graph = new Graph();
+        /**
          * The view (in terms of MVC) of the editor
          * @type {View}
          */
         this.view = new View(container);
-        this.commands = new Commands();
+        // Wrap graph methods with new methods which update the view
+        wrap(this.graph, this.view);
+        this.view.model = this.graph; // FIXIT: redundant
+        /**
+         * Commands for undo\redo behaviour
+         * @type {Commands}
+         */
+        this.commands = new Commands(this.graph);
         /**
          * The controller (in terms of MVC) of the editor
          * @type {Controller}
          */
         this.controller = new Controller(this.view, this.commands);
-        /**
-         * The model (in terms of MVC) of the editor
-         * @type {Graph}
-         */
-        this.graph = new Graph();
-
-        // Wrap graph methods with new methods which update the view
-        wrap(this.graph, this.view);
-        this.view.model = this.graph; // FIXIT: redundent
-
 
         function update() {
-            this.commands.set_graph(this.graph);
+            this.commands.clear_history();
             this.view.graph(this.graph.object());
         }
         update.call(this);
