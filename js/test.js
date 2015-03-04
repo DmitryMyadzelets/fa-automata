@@ -59,7 +59,7 @@ function load(name) {
 }
 
 function save_editor1_graph() {
-    var graph = editor1.graph.json();
+    var graph = editor1.graph.get_json();
     save(graph, 'graph');
 }
 
@@ -110,7 +110,7 @@ jas.after(editor1.commands, 'update', function () {
 
 (function init() {
     var graph = load('graph');
-    editor1.graph.json(graph);
+    editor1.graph.set_json(graph);
 }());
 
 

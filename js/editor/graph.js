@@ -239,25 +239,48 @@ var Graph = (function () {
     var edges_prototype = Object.create(basic_prototype);
     edges_methods.call(edges_prototype);
 
+    /**
+     * Creates a new instance of Graph
+     * @class
+     * @alias Graph
+     * @memberOf editor
+     * @param {object} graph object literal
+     * @return {Graph}
+     */
+    var constructor = function (json_graph) {
+        /**
+         * A namespace object for manipulation of the graph nodes
+         * @type {Object}
+         */
+        this.node = Object.create(nodes_prototype);
+        /**
+         * A namespace object for manipulation of the graph edges
+         * @type {Object}
+         */
+        this.edge = Object.create(edges_prototype);
 
-    // Creates an returns a JSON copy of the given graph
-    function graph2json(g) {
-        // Copy edges while calculating the indexes to the nodes
-        g.edges = g.edges.map(function (edge) {
-            var e = clone(edge);
-            e.source = g.nodes.indexOf(edge.source);
-            e.target = g.nodes.indexOf(edge.target);
-            return e;
-        });
-        // Make deep clone, such that the objects of the copy will have no references to the source
-        g = clone(g, true);
-        // Convert all the float values to integers
-        float2int(g);
-        return g;
-    }
+        this.node.data = [];
+        this.edge.data = [];
 
-    // Copy nodes and edges from json, validating and deindexing
-    function json2graph(json_graph) {
+        this.set_json(json_graph);
+    };
+
+    /**
+     * Returns a simple graph object literal with only nodes and edges (for serialization etc.)
+     * @return {Object} graph object literal
+     */
+    constructor.prototype.object = function () {
+        return {
+            nodes : this.node.data,
+            edges : this.edge.data
+        };
+    };
+
+    /**
+     * Copy nodes and edges from json, validating and deindexing
+     * @param {Object} json_graph
+     */
+    constructor.prototype.set_json = function (json_graph) {
         // Clear old graph data
         this.node.data.length = 0;
         this.edge.data.length = 0;
@@ -284,43 +307,6 @@ var Graph = (function () {
                 }
             }, this.edge.data);
         }
-    }
-
-    /**
-     * Creates a new instance of Graph
-     * @class
-     * @alias Graph
-     * @memberOf editor
-     * @param {object} graph object literal
-     * @return {Graph}
-     */
-    var constructor = function (json_graph) {
-        /**
-         * A namespace object for manipulation of the graph nodes
-         * @type {Object}
-         */
-        this.node = Object.create(nodes_prototype);
-        /**
-         * A namespace object for manipulation of the graph edges
-         * @type {Object}
-         */
-        this.edge = Object.create(edges_prototype);
-
-        this.node.data = [];
-        this.edge.data = [];
-
-        json2graph.call(this, json_graph);
-    };
-
-    /**
-     * Returns a simple graph object literal with only nodes and edges (for serialization etc.)
-     * @return {Object} graph object literal
-     */
-    constructor.prototype.object = function () {
-        return {
-            nodes : this.node.data,
-            edges : this.edge.data
-        };
     };
 
     /**
@@ -328,12 +314,20 @@ var Graph = (function () {
      * If JSON graph is provided, 
      * @return {Object}
      */
-    constructor.prototype.json = function (json_graph) {
-        if (arguments.length > 0) {
-            json2graph.call(this, json_graph);
-        } else {
-            return graph2json(this.object());
-        }
+    constructor.prototype.get_json = function () {
+        var g = this.object();
+        // Copy edges while calculating the indexes to the nodes
+        g.edges = g.edges.map(function (edge) {
+            var e = clone(edge);
+            e.source = g.nodes.indexOf(edge.source);
+            e.target = g.nodes.indexOf(edge.target);
+            return e;
+        });
+        // Make deep clone, such that the objects of the copy will have no references to the source
+        g = clone(g, true);
+        // Convert all the float values to integers
+        float2int(g);
+        return g;
     };
 
     return constructor;

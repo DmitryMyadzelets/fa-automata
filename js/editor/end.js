@@ -39,7 +39,7 @@
         update.call(this);
 
         // Set callback, s.t. update view and commands when a new graph is set
-        after(this.graph, 'json', update.bind(this));
+        after(this.graph, 'set_json', update.bind(this));
     };
 
     editor.Instance = Instance;
