@@ -114,7 +114,7 @@ jas.after(editor1.commands, 'update', function () {
 }());
 
 
-d3.select('#btn_save').on('click', function () {
+function save_svg() {
     // A separate SVG document must have its styling included into a CDATA section.
     // The below code does it.
 
@@ -151,7 +151,59 @@ d3.select('#btn_save').on('click', function () {
 
     // Delete the copy of SVG
     svg.parentNode.removeChild(svg);
+}
+
+
+function save_json() {
+    var s = JSON.stringify(editor1.graph.get_json());
+    var blob = new Blob(
+        // [(new XMLSerializer).serializeToString(doc)],
+        [s],
+        {type: 'application/json'}
+    );
+    saveAs(blob, 'graph' + '.json');
+}
+
+
+function load_json() {
+
+    // Invoked when a file is loaded
+    function on_file_loaded() {
+        var graph = JSON.parse(this.result);
+        editor1.graph.set_json(graph);
+    }
+
+    // Invoked when a file is selected in dialog
+    function on_file_selected() {
+        var f = this.files[0];
+        if (f.type.match('json')) {
+            var reader = new FileReader();
+            reader.onload = on_file_loaded;
+            reader.readAsText(f);
+        } else {
+            alert('Expected file extention \'json\'');
+        }
+    }
+
+    var input = d3.select('body').append('input')
+        .attr('type', 'file')
+        .style('opacity', '0')
+        .on('change', on_file_selected)
+        .each(function () { this.click(); })
+        .remove();
+}
+
+
+d3.select('#btn_save').on('click', function () {
+    // save_svg();
+    save_json();
 });
+
+d3.select('#btn_load').on('click', function () {
+    // save_svg();
+    load_json();
+});
+
 
 
 
