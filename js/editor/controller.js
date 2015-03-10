@@ -137,58 +137,6 @@ var control_nodes_drag = (function () {
 
 
 
-var control_text_edit = (function () {
-    "use strict";
-
-    var d, svg_text, text, enter;
-    var view;
-
-    // The state machine
-    var state, states = {
-        init : function (aView, datum, x, y, onenter, callback) {
-            d3.event.stopPropagation();
-
-            view = aView;
-            d = datum;
-            enter = onenter;
-            svg_text = d3.select(this).select('text');
-            // Remove text temporally, since it is viewed in text editor now
-            svg_text.text('');
-
-            text = d.text || '';
-            textarea(view.container, text, x, y, callback, callback);
-
-            view.spring.off();
-            state = states.wait;
-        },
-        wait : function (view, source) {
-            if (source === 'text') {
-                // Set original text back
-                svg_text.text(text);
-                // Call the 'enter' function if the user hits Enter
-                switch (d3.event.type) {
-                case 'keydown':
-                    if (d3.event.keyCode === 13 && typeof enter === 'function') {
-                        enter.call(this, d);
-                    }
-                    break;
-                }
-                view.spring.on();
-                state = states.init;
-            }
-        }
-    };
-    state = states.init;
-
-    return function loop() {
-        state.apply(this, arguments);
-        loop.done = state === states.init;
-        return loop;
-    };
-}());
-
-
-
 var control_edge_drag = (function () {
     "use strict";
 
@@ -373,14 +321,19 @@ var Controller = (function () {
 
     var pan, x, y;
 
-    var self;
 
-    // Callback function which is called by textarea object when 
-    // user enters the text or cancels it.
-    // This function invokes the parent automaton
-    function text_callback() {
-        self.context('text');
-        self.event.apply(this, arguments);
+    // Helper function for text editor control
+    function control_text_edit(selection, text, x, y, enter) {
+        // Remove old text until the end of editing
+        selection.text('');
+        textarea(view.container, text || '', x, y,
+            function onenter() {
+                enter(this.value || '');
+            },
+            function oncancel() {
+                // Restore old text
+                selection.text(text);
+            });
     }
 
 
@@ -496,14 +449,10 @@ var Controller = (function () {
                         pan = view.pan();
                         x = d.x + pan[0];
                         y = d.y + pan[1];
-
-                        control_text_edit.call(this, view, d, x, y,
-                            function onenter(d) {
-                                commands.start().node_text(d, this.value);
-                            },
-                            text_callback);
-
-                        state = states.edit_text;
+                        control_text_edit(d3.select(this).select('text'), d.text, x, y, function (text) {
+                            commands.start().node_text(d, text);
+                        });
+                        d3.event.stopPropagation();
                         break;
                     }
                     break;
@@ -535,13 +484,10 @@ var Controller = (function () {
                         x = d.tx + pan[0];
                         y = d.ty + pan[1];
 
-                        control_text_edit.call(this, view, d, x, y,
-                            function onenter(d) {
-                                commands.start().edge_text(d, this.value);
-                            },
-                            text_callback);
-
-                        state = states.edit_text;
+                        control_text_edit(d3.select(this).select('text'), d.text, x, y, function (text) {
+                            commands.start().edge_text(d, text);
+                        });
+                        d3.event.stopPropagation();
                         break;
                     }
                     break;
@@ -578,11 +524,6 @@ var Controller = (function () {
             if (d3.event.type === 'keyup') {
                 state = states.init;
             }
-        },
-        edit_text : function () {
-            if (control_text_edit.call(this, view, source).done) {
-                state = states.init;
-            }
         }
     };
 
@@ -597,7 +538,6 @@ var Controller = (function () {
     }
 
     function context(src) {
-        self = this;
         view = this.view;
         commands = this.commands;
         source = src;
