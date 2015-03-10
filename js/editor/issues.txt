@@ -12,6 +12,7 @@ Must do
 + Make 'initial' state command
 - Make export to usable formats.
 	+ SVG. What programs can accept SVG? Latex (how?), Inscape, ...
+		+ Inscape works
 	- Image
 + Make github...io page for demonstration.
 	- Describe API
@@ -20,8 +21,9 @@ Must do
 May do
 - Ideas:
 	- Selection: Shift adds to selections. Click onto already selected node doesn't change selection. Click onto not selected node with no Shift cansels already selected nodes.
-	- use 'json' name to get and set JSON graph.
-- Replace 'new' in commands to a not reserved word
+	+ When edit a text, cancel it on ESC pressed only.
+	+ use 'json' name to get and set JSON graph.
++ Replace 'new' in commands to a not reserved word
 + Use the function form of 'use strict'.
 + Too many savings to local storage while editing.
 + Implement edge movement in the model (it's in wrapper only).
