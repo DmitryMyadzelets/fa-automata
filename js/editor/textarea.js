@@ -87,7 +87,7 @@ var textarea = (function () {
             .attr('placeholder', 'Type here...');
 
         editor
-            .on('blur', cancel)
+            .on('blur', enter)
             .on('change', resize)
             .on('keydown', keydown)
             .on('cut', delayedResize)
