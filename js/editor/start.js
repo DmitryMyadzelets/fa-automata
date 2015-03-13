@@ -23,13 +23,4 @@
     // http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
 
 
-    /**
-     * Graph editor
-     * @exports jas.editor
-     * @namespace
-     * @version 0.1.0
-     */
-    var editor = { version: "0.1.0" };
-    jas.editor = editor;
-
 
