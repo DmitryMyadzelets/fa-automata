@@ -1,13 +1,13 @@
 // JSLint options:
-/*global jas*/
+/*global jas, d3, ResizeSensor*/
 
 console.log('test');
 
 
 
-var editor1 = new jas.editor.Instance(document.getElementById('svg_container1'));
-var editor2 = new jas.editor.Instance(document.getElementById('svg_container2'));
-var editor3 = new jas.editor.Instance();
+var editor1 = new jas.Editor(document.getElementById('svg_container1'));
+var editor2 = new jas.Editor(document.getElementById('svg_container2'));
+var editor3 = new jas.Editor();
 
 
 
@@ -28,7 +28,7 @@ var editor3 = new jas.editor.Instance();
 
 (function () {
     var elm = document.getElementById('svg_container');
-    var editor = new jas.editor.Instance(elm);
+    var editor = new jas.Editor(elm);
 
     function resize() {
         editor.view.size(elm.offsetWidth, elm.offsetHeight);
@@ -154,7 +154,7 @@ function save_svg() {
 }
 
 
-function save_json() {
+function save_json_file() {
     var s = JSON.stringify(editor1.graph.get_json());
     var blob = new Blob(
         // [(new XMLSerializer).serializeToString(doc)],
@@ -165,7 +165,7 @@ function save_json() {
 }
 
 
-function load_json() {
+function load_json_file() {
 
     // Invoked when a file is loaded
     function on_file_loaded() {
@@ -181,7 +181,7 @@ function load_json() {
             reader.onload = on_file_loaded;
             reader.readAsText(f);
         } else {
-            alert('Expected file extention \'json\'');
+            alert('Expected file extention \'*.json\'');
         }
     }
 
@@ -196,12 +196,12 @@ function load_json() {
 
 d3.select('#btn_save').on('click', function () {
     // save_svg();
-    save_json();
+    save_json_file();
 });
 
 d3.select('#btn_load').on('click', function () {
     // save_svg();
-    load_json();
+    load_json_file();
 });
 
 

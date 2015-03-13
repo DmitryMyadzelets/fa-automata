@@ -1,14 +1,13 @@
 // JSLint options:
-/*global editor, View, Graph, Commands, wrap, after, Controller*/
+/*global View, Graph, Commands, wrap, after, Controller*/
 
     /**
-     * Creates a new instance of editor
-     * @memberOf editor
+     * Creates a new instance of Editor
      * @class
      * @param {Object} [container] HTML DOM element. If not given, the document body is used as a container.
      * @example var editor = new jas.editor.Instance(document.getElementById('id_editor'));
      */
-    var Instance = function (container) {
+    var Editor = function (container) {
         /**
          * The model (in terms of MVC) of the editor
          * @type {Graph}
@@ -38,13 +37,11 @@
         }
         update.call(this);
 
-        // Set callback, s.t. update view and commands when a new graph is set
+        // Set callback which updates the view and commands when a user sets a new graph
         after(this.graph, 'set_json', update.bind(this));
     };
 
-    editor.Instance = Instance;
-    editor.Graph = Graph;
-
+    jas.Editor = Editor;
     jas.after = after;
 
 
