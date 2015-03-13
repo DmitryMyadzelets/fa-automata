@@ -23,15 +23,6 @@
     // http://tutorials.jenkov.com/svg/svg-and-css.html // SVG and CSS
 
 
-    /**
-     * Graph editor
-     * @exports jas.editor
-     * @namespace
-     * @version 0.1.0
-     */
-    var editor = { version: "0.1.0" };
-    jas.editor = editor;
-
 
 /*jslint bitwise: true */
 
@@ -76,16 +67,18 @@ function float2int(obj) {
  * @param  {Object} object An object.
  * @param  {Function} method A method of the object.
  * @param  {Function} hook A callback function which will be called after the call of object's method.
+ * @param  {Function} [context] Context wich will passed to the hook instead of `this`.
  * @return {Function} after Returns itself for chained calls.
  */
-function after(object, method, hook) {
+function after(object, method, hook, that) {
     var old = object[method];
     if (typeof old !== 'function' || typeof hook !== 'function') {
         throw new Error('the parameters must be functions');
     }
     object[method] = function () {
+        that = that || this;
         var ret = old.apply(this, arguments);
-        hook.apply(this, arguments);
+        hook.apply(that, arguments);
         return ret;
     };
     return after;
@@ -522,7 +515,7 @@ var textarea = (function () {
             .attr('placeholder', 'Type here...');
 
         editor
-            .on('blur', cancel)
+            .on('blur', enter)
             .on('change', resize)
             .on('keydown', keydown)
             .on('cut', delayedResize)
@@ -1183,7 +1176,7 @@ var Commands = (function () {
         }
 
         // Creates new command-function as the key of a 'Command' instance
-        this.new = function (name, fun) {
+        this.create = function (name, fun) {
             if (this[name] && console) {
                 console.error('Command', name, 'already exists');
                 return;
@@ -1202,15 +1195,15 @@ var Commands = (function () {
             }
         };
 
-        this.set_graph = function (aGraph) {
-            this.graph = aGraph;
+        this.clear_history = function () {
             this.stack.length = 0;
             this.macro.length = 0;
         };
     }
 
 
-    var instance = function () {
+    var constructor = function (aGraph) {
+        this.graph = aGraph;
         this.stack = [];
         this.macro = [];
         // Index is equal to a number of commands which the user can undo;
@@ -1221,86 +1214,86 @@ var Commands = (function () {
         this.update = dummy;
     };
 
-    prototype_methods.call(instance.prototype);
+    prototype_methods.call(constructor.prototype);
 
-    return instance;
+    return constructor;
 }());
 
 
 
-Commands.prototype.new('add_node', function (d) {
+Commands.prototype.create('add_node', function (d) {
     var graph = this.graph;
     this.redo = function () { graph.node.add(d); };
     this.undo = function () { graph.node.remove(d); };
 });
 
 
-Commands.prototype.new('del_node', function (d) {
+Commands.prototype.create('del_node', function (d) {
     var graph = this.graph;
     this.redo = function () { graph.node.remove(d); };
     this.undo = function () { graph.node.add(d); };
 });
 
 
-Commands.prototype.new('add_edge', function (d) {
+Commands.prototype.create('add_edge', function (d) {
     var graph = this.graph;
     this.redo = function () { graph.edge.add(d); };
     this.undo = function () { graph.edge.remove(d); };
 });
 
 
-Commands.prototype.new('del_edge', function (d) {
+Commands.prototype.create('del_edge', function (d) {
     var graph = this.graph;
     this.redo = function () { graph.edge.remove(d); };
     this.undo = function () { graph.edge.add(d); };
 });
 
 
-Commands.prototype.new('node_text', function (d, text) {
+Commands.prototype.create('node_text', function (d, text) {
     var graph = this.graph;
     var old_text = d.text;
     this.redo = function () { graph.node.text(d, text); };
     this.undo = function () { graph.node.text(d, old_text); };
 });
 
-Commands.prototype.new('edge_text', function (d, text) {
+Commands.prototype.create('edge_text', function (d, text) {
     var graph = this.graph;
     var old_text = d.text;
     this.redo = function () { graph.edge.text(d, text); };
     this.undo = function () { graph.edge.text(d, old_text); };
 });
 
-Commands.prototype.new('move_node', function (d, from, to) {
+Commands.prototype.create('move_node', function (d, from, to) {
     var graph = this.graph;
     this.redo = function () { graph.node.move(d, to); };
     this.undo = function () { graph.node.move(d, from); };
 });
 
-Commands.prototype.new('mark_node', function (d) {
+Commands.prototype.create('mark_node', function (d) {
     var graph = this.graph;
     this.redo = function () { graph.node.mark(d); };
     this.undo = function () { graph.node.unmark(d); };
 });
 
-Commands.prototype.new('unmark_node', function (d) {
+Commands.prototype.create('unmark_node', function (d) {
     var graph = this.graph;
     this.redo = function () { graph.node.unmark(d); };
     this.undo = function () { graph.node.mark(d); };
 });
 
-Commands.prototype.new('initial', function (from, to) {
+Commands.prototype.create('initial', function (from, to) {
     var graph = this.graph;
     this.redo = function () { graph.node.initial(to); };
     this.undo = function () { graph.node.initial(from); };
 });
 
-Commands.prototype.new('move_edge', function (d, from, to) {
+Commands.prototype.create('move_edge', function (d, from, to) {
     var graph = this.graph;
     this.redo = function () { graph.edge.move(d, to[0], to[1]); };
     this.undo = function () { graph.edge.move(d, from[0], from[1]); };
 });
 
-Commands.prototype.new('spring', function (view) {
+Commands.prototype.create('spring', function (view) {
     var graph = this.graph;
     var xy = [];
     var nodes =  graph.object().nodes;
@@ -1419,7 +1412,7 @@ var control_nodes_drag = (function () {
                 xy[0] = mouse[0] - xy[0];
                 xy[1] = mouse[1] - xy[1];
                 // Change positions of the selected nodes
-                view.model.node.shift(nodes, xy);
+                commands.graph.node.shift(nodes, xy);
                 view.spring.on();
                 xy[0] = mouse[0];
                 xy[1] = mouse[1];
@@ -1435,58 +1428,6 @@ var control_nodes_drag = (function () {
                 }
                 state = states.init;
                 break;
-            }
-        }
-    };
-    state = states.init;
-
-    return function loop() {
-        state.apply(this, arguments);
-        loop.done = state === states.init;
-        return loop;
-    };
-}());
-
-
-
-var control_text_edit = (function () {
-    "use strict";
-
-    var d, svg_text, text, enter;
-    var view;
-
-    // The state machine
-    var state, states = {
-        init : function (aView, datum, x, y, onenter, callback) {
-            d3.event.stopPropagation();
-
-            view = aView;
-            d = datum;
-            enter = onenter;
-            svg_text = d3.select(this).select('text');
-            // Remove text temporally, since it is viewed in text editor now
-            svg_text.text('');
-
-            text = d.text || '';
-            textarea(view.container, text, x, y, callback, callback);
-
-            view.spring.off();
-            state = states.wait;
-        },
-        wait : function (view, source) {
-            if (source === 'text') {
-                // Set original text back
-                svg_text.text(text);
-                // Call the 'enter' function if the user hits Enter
-                switch (d3.event.type) {
-                case 'keydown':
-                    if (d3.event.keyCode === 13 && typeof enter === 'function') {
-                        enter.call(this, d);
-                    }
-                    break;
-                }
-                view.spring.on();
-                state = states.init;
             }
         }
     };
@@ -1645,7 +1586,7 @@ var control_edge_drag = (function () {
     };
     state = states.init;
 
-    // Give names to the states-functions for debugging
+    // // Give names to the states-functions for debugging
     // var key;
     // for (key in states) {
     //     if (states.hasOwnProperty(key)) {
@@ -1658,7 +1599,7 @@ var control_edge_drag = (function () {
     // var ost = state;
     return function loop() {
         state.apply(this, arguments);
-        // Debug transitions
+        // // Debug transitions
         // if (ost !== state) {
         //     console.log(ost._name, state._name);
         //     ost = state;
@@ -1685,14 +1626,19 @@ var Controller = (function () {
 
     var pan, x, y;
 
-    var self;
 
-    // Callback function which is called by textarea object when 
-    // user enters the text or cancels it.
-    // This function invokes the parent automaton
-    function text_callback() {
-        self.context('text');
-        self.event.apply(this, arguments);
+    // Helper function for text editor control
+    function control_text_edit(selection, text, x, y, enter) {
+        // Remove old text until the end of editing
+        selection.text('');
+        textarea(view.container, text || '', x, y,
+            function onenter() {
+                enter(this.value || '');
+            },
+            function oncancel() {
+                // Restore old text
+                selection.text(text);
+            });
     }
 
 
@@ -1703,14 +1649,13 @@ var Controller = (function () {
                 case 46: // Delete
                     nodes = view.selected_nodes();
                     // Get incoming and outgoing edges of deleted nodes, joined with selected edges 
-                    edges = view.model.edge.adjacent(nodes);
-                    edges = edges.concat(view.selected_edges().filter(
-                        function (d) { return edges.indexOf(d) < 0; }
+                    edges = view.selected_edges();
+                    edges = edges.concat(commands.graph.edge.adjacent(nodes).filter(
+                        function (node) { return edges.indexOf(node) < 0; }
                     ));
-                    // Delete nodes edges
                     commands.start()
-                        .del_node(nodes)
-                        .del_edge(edges);
+                        .del_edge(edges)
+                        .del_node(nodes);
                     state = states.wait_for_keyup;
                     break;
                 case 70: // F
@@ -1809,14 +1754,10 @@ var Controller = (function () {
                         pan = view.pan();
                         x = d.x + pan[0];
                         y = d.y + pan[1];
-
-                        control_text_edit.call(this, view, d, x, y,
-                            function onenter(d) {
-                                commands.start().node_text(d, this.value);
-                            },
-                            text_callback);
-
-                        state = states.edit_text;
+                        control_text_edit(d3.select(this).select('text'), d.text, x, y, function (text) {
+                            commands.start().node_text(d, text);
+                        });
+                        d3.event.stopPropagation();
                         break;
                     }
                     break;
@@ -1848,13 +1789,10 @@ var Controller = (function () {
                         x = d.tx + pan[0];
                         y = d.ty + pan[1];
 
-                        control_text_edit.call(this, view, d, x, y,
-                            function onenter(d) {
-                                commands.start().edge_text(d, this.value);
-                            },
-                            text_callback);
-
-                        state = states.edit_text;
+                        control_text_edit(d3.select(this).select('text'), d.text, x, y, function (text) {
+                            commands.start().edge_text(d, text);
+                        });
+                        d3.event.stopPropagation();
                         break;
                     }
                     break;
@@ -1891,11 +1829,6 @@ var Controller = (function () {
             if (d3.event.type === 'keyup') {
                 state = states.init;
             }
-        },
-        edit_text : function () {
-            if (control_text_edit.call(this, view, source).done) {
-                state = states.init;
-            }
         }
     };
 
@@ -1910,7 +1843,6 @@ var Controller = (function () {
     }
 
     function context(src) {
-        self = this;
         view = this.view;
         commands = this.commands;
         source = src;
@@ -1945,7 +1877,7 @@ var Controller = (function () {
     }
 
 
-    var instance = function (aView, aCommands) {
+    var constructor = function (aView, aCommands) {
         this.view = aView;
         this.commands = aCommands;
 
@@ -1973,7 +1905,7 @@ var Controller = (function () {
         };
     };
 
-    return instance;
+    return constructor;
 }());
 
 // JSLint options:
@@ -1983,79 +1915,107 @@ var Controller = (function () {
 var Graph = (function () {
     "use strict";
 
-    // Helpers
-    // Calls function 'fun' for a single datum or an array of data
-    function foreach(d, fun) {
+    /**
+     * Calls function 'fun' for a single object or an array of objects
+     * @param  {Object|Array}
+     * @param  {Function}
+     * @param  {Object} [context] If provided, will be given instead of `this`
+     */
+    function foreach(d, fun, that) {
+        that = that || this;
         if (d instanceof Array) {
-            d.forEach(fun);
+            d.forEach(fun, that);
         } else {
-            fun(d);
+            fun.call(that, d);
         }
     }
 
-
-    // Methods for nodes only
+    /**
+     * Methods for nodes only
+     */
     function nodes_methods() {
 
-        var delta = [0, 0];
-
         function shift(d) {
-            d.x += delta[0];
-            d.y += delta[1];
+            d.x += this[0];
+            d.y += this[1];
             d.px = d.x;
             d.py = d.y;
         }
 
-        // Changes node position relatively to the previous one
+        function mark(d) { d.marked = true; }
+        function unmark(d) { delete d.marked; }
+
+        function initial(d) { d.initial = true; }
+        function uninitial(d) { delete d.initial; }
+
+        /**
+         * Changes the position of given node\ndoes equally and relatively to the previous
+         * @param  {Object|Array} node|nodes
+         * @param  {Array} dxy array of the coordinates chage in form: [dx, dy]
+         */
         this.shift = function (d, dxy) {
-            delta[0] = dxy[0];
-            delta[1] = dxy[1];
-            foreach(d, shift);
+            foreach(d, shift, dxy);
         };
 
-        // Moves node to new position
+        /**
+         * Moves each given node\nodes to a new position
+         * @param  {Object|Array} node|nodes
+         * @param  {Array} xy array of coordinates in form: [x1, y1, ... xn, yn]
+         */
         this.move = function (d, xy) {
             if (xy instanceof Array) {
                 var i = 0;
                 foreach(d, function (d) {
-                    d.x = xy[i++];
-                    d.y = xy[i++];
+                    d.x = xy[i++] || d.x;
+                    d.y = xy[i++] || d.y;
                     d.px = d.x;
                     d.py = d.y;
                 });
             }
         };
 
-        // [Un]Marking nodes\states
-
-        function mark(d) { d.marked = true; }
-        function unmark(d) { delete d.marked; }
-
+        /**
+         * Marks given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.mark = function (d) { foreach(d, mark); };
+
+        /**
+         * Unmarks given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.unmark = function (d) { foreach(d, unmark); };
 
-        // Making [not] initial nodes\states
-
-        function initial(d) { d.initial = true; }
-        function uninitial(d) { delete d.initial; }
-
+        /**
+         * Makes given node\nodes (aka state) initial. Other nodes will be made not initial
+         * @param  {Object|Array} node|nodes
+         */
         this.initial = function (d) {
             foreach(this.data, uninitial);
             foreach(d, initial);
         };
     }
 
-
-    // Methods for edges only
+    /**
+     * Methods for edges only
+     */
     function edges_methods() {
 
-        // Returns array of edges filtered upon the result of the test(edge, node) call
+        /**
+         * Returns new array of (unique) edges filtered upon the result of the test(edge, node) call for each node.
+         * The callback function will be invoked `|nodes| * |edges|` times.
+         * 
+         * @param  {Array} edges Input array of edges
+         * @param  {Object|Array} nodes
+         * @param  {Function} test Callback function
+         * @return {Array} edges Output array of edges
+         */
         function filter(edges, node, test) {
             var out;
             if (node instanceof Array) {
                 out = [];
                 node.forEach(function (n) {
-                    var a = edges.filter(function (e) { return test(e, n); });
+                    var a = edges.filter(function (e) { return test(e, n) && out.indexOf(e) < 0; });
                     while (a.length) { out.push(a.pop()); }
                 });
             } else {
@@ -2064,28 +2024,42 @@ var Graph = (function () {
             return out;
         }
 
-        // Returns array of incoming and outgoing edges of the given node[s]
+        /**
+         * Returns array of incoming and outgoing edges of the given node\nodess]
+         * @param  {Object|Array} node|nodes
+         */
         this.adjacent = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
                 return edge.source === node || edge.target === node;
             });
         };
 
-        // Returns array of incoming edges to the given node[s]
+        /**
+         * Returns array of incoming edges to the given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.incoming = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
                 return edge.target === node;
             });
         };
 
-        // Returns array of outgoing edges from the given node[s]
+        /**
+         * Returns array of outgoing edges from the given node\nodes
+         * @param  {Object|Array} node|nodes
+         */
         this.outgoing = function (nodes) {
             return filter(this.data, nodes, function (edge, node) {
                 return edge.source === node;
             });
         };
 
-        // Move edge from its previous nodes to nodes 'target', 'source'
+        /**
+         * Changes edge's nodes to new given nodes
+         * @param  {Object} edge
+         * @param  {Object} source
+         * @param  {Object} target
+         */
         this.move = function (d, source, target) {
             d.source = source;
             d.target = target;
@@ -2097,20 +2071,18 @@ var Graph = (function () {
     // Methods for both nodes and edges
     function basic_methods() {
 
-        var data;
-
         /**
          * Adds a node\edge to the graph.
          * @param {object}
          */
         function add(d) {
-            data.push(d);
+            this.push(d);
         }
 
         function remove(d) {
-            var i = data.indexOf(d);
+            var i = this.indexOf(d);
             if (i >= 0) {
-                data.splice(i, 1);
+                this.splice(i, 1);
             }
         }
 
@@ -2122,26 +2094,42 @@ var Graph = (function () {
             delete d.stressed;
         }
 
-        // Adds a single datum or an array of data into the array
+        /**
+         * Adds a single object or an array of objects into the array
+         * @param {Object}
+         * @return {Object} Itself
+         */
         this.add = function (d) {
-            data = this.data;
-            foreach(d, add);
+            foreach(d, add, this.data);
             return this;
         };
 
-        // Removes a single datum or an array of data from the array
+        /**
+         * Removes a single object or an array of objects from the array
+         * @param {Object}
+         * @return {Object} Itself
+         */
         this.remove = function (d) {
-            data = this.data;
-            foreach(d, remove);
+            foreach(d, remove, this.data);
             return this;
         };
 
-        // Sets text for the datum
+        /**
+         * Sets .text paremeter for the given object
+         * @param {Object}
+         * @param {String}
+         * @return {Object} Itself
+         */
         this.text = function (d, text) {
             d.text = text;
             return this;
         };
 
+        /**
+         * Sets .stressed parameter for the given object
+         * @param  {Object}
+         * @return {Object} Itsef
+         */
         this.stress = function (d) {
             foreach(this.data, unstress);
             foreach(d, stress);
@@ -2161,7 +2149,6 @@ var Graph = (function () {
     var edges_prototype = Object.create(basic_prototype);
     edges_methods.call(edges_prototype);
 
-
     /**
      * Creates a new instance of Graph
      * @class
@@ -2170,7 +2157,7 @@ var Graph = (function () {
      * @param {object} graph object literal
      * @return {Graph}
      */
-    var graph = function (user_graph) {
+    var constructor = function (json_graph) {
         /**
          * A namespace object for manipulation of the graph nodes
          * @type {Object}
@@ -2185,35 +2172,59 @@ var Graph = (function () {
         this.node.data = [];
         this.edge.data = [];
 
-        // Replace default nodes and edges arrays with ones provided by user.
-        // Exists 'edges' implies that 'nodes' exists, i.e. the must be no edges with no nodes.
-        if (user_graph) {
-            if (user_graph.nodes instanceof Array) {
-                this.node.data = user_graph.nodes;
-                if (user_graph.edges instanceof Array) {
-                    this.edge.data = user_graph.edges;
-                }
-            }
-        }
+        this.set_json(json_graph);
     };
 
     /**
      * Returns a simple graph object literal with only nodes and edges (for serialization etc.)
      * @return {Object} graph object literal
      */
-    graph.prototype.object = function () {
+    constructor.prototype.object = function () {
         return {
             nodes : this.node.data,
             edges : this.edge.data
         };
     };
 
+    /**
+     * Copy nodes and edges from json, validating and deindexing
+     * @param {Object} json_graph
+     */
+    constructor.prototype.set_json = function (json_graph) {
+        // Clear old graph data
+        this.node.data.length = 0;
+        this.edge.data.length = 0;
+
+        if (typeof json_graph === 'object') {
+            // Copy nodes which are unique objects
+            foreach(json_graph.nodes, function (node) {
+                if (typeof node === 'object' && this.indexOf(node) < 0) {
+                    this.push(node);
+                }
+            }, this.node.data);
+
+            // Copy edges which have valid indexes to nodes, and replace indexes to nodes objects
+            var self = this, i, j, num_nodes = this.node.data.length;
+            foreach(json_graph.edges, function (edge) {
+                if (typeof edge === 'object' && this.indexOf(edge) < 0) {
+                    i = Number(edge.source);
+                    j = Number(edge.target);
+                    if (i >= 0 && i < num_nodes && j >= 0 && j < num_nodes) {
+                        edge.source = self.node.data[i];
+                        edge.target = self.node.data[j];
+                        this.push(edge);
+                    }
+                }
+            }, this.edge.data);
+        }
+    };
 
     /**
-     * Returns graph object ready for convertion to JSON, with the nodes references in edges replaced by indexes
+     * Returns graph object in JSON, with the nodes references in edges replaced by indexes.
+     * If JSON graph is provided, 
      * @return {Object}
      */
-    graph.prototype.storable = function () {
+    constructor.prototype.get_json = function () {
         var g = this.object();
         // Copy edges while calculating the indexes to the nodes
         g.edges = g.edges.map(function (edge) {
@@ -2229,8 +2240,7 @@ var Graph = (function () {
         return g;
     };
 
-
-    return graph;
+    return constructor;
 
 }());
 
@@ -2272,53 +2282,49 @@ function wrap(graph, aView) {
 
 
 // JSLint options:
-/*global editor, View, Graph, Commands, wrap, after, Controller*/
+/*global View, Graph, Commands, wrap, after, Controller*/
 
     /**
-     * Creates a new instance of editor
-     * @memberOf editor
+     * Creates a new instance of Editor
      * @class
      * @param {Object} [container] HTML DOM element. If not given, the document body is used as a container.
      * @example var editor = new jas.editor.Instance(document.getElementById('id_editor'));
      */
-    var Instance = function (container) {
+    var Editor = function (container) {
+        /**
+         * The model (in terms of MVC) of the editor
+         * @type {Graph}
+         */
+        this.graph = new Graph();
         /**
          * The view (in terms of MVC) of the editor
          * @type {View}
          */
         this.view = new View(container);
-        this.commands = new Commands();
+        // Wrap graph methods with new methods which update the view
+        wrap(this.graph, this.view);
+        /**
+         * Commands for undo\redo behaviour
+         * @type {Commands}
+         */
+        this.commands = new Commands(this.graph);
         /**
          * The controller (in terms of MVC) of the editor
          * @type {Controller}
          */
         this.controller = new Controller(this.view, this.commands);
 
-        this.set_graph();
+        function update() {
+            this.commands.clear_history();
+            this.view.graph(this.graph.object());
+        }
+        update.call(this);
+
+        // Set callback which updates the view and commands when a user sets a new graph
+        after(this.graph, 'set_json', update.bind(this));
     };
 
-    /**
-     * Attaches a graph object literal to the editor
-     * @param {object} graph object literal
-     */
-    Instance.prototype.set_graph = function (json_graph) {
-        /**
-         * The data model (in terms of MVC) of the editor
-         * @type {Graph}
-         */
-        this.graph = new Graph(json_graph);
-        this.commands.set_graph(this.graph);
-        // Wrap graph methods with new methods which update the view
-        wrap(this.graph, this.view);
-
-        this.view.model = this.graph; // FIXIT: redundent
-        this.view.graph(this.graph.object());
-    };
-
-
-    editor.Instance = Instance;
-    editor.Graph = Graph;
-
+    jas.Editor = Editor;
     jas.after = after;
 
 
